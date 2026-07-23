@@ -1,0 +1,42 @@
+name: Daily Pipeline
+
+on:
+  schedule:
+    - cron: "15 10 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  run-daily-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-client-17
+
+      - name: Verify pg_dump 17 is installed
+        run: |
+          echo "Default pg_dump resolved via PATH/pg_wrapper:"
+          pg_dump --version || true
+          echo "Explicit versioned binary:"
+          /usr/lib/postgresql/17/bin/pg_dump --version
+          /usr/lib/postgresql/17/bin/pg_dump --version | grep -q "17\." || (echo "postgresql-client-17 install verification failed" && exit 1)
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run daily pipeline
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
+        run: python -m src.pipeline.run_all_daily
