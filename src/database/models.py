@@ -47,6 +47,12 @@ class SignalConfidenceTier(str, enum.Enum):
     INCONSISTENT_ACROSS_HORIZONS = "inconsistent_across_horizons"
 
 
+class ConfluenceConfidenceTier(str, enum.Enum):
+    CONSISTENT_HIGH_CONFIDENCE = "consistent_high_confidence"
+    CONSISTENT_LOW_SAMPLE = "consistent_low_sample"
+    INCONSISTENT = "inconsistent"
+
+
 class Company(Base):
     __tablename__ = "companies"
 
@@ -260,6 +266,38 @@ class SignalConfidence(Base):
     signal_name: Mapped[str] = mapped_column(String(100), nullable=False)
     tier: Mapped[SignalConfidenceTier] = mapped_column(
         Enum(SignalConfidenceTier, name="signal_confidence_tier_enum"), nullable=False
+    )
+    avg_win_rate_minus_baseline: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+    min_sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
+
+
+class ConfluenceBacktestResult(Base):
+    __tablename__ = "confluence_backtest_results"
+    __table_args__ = (
+        UniqueConstraint("signal_a", "signal_b", "forward_days", name="uq_confluence_backtest_results_pair_days"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    signal_a: Mapped[str] = mapped_column(String(100), nullable=False)
+    signal_b: Mapped[str] = mapped_column(String(100), nullable=False)
+    forward_days: Mapped[int] = mapped_column(Integer, nullable=False)
+    sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    win_rate: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+    mean_return: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    win_rate_minus_baseline: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+    computed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class ConfluenceConfidence(Base):
+    __tablename__ = "confluence_confidence"
+    __table_args__ = (UniqueConstraint("signal_a", "signal_b", name="uq_confluence_confidence_pair"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    signal_a: Mapped[str] = mapped_column(String(100), nullable=False)
+    signal_b: Mapped[str] = mapped_column(String(100), nullable=False)
+    tier: Mapped[ConfluenceConfidenceTier] = mapped_column(
+        Enum(ConfluenceConfidenceTier, name="confluence_confidence_tier_enum"), nullable=False
     )
     avg_win_rate_minus_baseline: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
     min_sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
