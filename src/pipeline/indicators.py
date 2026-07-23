@@ -183,3 +183,108 @@ def roc(prices: Sequence, period: int = 12) -> list[Decimal | None]:
             result[i] = Decimal(100) * (values[i] - base) / base
 
     return result
+
+
+def bollinger_bands(
+    prices: Sequence,
+    period: int = 20,
+    num_std: int = 2,
+) -> tuple[list[Decimal | None], list[Decimal | None], list[Decimal | None]]:
+    values = _to_decimal_list(prices)
+    length = len(values)
+
+    middle: list[Decimal | None] = [None] * length
+    upper: list[Decimal | None] = [None] * length
+    lower: list[Decimal | None] = [None] * length
+
+    for i in range(period - 1, length):
+        window = values[i - period + 1 : i + 1]
+        mean = sum(window) / Decimal(period)
+        variance = sum((v - mean) ** 2 for v in window) / Decimal(period)
+        stddev = variance.sqrt()
+
+        middle[i] = mean
+        upper[i] = mean + Decimal(num_std) * stddev
+        lower[i] = mean - Decimal(num_std) * stddev
+
+    return middle, upper, lower
+
+
+def atr(high: Sequence, low: Sequence, close: Sequence, period: int = 14) -> list[Decimal | None]:
+    highs = _to_decimal_list(high)
+    lows = _to_decimal_list(low)
+    closes = _to_decimal_list(close)
+    length = len(closes)
+
+    result: list[Decimal | None] = [None] * length
+
+    if length < period + 1:
+        return result
+
+    true_ranges: list[Decimal] = [Decimal(0)] * length
+    for i in range(1, length):
+        prev_close = closes[i - 1]
+        true_ranges[i] = max(
+            highs[i] - lows[i],
+            abs(highs[i] - prev_close),
+            abs(lows[i] - prev_close),
+        )
+
+    seed_index = period
+    seed = sum(true_ranges[1 : period + 1]) / Decimal(period)
+    result[seed_index] = seed
+
+    prev = seed
+    for i in range(seed_index + 1, length):
+        current = (prev * (period - 1) + true_ranges[i]) / Decimal(period)
+        result[i] = current
+        prev = current
+
+    return result
+
+
+def obv(close: Sequence, volume: Sequence) -> list[Decimal]:
+    closes = _to_decimal_list(close)
+    volumes = _to_decimal_list(volume)
+    length = len(closes)
+
+    result: list[Decimal] = [Decimal(0)] * length
+
+    for i in range(1, length):
+        if closes[i] > closes[i - 1]:
+            result[i] = result[i - 1] + volumes[i]
+        elif closes[i] < closes[i - 1]:
+            result[i] = result[i - 1] - volumes[i]
+        else:
+            result[i] = result[i - 1]
+
+    return result
+
+
+def vwap(
+    high: Sequence,
+    low: Sequence,
+    close: Sequence,
+    volume: Sequence,
+    period: int,
+) -> list[Decimal | None]:
+    highs = _to_decimal_list(high)
+    lows = _to_decimal_list(low)
+    closes = _to_decimal_list(close)
+    volumes = _to_decimal_list(volume)
+    length = len(closes)
+
+    typical_prices = [(highs[i] + lows[i] + closes[i]) / Decimal(3) for i in range(length)]
+
+    result: list[Decimal | None] = [None] * length
+    for i in range(period - 1, length):
+        window_tp = typical_prices[i - period + 1 : i + 1]
+        window_vol = volumes[i - period + 1 : i + 1]
+        numerator = sum(tp * vol for tp, vol in zip(window_tp, window_vol))
+        denominator = sum(window_vol)
+        if denominator == 0:
+            result[i] = None
+        else:
+            result[i] = numerator / denominator
+
+    return result
