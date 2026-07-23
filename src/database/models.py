@@ -32,6 +32,12 @@ class SymbolHistoryEventType(str, enum.Enum):
     NAME_CHANGE = "name_change"
 
 
+class SignalTimeframe(str, enum.Enum):
+    DAILY = "daily"
+    WEEKLY = "weekly"
+    MONTHLY = "monthly"
+
+
 class Company(Base):
     __tablename__ = "companies"
 
@@ -146,3 +152,75 @@ class SymbolHistory(Base):
     )
     effective_date: Mapped[date] = mapped_column(Date, nullable=False)
     notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
+
+
+class TechnicalSignal(Base):
+    __tablename__ = "technical_signals"
+    __table_args__ = (
+        UniqueConstraint("symbol", "date", "timeframe", name="uq_technical_signals_symbol_date_timeframe"),
+        Index("ix_technical_signals_symbol", "symbol"),
+        Index("ix_technical_signals_date", "date"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    symbol: Mapped[str] = mapped_column(String(20), ForeignKey("companies.symbol"), nullable=False)
+    date: Mapped[date] = mapped_column(Date, nullable=False)
+    timeframe: Mapped[SignalTimeframe] = mapped_column(
+        Enum(SignalTimeframe, name="signal_timeframe_enum"), nullable=False
+    )
+
+    sma_20: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    sma_50: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    sma_100: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    sma_200: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    ema_20: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    ema_50: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    rsi_14: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    macd_line: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    macd_signal: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    macd_histogram: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    stochastic_k: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    stochastic_d: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    cci_20: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    roc_12: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    bollinger_middle: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    bollinger_upper: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    bollinger_lower: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    atr_14: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    obv: Mapped[float | None] = mapped_column(Numeric(20, 4), nullable=True)
+    vwap_20: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    fifty_two_week_high: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    fifty_two_week_low: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    pivot: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    pivot_r1: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    pivot_r2: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    pivot_r3: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    pivot_s1: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    pivot_s2: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    pivot_s3: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    fib_0: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    fib_236: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    fib_382: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    fib_50: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    fib_618: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    fib_786: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    fib_100: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+
+    doji: Mapped[bool | None] = mapped_column(nullable=True)
+    marubozu_bullish: Mapped[bool | None] = mapped_column(nullable=True)
+    marubozu_bearish: Mapped[bool | None] = mapped_column(nullable=True)
+    hammer: Mapped[bool | None] = mapped_column(nullable=True)
+    shooting_star: Mapped[bool | None] = mapped_column(nullable=True)
+    spinning_top: Mapped[bool | None] = mapped_column(nullable=True)
+    bullish_engulfing: Mapped[bool | None] = mapped_column(nullable=True)
+    bearish_engulfing: Mapped[bool | None] = mapped_column(nullable=True)
+    bullish_harami: Mapped[bool | None] = mapped_column(nullable=True)
+    bearish_harami: Mapped[bool | None] = mapped_column(nullable=True)
+    piercing_line: Mapped[bool | None] = mapped_column(nullable=True)
+    dark_cloud_cover: Mapped[bool | None] = mapped_column(nullable=True)
+    tweezer_top: Mapped[bool | None] = mapped_column(nullable=True)
+    tweezer_bottom: Mapped[bool | None] = mapped_column(nullable=True)
+    morning_star: Mapped[bool | None] = mapped_column(nullable=True)
+    evening_star: Mapped[bool | None] = mapped_column(nullable=True)
+    three_white_soldiers: Mapped[bool | None] = mapped_column(nullable=True)
+    three_black_crows: Mapped[bool | None] = mapped_column(nullable=True)
