@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import enum
-from datetime import date
+from datetime import date, datetime
 
 from sqlalchemy import (
     BigInteger,
     Date,
+    DateTime,
     Enum,
     ForeignKey,
     Index,
+    Integer,
     Numeric,
     String,
     UniqueConstraint,
@@ -36,6 +38,13 @@ class SignalTimeframe(str, enum.Enum):
     DAILY = "daily"
     WEEKLY = "weekly"
     MONTHLY = "monthly"
+
+
+class SignalConfidenceTier(str, enum.Enum):
+    HIGH_CONFIDENCE = "high_confidence"
+    WEAK_OR_NO_EDGE = "weak_or_no_edge"
+    UNRELIABLE_LOW_SAMPLE = "unreliable_low_sample"
+    INCONSISTENT_ACROSS_HORIZONS = "inconsistent_across_horizons"
 
 
 class Company(Base):
@@ -224,3 +233,34 @@ class TechnicalSignal(Base):
     evening_star: Mapped[bool | None] = mapped_column(nullable=True)
     three_white_soldiers: Mapped[bool | None] = mapped_column(nullable=True)
     three_black_crows: Mapped[bool | None] = mapped_column(nullable=True)
+
+
+class BacktestResult(Base):
+    __tablename__ = "backtest_results"
+    __table_args__ = (
+        UniqueConstraint("signal_name", "forward_days", name="uq_backtest_results_signal_forward_days"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    signal_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    forward_days: Mapped[int] = mapped_column(Integer, nullable=False)
+    sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    mean_return: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    median_return: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    win_rate: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+    std_dev: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    computed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class SignalConfidence(Base):
+    __tablename__ = "signal_confidence"
+    __table_args__ = (UniqueConstraint("signal_name", name="uq_signal_confidence_signal_name"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    signal_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    tier: Mapped[SignalConfidenceTier] = mapped_column(
+        Enum(SignalConfidenceTier, name="signal_confidence_tier_enum"), nullable=False
+    )
+    avg_win_rate_minus_baseline: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+    min_sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    notes: Mapped[str | None] = mapped_column(String(500), nullable=True)

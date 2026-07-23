@@ -11,18 +11,30 @@ logger = logging.getLogger(__name__)
 
 DISCORD_TIMEOUT_SECONDS = 15
 COLOR_FAILURE = 0xE74C3C
+COLOR_WARNING = 0xF39C12
 COLOR_SUCCESS = 0x2ECC71
 
+SEVERITY_TITLES = {
+    "success": "Pipeline Success",
+    "warning": "Pipeline Completed with Warnings",
+    "failure": "Pipeline Failure",
+}
+SEVERITY_COLORS = {
+    "success": COLOR_SUCCESS,
+    "warning": COLOR_WARNING,
+    "failure": COLOR_FAILURE,
+}
 
-def send_discord_alert(message: str, is_failure: bool) -> bool:
+
+def send_discord_alert(message: str, severity: str) -> bool:
     if not settings.discord_webhook_url:
         logger.warning("DISCORD_WEBHOOK_URL not configured, skipping alert")
         return False
 
     embed = {
-        "title": "Pipeline Failure" if is_failure else "Pipeline Success",
+        "title": SEVERITY_TITLES[severity],
         "description": message,
-        "color": COLOR_FAILURE if is_failure else COLOR_SUCCESS,
+        "color": SEVERITY_COLORS[severity],
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
