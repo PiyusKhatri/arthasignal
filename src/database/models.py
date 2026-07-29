@@ -47,6 +47,7 @@ class SignalConfidenceTier(str, enum.Enum):
     INCONSISTENT_ACROSS_HORIZONS = "inconsistent_across_horizons"
     DECAYED_EDGE = "decayed_edge"
     LIQUIDITY_INVERTED = "liquidity_inverted"
+    UNSTABLE_MULTI_DIMENSIONAL = "unstable_multi_dimensional"
 
 
 class ConfluenceConfidenceTier(str, enum.Enum):
@@ -168,7 +169,7 @@ class SymbolHistory(Base):
         Enum(SymbolHistoryEventType, name="symbol_history_event_type_enum"), nullable=False
     )
     effective_date: Mapped[date] = mapped_column(Date, nullable=False)
-    notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    notes: Mapped[str | None] = mapped_column(String(1000), nullable=True)
 
 
 class TechnicalSignal(Base):
@@ -271,9 +272,10 @@ class SignalConfidence(Base):
     )
     avg_win_rate_minus_baseline: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
     min_sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
-    notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    universe_note: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    liquidity_note: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    notes: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    universe_note: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    liquidity_note: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    mtf_note: Mapped[str | None] = mapped_column(String(1000), nullable=True)
 
 
 class SignalRegimeStability(Base):
@@ -318,7 +320,7 @@ class ConfluenceConfidence(Base):
     )
     avg_win_rate_minus_baseline: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
     min_sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
-    notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    notes: Mapped[str | None] = mapped_column(String(1000), nullable=True)
 
 
 class VolumeConfirmedBacktestResult(Base):
@@ -353,7 +355,7 @@ class VolumeConditionalTier(Base):
     )
     avg_win_rate_minus_baseline: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
     min_sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
-    notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    notes: Mapped[str | None] = mapped_column(String(1000), nullable=True)
 
 
 class SymbolLiquidityTier(Base):
@@ -378,6 +380,24 @@ class LiquidityStratifiedBacktestResult(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     signal_name: Mapped[str] = mapped_column(String(100), nullable=False)
     liquidity_tier: Mapped[str] = mapped_column(String(20), nullable=False)
+    forward_days: Mapped[int] = mapped_column(Integer, nullable=False)
+    sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    win_rate: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+    win_rate_minus_baseline: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+    computed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class MtfAgreementBacktestResult(Base):
+    __tablename__ = "mtf_agreement_backtest_results"
+    __table_args__ = (
+        UniqueConstraint(
+            "signal_name", "agreement_group", "forward_days", name="uq_mtf_agreement_signal_group_days"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    signal_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    agreement_group: Mapped[str] = mapped_column(String(20), nullable=False)
     forward_days: Mapped[int] = mapped_column(Integer, nullable=False)
     sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
     win_rate: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)

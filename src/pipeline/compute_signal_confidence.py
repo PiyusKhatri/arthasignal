@@ -12,6 +12,7 @@ from src.database.models import (
     BacktestResult,
     ConfluenceConfidence,
     LiquidityStratifiedBacktestResult,
+    MtfAgreementBacktestResult,
     SignalConfidence,
     SignalConfidenceTier,
     SignalRegimeStability,
@@ -47,6 +48,10 @@ CONFLUENCE_REGIME_PAIRS = [
     ("close < bollinger_lower", "rsi_14 < 30 (oversold)"),
     ("close < bollinger_lower", "marubozu_bearish"),
 ]
+
+MTF_MULTI_DIMENSIONAL_DOWNGRADE_SIGNALS = {"marubozu_bullish"}
+MTF_ACTIONABLE_SIGNALS = {"marubozu_bearish", "shooting_star"}
+MTF_STRENGTHENS_SIGNALS = {"rsi_14 < 30 (oversold)"}
 
 LIQUIDITY_INVERTED_SIGNALS = {"marubozu_bearish"}
 LIQUIDITY_CAUTION_SIGNALS = {"shooting_star"}
@@ -297,6 +302,95 @@ def _apply_liquidity_awareness(classifications: list[dict[str, Any]]) -> list[di
     return classifications
 
 
+def _load_mtf_agreement() -> dict[str, dict[str, list[Decimal]]]:
+    with get_session() as session:
+        rows = session.execute(select(MtfAgreementBacktestResult)).scalars().all()
+        by_signal: dict[str, dict[str, list[Decimal]]] = {}
+        for row in rows:
+            if row.win_rate_minus_baseline is None:
+                continue
+            by_signal.setdefault(row.signal_name, {}).setdefault(row.agreement_group, []).append(
+                row.win_rate_minus_baseline
+            )
+        return by_signal
+
+
+def _load_regime_stability_single(signal_name: str) -> tuple[Decimal, int, Decimal, int] | None:
+    regime = _load_regime_stability().get(signal_name)
+    if regime is None or "first_half" not in regime or "second_half" not in regime:
+        return None
+    fh_delta, fh_n = regime["first_half"]
+    sh_delta, sh_n = regime["second_half"]
+    if fh_delta is None or sh_delta is None:
+        return None
+    return fh_delta, fh_n, sh_delta, sh_n
+
+
+def _apply_mtf_awareness(classifications: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    mtf_by_signal = _load_mtf_agreement()
+    liquidity_by_signal = _load_liquidity_stratified()
+    tracked_signals = MTF_MULTI_DIMENSIONAL_DOWNGRADE_SIGNALS | MTF_ACTIONABLE_SIGNALS | MTF_STRENGTHENS_SIGNALS
+
+    for c in classifications:
+        if c["signal_name"] not in tracked_signals:
+            continue
+
+        groups = mtf_by_signal.get(c["signal_name"])
+        required_groups = ("high_agreement", "low_agreement")
+        if groups is None or not all(g in groups for g in required_groups):
+            continue
+
+        high_avg = sum(groups["high_agreement"]) / len(groups["high_agreement"])
+        low_avg = sum(groups["low_agreement"]) / len(groups["low_agreement"])
+
+        if c["signal_name"] in MTF_MULTI_DIMENSIONAL_DOWNGRADE_SIGNALS:
+            regime = _load_regime_stability_single(c["signal_name"])
+            liquidity_tiers = liquidity_by_signal.get(c["signal_name"])
+
+            regime_part = "regime data unavailable"
+            if regime is not None:
+                fh_delta, fh_n, sh_delta, sh_n = regime
+                regime_part = (
+                    f"REGIME - decayed from first_half={fh_delta:.2f} (n={fh_n}) to "
+                    f"second_half={sh_delta:.2f} (n={sh_n})"
+                )
+
+            liquidity_part = "liquidity data unavailable"
+            if liquidity_tiers is not None and all(
+                t in liquidity_tiers for t in ("high_liquidity", "medium_liquidity", "low_liquidity")
+            ):
+                liq_high = sum(liquidity_tiers["high_liquidity"]) / len(liquidity_tiers["high_liquidity"])
+                liq_low = sum(liquidity_tiers["low_liquidity"]) / len(liquidity_tiers["low_liquidity"])
+                liquidity_part = (
+                    f"LIQUIDITY - strong on high_liquidity (avg={liq_high:.2f}), weak on low_liquidity "
+                    f"(avg={liq_low:.2f}); only works on large-caps"
+                )
+
+            c["tier"] = SignalConfidenceTier.UNSTABLE_MULTI_DIMENSIONAL
+            c["notes"] = (
+                f"{c['notes']} | MULTI-DIMENSIONAL INSTABILITY: DOWNGRADED from decayed_edge. Fails or "
+                f"inverts on 3 independent validation checks: (1) {regime_part}; (2) {liquidity_part}; "
+                f"(3) MULTI-TIMEFRAME - inverted, low_agreement (avg={low_avg:.2f}) outperforms "
+                f"high_agreement (avg={high_avg:.2f}). Treat as unreliable; do not use for trading "
+                f"decisions without further investigation."
+            )
+        elif c["signal_name"] in MTF_ACTIONABLE_SIGNALS:
+            c["mtf_note"] = (
+                f"MULTI-TIMEFRAME CONFIRMS: flips from negative to positive when confirmed by "
+                f"weekly/monthly agreement (avg win_rate_minus_baseline high_agreement={high_avg:.2f} vs "
+                f"low_agreement={low_avg:.2f}). Actionable - require multi-timeframe confirmation "
+                f"before trusting this signal."
+            )
+        elif c["signal_name"] in MTF_STRENGTHENS_SIGNALS:
+            c["mtf_note"] = (
+                f"MULTI-TIMEFRAME STRENGTHENS: positive either way, but stronger when confirmed (avg "
+                f"high_agreement={high_avg:.2f} vs low_agreement={low_avg:.2f}). Not required, but "
+                f"improves the edge when present."
+            )
+
+    return classifications
+
+
 def _upsert_signal_confidence(rows: list[dict[str, Any]]) -> int:
     if not rows:
         return 0
@@ -310,6 +404,7 @@ def _upsert_signal_confidence(rows: list[dict[str, Any]]) -> int:
             "notes": stmt.excluded.notes,
             "universe_note": stmt.excluded.universe_note,
             "liquidity_note": stmt.excluded.liquidity_note,
+            "mtf_note": stmt.excluded.mtf_note,
         },
     )
     with get_session() as session:
@@ -331,6 +426,7 @@ def compute_signal_confidence(forward_days: list[int] = DEFAULT_FORWARD_DAYS) ->
     classifications = _apply_regime_awareness(classifications)
     _apply_regime_notes_to_confluence()
     classifications = _apply_liquidity_awareness(classifications)
+    classifications = _apply_mtf_awareness(classifications)
 
     rows = [
         {
@@ -341,6 +437,7 @@ def compute_signal_confidence(forward_days: list[int] = DEFAULT_FORWARD_DAYS) ->
             "notes": c["notes"],
             "universe_note": SURVIVORSHIP_BIAS_NOTE,
             "liquidity_note": c.get("liquidity_note"),
+            "mtf_note": c.get("mtf_note"),
         }
         for c in classifications
     ]

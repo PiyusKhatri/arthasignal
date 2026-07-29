@@ -38,7 +38,7 @@ def _load_price_series() -> dict[str, dict[str, Any]]:
 
 def _load_daily_signal_entries() -> list[tuple[TechnicalSignal, Decimal | None]]:
     with get_session() as session:
-        session.execute(text("SET statement_timeout = '300s'"))
+        session.execute(text("SET statement_timeout = '600s'"))
         rows = session.execute(
             select(TechnicalSignal, DailyPrice.close)
             .join(
@@ -60,9 +60,11 @@ def _evaluate_signal(
     signal_entries: list[tuple[TechnicalSignal, Decimal | None]],
     price_series: dict[str, dict[str, Any]],
     dedup_episodes: bool = True,
+    capture_all_episodes: bool = False,
 ) -> dict[str, Any]:
     returns_by_horizon: dict[int, list[Decimal]] = {n: [] for n in forward_days}
     examples_by_horizon: dict[int, list[dict[str, Any]]] = {n: [] for n in forward_days}
+    all_episodes: list[dict[str, Any]] = []
 
     condition_active_by_symbol: dict[str, bool] = {}
     prev_entry_by_symbol: dict[str, tuple[TechnicalSignal, Decimal | None]] = {}
@@ -97,6 +99,8 @@ def _evaluate_signal(
         if current_close is None or current_close == 0:
             continue
 
+        episode_forward_returns: dict[int, Decimal] = {}
+
         for n in forward_days:
             target_idx = idx + n
             if target_idx >= len(series["closes"]):
@@ -108,6 +112,7 @@ def _evaluate_signal(
 
             forward_return = (future_close - current_close) / current_close * Decimal(100)
             returns_by_horizon[n].append(forward_return)
+            episode_forward_returns[n] = forward_return
 
             if len(examples_by_horizon[n]) < MAX_EXAMPLES_PER_HORIZON:
                 examples_by_horizon[n].append(
@@ -120,6 +125,16 @@ def _evaluate_signal(
                         "forward_return_pct": forward_return,
                     }
                 )
+
+        if capture_all_episodes:
+            all_episodes.append(
+                {
+                    "symbol": row.symbol,
+                    "date": row.date,
+                    "row": row,
+                    "forward_returns": episode_forward_returns,
+                }
+            )
 
     horizon_stats: dict[int, dict[str, Any]] = {}
     for n in forward_days:
@@ -152,6 +167,7 @@ def _evaluate_signal(
         "forward_days": horizon_stats,
         "episode_count": episode_count,
         "triggered_day_count": triggered_day_count,
+        "all_episodes": all_episodes,
     }
 
 
@@ -180,6 +196,23 @@ def backtest_multiple_signals(
     for signal_name, condition_fn in signal_conditions.items():
         results[signal_name] = _evaluate_signal(
             signal_name, condition_fn, forward_days, signal_entries, price_series, dedup_episodes
+        )
+    return results
+
+
+def backtest_multiple_signals_with_episodes(
+    signal_conditions: dict[str, SignalConditionFn],
+    forward_days: list[int] = DEFAULT_FORWARD_DAYS,
+    dedup_episodes: bool = True,
+) -> dict[str, dict[str, Any]]:
+    price_series = _load_price_series()
+    signal_entries = _load_daily_signal_entries()
+
+    results = {}
+    for signal_name, condition_fn in signal_conditions.items():
+        results[signal_name] = _evaluate_signal(
+            signal_name, condition_fn, forward_days, signal_entries, price_series, dedup_episodes,
+            capture_all_episodes=True,
         )
     return results
 
