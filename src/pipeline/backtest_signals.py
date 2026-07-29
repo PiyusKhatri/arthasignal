@@ -181,3 +181,22 @@ def backtest_multiple_signals(
             signal_name, condition_fn, forward_days, signal_entries, price_series, dedup_episodes
         )
     return results
+
+
+def backtest_multiple_signals_in_range(
+    signal_conditions: dict[str, SignalConditionFn],
+    forward_days: list[int],
+    start_date,
+    end_date,
+    dedup_episodes: bool = True,
+) -> dict[str, dict[str, Any]]:
+    price_series = _load_price_series()
+    all_signal_entries = _load_daily_signal_entries()
+    ranged_entries = [(row, close) for row, close in all_signal_entries if start_date <= row.date <= end_date]
+
+    results = {}
+    for signal_name, condition_fn in signal_conditions.items():
+        results[signal_name] = _evaluate_signal(
+            signal_name, condition_fn, forward_days, ranged_entries, price_series, dedup_episodes
+        )
+    return results

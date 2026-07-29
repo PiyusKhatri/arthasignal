@@ -45,6 +45,7 @@ class SignalConfidenceTier(str, enum.Enum):
     WEAK_OR_NO_EDGE = "weak_or_no_edge"
     UNRELIABLE_LOW_SAMPLE = "unreliable_low_sample"
     INCONSISTENT_ACROSS_HORIZONS = "inconsistent_across_horizons"
+    DECAYED_EDGE = "decayed_edge"
 
 
 class ConfluenceConfidenceTier(str, enum.Enum):
@@ -272,6 +273,19 @@ class SignalConfidence(Base):
     notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
 
+class SignalRegimeStability(Base):
+    __tablename__ = "signal_regime_stability"
+    __table_args__ = (
+        UniqueConstraint("signal_name", "period", name="uq_signal_regime_stability_signal_period"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    signal_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    period: Mapped[str] = mapped_column(String(20), nullable=False)
+    sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    win_rate_minus_baseline: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+
+
 class ConfluenceBacktestResult(Base):
     __tablename__ = "confluence_backtest_results"
     __table_args__ = (
@@ -298,6 +312,41 @@ class ConfluenceConfidence(Base):
     signal_b: Mapped[str] = mapped_column(String(100), nullable=False)
     tier: Mapped[ConfluenceConfidenceTier] = mapped_column(
         Enum(ConfluenceConfidenceTier, name="confluence_confidence_tier_enum"), nullable=False
+    )
+    avg_win_rate_minus_baseline: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+    min_sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
+
+
+class VolumeConfirmedBacktestResult(Base):
+    __tablename__ = "volume_confirmed_backtest_results"
+    __table_args__ = (
+        UniqueConstraint(
+            "pattern_name", "volume_condition", "forward_days", name="uq_volume_confirmed_pattern_condition_days"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    pattern_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    volume_condition: Mapped[str] = mapped_column(String(20), nullable=False)
+    forward_days: Mapped[int] = mapped_column(Integer, nullable=False)
+    sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    win_rate: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+    win_rate_minus_baseline: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+    computed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class VolumeConditionalTier(Base):
+    __tablename__ = "volume_conditional_tier"
+    __table_args__ = (
+        UniqueConstraint("pattern_name", "volume_condition", name="uq_volume_conditional_tier_pattern_condition"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    pattern_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    volume_condition: Mapped[str] = mapped_column(String(20), nullable=False)
+    tier: Mapped[SignalConfidenceTier] = mapped_column(
+        Enum(SignalConfidenceTier, name="signal_confidence_tier_enum"), nullable=False
     )
     avg_win_rate_minus_baseline: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
     min_sample_size: Mapped[int] = mapped_column(Integer, nullable=False)

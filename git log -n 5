@@ -1,0 +1,71 @@
+[33mcommit 5a1c081bb8e75e86f149fab7f55741bfcc906bf5[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author:     Piyus Khatri <khatripiyus95@gmail.com>
+AuthorDate: Thu Jul 23 23:33:52 2026 +0545
+Commit:     Piyus Khatri <khatripiyus95@gmail.com>
+CommitDate: Thu Jul 23 23:33:52 2026 +0545
+
+    Add weekly/monthly signal computation and multi-timeframe agreement scoring
+
+[33mcommit d768750ff31815c49c8d7a7514751626d3e25e37[m
+Author:     Piyus Khatri <khatripiyus95@gmail.com>
+AuthorDate: Thu Jul 23 23:33:52 2026 +0545
+Commit:     Piyus Khatri <khatripiyus95@gmail.com>
+CommitDate: Thu Jul 23 23:33:52 2026 +0545
+
+    Add confluence (combined-signal) backtesting - 6 pairs verified consistent across 5/10/20-day horizons
+
+[33mcommit 2aebf147dd7004aeda3de3fdef40d7e4c9dbb33c[m
+Author:     Piyus Khatri <khatripiyus95@gmail.com>
+AuthorDate: Thu Jul 23 23:33:52 2026 +0545
+Commit:     Piyus Khatri <khatripiyus95@gmail.com>
+CommitDate: Thu Jul 23 23:33:52 2026 +0545
+
+    Integrate signal computation into daily pipeline, add three-tier Discord alert severity (success/warning/failure)
+
+[33mcommit 50989ccdf23e90917963b8a8af3e891e16df812e[m
+Author:     Piyus Khatri <khatripiyus95@gmail.com>
+AuthorDate: Thu Jul 23 23:33:52 2026 +0545
+Commit:     Piyus Khatri <khatripiyus95@gmail.com>
+CommitDate: Thu Jul 23 23:33:52 2026 +0545
+
+    Add technical_signals table and compute_signals pipeline - all 25 indicators/patterns computed and stored for 284 symbols
+
+[33mcommit 39cac1bdf9062515b7553870093423e8003ce468[m
+Author:     Piyus Khatri <khatripiyus95@gmail.com>
+AuthorDate: Thu Jul 23 23:33:52 2026 +0545
+Commit:     Piyus Khatri <khatripiyus95@gmail.com>
+CommitDate: Thu Jul 23 23:33:52 2026 +0545
+
+    Add multi-timeframe resampling (weekly/monthly) with NEPSE Sunday-week handling
+
+[33mcommit 7525acf8ad695b7580bcbf6607a1deee0d1ae651[m
+Author:     Piyus Khatri <khatripiyus95@gmail.com>
+AuthorDate: Thu Jul 23 23:33:52 2026 +0545
+Commit:     Piyus Khatri <khatripiyus95@gmail.com>
+CommitDate: Thu Jul 23 23:33:52 2026 +0545
+
+    Add candlestick pattern detection: 11 patterns with golden test verification
+
+[33mcommit fc7716d84087c37679f8a82504952982fc615852[m
+Author:     Piyus Khatri <khatripiyus95@gmail.com>
+AuthorDate: Thu Jul 23 23:33:52 2026 +0545
+Commit:     Piyus Khatri <khatripiyus95@gmail.com>
+CommitDate: Thu Jul 23 23:33:52 2026 +0545
+
+    Add volume indicators: OBV, VWAP with golden test verification
+
+[33mcommit fd668a69e4fc77bbdcaeab67df10e37f9e242b86[m
+Author:     Piyus Khatri <khatripiyus95@gmail.com>
+AuthorDate: Thu Jul 23 23:33:52 2026 +0545
+Commit:     Piyus Khatri <khatripiyus95@gmail.com>
+CommitDate: Thu Jul 23 23:33:52 2026 +0545
+
+    Add momentum indicators: stochastic, CCI, ROC with golden test
+
+[33mcommit 1a845d7a6ab9c3a3576e55d696bb1f8bdbd2cc69[m
+Author:     Piyus Khatri <khatripiyus95@gmail.com>
+AuthorDate: Thu Jul 23 23:33:52 2026 +0545
+Commit:     Piyus Khatri <khatripiyus95@gmail.com>
+CommitDate: Thu Jul 23 23:33:52 2026 +0545
+
+    Completion of Phase 1: full data pipeline, automation, and monitoring
