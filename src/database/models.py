@@ -271,6 +271,7 @@ class SignalConfidence(Base):
     avg_win_rate_minus_baseline: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
     min_sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
     notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    universe_note: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
 
 class SignalRegimeStability(Base):

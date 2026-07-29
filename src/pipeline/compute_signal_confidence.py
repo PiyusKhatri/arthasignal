@@ -25,6 +25,14 @@ logger = logging.getLogger(__name__)
 LOW_SAMPLE_THRESHOLD = 500
 UNCLASSIFIED_TIER = "unclassified"
 
+SURVIVORSHIP_BIAS_NOTE = (
+    "SURVIVORSHIP BIAS CAVEAT: backtest universe = 287 currently-active equities + 35 recovered "
+    "delisted/suspended equities (of 209 identified via nepse_api; sharesansar historical coverage "
+    "recovered only 16.7%). 174 delisted/suspended equities remain unrecoverable from available "
+    "sources. Recovered symbols added ~5% of total company-days and shifted win_rate_minus_baseline "
+    "by <0.6pts for every tested signal (immaterial). Results remain survivor-biased overall."
+)
+
 REGIME_FIRST_HALF_LABEL = "2021-07-25 to 2024-01-23"
 REGIME_SECOND_HALF_LABEL = "2024-01-23 to 2026-07-23"
 
@@ -226,6 +234,7 @@ def _upsert_signal_confidence(rows: list[dict[str, Any]]) -> int:
             "avg_win_rate_minus_baseline": stmt.excluded.avg_win_rate_minus_baseline,
             "min_sample_size": stmt.excluded.min_sample_size,
             "notes": stmt.excluded.notes,
+            "universe_note": stmt.excluded.universe_note,
         },
     )
     with get_session() as session:
@@ -254,6 +263,7 @@ def compute_signal_confidence(forward_days: list[int] = DEFAULT_FORWARD_DAYS) ->
             "avg_win_rate_minus_baseline": c["avg_win_rate_minus_baseline"],
             "min_sample_size": c["min_sample_size"],
             "notes": c["notes"],
+            "universe_note": SURVIVORSHIP_BIAS_NOTE,
         }
         for c in classifications
     ]
