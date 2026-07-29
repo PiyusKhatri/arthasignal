@@ -87,8 +87,18 @@ def _check_row_count_anomaly(latest_date) -> dict[str, Any]:
     }
 
 
+def _active_equity_symbols_from_companies_table() -> set[str]:
+    with get_session() as session:
+        rows = session.execute(
+            text("SELECT symbol FROM companies WHERE status = 'A' AND instrument_type = 'Equity'")
+        ).all()
+    return {row.symbol for row in rows}
+
+
 def _check_missing_symbols(latest_date) -> dict[str, Any]:
-    active_symbols = set(get_all_listed_symbols())
+    listed_symbols = set(get_all_listed_symbols())
+    equity_symbols = _active_equity_symbols_from_companies_table()
+    active_symbols = listed_symbols & equity_symbols
     recent_days = _trailing_trading_days(latest_date + timedelta(days=1), MISSING_SYMBOL_CONSECUTIVE_DAYS)
 
     if len(recent_days) < MISSING_SYMBOL_CONSECUTIVE_DAYS:
