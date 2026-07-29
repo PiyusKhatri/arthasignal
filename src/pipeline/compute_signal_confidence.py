@@ -11,6 +11,7 @@ from src.database.connection import get_session
 from src.database.models import (
     BacktestResult,
     ConfluenceConfidence,
+    LiquidityStratifiedBacktestResult,
     SignalConfidence,
     SignalConfidenceTier,
     SignalRegimeStability,
@@ -46,6 +47,11 @@ CONFLUENCE_REGIME_PAIRS = [
     ("close < bollinger_lower", "rsi_14 < 30 (oversold)"),
     ("close < bollinger_lower", "marubozu_bearish"),
 ]
+
+LIQUIDITY_INVERTED_SIGNALS = {"marubozu_bearish"}
+LIQUIDITY_CAUTION_SIGNALS = {"shooting_star"}
+LARGE_CAP_SIGNALS = {"doji", "marubozu_bullish"}
+ROBUST_LIQUIDITY_SIGNALS = {"close < bollinger_lower", "rsi_14 < 30 (oversold)"}
 
 
 def get_signal_confidence(signal_name: str) -> dict[str, Any]:
@@ -223,6 +229,74 @@ def _apply_regime_notes_to_confluence() -> None:
                 row.notes = f"{row.notes} | {regime_note}"
 
 
+def _load_liquidity_stratified() -> dict[str, dict[str, list[Decimal]]]:
+    with get_session() as session:
+        rows = session.execute(select(LiquidityStratifiedBacktestResult)).scalars().all()
+        by_signal: dict[str, dict[str, list[Decimal]]] = {}
+        for row in rows:
+            if row.win_rate_minus_baseline is None:
+                continue
+            by_signal.setdefault(row.signal_name, {}).setdefault(row.liquidity_tier, []).append(
+                row.win_rate_minus_baseline
+            )
+        return by_signal
+
+
+def _apply_liquidity_awareness(classifications: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    liquidity_by_signal = _load_liquidity_stratified()
+    tracked_signals = (
+        LIQUIDITY_INVERTED_SIGNALS | LIQUIDITY_CAUTION_SIGNALS | LARGE_CAP_SIGNALS | ROBUST_LIQUIDITY_SIGNALS
+    )
+
+    for c in classifications:
+        if c["signal_name"] not in tracked_signals:
+            continue
+
+        tiers = liquidity_by_signal.get(c["signal_name"])
+        required_tiers = ("high_liquidity", "medium_liquidity", "low_liquidity")
+        if tiers is None or not all(t in tiers for t in required_tiers):
+            continue
+
+        avg = {t: sum(tiers[t]) / len(tiers[t]) for t in required_tiers}
+        high, medium, low = avg["high_liquidity"], avg["medium_liquidity"], avg["low_liquidity"]
+
+        if c["signal_name"] in LIQUIDITY_INVERTED_SIGNALS:
+            c["tier"] = SignalConfidenceTier.LIQUIDITY_INVERTED
+            c["liquidity_note"] = (
+                f"LIQUIDITY-INVERTED: DOWNGRADED from high_confidence. Negative on high_liquidity "
+                f"(avg win_rate_minus_baseline={high:.2f}), positive on low_liquidity (avg={low:.2f}) "
+                f"and medium_liquidity (avg={medium:.2f}). The aggregate high_confidence label was "
+                f"misleading - real edge is concentrated in harder-to-trade names. Do not recommend "
+                f"this signal for large-cap/liquid stocks."
+            )
+        elif c["signal_name"] in LIQUIDITY_CAUTION_SIGNALS:
+            c["liquidity_note"] = (
+                f"CAUTION - liquidity-skewed: aggregate high_confidence is driven mainly by "
+                f"low_liquidity performance (avg win_rate_minus_baseline={low:.2f}); high_liquidity "
+                f"edge is weak (avg={high:.2f}) versus medium_liquidity (avg={medium:.2f}). Not "
+                f"downgraded since high_liquidity is still positive, but do not recommend this signal "
+                f"for large-cap/liquid stock trades specifically."
+            )
+        elif c["signal_name"] in LARGE_CAP_SIGNALS:
+            c["liquidity_note"] = (
+                f"LARGE-CAP SIGNAL: strongest specifically on high_liquidity names (avg "
+                f"win_rate_minus_baseline={high:.2f} vs medium={medium:.2f}, low={low:.2f}). Good fit "
+                f"for liquid/large-cap trading; comparatively weak or inconsistent elsewhere."
+            )
+        elif c["signal_name"] in ROBUST_LIQUIDITY_SIGNALS:
+            strongest = max(avg, key=avg.get)
+            strongest_note = (
+                "not high_liquidity as might be assumed" if strongest != "high_liquidity" else "high_liquidity"
+            )
+            c["liquidity_note"] = (
+                f"ROBUST ACROSS LIQUIDITY: positive on every tier (high={high:.2f}, medium={medium:.2f}, "
+                f"low={low:.2f}), broadly usable regardless of a stock's liquidity. Strongest tier is "
+                f"{strongest_note}."
+            )
+
+    return classifications
+
+
 def _upsert_signal_confidence(rows: list[dict[str, Any]]) -> int:
     if not rows:
         return 0
@@ -235,6 +309,7 @@ def _upsert_signal_confidence(rows: list[dict[str, Any]]) -> int:
             "min_sample_size": stmt.excluded.min_sample_size,
             "notes": stmt.excluded.notes,
             "universe_note": stmt.excluded.universe_note,
+            "liquidity_note": stmt.excluded.liquidity_note,
         },
     )
     with get_session() as session:
@@ -255,6 +330,7 @@ def compute_signal_confidence(forward_days: list[int] = DEFAULT_FORWARD_DAYS) ->
 
     classifications = _apply_regime_awareness(classifications)
     _apply_regime_notes_to_confluence()
+    classifications = _apply_liquidity_awareness(classifications)
 
     rows = [
         {
@@ -264,6 +340,7 @@ def compute_signal_confidence(forward_days: list[int] = DEFAULT_FORWARD_DAYS) ->
             "min_sample_size": c["min_sample_size"],
             "notes": c["notes"],
             "universe_note": SURVIVORSHIP_BIAS_NOTE,
+            "liquidity_note": c.get("liquidity_note"),
         }
         for c in classifications
     ]

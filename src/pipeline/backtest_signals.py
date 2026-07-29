@@ -5,7 +5,7 @@ import statistics
 from decimal import Decimal
 from typing import Any, Callable
 
-from sqlalchemy import select
+from sqlalchemy import select, text
 
 from src.database.connection import get_session
 from src.database.models import DailyPrice, SignalTimeframe, TechnicalSignal
@@ -38,6 +38,7 @@ def _load_price_series() -> dict[str, dict[str, Any]]:
 
 def _load_daily_signal_entries() -> list[tuple[TechnicalSignal, Decimal | None]]:
     with get_session() as session:
+        session.execute(text("SET statement_timeout = '300s'"))
         rows = session.execute(
             select(TechnicalSignal, DailyPrice.close)
             .join(
@@ -198,5 +199,23 @@ def backtest_multiple_signals_in_range(
     for signal_name, condition_fn in signal_conditions.items():
         results[signal_name] = _evaluate_signal(
             signal_name, condition_fn, forward_days, ranged_entries, price_series, dedup_episodes
+        )
+    return results
+
+
+def backtest_multiple_signals_for_symbols(
+    signal_conditions: dict[str, SignalConditionFn],
+    forward_days: list[int],
+    symbols: set[str],
+    dedup_episodes: bool = True,
+) -> dict[str, dict[str, Any]]:
+    price_series = _load_price_series()
+    all_signal_entries = _load_daily_signal_entries()
+    filtered_entries = [(row, close) for row, close in all_signal_entries if row.symbol in symbols]
+
+    results = {}
+    for signal_name, condition_fn in signal_conditions.items():
+        results[signal_name] = _evaluate_signal(
+            signal_name, condition_fn, forward_days, filtered_entries, price_series, dedup_episodes
         )
     return results

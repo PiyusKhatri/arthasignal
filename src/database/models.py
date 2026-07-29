@@ -46,6 +46,7 @@ class SignalConfidenceTier(str, enum.Enum):
     UNRELIABLE_LOW_SAMPLE = "unreliable_low_sample"
     INCONSISTENT_ACROSS_HORIZONS = "inconsistent_across_horizons"
     DECAYED_EDGE = "decayed_edge"
+    LIQUIDITY_INVERTED = "liquidity_inverted"
 
 
 class ConfluenceConfidenceTier(str, enum.Enum):
@@ -272,6 +273,7 @@ class SignalConfidence(Base):
     min_sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
     notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
     universe_note: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    liquidity_note: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
 
 class SignalRegimeStability(Base):
@@ -352,3 +354,32 @@ class VolumeConditionalTier(Base):
     avg_win_rate_minus_baseline: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
     min_sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
     notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
+
+
+class SymbolLiquidityTier(Base):
+    __tablename__ = "symbol_liquidity_tier"
+    __table_args__ = (UniqueConstraint("symbol", name="uq_symbol_liquidity_tier_symbol"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    symbol: Mapped[str] = mapped_column(String(20), nullable=False)
+    avg_daily_turnover: Mapped[float] = mapped_column(Numeric(20, 4), nullable=False)
+    liquidity_tier: Mapped[str] = mapped_column(String(20), nullable=False)
+    computed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class LiquidityStratifiedBacktestResult(Base):
+    __tablename__ = "liquidity_stratified_backtest_results"
+    __table_args__ = (
+        UniqueConstraint(
+            "signal_name", "liquidity_tier", "forward_days", name="uq_liquidity_stratified_signal_tier_days"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    signal_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    liquidity_tier: Mapped[str] = mapped_column(String(20), nullable=False)
+    forward_days: Mapped[int] = mapped_column(Integer, nullable=False)
+    sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    win_rate: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+    win_rate_minus_baseline: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+    computed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
