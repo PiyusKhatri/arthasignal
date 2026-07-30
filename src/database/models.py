@@ -510,6 +510,18 @@ class Broker(Base):
     is_active: Mapped[bool] = mapped_column(nullable=False)
 
 
+class SectorFundamentalBaseline(Base):
+    __tablename__ = "sector_fundamental_baseline"
+    __table_args__ = (UniqueConstraint("sector", name="uq_sector_fundamental_baseline_sector"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    sector: Mapped[str] = mapped_column(String(100), nullable=False)
+    avg_pe: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    avg_pb: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    excluded_outlier_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    computed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
 class MarketPulseBacktestResult(Base):
     __tablename__ = "market_pulse_backtest_results"
     __table_args__ = (

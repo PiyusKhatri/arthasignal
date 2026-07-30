@@ -81,6 +81,12 @@ def get_fundamentals(symbol: str) -> dict[str, Any] | None:
         logger.warning("%s: no fundamentals fields found on merolagani company page", symbol)
         return None
 
+    if values.get("eps") == 0:
+        logger.warning("%s: EPS reported as exactly 0.00, treating as missing data rather than genuine zero", symbol)
+        values["eps"] = None
+    if values.get("pe_ratio") == 0:
+        values["pe_ratio"] = None
+
     reported_date = date.today()
     if fiscal_year is None:
         fiscal_year = _derive_fiscal_year_label(reported_date)
