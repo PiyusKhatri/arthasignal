@@ -6,6 +6,7 @@ from typing import Any
 
 from src.notifications.discord_alert import send_discord_alert
 from src.pipeline.backfill_calendar import is_market_open_today
+from src.pipeline.backfill_daily_floorsheet import run_daily_floorsheet_backfill
 from src.pipeline.backfill_signals import run_signals_backfill
 from src.pipeline.backup_to_drive import run_backup
 from src.pipeline.data_quality import check_daily_pipeline_health
@@ -45,6 +46,21 @@ def run_all_daily() -> dict[str, Any]:
         logger.exception("compute_signals.py backfill failed")
         signals_summary = {"symbols_processed": 0, "rows_upserted": 0, "failures": 0}
 
+    try:
+        floorsheet_summary = run_daily_floorsheet_backfill()
+    except Exception:
+        logger.exception("backfill_daily_floorsheet.py failed")
+        floorsheet_summary = {"skipped": False, "symbols_processed": 0, "rows_inserted": 0, "failures": 0}
+
+    if floorsheet_summary.get("skipped"):
+        floorsheet_status = "skipped (not a trading day)"
+    else:
+        floorsheet_status = (
+            f"{floorsheet_summary.get('symbols_processed', 0)} symbols, "
+            f"{floorsheet_summary.get('rows_inserted', 0)} rows, "
+            f"{floorsheet_summary.get('failures', 0)} failures"
+        )
+
     backup_status = "skipped (not a trading day)"
     try:
         if is_market_open_today():
@@ -73,10 +89,13 @@ def run_all_daily() -> dict[str, Any]:
         f"Data quality flags: {quality_summary['checks_flagged']}/{quality_summary['checks_run']}\n"
         f"Signals computed: {signals_summary['symbols_processed']} symbols, "
         f"{signals_summary['rows_upserted']} rows, {signals_summary['failures']} failures\n"
+        f"Floorsheet: {floorsheet_status}\n"
         f"Backup: {backup_status}"
     )
 
-    total_failures = daily_summary["failures"] + signals_summary["failures"]
+    total_failures = (
+        daily_summary["failures"] + signals_summary["failures"] + floorsheet_summary.get("failures", 0)
+    )
     if total_failures == 0 and quality_summary["checks_flagged"] == 0:
         severity = "success"
     elif total_failures <= MINOR_FAILURE_THRESHOLD:
@@ -91,6 +110,7 @@ def run_all_daily() -> dict[str, Any]:
         "daily_summary": daily_summary,
         "quality_summary": quality_summary,
         "signals_summary": signals_summary,
+        "floorsheet_summary": floorsheet_summary,
         "backup_status": backup_status,
         "execution_time_seconds": round(elapsed_seconds, 2),
     }

@@ -30,6 +30,12 @@ def get_sectorwise_summary() -> list[dict[str, Any]]:
 
 
 @retry(reraise=True, stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=8))
+def get_nepse_index() -> list[dict[str, Any]]:
+    logger.info("Fetching NEPSE index and market-wide sub-indices from nepse-scraper")
+    return _client.get_nepse_index()
+
+
+@retry(reraise=True, stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=8))
 def get_all_securities() -> list[dict[str, Any]]:
     logger.info("Fetching full securities list from nepse-scraper")
     return _client.get_all_securities()

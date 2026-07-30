@@ -16,6 +16,7 @@ from src.database.models import (
     SignalConfidence,
     SignalConfidenceTier,
     SignalRegimeStability,
+    TransactionCostAdjustedReturn,
 )
 from src.pipeline.backtest_signals import DEFAULT_FORWARD_DAYS
 from src.pipeline.compute_baseline import BASELINE_SIGNAL_NAME
@@ -52,6 +53,9 @@ CONFLUENCE_REGIME_PAIRS = [
 MTF_MULTI_DIMENSIONAL_DOWNGRADE_SIGNALS = {"marubozu_bullish"}
 MTF_ACTIONABLE_SIGNALS = {"marubozu_bearish", "shooting_star"}
 MTF_STRENGTHENS_SIGNALS = {"rsi_14 < 30 (oversold)"}
+
+UNKNOWN_HOLDING_PERIOD = "unknown - transaction cost analysis not yet run"
+THIN_MARGIN_THRESHOLD = Decimal("0.20")
 
 LIQUIDITY_INVERTED_SIGNALS = {"marubozu_bearish"}
 LIQUIDITY_CAUTION_SIGNALS = {"shooting_star"}
@@ -391,6 +395,82 @@ def _apply_mtf_awareness(classifications: list[dict[str, Any]]) -> list[dict[str
     return classifications
 
 
+def _load_transaction_costs() -> dict[str, dict[int, dict[str, dict[str, Any]]]]:
+    with get_session() as session:
+        rows = session.execute(select(TransactionCostAdjustedReturn)).scalars().all()
+        by_signal: dict[str, dict[int, dict[str, dict[str, Any]]]] = {}
+        for row in rows:
+            by_signal.setdefault(row.signal_name, {}).setdefault(row.forward_days, {})[row.cost_scenario] = {
+                "mean_return": row.mean_return,
+                "adjusted_mean_return": row.adjusted_mean_return,
+                "remains_positive": row.remains_positive,
+            }
+        return by_signal
+
+
+def _apply_cost_viability(classifications: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    tx_by_signal = _load_transaction_costs()
+
+    for c in classifications:
+        horizons = tx_by_signal.get(c["signal_name"])
+        if horizons is None:
+            c["recommended_holding_period"] = UNKNOWN_HOLDING_PERIOD
+            c["cost_viability_note"] = None
+            continue
+
+        complete = {}
+        for n in (5, 10, 20):
+            entry = horizons.get(n)
+            if entry is None or "official_only" not in entry or "with_spread_estimate" not in entry:
+                complete = None
+                break
+            complete[n] = entry
+        if complete is None:
+            c["recommended_holding_period"] = UNKNOWN_HOLDING_PERIOD
+            c["cost_viability_note"] = None
+            continue
+
+        full = {n: complete[n]["with_spread_estimate"] for n in (5, 10, 20)}
+        official = {n: complete[n]["official_only"] for n in (5, 10, 20)}
+
+        if full[5]["remains_positive"] or full[10]["remains_positive"]:
+            c["recommended_holding_period"] = "5/10-day viable"
+            c["cost_viability_note"] = (
+                f"Clears realistic round-trip transaction costs at a shorter horizon: "
+                f"5d adjusted={full[5]['adjusted_mean_return']:.3f}, 10d adjusted={full[10]['adjusted_mean_return']:.3f}."
+            )
+        elif full[20]["remains_positive"]:
+            thin = full[20]["adjusted_mean_return"] < THIN_MARGIN_THRESHOLD
+            c["recommended_holding_period"] = "20-day minimum" + (" (thin margin)" if thin else "")
+            margin_desc = "a thin margin" if thin else "a comfortable margin"
+            c["cost_viability_note"] = (
+                f"Only clears realistic round-trip transaction costs (~1.24% full estimate) at the "
+                f"20-day horizon, with {margin_desc} (20d adjusted_mean_return={full[20]['adjusted_mean_return']:.3f}%). "
+                f"5-day and 10-day raw edges do not survive costs (5d adjusted={full[5]['adjusted_mean_return']:.3f}%, "
+                f"10d adjusted={full[10]['adjusted_mean_return']:.3f}%)."
+            )
+        elif official[20]["remains_positive"]:
+            c["recommended_holding_period"] = "marginal/uncertain"
+            c["cost_viability_note"] = (
+                f"MARGINAL - not clearly cost-viable under realistic spread assumptions. Positive after "
+                f"official fees only (20d adjusted={official[20]['adjusted_mean_return']:.3f}%), but negative "
+                f"once the estimated bid-ask spread is included (20d adjusted={full[20]['adjusted_mean_return']:.3f}%). "
+                f"Do not treat as a confirmed tradeable edge."
+            )
+        else:
+            raw_20d = complete[20]["official_only"]["mean_return"]
+            c["recommended_holding_period"] = "not currently cost-viable"
+            c["cost_viability_note"] = (
+                f"NOT COST-VIABLE at any tested horizon (5/10/20 days) under either cost scenario. Raw edge "
+                f"(20d mean_return={raw_20d:.3f}% before costs) is too small to survive an estimated "
+                f"~0.74-1.24% round-trip transaction cost. This is a raw-edge finding from "
+                f"liquidity/regime/mtf validation - distinct from cost-viability, which fails "
+                f"independently of those checks."
+            )
+
+    return classifications
+
+
 def _upsert_signal_confidence(rows: list[dict[str, Any]]) -> int:
     if not rows:
         return 0
@@ -405,6 +485,8 @@ def _upsert_signal_confidence(rows: list[dict[str, Any]]) -> int:
             "universe_note": stmt.excluded.universe_note,
             "liquidity_note": stmt.excluded.liquidity_note,
             "mtf_note": stmt.excluded.mtf_note,
+            "recommended_holding_period": stmt.excluded.recommended_holding_period,
+            "cost_viability_note": stmt.excluded.cost_viability_note,
         },
     )
     with get_session() as session:
@@ -427,6 +509,7 @@ def compute_signal_confidence(forward_days: list[int] = DEFAULT_FORWARD_DAYS) ->
     _apply_regime_notes_to_confluence()
     classifications = _apply_liquidity_awareness(classifications)
     classifications = _apply_mtf_awareness(classifications)
+    classifications = _apply_cost_viability(classifications)
 
     rows = [
         {
@@ -438,6 +521,8 @@ def compute_signal_confidence(forward_days: list[int] = DEFAULT_FORWARD_DAYS) ->
             "universe_note": SURVIVORSHIP_BIAS_NOTE,
             "liquidity_note": c.get("liquidity_note"),
             "mtf_note": c.get("mtf_note"),
+            "recommended_holding_period": c.get("recommended_holding_period", UNKNOWN_HOLDING_PERIOD),
+            "cost_viability_note": c.get("cost_viability_note"),
         }
         for c in classifications
     ]

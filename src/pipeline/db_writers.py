@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import date, timedelta
 from typing import Any
 
 from sqlalchemy import select
@@ -17,6 +18,8 @@ from src.database.models import (
     TradingCalendar,
 )
 from src.scrapers import nepse_api
+
+RECENT_UPSERT_WINDOW_DAYS = 2
 
 logger = logging.getLogger(__name__)
 
@@ -110,12 +113,30 @@ def upsert_companies(records: list[dict[str, Any]]) -> int:
 def insert_new_daily_prices(rows: list[dict[str, Any]]) -> tuple[int, int]:
     if not rows:
         return 0, 0
-    stmt = pg_insert(DailyPrice).values(rows)
-    stmt = stmt.on_conflict_do_nothing(index_elements=["symbol", "date"])
-    stmt = stmt.returning(DailyPrice.id)
-    with get_session() as session:
-        result = session.execute(stmt)
-        inserted = len(result.fetchall())
+
+    cutoff = date.today() - timedelta(days=RECENT_UPSERT_WINDOW_DAYS)
+    recent_rows = [r for r in rows if r["date"] >= cutoff]
+    older_rows = [r for r in rows if r["date"] < cutoff]
+
+    inserted = 0
+
+    if recent_rows:
+        stmt = pg_insert(DailyPrice).values(recent_rows)
+        update_columns = {c: getattr(stmt.excluded, c) for c in recent_rows[0] if c not in ("symbol", "date")}
+        stmt = stmt.on_conflict_do_update(index_elements=["symbol", "date"], set_=update_columns)
+        stmt = stmt.returning(DailyPrice.id)
+        with get_session() as session:
+            result = session.execute(stmt)
+            inserted += len(result.fetchall())
+
+    if older_rows:
+        stmt = pg_insert(DailyPrice).values(older_rows)
+        stmt = stmt.on_conflict_do_nothing(index_elements=["symbol", "date"])
+        stmt = stmt.returning(DailyPrice.id)
+        with get_session() as session:
+            result = session.execute(stmt)
+            inserted += len(result.fetchall())
+
     skipped = len(rows) - inserted
     return inserted, skipped
 

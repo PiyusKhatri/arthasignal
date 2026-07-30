@@ -12,6 +12,7 @@ from src.scrapers.http_utils import fetch, post
 
 logger = logging.getLogger(__name__)
 
+HOMEPAGE_URL = "https://www.sharesansar.com/"
 TODAY_PRICE_URL = "https://www.sharesansar.com/today-share-price"
 COMPANY_PAGE_URL_TEMPLATE = "https://www.sharesansar.com/company/{slug}"
 PRICE_HISTORY_URL = "https://www.sharesansar.com/company-price-history"
@@ -80,6 +81,43 @@ def scrape_today_price() -> list[dict[str, Any]]:
 def get_symbols() -> list[str]:
     rows = scrape_today_price()
     return sorted({row["symbol"] for row in rows if row.get("symbol")})
+
+
+def scrape_sub_indices() -> list[dict[str, Any]]:
+    response = fetch(HOMEPAGE_URL)
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    heading = next(
+        (h for h in soup.find_all("h3", class_="heading-title") if "Indices" in h.get_text(strip=True)),
+        None,
+    )
+    if heading is None:
+        logger.error("sharesansar: could not locate sub-indices heading on homepage")
+        return []
+
+    block = heading.find_parent("div", class_="n-block")
+    table = block.find("table") if block else None
+    if table is None:
+        logger.error("sharesansar: could not locate sub-indices table on homepage")
+        return []
+
+    results: list[dict[str, Any]] = []
+    for row in table.find_all("tr")[1:]:
+        cells = [c.get_text(strip=True) for c in row.find_all("td")]
+        if len(cells) < 8:
+            continue
+
+        results.append(
+            {
+                "indexName": cells[0],
+                "close": _parse_number(cells[4]),
+                "pointChange": _parse_number(cells[6]),
+                "percentChange": _parse_number(cells[7]),
+            }
+        )
+
+    logger.info("sharesansar: parsed %d sub-index rows", len(results))
+    return results
 
 
 def _get_company_session(symbol: str) -> tuple[requests.Session, str, str]:

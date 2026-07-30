@@ -276,6 +276,8 @@ class SignalConfidence(Base):
     universe_note: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     liquidity_note: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     mtf_note: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    recommended_holding_period: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    cost_viability_note: Mapped[str | None] = mapped_column(String(1000), nullable=True)
 
 
 class SignalRegimeStability(Base):
@@ -403,3 +405,98 @@ class MtfAgreementBacktestResult(Base):
     win_rate: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
     win_rate_minus_baseline: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
     computed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class TransactionCostAdjustedReturn(Base):
+    __tablename__ = "transaction_cost_adjusted_returns"
+    __table_args__ = (
+        UniqueConstraint(
+            "signal_name", "forward_days", "cost_scenario", name="uq_tx_cost_signal_days_scenario"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    signal_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    forward_days: Mapped[int] = mapped_column(Integer, nullable=False)
+    cost_scenario: Mapped[str] = mapped_column(String(30), nullable=False)
+    sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    mean_return: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    round_trip_cost_pct: Mapped[float] = mapped_column(Numeric(10, 4), nullable=False)
+    adjusted_mean_return: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    remains_positive: Mapped[bool | None] = mapped_column(nullable=True)
+    computed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class SystemNote(Base):
+    __tablename__ = "system_notes"
+    __table_args__ = (UniqueConstraint("note_key", name="uq_system_notes_note_key"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    note_key: Mapped[str] = mapped_column(String(100), nullable=False)
+    note_text: Mapped[str] = mapped_column(String(2000), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class IntradaySnapshot(Base):
+    __tablename__ = "intraday_snapshots"
+    __table_args__ = (
+        UniqueConstraint("symbol", "snapshot_time", name="uq_intraday_snapshots_symbol_time"),
+        Index("ix_intraday_snapshots_symbol", "symbol"),
+        Index("ix_intraday_snapshots_snapshot_time", "snapshot_time"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    symbol: Mapped[str] = mapped_column(String(20), ForeignKey("companies.symbol"), nullable=False)
+    snapshot_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    ltp: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    volume_so_far: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    turnover_so_far: Mapped[float | None] = mapped_column(Numeric(20, 4), nullable=True)
+    day_high_so_far: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    day_low_so_far: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    percent_change: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+
+
+class IntradayIndexSnapshot(Base):
+    __tablename__ = "intraday_index_snapshots"
+    __table_args__ = (
+        UniqueConstraint("index_name", "snapshot_time", name="uq_intraday_index_snapshots_name_time"),
+        Index("ix_intraday_index_snapshots_index_name", "index_name"),
+        Index("ix_intraday_index_snapshots_snapshot_time", "snapshot_time"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    index_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    snapshot_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    current_value: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    percent_change: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+    points_change: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+
+
+class IntradayFloorsheet(Base):
+    __tablename__ = "intraday_floorsheet"
+    __table_args__ = (
+        UniqueConstraint("symbol", "contract_no", name="uq_intraday_floorsheet_symbol_contract_no"),
+        Index("ix_intraday_floorsheet_symbol", "symbol"),
+        Index("ix_intraday_floorsheet_snapshot_time", "snapshot_time"),
+        Index("ix_intraday_floorsheet_buyer_broker_id", "buyer_broker_id"),
+        Index("ix_intraday_floorsheet_seller_broker_id", "seller_broker_id"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    symbol: Mapped[str] = mapped_column(String(20), ForeignKey("companies.symbol"), nullable=False)
+    contract_no: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    snapshot_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    buyer_broker_id: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    seller_broker_id: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    contract_quantity: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    contract_rate: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    contract_amount: Mapped[float | None] = mapped_column(Numeric(20, 4), nullable=True)
+
+
+class SectorIndexMapping(Base):
+    __tablename__ = "sector_index_mapping"
+    __table_args__ = (UniqueConstraint("companies_sector", name="uq_sector_index_mapping_companies_sector"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    companies_sector: Mapped[str] = mapped_column(String(100), nullable=False)
+    market_index_name: Mapped[str] = mapped_column(String(100), nullable=False)

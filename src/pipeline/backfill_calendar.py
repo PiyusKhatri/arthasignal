@@ -8,7 +8,7 @@ from typing import Any
 from sqlalchemy import select
 
 from src.database.connection import get_session
-from src.database.models import MarketIndex, TradingCalendar
+from src.database.models import DailyPrice, MarketIndex, TradingCalendar
 from src.pipeline.db_writers import upsert_trading_calendar_rows
 from src.scrapers import nepse_api
 
@@ -143,24 +143,26 @@ def is_market_open_today() -> bool:
     if row is not None:
         return row
 
-    logger.warning("No trading calendar entry for %s, falling back to live market status check", today)
+    logger.warning("No trading calendar entry for %s, checking for existing market data", today)
+    with get_session() as session:
+        has_market_data_today = (
+            session.execute(select(MarketIndex.id).where(MarketIndex.date == today).limit(1)).first()
+            is not None
+            or session.execute(select(DailyPrice.id).where(DailyPrice.date == today).limit(1)).first()
+            is not None
+        )
+
+    if has_market_data_today:
+        logger.warning(
+            "market_index or daily_prices already has a row for %s, treating today as a trading day", today
+        )
+        return True
+
+    logger.warning("No market data for %s yet, falling back to live market status check", today)
     try:
         return nepse_api.is_market_open()
     except Exception:
         logger.exception("Live market status check failed for %s, falling back to a non-crashing signal", today)
-
-        with get_session() as session:
-            has_market_data_today = (
-                session.execute(select(MarketIndex.id).where(MarketIndex.date == today).limit(1)).first()
-                is not None
-            )
-
-        if has_market_data_today:
-            logger.warning(
-                "market_index already has a row for %s despite the live check failing, treating today as a trading day",
-                today,
-            )
-            return True
 
         non_trading_weekdays = _known_non_trading_weekdays()
         fallback_result = today.weekday() not in non_trading_weekdays
