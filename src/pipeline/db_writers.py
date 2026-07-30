@@ -15,6 +15,7 @@ from src.database.models import (
     DailyPrice,
     Fundamental,
     MarketIndex,
+    PromoterHolding,
     SymbolHistory,
     TradingCalendar,
 )
@@ -205,6 +206,19 @@ def insert_new_fundamentals(rows: list[dict[str, Any]]) -> tuple[int, int]:
     stmt = pg_insert(Fundamental).values(rows)
     stmt = stmt.on_conflict_do_nothing(index_elements=["symbol", "reported_date"])
     stmt = stmt.returning(Fundamental.id)
+    with get_session() as session:
+        result = session.execute(stmt)
+        inserted = len(result.fetchall())
+    skipped = len(rows) - inserted
+    return inserted, skipped
+
+
+def insert_new_promoter_holding(rows: list[dict[str, Any]]) -> tuple[int, int]:
+    if not rows:
+        return 0, 0
+    stmt = pg_insert(PromoterHolding).values(rows)
+    stmt = stmt.on_conflict_do_nothing(index_elements=["symbol", "reported_date"])
+    stmt = stmt.returning(PromoterHolding.id)
     with get_session() as session:
         result = session.execute(stmt)
         inserted = len(result.fetchall())

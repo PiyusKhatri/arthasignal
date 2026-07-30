@@ -510,6 +510,23 @@ class Broker(Base):
     is_active: Mapped[bool] = mapped_column(nullable=False)
 
 
+class PromoterHolding(Base):
+    __tablename__ = "promoter_holding"
+    __table_args__ = (UniqueConstraint("symbol", "reported_date", name="uq_promoter_holding_symbol_reported_date"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    symbol: Mapped[str] = mapped_column(String(20), ForeignKey("companies.symbol"), nullable=False)
+    total_shares: Mapped[float | None] = mapped_column(Numeric(20, 4), nullable=True)
+    promoter_shares: Mapped[float | None] = mapped_column(Numeric(20, 4), nullable=True)
+    promoter_pct: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+    public_shares: Mapped[float | None] = mapped_column(Numeric(20, 4), nullable=True)
+    public_pct: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+    lock_status: Mapped[str] = mapped_column(String(20), nullable=False)
+    prom_lock_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    mf_lock_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    reported_date: Mapped[date] = mapped_column(Date, nullable=False)
+
+
 class SectorFundamentalBaseline(Base):
     __tablename__ = "sector_fundamental_baseline"
     __table_args__ = (UniqueConstraint("sector", name="uq_sector_fundamental_baseline_sector"),)
