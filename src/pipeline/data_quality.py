@@ -18,6 +18,8 @@ CIRCUIT_BREAKER_RULE_CHANGE_DATE = date(2026, 4, 20)
 CIRCUIT_BREAKER_PERCENT_BEFORE_CHANGE = 10.0
 CIRCUIT_BREAKER_PERCENT_ON_OR_AFTER_CHANGE = 15.0
 CIRCUIT_BREAKER_FLAG_BUFFER_PERCENT = 2.0
+STALE_FUNDAMENTALS_SYMBOL_DAYS = 45
+STALE_FUNDAMENTALS_TABLE_DAYS = 14
 
 
 def _circuit_breaker_flag_threshold(as_of_date: date) -> float:
@@ -214,6 +216,59 @@ def _check_null_or_zero_prices(latest_date) -> dict[str, Any]:
     return {"flagged": bool(bad_rows), "date": latest_date, "bad_rows": bad_rows}
 
 
+def _check_fundamentals_symbol_staleness(latest_date) -> dict[str, Any]:
+    equity_symbols = _active_equity_symbols_from_companies_table()
+
+    with get_session() as session:
+        rows = session.execute(text("SELECT symbol, max(reported_date) AS reported_date FROM fundamentals GROUP BY symbol")).all()
+    latest_by_symbol = {row.symbol: row.reported_date for row in rows}
+
+    stale_symbols = []
+    for symbol in equity_symbols:
+        reported_date = latest_by_symbol.get(symbol)
+        if reported_date is None:
+            stale_symbols.append({"symbol": symbol, "reported_date": None, "days_stale": None})
+            continue
+        days_stale = (latest_date - reported_date).days
+        if days_stale > STALE_FUNDAMENTALS_SYMBOL_DAYS:
+            stale_symbols.append({"symbol": symbol, "reported_date": reported_date, "days_stale": days_stale})
+
+    if stale_symbols:
+        logger.warning(
+            "data_quality: %d active equity symbols have fundamentals older than %d days or missing entirely",
+            len(stale_symbols),
+            STALE_FUNDAMENTALS_SYMBOL_DAYS,
+        )
+
+    return {
+        "flagged": bool(stale_symbols),
+        "stale_symbol_count": len(stale_symbols),
+        "stale_symbols": stale_symbols,
+    }
+
+
+def _check_fundamentals_table_freshness(latest_date) -> dict[str, Any]:
+    with get_session() as session:
+        most_recent = session.execute(text("SELECT max(reported_date) FROM fundamentals")).scalar()
+
+    if most_recent is None:
+        flagged = True
+        days_stale = None
+    else:
+        days_stale = (latest_date - most_recent).days
+        flagged = days_stale > STALE_FUNDAMENTALS_TABLE_DAYS
+
+    if flagged:
+        logger.warning(
+            "data_quality: fundamentals table has not been refreshed in over %d days (most recent reported_date=%s) "
+            "- likely a systemic backfill failure, not just one stale symbol",
+            STALE_FUNDAMENTALS_TABLE_DAYS,
+            most_recent,
+        )
+
+    return {"flagged": flagged, "most_recent_reported_date": most_recent, "days_stale": days_stale}
+
+
 def check_daily_pipeline_health() -> dict[str, Any]:
     latest_date = _latest_price_date()
     if latest_date is None:
@@ -228,6 +283,8 @@ def check_daily_pipeline_health() -> dict[str, Any]:
         ("missing_symbols", _check_missing_symbols),
         ("price_sanity", _check_price_sanity),
         ("null_or_zero_prices", _check_null_or_zero_prices),
+        ("fundamentals_symbol_staleness", _check_fundamentals_symbol_staleness),
+        ("fundamentals_table_freshness", _check_fundamentals_table_freshness),
     ):
         try:
             results[name] = check(latest_date)
