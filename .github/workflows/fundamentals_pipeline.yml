@@ -27,3 +27,8 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: python -m src.pipeline.backfill_promoter_holding
+
+      - name: Run macro data backfill
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python -m src.pipeline.backfill_macro_data

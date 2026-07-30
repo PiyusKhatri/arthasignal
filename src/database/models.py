@@ -527,6 +527,41 @@ class PromoterHolding(Base):
     reported_date: Mapped[date] = mapped_column(Date, nullable=False)
 
 
+class ShortTermInterestRate(Base):
+    __tablename__ = "short_term_interest_rates"
+    __table_args__ = (UniqueConstraint("fiscal_year", "month", name="uq_short_term_interest_rates_fy_month"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    fiscal_year: Mapped[str] = mapped_column(String(20), nullable=False)
+    month: Mapped[str] = mapped_column(String(20), nullable=False)
+    treasury_bill_rate: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+    interbank_commercial_rate: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+    interbank_other_rate: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+
+
+class Remittance(Base):
+    __tablename__ = "remittance"
+    __table_args__ = (UniqueConstraint("fiscal_year", "month", name="uq_remittance_fy_month"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    fiscal_year: Mapped[str] = mapped_column(String(20), nullable=False)
+    month: Mapped[str] = mapped_column(String(20), nullable=False)
+    amount_billions: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    growth_pct: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+
+
+class GdpNepse(Base):
+    __tablename__ = "gdp_nepse"
+    __table_args__ = (UniqueConstraint("fiscal_year", name="uq_gdp_nepse_fiscal_year"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    fiscal_year: Mapped[str] = mapped_column(String(20), nullable=False)
+    gdp_growth_rate: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+    market_cap: Mapped[float | None] = mapped_column(Numeric(20, 4), nullable=True)
+    market_cap_gdp_ratio: Mapped[float | None] = mapped_column(Numeric(10, 4), nullable=True)
+    nepse_index: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+
+
 class SectorFundamentalBaseline(Base):
     __tablename__ = "sector_fundamental_baseline"
     __table_args__ = (UniqueConstraint("sector", name="uq_sector_fundamental_baseline_sector"),)
