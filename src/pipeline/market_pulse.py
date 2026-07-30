@@ -27,6 +27,11 @@ AD_RATIO_BROAD_THRESHOLD = Decimal("1.5")
 
 MIN_SECTOR_FLOORSHEET_COVERAGE_FRACTION = Decimal("0.5")
 
+VOLUME_TRAILING_DAYS = 20
+VOLUME_SPIKE_RATIO_THRESHOLD = Decimal("2.0")
+VOLUME_DROUGHT_RATIO_THRESHOLD = Decimal("0.3")
+SINGLE_BROKER_VOLUME_SHARE_THRESHOLD = Decimal("0.15")
+
 
 def _today_npt() -> date:
     return datetime.now(timezone.utc).astimezone(NEPT_OFFSET).date()
@@ -626,6 +631,154 @@ def compute_overall_market_pulse(snapshot_time: datetime | None = None) -> dict[
         "nepse_index": nepse_index,
         "broker_concentration": broker_concentration,
         "turnover_trend": turnover_trend,
+    }
+
+
+def _load_symbol_volumes(today: date) -> dict[str, int]:
+    with get_session() as session:
+        rows = session.execute(
+            text(
+                """
+                SELECT dp.symbol, dp.volume
+                FROM daily_prices dp
+                JOIN companies c ON c.symbol = dp.symbol
+                WHERE dp.date = :d AND c.instrument_type = 'Equity' AND c.status = 'A'
+                """
+            ),
+            {"d": today},
+        ).all()
+    return {row.symbol: row.volume for row in rows}
+
+
+def _load_symbol_trailing_avg_volumes(today: date) -> dict[str, Decimal]:
+    trailing_days = _trailing_trading_days(today, VOLUME_TRAILING_DAYS)
+    if not trailing_days:
+        return {}
+    with get_session() as session:
+        rows = session.execute(
+            text(
+                """
+                SELECT dp.symbol, sum(dp.volume) / :n AS avg_volume
+                FROM daily_prices dp
+                JOIN companies c ON c.symbol = dp.symbol
+                WHERE dp.date = ANY(:days) AND c.instrument_type = 'Equity' AND c.status = 'A'
+                GROUP BY dp.symbol
+                """
+            ),
+            {"days": trailing_days, "n": len(trailing_days)},
+        ).all()
+    return {row.symbol: row.avg_volume for row in rows}
+
+
+def _load_symbol_broker_quantities(today: date) -> tuple[dict[str, dict[str, int]], dict[str, dict[str, int]]]:
+    with get_session() as session:
+        rows = session.execute(
+            text(
+                """
+                SELECT symbol, buyer_broker_id, seller_broker_id, contract_quantity
+                FROM intraday_floorsheet
+                WHERE date_trunc('day', snapshot_time) = :d
+                """
+            ),
+            {"d": today},
+        ).all()
+
+    buy_totals_by_symbol: dict[str, dict[str, int]] = {}
+    sell_totals_by_symbol: dict[str, dict[str, int]] = {}
+    for row in rows:
+        if row.contract_quantity is None:
+            continue
+        if row.buyer_broker_id:
+            symbol_totals = buy_totals_by_symbol.setdefault(row.symbol, {})
+            symbol_totals[row.buyer_broker_id] = symbol_totals.get(row.buyer_broker_id, 0) + row.contract_quantity
+        if row.seller_broker_id:
+            symbol_totals = sell_totals_by_symbol.setdefault(row.symbol, {})
+            symbol_totals[row.seller_broker_id] = symbol_totals.get(row.seller_broker_id, 0) + row.contract_quantity
+
+    return buy_totals_by_symbol, sell_totals_by_symbol
+
+
+def _compute_volume_spikes_and_droughts(
+    volumes: dict[str, int], trailing_avgs: dict[str, Decimal]
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    spikes = []
+    droughts = []
+
+    for symbol, volume in volumes.items():
+        avg_volume = trailing_avgs.get(symbol)
+        if not avg_volume:
+            continue
+
+        ratio = Decimal(volume) / avg_volume
+        entry = {
+            "symbol": symbol,
+            "today_volume": volume,
+            "trailing_20_day_avg_volume": avg_volume,
+            "ratio": ratio,
+        }
+        if ratio > VOLUME_SPIKE_RATIO_THRESHOLD:
+            spikes.append(entry)
+        elif ratio < VOLUME_DROUGHT_RATIO_THRESHOLD:
+            droughts.append(entry)
+
+    spikes.sort(key=lambda e: e["ratio"], reverse=True)
+    droughts.sort(key=lambda e: e["ratio"])
+    return spikes, droughts
+
+
+def _flag_concentrated_side(
+    side: str, totals_by_symbol: dict[str, dict[str, int]], volumes: dict[str, int]
+) -> list[dict[str, Any]]:
+    flags = []
+    for symbol, broker_totals in totals_by_symbol.items():
+        total_volume = volumes.get(symbol)
+        if not total_volume:
+            continue
+
+        for broker_id, quantity in broker_totals.items():
+            share = Decimal(quantity) / Decimal(total_volume)
+            if share > SINGLE_BROKER_VOLUME_SHARE_THRESHOLD:
+                flags.append(
+                    {
+                        "symbol": symbol,
+                        "broker_id": broker_id,
+                        "side": side,
+                        "broker_quantity": quantity,
+                        "today_volume": total_volume,
+                        "share_of_volume": share,
+                    }
+                )
+    return flags
+
+
+def _compute_concentrated_broker_activity(
+    volumes: dict[str, int],
+    buy_totals_by_symbol: dict[str, dict[str, int]],
+    sell_totals_by_symbol: dict[str, dict[str, int]],
+) -> list[dict[str, Any]]:
+    flags = _flag_concentrated_side("buy", buy_totals_by_symbol, volumes)
+    flags += _flag_concentrated_side("sell", sell_totals_by_symbol, volumes)
+    flags.sort(key=lambda e: e["share_of_volume"], reverse=True)
+    return flags
+
+
+def compute_volume_anomalies(snapshot_time: datetime | None = None) -> dict[str, Any]:
+    today = snapshot_time.date() if snapshot_time is not None else _today_npt()
+
+    volumes = _load_symbol_volumes(today)
+    trailing_avgs = _load_symbol_trailing_avg_volumes(today)
+    buy_totals_by_symbol, sell_totals_by_symbol = _load_symbol_broker_quantities(today)
+
+    volume_spikes, volume_droughts = _compute_volume_spikes_and_droughts(volumes, trailing_avgs)
+    concentrated_broker_activity = _compute_concentrated_broker_activity(
+        volumes, buy_totals_by_symbol, sell_totals_by_symbol
+    )
+
+    return {
+        "date": today,
+        "volume_spikes": volume_spikes,
+        "volume_droughts": volume_droughts,
+        "concentrated_broker_activity": concentrated_broker_activity,
     }
 
 
