@@ -42,6 +42,12 @@ def get_all_securities() -> list[dict[str, Any]]:
 
 
 @retry(reraise=True, stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=8))
+def get_brokers() -> list[dict[str, Any]]:
+    logger.info("Fetching licensed broker list from nepse-scraper")
+    return _client.get_brokers()
+
+
+@retry(reraise=True, stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=8))
 def is_market_open() -> bool:
     logger.info("Checking live market open status from nepse-scraper")
     try:

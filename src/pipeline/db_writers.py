@@ -9,6 +9,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from src.database.connection import get_session
 from src.database.models import (
+    Broker,
     Company,
     CorporateAction,
     DailyPrice,
@@ -222,6 +223,19 @@ def insert_new_symbol_history(rows: list[dict[str, Any]]) -> tuple[int, int]:
         inserted = len(result.fetchall())
     skipped = len(rows) - inserted
     return inserted, skipped
+
+
+def upsert_brokers(records: list[dict[str, Any]]) -> int:
+    if not records:
+        return 0
+    stmt = pg_insert(Broker).values(records)
+    stmt = stmt.on_conflict_do_update(
+        index_elements=["broker_id"],
+        set_={"broker_name": stmt.excluded.broker_name, "is_active": stmt.excluded.is_active},
+    )
+    with get_session() as session:
+        session.execute(stmt)
+    return len(records)
 
 
 def upsert_trading_calendar_rows(rows: list[dict[str, Any]]) -> int:

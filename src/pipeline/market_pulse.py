@@ -8,6 +8,7 @@ from sqlalchemy import func, select, text
 
 from src.database.connection import get_session
 from src.database.models import (
+    Broker,
     Company,
     IntradayFloorsheet,
     IntradayIndexSnapshot,
@@ -183,6 +184,12 @@ def _compute_nepse_index(today: date) -> dict[str, Any]:
     return {"source": "unavailable", "current_value": None, "percent_change": None, "points_change": None}
 
 
+def _load_broker_names() -> dict[str, str]:
+    with get_session() as session:
+        rows = session.execute(select(Broker.broker_id, Broker.broker_name)).all()
+    return {broker_id: broker_name for broker_id, broker_name in rows}
+
+
 def _compute_broker_concentration(today: date, total_market_turnover: Decimal | None) -> dict[str, Any]:
     with get_session() as session:
         rows = session.execute(
@@ -218,10 +225,12 @@ def _compute_broker_concentration(today: date, total_market_turnover: Decimal | 
 
     ranked = sorted(broker_totals.items(), key=lambda kv: kv[1], reverse=True)[:TOP_BROKER_COUNT]
     denominator = total_market_turnover if total_market_turnover else floorsheet_turnover
+    broker_names = _load_broker_names()
 
     top_brokers = [
         {
             "broker_id": broker_id,
+            "broker_name": broker_names.get(broker_id),
             "total_contract_value": value,
             "fraction_of_total_market_turnover": (value / denominator) if denominator else None,
         }
@@ -485,6 +494,7 @@ def _compute_sector_broker_concentration(
     floorsheet_rows: list[tuple[str, str, Decimal, str]],
     sector_turnover: Decimal | None,
     total_sector_symbols: int,
+    broker_names: dict[str, str],
 ) -> dict[str, Any]:
     if not floorsheet_rows:
         return {
@@ -520,6 +530,7 @@ def _compute_sector_broker_concentration(
     top_brokers = [
         {
             "broker_id": broker_id,
+            "broker_name": broker_names.get(broker_id),
             "total_contract_value": value,
             "fraction_of_sector_turnover": (value / denominator) if denominator else None,
         }
@@ -557,6 +568,7 @@ def compute_sector_wise_pulse(snapshot_time: datetime | None = None) -> list[dic
     today_turnover_by_sector, trailing_avg_by_sector = _load_sector_turnover(today)
     floorsheet_by_sector = _load_floorsheet_by_sector(today)
     sector_symbol_counts = _load_sector_symbol_counts()
+    broker_names = _load_broker_names()
 
     results = []
     for sector, index_name in sector_index_map.items():
@@ -586,7 +598,7 @@ def compute_sector_wise_pulse(snapshot_time: datetime | None = None) -> list[dic
 
         total_sector_symbols = sector_symbol_counts.get(sector, 0)
         broker_concentration = _compute_sector_broker_concentration(
-            floorsheet_by_sector.get(sector, []), today_turnover, total_sector_symbols
+            floorsheet_by_sector.get(sector, []), today_turnover, total_sector_symbols, broker_names
         )
 
         results.append(

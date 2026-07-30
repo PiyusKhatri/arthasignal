@@ -502,6 +502,14 @@ class SectorIndexMapping(Base):
     market_index_name: Mapped[str] = mapped_column(String(100), nullable=False)
 
 
+class Broker(Base):
+    __tablename__ = "brokers"
+
+    broker_id: Mapped[str] = mapped_column(String(20), primary_key=True)
+    broker_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    is_active: Mapped[bool] = mapped_column(nullable=False)
+
+
 class MarketPulseBacktestResult(Base):
     __tablename__ = "market_pulse_backtest_results"
     __table_args__ = (
