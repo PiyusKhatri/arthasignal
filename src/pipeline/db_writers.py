@@ -141,6 +141,37 @@ def insert_new_daily_prices(rows: list[dict[str, Any]]) -> tuple[int, int]:
     return inserted, skipped
 
 
+def upsert_recent_market_index_rows(rows: list[dict[str, Any]]) -> tuple[int, int]:
+    if not rows:
+        return 0, 0
+
+    cutoff = date.today() - timedelta(days=RECENT_UPSERT_WINDOW_DAYS)
+    recent_rows = [r for r in rows if r["date"] >= cutoff]
+    older_rows = [r for r in rows if r["date"] < cutoff]
+
+    inserted = 0
+
+    if recent_rows:
+        stmt = pg_insert(MarketIndex).values(recent_rows)
+        update_columns = {c: getattr(stmt.excluded, c) for c in recent_rows[0] if c not in ("index_name", "date")}
+        stmt = stmt.on_conflict_do_update(index_elements=["index_name", "date"], set_=update_columns)
+        stmt = stmt.returning(MarketIndex.id)
+        with get_session() as session:
+            result = session.execute(stmt)
+            inserted += len(result.fetchall())
+
+    if older_rows:
+        stmt = pg_insert(MarketIndex).values(older_rows)
+        stmt = stmt.on_conflict_do_nothing(index_elements=["index_name", "date"])
+        stmt = stmt.returning(MarketIndex.id)
+        with get_session() as session:
+            result = session.execute(stmt)
+            inserted += len(result.fetchall())
+
+    skipped = len(rows) - inserted
+    return inserted, skipped
+
+
 def insert_new_market_index_rows(rows: list[dict[str, Any]]) -> tuple[int, int]:
     if not rows:
         return 0, 0
