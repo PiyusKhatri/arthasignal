@@ -2,9 +2,9 @@ name: Intraday Pipeline
 
 on:
   schedule:
-    - cron: "15,30,45 5 * * *"
-    - cron: "0,15,30,45 6-8 * * *"
-    - cron: "0,15 9 * * *"
+    - cron: "15,20,25,30,35,40,45,50,55 5 * * *"
+    - cron: "*/5 6-8 * * *"
+    - cron: "0,5,10,15 9 * * *"
   workflow_dispatch: {}
 
 jobs:

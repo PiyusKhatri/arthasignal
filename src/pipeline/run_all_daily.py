@@ -10,6 +10,7 @@ from src.pipeline.backfill_daily_floorsheet import run_daily_floorsheet_backfill
 from src.pipeline.backfill_daily_index import run_daily_index_refresh
 from src.pipeline.backfill_signals import run_signals_backfill
 from src.pipeline.backup_to_drive import run_backup
+from src.pipeline.cleanup_intraday_tables import run_intraday_table_cleanup
 from src.pipeline.data_quality import check_daily_pipeline_health
 from src.pipeline.run_daily import run_daily_pipeline
 
@@ -91,6 +92,17 @@ def run_all_daily() -> dict[str, Any]:
         send_discord_alert(f"backup_to_drive.py failed: {exc}", severity="failure")
         raise
 
+    try:
+        cleanup_summary = run_intraday_table_cleanup()
+    except Exception:
+        logger.exception("cleanup_intraday_tables.py failed")
+        cleanup_summary = {"total_deleted": 0, "deleted_by_table": {}, "failures": 1}
+
+    cleanup_status = (
+        f"{cleanup_summary.get('total_deleted', 0)} rows deleted "
+        f"({cleanup_summary.get('failures', 0)} table failures)"
+    )
+
     elapsed_seconds = time.perf_counter() - start_time
 
     message = (
@@ -107,7 +119,8 @@ def run_all_daily() -> dict[str, Any]:
         f"{signals_summary['rows_upserted']} rows, {signals_summary['failures']} failures\n"
         f"Floorsheet: {floorsheet_status}\n"
         f"Index refresh: {index_status}\n"
-        f"Backup: {backup_status}"
+        f"Backup: {backup_status}\n"
+        f"Intraday cleanup: {cleanup_status}"
     )
 
     total_failures = (
@@ -115,6 +128,7 @@ def run_all_daily() -> dict[str, Any]:
         + signals_summary["failures"]
         + floorsheet_summary.get("failures", 0)
         + index_summary.get("failures", 0)
+        + cleanup_summary.get("failures", 0)
     )
     if total_failures == 0 and quality_summary["checks_flagged"] == 0:
         severity = "success"
@@ -133,6 +147,7 @@ def run_all_daily() -> dict[str, Any]:
         "floorsheet_summary": floorsheet_summary,
         "index_summary": index_summary,
         "backup_status": backup_status,
+        "cleanup_summary": cleanup_summary,
         "execution_time_seconds": round(elapsed_seconds, 2),
     }
 
