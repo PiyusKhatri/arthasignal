@@ -500,3 +500,23 @@ class SectorIndexMapping(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     companies_sector: Mapped[str] = mapped_column(String(100), nullable=False)
     market_index_name: Mapped[str] = mapped_column(String(100), nullable=False)
+
+
+class MarketPulseBacktestResult(Base):
+    __tablename__ = "market_pulse_backtest_results"
+    __table_args__ = (
+        UniqueConstraint(
+            "metric_name", "condition", "forward_days", name="uq_market_pulse_backtest_metric_condition_days"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    metric_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    condition: Mapped[str] = mapped_column(String(100), nullable=False)
+    forward_days: Mapped[int] = mapped_column(Integer, nullable=False)
+    sample_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    mean_forward_return: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    mean_forward_return_minus_baseline: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    p_value: Mapped[float | None] = mapped_column(Numeric(10, 6), nullable=True)
+    is_significant: Mapped[bool | None] = mapped_column(nullable=True)
+    computed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
