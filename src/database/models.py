@@ -562,6 +562,26 @@ class GdpNepse(Base):
     nepse_index: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
 
 
+class IpoCalendar(Base):
+    __tablename__ = "ipo_calendar"
+    __table_args__ = (
+        UniqueConstraint("company_name", "issue_type", "opening_date", name="uq_ipo_calendar_company_type_opening"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    symbol: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    company_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    issue_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    opening_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    closing_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    price: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    units_offered: Mapped[float | None] = mapped_column(Numeric(20, 4), nullable=True)
+    min_application_units: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=False)
+    result_announced_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    source_updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
 class SectorFundamentalBaseline(Base):
     __tablename__ = "sector_fundamental_baseline"
     __table_args__ = (UniqueConstraint("sector", name="uq_sector_fundamental_baseline_sector"),)

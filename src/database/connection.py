@@ -14,8 +14,14 @@ from src.config import settings
 logger = logging.getLogger(__name__)
 
 DEFAULT_STATEMENT_TIMEOUT_SECONDS = 90
+CONNECT_TIMEOUT_SECONDS = 10
 
-engine = create_engine(settings.database_url, poolclass=NullPool, future=True)
+engine = create_engine(
+    settings.database_url,
+    poolclass=NullPool,
+    future=True,
+    connect_args={"connect_timeout": CONNECT_TIMEOUT_SECONDS},
+)
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 

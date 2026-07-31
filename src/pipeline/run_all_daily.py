@@ -12,6 +12,7 @@ from src.pipeline.backfill_signals import run_signals_backfill
 from src.pipeline.backup_to_drive import run_backup
 from src.pipeline.cleanup_intraday_tables import run_intraday_table_cleanup
 from src.pipeline.data_quality import check_daily_pipeline_health
+from src.pipeline.refresh_ipo_status import refresh_ipo_status
 from src.pipeline.run_daily import run_daily_pipeline
 
 logging.basicConfig(level=logging.INFO)
@@ -103,6 +104,17 @@ def run_all_daily() -> dict[str, Any]:
         f"({cleanup_summary.get('failures', 0)} table failures)"
     )
 
+    try:
+        ipo_status_summary = refresh_ipo_status()
+    except Exception:
+        logger.exception("refresh_ipo_status.py failed")
+        ipo_status_summary = {"rows_checked": 0, "rows_updated": 0, "failures": 1}
+
+    ipo_status_line = (
+        f"{ipo_status_summary.get('rows_checked', 0)} checked, "
+        f"{ipo_status_summary.get('rows_updated', 0)} updated"
+    )
+
     elapsed_seconds = time.perf_counter() - start_time
 
     message = (
@@ -120,7 +132,8 @@ def run_all_daily() -> dict[str, Any]:
         f"Floorsheet: {floorsheet_status}\n"
         f"Index refresh: {index_status}\n"
         f"Backup: {backup_status}\n"
-        f"Intraday cleanup: {cleanup_status}"
+        f"Intraday cleanup: {cleanup_status}\n"
+        f"IPO status refresh: {ipo_status_line}"
     )
 
     total_failures = (
@@ -129,6 +142,7 @@ def run_all_daily() -> dict[str, Any]:
         + floorsheet_summary.get("failures", 0)
         + index_summary.get("failures", 0)
         + cleanup_summary.get("failures", 0)
+        + ipo_status_summary.get("failures", 0)
     )
     if total_failures == 0 and quality_summary["checks_flagged"] == 0:
         severity = "success"
@@ -148,6 +162,7 @@ def run_all_daily() -> dict[str, Any]:
         "index_summary": index_summary,
         "backup_status": backup_status,
         "cleanup_summary": cleanup_summary,
+        "ipo_status_summary": ipo_status_summary,
         "execution_time_seconds": round(elapsed_seconds, 2),
     }
 

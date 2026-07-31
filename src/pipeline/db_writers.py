@@ -15,6 +15,7 @@ from src.database.models import (
     DailyPrice,
     Fundamental,
     GdpNepse,
+    IpoCalendar,
     MarketIndex,
     PromoterHolding,
     Remittance,
@@ -266,6 +267,45 @@ def insert_new_gdp_nepse(rows: list[dict[str, Any]]) -> tuple[int, int]:
         inserted = len(result.fetchall())
     skipped = len(rows) - inserted
     return inserted, skipped
+
+
+IPO_CALENDAR_UPSERT_BATCH_SIZE = 100
+
+
+def upsert_ipo_calendar(rows: list[dict[str, Any]]) -> tuple[int, int]:
+    if not rows:
+        return 0, 0
+
+    deduped: dict[tuple[Any, Any, Any], dict[str, Any]] = {}
+    for row in rows:
+        deduped[(row["company_name"], row["issue_type"], row["opening_date"])] = row
+    rows = list(deduped.values())
+
+    update_columns = {
+        c: None
+        for c in rows[0]
+        if c not in ("company_name", "issue_type", "opening_date", "result_announced_date", "min_application_units")
+    }
+
+    upserted = 0
+    failed_batches = 0
+
+    for i in range(0, len(rows), IPO_CALENDAR_UPSERT_BATCH_SIZE):
+        batch = rows[i : i + IPO_CALENDAR_UPSERT_BATCH_SIZE]
+        stmt = pg_insert(IpoCalendar).values(batch)
+        batch_update_columns = {c: getattr(stmt.excluded, c) for c in update_columns}
+        stmt = stmt.on_conflict_do_update(
+            index_elements=["company_name", "issue_type", "opening_date"], set_=batch_update_columns
+        )
+        try:
+            with get_session() as session:
+                session.execute(stmt)
+            upserted += len(batch)
+        except Exception:
+            logger.exception("Failed to upsert ipo_calendar batch starting at index %d", i)
+            failed_batches += 1
+
+    return upserted, failed_batches
 
 
 def insert_new_symbol_history(rows: list[dict[str, Any]]) -> tuple[int, int]:
