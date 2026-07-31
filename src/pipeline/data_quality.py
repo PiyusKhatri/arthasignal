@@ -20,6 +20,7 @@ CIRCUIT_BREAKER_PERCENT_ON_OR_AFTER_CHANGE = 15.0
 CIRCUIT_BREAKER_FLAG_BUFFER_PERCENT = 2.0
 STALE_FUNDAMENTALS_SYMBOL_DAYS = 45
 STALE_FUNDAMENTALS_TABLE_DAYS = 14
+STALE_SECTOR_FUNDAMENTAL_BASELINE_DAYS = 14
 
 
 def _circuit_breaker_flag_threshold(as_of_date: date) -> float:
@@ -269,6 +270,28 @@ def _check_fundamentals_table_freshness(latest_date) -> dict[str, Any]:
     return {"flagged": flagged, "most_recent_reported_date": most_recent, "days_stale": days_stale}
 
 
+def _check_sector_fundamental_baseline_freshness(latest_date) -> dict[str, Any]:
+    with get_session() as session:
+        most_recent = session.execute(text("SELECT max(computed_at) FROM sector_fundamental_baseline")).scalar()
+
+    if most_recent is None:
+        flagged = True
+        days_stale = None
+    else:
+        days_stale = (latest_date - most_recent.date()).days
+        flagged = days_stale > STALE_SECTOR_FUNDAMENTAL_BASELINE_DAYS
+
+    if flagged:
+        logger.warning(
+            "data_quality: sector_fundamental_baseline has not been refreshed in over %d days (most recent computed_at=%s) "
+            "- likely a systemic automation failure",
+            STALE_SECTOR_FUNDAMENTAL_BASELINE_DAYS,
+            most_recent,
+        )
+
+    return {"flagged": flagged, "most_recent_computed_at": most_recent, "days_stale": days_stale}
+
+
 def check_daily_pipeline_health() -> dict[str, Any]:
     latest_date = _latest_price_date()
     if latest_date is None:
@@ -285,6 +308,7 @@ def check_daily_pipeline_health() -> dict[str, Any]:
         ("null_or_zero_prices", _check_null_or_zero_prices),
         ("fundamentals_symbol_staleness", _check_fundamentals_symbol_staleness),
         ("fundamentals_table_freshness", _check_fundamentals_table_freshness),
+        ("sector_fundamental_baseline_freshness", _check_sector_fundamental_baseline_freshness),
     ):
         try:
             results[name] = check(latest_date)

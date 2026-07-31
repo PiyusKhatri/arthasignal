@@ -19,16 +19,25 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run fundamentals backfill
+        continue-on-error: true
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: python -m src.pipeline.backfill_fundamentals
 
       - name: Run promoter holding backfill
+        continue-on-error: true
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: python -m src.pipeline.backfill_promoter_holding
 
+      - name: Compute sector fundamental baselines
+        continue-on-error: true
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python -m src.pipeline.sector_fundamental_baseline
+
       - name: Run macro data backfill
+        continue-on-error: true
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: python -m src.pipeline.backfill_macro_data
