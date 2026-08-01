@@ -75,3 +75,9 @@ def debt_to_equity(total_debt: Decimal, total_equity: Decimal) -> Decimal | None
     if total_equity <= 0:
         return None
     return total_debt / total_equity
+
+
+def payout_ratio(dividend_per_share: Decimal, eps: Decimal) -> Decimal | None:
+    if eps <= 0:
+        return None
+    return dividend_per_share / eps * 100

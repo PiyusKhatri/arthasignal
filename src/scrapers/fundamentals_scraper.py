@@ -42,14 +42,12 @@ def _parse_value_with_fy(text: str) -> tuple[str | None, str | None, str | None]
     return match.group(1), match.group(2), match.group(3)
 
 
+UNKNOWN_FISCAL_YEAR = "unknown"
+
+
 def _normalize_fiscal_year(short_fy: str) -> str:
     start, end = short_fy.split("-")
     return f"2{start}/2{end}"
-
-
-def _derive_fiscal_year_label(as_of: date) -> str:
-    start_year = as_of.year if as_of.month >= 7 else as_of.year - 1
-    return f"{start_year}/{start_year + 1}"
 
 
 def get_fundamentals(symbol: str) -> dict[str, Any] | None:
@@ -89,7 +87,7 @@ def get_fundamentals(symbol: str) -> dict[str, Any] | None:
 
     reported_date = date.today()
     if fiscal_year is None:
-        fiscal_year = _derive_fiscal_year_label(reported_date)
+        fiscal_year = UNKNOWN_FISCAL_YEAR
 
     record = {
         "symbol": symbol,
