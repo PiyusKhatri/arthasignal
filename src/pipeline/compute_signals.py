@@ -179,6 +179,26 @@ def _build_rows(symbol: str, timeframe: SignalTimeframe, bars: list[dict[str, An
     return rows
 
 
+RECENT_REFRESH_WINDOW = 5
+
+
+def _load_existing_signal_dates(symbol: str, timeframe: SignalTimeframe) -> set:
+    with get_session() as session:
+        rows = session.execute(
+            select(TechnicalSignal.date)
+            .where(TechnicalSignal.symbol == symbol)
+            .where(TechnicalSignal.timeframe == timeframe)
+        ).scalars().all()
+    return set(rows)
+
+
+def _filter_rows_to_write(rows: list[dict[str, Any]], existing_dates: set) -> list[dict[str, Any]]:
+    if not rows:
+        return rows
+    recent_dates = {r["date"] for r in rows[-RECENT_REFRESH_WINDOW:]}
+    return [r for r in rows if r["date"] not in existing_dates or r["date"] in recent_dates]
+
+
 def _upsert_signals(rows: list[dict[str, Any]]) -> int:
     if not rows:
         return 0
@@ -197,4 +217,6 @@ def compute_and_store_signals(symbol: str, timeframe: str = "daily") -> int:
     tf = SignalTimeframe(timeframe)
     bars = _load_bars(symbol, tf)
     rows = _build_rows(symbol, tf, bars)
-    return _upsert_signals(rows)
+    existing_dates = _load_existing_signal_dates(symbol, tf)
+    rows_to_write = _filter_rows_to_write(rows, existing_dates)
+    return _upsert_signals(rows_to_write)

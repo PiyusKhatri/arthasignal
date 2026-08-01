@@ -6,6 +6,7 @@ from datetime import date, datetime
 from typing import Any
 
 from src.pipeline.adjustment_ops import reapply_adjustment_for_symbol, symbols_with_corporate_actions
+from src.pipeline.backfill_calendar import is_market_open_today
 from src.pipeline.data_quality import check_daily_pipeline_health
 from src.pipeline.db_writers import build_company_records, insert_new_daily_prices, upsert_companies
 from src.scrapers.market_data import get_today_price_with_fallback
@@ -70,8 +71,32 @@ def _normalize_price_rows(raw_rows: list[dict[str, Any]]) -> tuple[list[dict[str
     return normalized, failures
 
 
+def _skipped_summary(elapsed_seconds: float) -> dict[str, Any]:
+    return {
+        "skipped": True,
+        "reason": "not a trading day",
+        "companies_processed": 0,
+        "new_price_rows_inserted": 0,
+        "duplicates_skipped": 0,
+        "data_quality_flags": 0,
+        "raw_price_rows_received": 0,
+        "price_row_parse_failures": 0,
+        "company_upsert_failed": False,
+        "price_insert_failed": False,
+        "corporate_action_lookup_failed": False,
+        "adjustment_symbols_processed": 0,
+        "adjustment_failures": 0,
+        "failures": 0,
+        "execution_time_seconds": round(elapsed_seconds, 2),
+    }
+
+
 def run_daily_pipeline() -> dict[str, Any]:
     start_time = time.perf_counter()
+
+    if not is_market_open_today():
+        logger.info("run_daily_pipeline skipped: not a trading day")
+        return _skipped_summary(time.perf_counter() - start_time)
 
     symbols = get_all_listed_symbols()
     logger.info("Retrieved %d listed symbols", len(symbols))
@@ -133,6 +158,8 @@ def run_daily_pipeline() -> dict[str, Any]:
     )
 
     summary = {
+        "skipped": False,
+        "reason": None,
         "companies_processed": companies_processed,
         "new_price_rows_inserted": new_rows_inserted,
         "duplicates_skipped": duplicates_skipped,

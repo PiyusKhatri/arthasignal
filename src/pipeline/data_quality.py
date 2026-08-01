@@ -7,6 +7,7 @@ from typing import Any
 from sqlalchemy import text
 
 from src.database.connection import get_session
+from src.pipeline.backfill_calendar import is_market_open_today
 from src.scrapers.symbols import get_all_listed_symbols
 
 logger = logging.getLogger(__name__)
@@ -21,6 +22,7 @@ CIRCUIT_BREAKER_FLAG_BUFFER_PERCENT = 2.0
 STALE_FUNDAMENTALS_SYMBOL_DAYS = 45
 STALE_FUNDAMENTALS_TABLE_DAYS = 14
 STALE_SECTOR_FUNDAMENTAL_BASELINE_DAYS = 14
+SIGNAL_CALL_EXTRACTION_STALL_CONSECUTIVE_DAYS = 3
 
 
 def _circuit_breaker_flag_threshold(as_of_date: date) -> float:
@@ -292,6 +294,42 @@ def _check_sector_fundamental_baseline_freshness(latest_date) -> dict[str, Any]:
     return {"flagged": flagged, "most_recent_computed_at": most_recent, "days_stale": days_stale}
 
 
+def _check_signal_call_extraction_liveness(latest_date) -> dict[str, Any]:
+    if not is_market_open_today():
+        return {"flagged": False, "skipped": "not a trading day"}
+
+    recent_days = _trailing_trading_days(
+        latest_date + timedelta(days=1), SIGNAL_CALL_EXTRACTION_STALL_CONSECUTIVE_DAYS
+    )
+    if len(recent_days) < SIGNAL_CALL_EXTRACTION_STALL_CONSECUTIVE_DAYS:
+        logger.warning(
+            "data_quality: fewer than %d trading days on record, skipping signal_calls liveness check",
+            SIGNAL_CALL_EXTRACTION_STALL_CONSECUTIVE_DAYS,
+        )
+        return {"flagged": False}
+
+    with get_session() as session:
+        rows_created = session.execute(
+            text(
+                "SELECT count(*) FROM signal_calls WHERE created_at::date >= :start AND created_at::date <= :end"
+            ),
+            {"start": min(recent_days), "end": max(recent_days)},
+        ).scalar()
+
+    flagged = rows_created == 0
+    if flagged:
+        logger.warning(
+            "data_quality: zero signal_calls rows created across all 4 target signals in the last %d "
+            "trading days (%s to %s) - extract_signal_calls.py may have stopped running, not just that "
+            "no signals fired",
+            SIGNAL_CALL_EXTRACTION_STALL_CONSECUTIVE_DAYS,
+            min(recent_days),
+            max(recent_days),
+        )
+
+    return {"flagged": flagged, "checked_days": recent_days, "rows_created": rows_created}
+
+
 def check_daily_pipeline_health() -> dict[str, Any]:
     latest_date = _latest_price_date()
     if latest_date is None:
@@ -309,6 +347,7 @@ def check_daily_pipeline_health() -> dict[str, Any]:
         ("fundamentals_symbol_staleness", _check_fundamentals_symbol_staleness),
         ("fundamentals_table_freshness", _check_fundamentals_table_freshness),
         ("sector_fundamental_baseline_freshness", _check_sector_fundamental_baseline_freshness),
+        ("signal_call_extraction_liveness", _check_signal_call_extraction_liveness),
     ):
         try:
             results[name] = check(latest_date)

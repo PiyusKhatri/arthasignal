@@ -4,7 +4,7 @@ import logging
 from datetime import date, timedelta
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import literal_column, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from src.database.connection import get_session
@@ -130,10 +130,10 @@ def insert_new_daily_prices(rows: list[dict[str, Any]]) -> tuple[int, int]:
         stmt = pg_insert(DailyPrice).values(recent_rows)
         update_columns = {c: getattr(stmt.excluded, c) for c in recent_rows[0] if c not in ("symbol", "date")}
         stmt = stmt.on_conflict_do_update(index_elements=["symbol", "date"], set_=update_columns)
-        stmt = stmt.returning(DailyPrice.id)
+        stmt = stmt.returning(DailyPrice.id, literal_column("(xmax = 0)").label("is_new_insert"))
         with get_session() as session:
             result = session.execute(stmt)
-            inserted += len(result.fetchall())
+            inserted += sum(1 for row in result if row.is_new_insert)
 
     if older_rows:
         stmt = pg_insert(DailyPrice).values(older_rows)

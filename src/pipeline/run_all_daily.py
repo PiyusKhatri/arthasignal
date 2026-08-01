@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import time
+from datetime import date, timedelta
 from typing import Any
 
 from src.notifications.discord_alert import send_discord_alert
@@ -12,6 +13,8 @@ from src.pipeline.backfill_signals import run_signals_backfill
 from src.pipeline.backup_to_drive import run_backup
 from src.pipeline.cleanup_intraday_tables import run_intraday_table_cleanup
 from src.pipeline.data_quality import check_daily_pipeline_health
+from src.pipeline.extract_signal_calls import extract_signal_calls
+from src.pipeline.grade_signal_calls import grade_signal_calls
 from src.pipeline.refresh_ipo_status import refresh_ipo_status
 from src.pipeline.run_daily import run_daily_pipeline
 
@@ -19,6 +22,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 MINOR_FAILURE_THRESHOLD = 5
+SIGNAL_CALL_EXTRACTION_LOOKBACK_DAYS = 7
 
 
 def run_all_daily() -> dict[str, Any]:
@@ -48,6 +52,44 @@ def run_all_daily() -> dict[str, Any]:
     except Exception:
         logger.exception("compute_signals.py backfill failed")
         signals_summary = {"symbols_processed": 0, "rows_upserted": 0, "failures": 0}
+
+    try:
+        extraction_summary = extract_signal_calls(
+            date.today() - timedelta(days=SIGNAL_CALL_EXTRACTION_LOOKBACK_DAYS), date.today()
+        )
+    except Exception as exc:
+        logger.exception("extract_signal_calls.py failed")
+        send_discord_alert(f"Paper-trade validation alert: extract_signal_calls.py failed: {exc}", severity="failure")
+        extraction_summary = {
+            "rows_extracted": 0,
+            "rows_inserted": 0,
+            "skipped_missing_next_day_price": 0,
+            "by_signal": {},
+            "failures": 1,
+        }
+
+    try:
+        grading_summary = grade_signal_calls()
+    except Exception as exc:
+        logger.exception("grade_signal_calls.py failed")
+        send_discord_alert(f"Paper-trade validation alert: grade_signal_calls.py failed: {exc}", severity="failure")
+        grading_summary = {
+            "total_pending": 0,
+            "not_ready": 0,
+            "resolved": 0,
+            "voided": 0,
+            "win": 0,
+            "loss": 0,
+            "failures": 1,
+        }
+
+    by_signal_str = ", ".join(f"{k}={v}" for k, v in extraction_summary.get("by_signal", {}).items())
+    extraction_status = f"{extraction_summary.get('rows_inserted', 0)} new calls ({by_signal_str})"
+    grading_status = (
+        f"{grading_summary.get('resolved', 0)} resolved "
+        f"({grading_summary.get('win', 0)} WIN / {grading_summary.get('loss', 0)} LOSS), "
+        f"{grading_summary.get('voided', 0)} VOID"
+    )
 
     try:
         floorsheet_summary = run_daily_floorsheet_backfill()
@@ -117,18 +159,27 @@ def run_all_daily() -> dict[str, Any]:
 
     elapsed_seconds = time.perf_counter() - start_time
 
+    if daily_summary.get("skipped"):
+        daily_price_section = "New price rows inserted: skipped (not a trading day)"
+    else:
+        daily_price_section = (
+            f"Companies processed: {daily_summary['companies_processed']}\n"
+            f"New price rows inserted: {daily_summary['new_price_rows_inserted']}\n"
+            f"Duplicates skipped: {daily_summary['duplicates_skipped']}\n"
+            f"Price row parse failures: {daily_summary['price_row_parse_failures']}/{daily_summary['raw_price_rows_received']}\n"
+            f"Adjustment failures: {daily_summary['adjustment_failures']}/{daily_summary['adjustment_symbols_processed']}\n"
+            f"Company upsert failed: {daily_summary['company_upsert_failed']}\n"
+            f"Price insert failed: {daily_summary['price_insert_failed']}"
+        )
+
     message = (
         f"Daily pipeline completed in {elapsed_seconds:.1f}s\n"
-        f"Companies processed: {daily_summary['companies_processed']}\n"
-        f"New price rows inserted: {daily_summary['new_price_rows_inserted']}\n"
-        f"Duplicates skipped: {daily_summary['duplicates_skipped']}\n"
-        f"Price row parse failures: {daily_summary['price_row_parse_failures']}/{daily_summary['raw_price_rows_received']}\n"
-        f"Adjustment failures: {daily_summary['adjustment_failures']}/{daily_summary['adjustment_symbols_processed']}\n"
-        f"Company upsert failed: {daily_summary['company_upsert_failed']}\n"
-        f"Price insert failed: {daily_summary['price_insert_failed']}\n"
+        f"{daily_price_section}\n"
         f"Data quality flags: {quality_summary['checks_flagged']}/{quality_summary['checks_run']}\n"
         f"Signals computed: {signals_summary['symbols_processed']} symbols, "
         f"{signals_summary['rows_upserted']} rows, {signals_summary['failures']} failures\n"
+        f"Signal call extraction: {extraction_status}\n"
+        f"Signal call grading: {grading_status}\n"
         f"Floorsheet: {floorsheet_status}\n"
         f"Index refresh: {index_status}\n"
         f"Backup: {backup_status}\n"
@@ -139,6 +190,8 @@ def run_all_daily() -> dict[str, Any]:
     total_failures = (
         daily_summary["failures"]
         + signals_summary["failures"]
+        + extraction_summary.get("failures", 0)
+        + grading_summary.get("failures", 0)
         + floorsheet_summary.get("failures", 0)
         + index_summary.get("failures", 0)
         + cleanup_summary.get("failures", 0)
@@ -158,6 +211,8 @@ def run_all_daily() -> dict[str, Any]:
         "daily_summary": daily_summary,
         "quality_summary": quality_summary,
         "signals_summary": signals_summary,
+        "extraction_summary": extraction_summary,
+        "grading_summary": grading_summary,
         "floorsheet_summary": floorsheet_summary,
         "index_summary": index_summary,
         "backup_status": backup_status,
