@@ -40,6 +40,18 @@ class SignalTimeframe(str, enum.Enum):
     MONTHLY = "monthly"
 
 
+class SignalCallStatus(str, enum.Enum):
+    PENDING = "pending"
+    RESOLVED = "resolved"
+    VOID = "void"
+
+
+class SignalCallOutcome(str, enum.Enum):
+    WIN = "win"
+    LOSS = "loss"
+    VOID = "void"
+
+
 class SignalConfidenceTier(str, enum.Enum):
     HIGH_CONFIDENCE = "high_confidence"
     WEAK_OR_NO_EDGE = "weak_or_no_edge"
@@ -69,6 +81,7 @@ class Company(Base):
     daily_prices: Mapped[list["DailyPrice"]] = relationship(back_populates="company")
     corporate_actions: Mapped[list["CorporateAction"]] = relationship(back_populates="company")
     fundamentals: Mapped[list["Fundamental"]] = relationship(back_populates="company")
+    signal_calls: Mapped[list["SignalCall"]] = relationship(back_populates="company")
 
 
 class DailyPrice(Base):
@@ -612,3 +625,29 @@ class MarketPulseBacktestResult(Base):
     p_value: Mapped[float | None] = mapped_column(Numeric(10, 6), nullable=True)
     is_significant: Mapped[bool | None] = mapped_column(nullable=True)
     computed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class SignalCall(Base):
+    __tablename__ = "signal_calls"
+    __table_args__ = (
+        UniqueConstraint("symbol", "signal_name", "entry_date", name="uq_signal_calls_symbol_signal_entry_date"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    symbol: Mapped[str] = mapped_column(String(20), ForeignKey("companies.symbol"), nullable=False)
+    signal_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    entry_date: Mapped[date] = mapped_column(Date, nullable=False)
+    entry_price: Mapped[float] = mapped_column(Numeric(14, 4), nullable=False)
+    resolution_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    resolution_price: Mapped[float | None] = mapped_column(Numeric(14, 4), nullable=True)
+    status: Mapped[SignalCallStatus] = mapped_column(
+        Enum(SignalCallStatus, name="signal_call_status_enum"), nullable=False
+    )
+    outcome: Mapped[SignalCallOutcome | None] = mapped_column(
+        Enum(SignalCallOutcome, name="signal_call_outcome_enum"), nullable=True
+    )
+    forward_days_horizon: Mapped[int] = mapped_column(Integer, nullable=False)
+    signal_logic_commit_hash: Mapped[str] = mapped_column(String(40), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+    company: Mapped["Company"] = relationship(back_populates="signal_calls")

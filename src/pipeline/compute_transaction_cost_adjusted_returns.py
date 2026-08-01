@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 TRACKED_SIGNALS = [
     "rsi_14 < 30 (oversold)",
+    "rsi_14 > 70 (overbought)",
     "close < bollinger_lower",
     "doji",
     "shooting_star",
