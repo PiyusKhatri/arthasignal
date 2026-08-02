@@ -18,6 +18,7 @@ class ConfigError(Exception):
 @dataclass(frozen=True)
 class Settings:
     database_url: str
+    database_url_readonly: str
     discord_webhook_url: str | None
     google_service_account_json: str | None
     google_drive_folder_id: str | None
@@ -35,6 +36,7 @@ def _require_env(name: str) -> str:
 def get_settings() -> Settings:
     return Settings(
         database_url=_require_env("DATABASE_URL"),
+        database_url_readonly=_require_env("DATABASE_URL_READONLY"),
         discord_webhook_url=os.getenv("DISCORD_WEBHOOK_URL"),
         google_service_account_json=os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON"),
         google_drive_folder_id=os.getenv("GOOGLE_DRIVE_FOLDER_ID"),
