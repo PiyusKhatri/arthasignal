@@ -3,10 +3,12 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, status
 from sqlalchemy import select
 
+from src.api.cache import cached, technical_signals_cache
 from src.api.db_readonly import get_readonly_session
+from src.api.rate_limit import PUBLIC_RATE_LIMIT, limiter
 from src.database.models import ActionType, Company, CorporateAction, DailyPrice, Fundamental, SignalTimeframe, TechnicalSignal
 from src.pipeline.fundamental_ratios import payout_ratio
 
@@ -31,7 +33,8 @@ def _load_company(symbol: str) -> Company:
 
 
 @router.get("/{symbol}/summary")
-def get_stock_summary(symbol: str) -> dict[str, Any]:
+@limiter.limit(PUBLIC_RATE_LIMIT)
+def get_stock_summary(symbol: str, request: Request) -> dict[str, Any]:
     company = _load_company(symbol)
 
     with get_readonly_session() as session:
@@ -67,7 +70,9 @@ def get_stock_summary(symbol: str) -> dict[str, Any]:
 
 
 @router.get("/{symbol}/technical")
-def get_stock_technical(symbol: str) -> dict[str, Any]:
+@limiter.limit(PUBLIC_RATE_LIMIT)
+@cached(technical_signals_cache, key_fn=lambda **kwargs: kwargs.get("symbol"))
+def get_stock_technical(symbol: str, request: Request) -> dict[str, Any]:
     _load_company(symbol)
 
     with get_readonly_session() as session:
@@ -88,7 +93,8 @@ def get_stock_technical(symbol: str) -> dict[str, Any]:
 
 
 @router.get("/{symbol}/fundamental")
-def get_stock_fundamental(symbol: str) -> dict[str, Any]:
+@limiter.limit(PUBLIC_RATE_LIMIT)
+def get_stock_fundamental(symbol: str, request: Request) -> dict[str, Any]:
     _load_company(symbol)
 
     with get_readonly_session() as session:
