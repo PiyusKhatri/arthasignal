@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from src.api import auth, market, stocks
+from src.api import auth, market, portfolio, stocks
 from src.database.connection import get_session
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -32,6 +32,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(stocks.router)
 app.include_router(market.router)
+app.include_router(portfolio.router)
 
 
 @app.get("/health")

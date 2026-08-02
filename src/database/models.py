@@ -661,3 +661,18 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     is_active: Mapped[bool] = mapped_column(nullable=False, default=True)
+
+
+class Holding(Base):
+    __tablename__ = "holdings"
+    __table_args__ = (
+        UniqueConstraint("user_id", "symbol", "purchase_date", name="uq_holdings_user_symbol_purchase_date"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    symbol: Mapped[str] = mapped_column(String(20), ForeignKey("companies.symbol"), nullable=False)
+    quantity: Mapped[float] = mapped_column(Numeric(20, 4), nullable=False)
+    purchase_price: Mapped[float] = mapped_column(Numeric(14, 4), nullable=False)
+    purchase_date: Mapped[date] = mapped_column(Date, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
