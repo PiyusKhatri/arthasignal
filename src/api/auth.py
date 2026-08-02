@@ -1,0 +1,151 @@
+from __future__ import annotations
+
+import logging
+import re
+from datetime import datetime, timezone
+
+import jwt
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel, EmailStr, field_validator
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+
+from src.api.dependencies import get_current_user
+from src.api.security import create_access_token, create_refresh_token, decode_token, hash_password, verify_password
+from src.database.connection import get_session
+from src.database.models import User
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/auth", tags=["auth"])
+
+MIN_PASSWORD_LENGTH = 8
+MAX_PASSWORD_BYTES = 72
+
+
+class SignupRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_strength(cls, value: str) -> str:
+        if len(value) < MIN_PASSWORD_LENGTH:
+            raise ValueError(f"password must be at least {MIN_PASSWORD_LENGTH} characters")
+        if len(value.encode("utf-8")) > MAX_PASSWORD_BYTES:
+            raise ValueError(f"password must not exceed {MAX_PASSWORD_BYTES} bytes")
+        if not re.search(r"[A-Za-z]", value):
+            raise ValueError("password must contain at least one letter")
+        if not re.search(r"[0-9]", value):
+            raise ValueError("password must contain at least one digit")
+        return value
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    created_at: datetime
+    is_active: bool
+
+
+@router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+def signup(payload: SignupRequest) -> UserResponse:
+    hashed = hash_password(payload.password)
+
+    with get_session() as session:
+        existing = session.execute(select(User).where(User.email == payload.email)).scalar_one_or_none()
+        if existing is not None:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
+
+        user = User(
+            email=payload.email,
+            hashed_password=hashed,
+            created_at=datetime.now(timezone.utc),
+            is_active=True,
+        )
+        session.add(user)
+        try:
+            session.flush()
+        except IntegrityError:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
+
+        user_id, email, created_at, is_active = user.id, user.email, user.created_at, user.is_active
+
+    return UserResponse(id=user_id, email=email, created_at=created_at, is_active=is_active)
+
+
+@router.post("/login", response_model=TokenResponse)
+def login(payload: LoginRequest) -> TokenResponse:
+    with get_session() as session:
+        user = session.execute(select(User).where(User.email == payload.email)).scalar_one_or_none()
+        if user is not None:
+            session.expunge(user)
+
+    if user is None or not verify_password(payload.password, user.hashed_password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
+
+    if not user.is_active:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Account is inactive")
+
+    return TokenResponse(
+        access_token=create_access_token(user.id),
+        refresh_token=create_refresh_token(user.id),
+    )
+
+
+@router.post("/refresh", response_model=TokenResponse)
+def refresh(payload: RefreshRequest) -> TokenResponse:
+    try:
+        token_payload = decode_token(payload.refresh_token)
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+
+    if token_payload.get("type") != "refresh":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token type")
+
+    user_id_raw = token_payload.get("sub")
+    try:
+        user_id = int(user_id_raw)
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+
+    with get_session() as session:
+        user = session.execute(select(User).where(User.id == user_id)).scalar_one_or_none()
+        if user is not None:
+            session.expunge(user)
+
+    if user is None or not user.is_active:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found or inactive")
+
+    return TokenResponse(
+        access_token=create_access_token(user.id),
+        refresh_token=create_refresh_token(user.id),
+    )
+
+
+@router.get("/me", response_model=UserResponse)
+def me(current_user: User = Depends(get_current_user)) -> UserResponse:
+    return UserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        created_at=current_user.created_at,
+        is_active=current_user.is_active,
+    )

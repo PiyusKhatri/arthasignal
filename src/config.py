@@ -21,6 +21,7 @@ class Settings:
     discord_webhook_url: str | None
     google_service_account_json: str | None
     google_drive_folder_id: str | None
+    jwt_secret_key: str
 
 
 def _require_env(name: str) -> str:
@@ -37,6 +38,7 @@ def get_settings() -> Settings:
         discord_webhook_url=os.getenv("DISCORD_WEBHOOK_URL"),
         google_service_account_json=os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON"),
         google_drive_folder_id=os.getenv("GOOGLE_DRIVE_FOLDER_ID"),
+        jwt_secret_key=_require_env("JWT_SECRET_KEY"),
     )
 
 

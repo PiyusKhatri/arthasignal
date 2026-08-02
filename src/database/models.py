@@ -651,3 +651,13 @@ class SignalCall(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
     company: Mapped["Company"] = relationship(back_populates="signal_calls")
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    is_active: Mapped[bool] = mapped_column(nullable=False, default=True)
