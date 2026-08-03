@@ -7,9 +7,11 @@ from cachetools import TTLCache
 
 MARKET_PULSE_TTL_SECONDS = 300
 TECHNICAL_SIGNALS_TTL_SECONDS = 900
+PRICE_HISTORY_TTL_SECONDS = 900
 
 market_pulse_cache: TTLCache = TTLCache(maxsize=8, ttl=MARKET_PULSE_TTL_SECONDS)
 technical_signals_cache: TTLCache = TTLCache(maxsize=1024, ttl=TECHNICAL_SIGNALS_TTL_SECONDS)
+price_history_cache: TTLCache = TTLCache(maxsize=1024, ttl=PRICE_HISTORY_TTL_SECONDS)
 
 
 def cached(cache: TTLCache, key_fn: Callable[..., Any]) -> Callable:

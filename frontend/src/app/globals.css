@@ -16,6 +16,7 @@
 
   --color-success-text: #7dd3a8;
   --color-danger-text: #f87171;
+  --color-warning-text: #fbbf24;
 
   --color-background: #121316;
   --color-card: #1b1d21;
@@ -31,6 +32,7 @@
 
   --color-success-text: #166534;
   --color-danger-text: #b91c1c;
+  --color-warning-text: #92400e;
 
   --color-background: #faf7f1;
   --color-card: #f5f1e8;
@@ -56,6 +58,7 @@
   --color-danger: var(--color-danger);
   --color-danger-text: var(--color-danger-text);
   --color-warning: var(--color-warning);
+  --color-warning-text: var(--color-warning-text);
 }
 
 body {

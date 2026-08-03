@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { StockSummary } from "@/lib/market-data";
 
 function formatPercent(value: string | null): string {
@@ -35,7 +36,9 @@ export function WatchlistTable({ stocks }: { stocks: StockSummary[] }) {
             return (
               <tr key={stock.symbol}>
                 <td className="px-4 py-3">
-                  <p className="font-medium text-text-primary">{stock.symbol}</p>
+                  <Link href={`/stock/${stock.symbol}`} className="font-medium text-text-primary hover:underline">
+                    {stock.symbol}
+                  </Link>
                   <p className="text-xs text-text-secondary">{stock.company_name}</p>
                 </td>
                 <td className="px-4 py-3 text-text-primary">

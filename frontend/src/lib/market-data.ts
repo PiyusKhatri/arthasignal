@@ -13,6 +13,94 @@ export type StockSummary = {
   previous_close: string | null;
   percent_change: string | null;
   volume: number;
+  day_high: string;
+  day_low: string;
+};
+
+export type StockHistoryPoint = {
+  date: string;
+  open: string;
+  high: string;
+  low: string;
+  close: string;
+  volume: number;
+};
+
+export type StockTechnical = {
+  symbol: string;
+  date: string;
+  timeframe: string;
+  sma_20: string | null;
+  sma_50: string | null;
+  sma_100: string | null;
+  sma_200: string | null;
+  ema_20: string | null;
+  ema_50: string | null;
+  rsi_14: string | null;
+  macd_line: string | null;
+  macd_signal: string | null;
+  macd_histogram: string | null;
+  stochastic_k: string | null;
+  stochastic_d: string | null;
+  cci_20: string | null;
+  roc_12: string | null;
+  bollinger_middle: string | null;
+  bollinger_upper: string | null;
+  bollinger_lower: string | null;
+  atr_14: string | null;
+  obv: string | null;
+  vwap_20: string | null;
+  fifty_two_week_high: string | null;
+  fifty_two_week_low: string | null;
+  pivot: string | null;
+  pivot_r1: string | null;
+  pivot_r2: string | null;
+  pivot_r3: string | null;
+  pivot_s1: string | null;
+  pivot_s2: string | null;
+  pivot_s3: string | null;
+  fib_0: string | null;
+  fib_236: string | null;
+  fib_382: string | null;
+  fib_50: string | null;
+  fib_618: string | null;
+  fib_786: string | null;
+  fib_100: string | null;
+  doji: boolean | null;
+  marubozu_bullish: boolean | null;
+  marubozu_bearish: boolean | null;
+  hammer: boolean | null;
+  shooting_star: boolean | null;
+  spinning_top: boolean | null;
+  bullish_engulfing: boolean | null;
+  bearish_engulfing: boolean | null;
+  bullish_harami: boolean | null;
+  bearish_harami: boolean | null;
+  piercing_line: boolean | null;
+  dark_cloud_cover: boolean | null;
+  tweezer_top: boolean | null;
+  tweezer_bottom: boolean | null;
+  morning_star: boolean | null;
+  evening_star: boolean | null;
+  three_white_soldiers: boolean | null;
+  three_black_crows: boolean | null;
+};
+
+export type StockFundamental = {
+  symbol: string;
+  fiscal_year: string;
+  eps: string | null;
+  pe_ratio: string | null;
+  pb_ratio: string | null;
+  book_value: string | null;
+  market_capitalization: string | null;
+  reported_date: string;
+  dividend_percent: string | null;
+  dividend_fiscal_year: string | null;
+  payout_ratio: string | null;
+  sector_avg_pe: string | null;
+  sector_avg_pb: string | null;
+  sector_pe_relative_percent: string | null;
 };
 
 export type StockSignal = {
@@ -21,6 +109,7 @@ export type StockSignal = {
   tier: string | null;
   avg_win_rate_minus_baseline: string | null;
   recommended_holding_period: string | null;
+  cost_viability_note: string | null;
 };
 
 export type StockSignals = {
@@ -115,6 +204,22 @@ export async function getSectorPerformance(): Promise<SectorPerformance[] | null
 
 export async function getStockSummary(symbol: string): Promise<StockSummary | null> {
   return fetchJson<StockSummary>(`/stocks/${symbol}/summary`);
+}
+
+export async function getStockHistory(symbol: string, days = 180): Promise<StockHistoryPoint[] | null> {
+  return fetchJson<StockHistoryPoint[]>(`/stocks/${symbol}/history?days=${days}`);
+}
+
+export async function getStockTechnical(symbol: string): Promise<StockTechnical | null> {
+  return fetchJson<StockTechnical>(`/stocks/${symbol}/technical`);
+}
+
+export async function getStockSignals(symbol: string): Promise<StockSignals | null> {
+  return fetchJson<StockSignals>(`/stocks/${symbol}/signals`);
+}
+
+export async function getStockFundamental(symbol: string): Promise<StockFundamental | null> {
+  return fetchJson<StockFundamental>(`/stocks/${symbol}/fundamental`);
 }
 
 export async function getWatchlistData(symbols: string[]): Promise<StockSummary[]> {

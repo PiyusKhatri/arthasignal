@@ -6,7 +6,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Request, status
 from sqlalchemy import select
 
-from src.api.cache import cached, technical_signals_cache
+from src.api.cache import cached, price_history_cache, technical_signals_cache
 from src.api.db_readonly import get_readonly_session
 from src.api.rate_limit import PUBLIC_RATE_LIMIT, limiter
 from src.database.models import (
@@ -15,13 +15,14 @@ from src.database.models import (
     CorporateAction,
     DailyPrice,
     Fundamental,
+    SectorFundamentalBaseline,
     SignalConfidence,
     SignalTimeframe,
     SymbolLiquidityTier,
     TechnicalSignal,
 )
 from src.pipeline.extract_signal_calls import DOJI_REQUIRED_LIQUIDITY_TIER, DOJI_SIGNAL_NAME, TARGET_SIGNAL_HORIZONS
-from src.pipeline.fundamental_ratios import payout_ratio
+from src.pipeline.fundamental_ratios import payout_ratio, sector_relative_valuation
 from src.pipeline.run_signal_backtests import build_signal_conditions
 
 router = APIRouter(prefix="/stocks", tags=["stocks"])
@@ -79,7 +80,42 @@ def get_stock_summary(symbol: str, request: Request) -> dict[str, Any]:
         "previous_close": previous.close if previous else None,
         "percent_change": percent_change,
         "volume": latest.volume,
+        "day_high": latest.high,
+        "day_low": latest.low,
     }
+
+
+@router.get("/{symbol}/history")
+@limiter.limit(PUBLIC_RATE_LIMIT)
+@cached(price_history_cache, key_fn=lambda **kwargs: (kwargs.get("symbol"), kwargs.get("days")))
+def get_stock_history(symbol: str, request: Request, days: int = 180) -> list[dict[str, Any]]:
+    _load_company(symbol)
+
+    days = max(1, min(days, 730))
+
+    with get_readonly_session() as session:
+        rows = session.execute(
+            select(DailyPrice)
+            .where(DailyPrice.symbol == symbol)
+            .order_by(DailyPrice.date.desc())
+            .limit(days)
+        ).scalars().all()
+        session.expunge_all()
+
+    if not rows:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No price data for symbol: {symbol}")
+
+    return [
+        {
+            "date": row.date,
+            "open": row.open,
+            "high": row.high,
+            "low": row.low,
+            "close": row.close,
+            "volume": row.volume,
+        }
+        for row in reversed(rows)
+    ]
 
 
 @router.get("/{symbol}/technical")
@@ -108,7 +144,7 @@ def get_stock_technical(symbol: str, request: Request) -> dict[str, Any]:
 @router.get("/{symbol}/fundamental")
 @limiter.limit(PUBLIC_RATE_LIMIT)
 def get_stock_fundamental(symbol: str, request: Request) -> dict[str, Any]:
-    _load_company(symbol)
+    company = _load_company(symbol)
 
     with get_readonly_session() as session:
         fundamental = session.execute(
@@ -130,6 +166,14 @@ def get_stock_fundamental(symbol: str, request: Request) -> dict[str, Any]:
         if dividend is not None:
             session.expunge(dividend)
 
+        sector_baseline = None
+        if company.sector is not None:
+            sector_baseline = session.execute(
+                select(SectorFundamentalBaseline).where(SectorFundamentalBaseline.sector == company.sector)
+            ).scalar_one_or_none()
+            if sector_baseline is not None:
+                session.expunge(sector_baseline)
+
     if fundamental is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No fundamentals for symbol: {symbol}")
 
@@ -148,6 +192,19 @@ def get_stock_fundamental(symbol: str, request: Request) -> dict[str, Any]:
             eps = Decimal(str(fundamental.eps))
             ratio = payout_ratio(dividend_per_share, eps)
             result["payout_ratio"] = ratio
+
+    result["sector_avg_pe"] = None
+    result["sector_avg_pb"] = None
+    result["sector_pe_relative_percent"] = None
+
+    if sector_baseline is not None:
+        result["sector_avg_pe"] = sector_baseline.avg_pe
+        result["sector_avg_pb"] = sector_baseline.avg_pb
+
+        if fundamental.pe_ratio is not None and sector_baseline.avg_pe is not None:
+            company_pe = Decimal(str(fundamental.pe_ratio))
+            sector_avg_pe = Decimal(str(sector_baseline.avg_pe))
+            result["sector_pe_relative_percent"] = sector_relative_valuation(company_pe, sector_avg_pe)
 
     return result
 
