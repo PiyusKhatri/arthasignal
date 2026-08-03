@@ -9,8 +9,20 @@ from sqlalchemy import select
 from src.api.cache import cached, technical_signals_cache
 from src.api.db_readonly import get_readonly_session
 from src.api.rate_limit import PUBLIC_RATE_LIMIT, limiter
-from src.database.models import ActionType, Company, CorporateAction, DailyPrice, Fundamental, SignalTimeframe, TechnicalSignal
+from src.database.models import (
+    ActionType,
+    Company,
+    CorporateAction,
+    DailyPrice,
+    Fundamental,
+    SignalConfidence,
+    SignalTimeframe,
+    SymbolLiquidityTier,
+    TechnicalSignal,
+)
+from src.pipeline.extract_signal_calls import DOJI_REQUIRED_LIQUIDITY_TIER, DOJI_SIGNAL_NAME, TARGET_SIGNAL_HORIZONS
 from src.pipeline.fundamental_ratios import payout_ratio
+from src.pipeline.run_signal_backtests import build_signal_conditions
 
 router = APIRouter(prefix="/stocks", tags=["stocks"])
 
@@ -137,3 +149,62 @@ def get_stock_fundamental(symbol: str, request: Request) -> dict[str, Any]:
             result["payout_ratio"] = ratio
 
     return result
+
+
+@router.get("/{symbol}/signals")
+@limiter.limit(PUBLIC_RATE_LIMIT)
+def get_stock_signals(symbol: str, request: Request) -> dict[str, Any]:
+    _load_company(symbol)
+
+    with get_readonly_session() as session:
+        joined = session.execute(
+            select(TechnicalSignal, DailyPrice.close)
+            .join(DailyPrice, (DailyPrice.symbol == TechnicalSignal.symbol) & (DailyPrice.date == TechnicalSignal.date))
+            .where(TechnicalSignal.symbol == symbol)
+            .where(TechnicalSignal.timeframe == SignalTimeframe.DAILY)
+            .order_by(TechnicalSignal.date.desc())
+            .limit(1)
+        ).first()
+
+        signal_row = None
+        close_price = None
+        if joined is not None:
+            signal_row, close_price = joined
+            session.expunge(signal_row)
+
+        liquidity_tier = session.execute(
+            select(SymbolLiquidityTier.liquidity_tier).where(SymbolLiquidityTier.symbol == symbol)
+        ).scalar_one_or_none()
+
+        confidence_rows = session.execute(
+            select(SignalConfidence).where(SignalConfidence.signal_name.in_(TARGET_SIGNAL_HORIZONS))
+        ).scalars().all()
+        session.expunge_all()
+
+    if signal_row is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No technical signals for symbol: {symbol}")
+
+    conditions = build_signal_conditions()
+    confidence_by_name = {c.signal_name: c for c in confidence_rows}
+
+    results = []
+    for signal_name in TARGET_SIGNAL_HORIZONS:
+        condition_fn = conditions[signal_name]
+        active = bool(condition_fn(signal_row, close_price, None, None))
+
+        if signal_name == DOJI_SIGNAL_NAME and liquidity_tier != DOJI_REQUIRED_LIQUIDITY_TIER:
+            active = False
+
+        confidence = confidence_by_name.get(signal_name)
+        results.append(
+            {
+                "signal_name": signal_name,
+                "active": active,
+                "tier": confidence.tier.value if confidence is not None else None,
+                "avg_win_rate_minus_baseline": confidence.avg_win_rate_minus_baseline if confidence is not None else None,
+                "recommended_holding_period": confidence.recommended_holding_period if confidence is not None else None,
+                "cost_viability_note": confidence.cost_viability_note if confidence is not None else None,
+            }
+        )
+
+    return {"symbol": symbol, "as_of_date": signal_row.date, "signals": results}
