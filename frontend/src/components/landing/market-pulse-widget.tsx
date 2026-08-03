@@ -1,4 +1,4 @@
-import type { MarketPulse } from "@/lib/landing-data";
+import type { MarketPulse } from "@/lib/market-data";
 
 function formatSignedPercent(value: number): string {
   return `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
@@ -30,9 +30,9 @@ export function MarketPulseWidget({ pulse }: { pulse: MarketPulse | null }) {
             <p className="text-xs text-text-secondary">Advance / decline</p>
             {hasBreadth ? (
               <p className="mt-2 text-2xl font-semibold text-text-primary">
-                <span className="text-success">{pulse.advance_decline.advances}</span>
+                <span className="text-success-text">{pulse.advance_decline.advances}</span>
                 {" / "}
-                <span className="text-danger">{pulse.advance_decline.declines}</span>
+                <span className="text-danger-text">{pulse.advance_decline.declines}</span>
               </p>
             ) : (
               <p className="mt-2 text-sm text-text-secondary">No trades captured yet today.</p>
@@ -41,12 +41,14 @@ export function MarketPulseWidget({ pulse }: { pulse: MarketPulse | null }) {
 
           <div className="py-6 sm:px-8 sm:py-0">
             <p className="text-xs text-text-secondary">NEPSE index</p>
-            {pulse.nepse_index ? (
+            {pulse.nepse_index?.current_value !== null && pulse.nepse_index?.current_value !== undefined ? (
               <p className="mt-2 text-2xl font-semibold text-text-primary">
                 {pulse.nepse_index.current_value.toLocaleString("en-US", { maximumFractionDigits: 2 })}
-                <span className={`ml-2 text-base font-medium ${pulse.nepse_index.percent_change >= 0 ? "text-success" : "text-danger"}`}>
-                  {formatSignedPercent(pulse.nepse_index.percent_change)}
-                </span>
+                {pulse.nepse_index.percent_change !== null ? (
+                  <span className={`ml-2 text-base font-medium ${pulse.nepse_index.percent_change >= 0 ? "text-success-text" : "text-danger-text"}`}>
+                    {formatSignedPercent(pulse.nepse_index.percent_change)}
+                  </span>
+                ) : null}
               </p>
             ) : (
               <p className="mt-2 text-sm text-text-secondary">Index data unavailable.</p>

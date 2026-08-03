@@ -29,7 +29,7 @@ export function SidebarNavLink({ href }: { href: string }) {
       title={item.label}
       className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
         isActive
-          ? "bg-accent-primary/10 text-accent-primary"
+          ? "bg-accent-text/10 text-accent-text"
           : "text-text-secondary hover:bg-card hover:text-text-primary"
       }`}
     >
@@ -51,7 +51,7 @@ export function DrawerNavLink({ href, onNavigate }: { href: string; onNavigate: 
       aria-current={isActive ? "page" : undefined}
       className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
         isActive
-          ? "bg-accent-primary/10 text-accent-primary"
+          ? "bg-accent-text/10 text-accent-text"
           : "text-text-secondary hover:bg-card hover:text-text-primary"
       }`}
     >

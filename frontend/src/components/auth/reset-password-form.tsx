@@ -27,7 +27,7 @@ export function ResetPasswordForm() {
     return (
       <AuthCard title="Reset password">
         <FormError message="This reset link is missing a token. Request a new one." />
-        <Link href="/forgot-password" className="text-sm text-accent-primary hover:text-accent-primary-light">
+        <Link href="/forgot-password" className="text-sm text-accent-text hover:text-text-primary">
           Request a new reset link
         </Link>
       </AuthCard>

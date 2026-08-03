@@ -1,5 +1,5 @@
 import { TrendingDown, TrendingUp } from "lucide-react";
-import type { StockSignals, StockSummary } from "@/lib/landing-data";
+import type { StockSignals, StockSummary } from "@/lib/market-data";
 
 function formatPercent(value: string | null): string {
   if (value === null) {
@@ -28,7 +28,7 @@ export function HeroStockCard({ summary, signals }: { summary: StockSummary; sig
         </div>
         <span
           className={`flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium ${
-            isUp ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
+            isUp ? "bg-success/10 text-success-text" : "bg-danger/10 text-danger-text"
           }`}
         >
           {isUp ? <TrendingUp className="size-4" aria-hidden="true" /> : <TrendingDown className="size-4" aria-hidden="true" />}

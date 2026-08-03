@@ -10,13 +10,20 @@ from src.database.connection import get_session
 from src.database.models import (
     Broker,
     Company,
+    DailyPrice,
     IntradayFloorsheet,
     IntradayIndexSnapshot,
     IntradaySnapshot,
     MarketIndex,
     SectorIndexMapping,
+    SignalConfidence,
+    SignalTimeframe,
+    SymbolLiquidityTier,
+    TechnicalSignal,
 )
 from src.pipeline.data_quality import _trailing_trading_days
+from src.pipeline.extract_signal_calls import DOJI_REQUIRED_LIQUIDITY_TIER, DOJI_SIGNAL_NAME, TARGET_SIGNAL_HORIZONS
+from src.pipeline.run_signal_backtests import build_signal_conditions
 from src.scrapers import nepse_api
 
 TOP_BROKER_COUNT = 5
@@ -627,6 +634,96 @@ def compute_sector_wise_pulse(snapshot_time: datetime | None = None) -> list[dic
         reverse=True,
     )
     return results
+
+
+def compute_active_signals() -> dict[str, Any]:
+    with get_session() as session:
+        latest_date = session.execute(
+            select(func.max(TechnicalSignal.date)).where(TechnicalSignal.timeframe == SignalTimeframe.DAILY)
+        ).scalar_one_or_none()
+
+        if latest_date is None:
+            return {"as_of_date": None, "signals": []}
+
+        rows = session.execute(
+            select(TechnicalSignal, DailyPrice.close, Company.company_name, Company.sector)
+            .join(DailyPrice, (DailyPrice.symbol == TechnicalSignal.symbol) & (DailyPrice.date == TechnicalSignal.date))
+            .join(Company, Company.symbol == TechnicalSignal.symbol)
+            .where(TechnicalSignal.timeframe == SignalTimeframe.DAILY)
+            .where(TechnicalSignal.date == latest_date)
+            .where(Company.instrument_type == "Equity")
+            .where(Company.status == "A")
+        ).all()
+
+        symbols = [row.TechnicalSignal.symbol for row in rows]
+        prev_closes: dict[str, Decimal] = {}
+        if symbols:
+            prev_rows = session.execute(
+                text(
+                    """
+                    SELECT dp.symbol, prev.close AS prev_close
+                    FROM daily_prices dp
+                    JOIN LATERAL (
+                        SELECT close FROM daily_prices p
+                        WHERE p.symbol = dp.symbol AND p.date < dp.date
+                        ORDER BY p.date DESC LIMIT 1
+                    ) prev ON true
+                    WHERE dp.symbol = ANY(:symbols) AND dp.date = :d
+                    """
+                ),
+                {"symbols": symbols, "d": latest_date},
+            ).all()
+            prev_closes = {row.symbol: row.prev_close for row in prev_rows}
+
+        liquidity_rows = session.execute(select(SymbolLiquidityTier.symbol, SymbolLiquidityTier.liquidity_tier)).all()
+        liquidity_by_symbol = {row.symbol: row.liquidity_tier for row in liquidity_rows}
+
+        confidence_rows = (
+            session.execute(select(SignalConfidence).where(SignalConfidence.signal_name.in_(TARGET_SIGNAL_HORIZONS)))
+            .scalars()
+            .all()
+        )
+        session.expunge_all()
+
+    confidence_by_name = {row.signal_name: row for row in confidence_rows}
+    conditions = build_signal_conditions()
+
+    results = []
+    for signal_row, close_price, company_name, sector in rows:
+        prev_close = prev_closes.get(signal_row.symbol)
+        percent_change = None
+        if prev_close:
+            percent_change = (close_price - prev_close) / prev_close * Decimal(100)
+
+        liquidity_tier = liquidity_by_symbol.get(signal_row.symbol)
+
+        for signal_name in TARGET_SIGNAL_HORIZONS:
+            active = bool(conditions[signal_name](signal_row, close_price, None, None))
+            if signal_name == DOJI_SIGNAL_NAME and liquidity_tier != DOJI_REQUIRED_LIQUIDITY_TIER:
+                active = False
+            if not active:
+                continue
+
+            confidence = confidence_by_name.get(signal_name)
+            results.append(
+                {
+                    "symbol": signal_row.symbol,
+                    "company_name": company_name,
+                    "sector": sector,
+                    "latest_close": close_price,
+                    "percent_change": percent_change,
+                    "signal_name": signal_name,
+                    "tier": confidence.tier.value if confidence is not None else None,
+                    "avg_win_rate_minus_baseline": confidence.avg_win_rate_minus_baseline if confidence is not None else None,
+                    "recommended_holding_period": confidence.recommended_holding_period if confidence is not None else None,
+                }
+            )
+
+    results.sort(
+        key=lambda r: r["avg_win_rate_minus_baseline"] if r["avg_win_rate_minus_baseline"] is not None else Decimal("-Infinity"),
+        reverse=True,
+    )
+    return {"as_of_date": latest_date, "signals": results}
 
 
 def compute_overall_market_pulse(snapshot_time: datetime | None = None) -> dict[str, Any]:

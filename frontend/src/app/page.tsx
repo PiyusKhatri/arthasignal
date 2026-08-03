@@ -4,7 +4,7 @@ import { LandingNav } from "@/components/landing/landing-nav";
 import { MarketPulseWidget } from "@/components/landing/market-pulse-widget";
 import { PricingTable } from "@/components/landing/pricing-table";
 import { ValueProps } from "@/components/landing/value-props";
-import { getHeroStockData, getMarketPulseData } from "@/lib/landing-data";
+import { getHeroStockData, getMarketPulseData } from "@/lib/market-data";
 
 export default async function Home() {
   const [stock, pulse] = await Promise.all([getHeroStockData(), getMarketPulseData()]);

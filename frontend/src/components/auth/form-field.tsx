@@ -27,7 +27,7 @@ export function FormField({ id, label, type, value, onChange, error, autoComplet
         }`}
       />
       {error ? (
-        <p id={`${id}-error`} className="mt-1 text-xs text-danger">
+        <p id={`${id}-error`} className="mt-1 text-xs text-danger-text">
           {error}
         </p>
       ) : null}

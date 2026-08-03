@@ -6,7 +6,7 @@ export function LandingNav() {
     <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="text-lg font-semibold tracking-tight text-text-primary">
-          Artha<span className="text-accent-primary">Signal</span>
+          Artha<span className="text-accent-text">Signal</span>
         </Link>
 
         <nav className="hidden items-center gap-8 text-sm text-text-secondary md:flex">

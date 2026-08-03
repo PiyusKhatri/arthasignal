@@ -78,6 +78,7 @@ def get_stock_summary(symbol: str, request: Request) -> dict[str, Any]:
         "latest_close": latest.close,
         "previous_close": previous.close if previous else None,
         "percent_change": percent_change,
+        "volume": latest.volume,
     }
 
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { HeroStockCard } from "@/components/landing/hero-stock-card";
-import type { StockSignals, StockSummary } from "@/lib/landing-data";
+import type { StockSignals, StockSummary } from "@/lib/market-data";
 
 export function Hero({ stock }: { stock: { summary: StockSummary; signals: StockSignals } | null }) {
   return (

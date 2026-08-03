@@ -24,7 +24,7 @@ export function ValueProps() {
       <div className="grid gap-10 sm:grid-cols-3 sm:gap-8">
         {VALUE_PROPS.map(({ icon: Icon, title, body }) => (
           <div key={title}>
-            <Icon className="size-6 text-accent-primary" aria-hidden="true" strokeWidth={1.75} />
+            <Icon className="size-6 text-accent-text" aria-hidden="true" strokeWidth={1.75} />
             <h3 className="mt-4 text-base font-semibold text-text-primary">{title}</h3>
             <p className="mt-2 text-sm leading-relaxed text-text-secondary">{body}</p>
           </div>

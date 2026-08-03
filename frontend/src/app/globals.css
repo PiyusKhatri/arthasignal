@@ -12,6 +12,10 @@
 [data-theme="dark"] {
   --color-accent-primary: #4f5f45;
   --color-accent-primary-light: #a9c29a;
+  --color-accent-text: #a9c29a;
+
+  --color-success-text: #7dd3a8;
+  --color-danger-text: #f87171;
 
   --color-background: #121316;
   --color-card: #1b1d21;
@@ -23,6 +27,10 @@
 [data-theme="light"] {
   --color-accent-primary: #4f5f45;
   --color-accent-primary-light: #a9c29a;
+  --color-accent-text: #4f5f45;
+
+  --color-success-text: #166534;
+  --color-danger-text: #b91c1c;
 
   --color-background: #faf7f1;
   --color-card: #f5f1e8;
@@ -42,8 +50,11 @@
   --color-text-secondary: var(--color-text-secondary);
   --color-accent-primary: var(--color-accent-primary);
   --color-accent-primary-light: var(--color-accent-primary-light);
+  --color-accent-text: var(--color-accent-text);
   --color-success: var(--color-success);
+  --color-success-text: var(--color-success-text);
   --color-danger: var(--color-danger);
+  --color-danger-text: var(--color-danger-text);
   --color-warning: var(--color-warning);
 }
 
