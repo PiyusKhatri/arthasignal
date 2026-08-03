@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+:root {
+  --font-latin: var(--font-ibm-plex-sans), sans-serif;
+  --font-devanagari: var(--font-noto-sans-devanagari), sans-serif;
+
+  --color-success: #7dd3a8;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+}
+
+[data-theme="dark"] {
+  --color-accent-primary: #4f5f45;
+  --color-accent-primary-light: #a9c29a;
+
+  --color-background: #121316;
+  --color-card: #1b1d21;
+  --color-border: #2a2d33;
+  --color-text-primary: #edeef0;
+  --color-text-secondary: #9a9ca3;
+}
+
+[data-theme="light"] {
+  --color-accent-primary: #4f5f45;
+  --color-accent-primary-light: #a9c29a;
+
+  --color-background: #faf7f1;
+  --color-card: #f5f1e8;
+  --color-border: #e5dfd1;
+  --color-text-primary: #211f1b;
+  --color-text-secondary: #6b6659;
+}
+
+@theme inline {
+  --font-latin: var(--font-latin);
+  --font-devanagari: var(--font-devanagari);
+
+  --color-background: var(--color-background);
+  --color-card: var(--color-card);
+  --color-border: var(--color-border);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-accent-primary: var(--color-accent-primary);
+  --color-accent-primary-light: var(--color-accent-primary-light);
+  --color-success: var(--color-success);
+  --color-danger: var(--color-danger);
+  --color-warning: var(--color-warning);
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-latin);
+}
