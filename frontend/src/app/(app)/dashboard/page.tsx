@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { MarketPulseRow } from "@/components/dashboard/market-pulse-row";
 import { PaperTradeBanner } from "@/components/dashboard/paper-trade-banner";
 import { SectorPerformanceList } from "@/components/dashboard/sector-performance-list";
@@ -49,7 +50,12 @@ export default async function DashboardPage() {
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold text-text-primary">Sector performance</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-text-primary">Sector performance</h2>
+            <Link href="/sectors" className="text-xs font-medium text-accent-text hover:underline">
+              View all
+            </Link>
+          </div>
           <div className="mt-4">
             <SectorPerformanceList sectors={sortedSectors} />
           </div>

@@ -34,6 +34,36 @@ def _row_to_dict(row: Any, exclude: set[str]) -> dict[str, Any]:
     return {c.name: getattr(row, c.name) for c in row.__table__.columns if c.name not in exclude}
 
 
+def evaluate_target_signal_conditions(
+    signal_row: TechnicalSignal,
+    close_price: Any,
+    liquidity_tier: str | None,
+    confidence_by_name: dict[str, SignalConfidence],
+) -> list[dict[str, Any]]:
+    conditions = build_signal_conditions()
+
+    results = []
+    for signal_name in TARGET_SIGNAL_HORIZONS:
+        condition_fn = conditions[signal_name]
+        active = bool(condition_fn(signal_row, close_price, None, None))
+
+        if signal_name == DOJI_SIGNAL_NAME and liquidity_tier != DOJI_REQUIRED_LIQUIDITY_TIER:
+            active = False
+
+        confidence = confidence_by_name.get(signal_name)
+        results.append(
+            {
+                "signal_name": signal_name,
+                "active": active,
+                "tier": confidence.tier.value if confidence is not None else None,
+                "avg_win_rate_minus_baseline": confidence.avg_win_rate_minus_baseline if confidence is not None else None,
+                "recommended_holding_period": confidence.recommended_holding_period if confidence is not None else None,
+                "cost_viability_note": confidence.cost_viability_note if confidence is not None else None,
+            }
+        )
+    return results
+
+
 def _load_company(symbol: str) -> Company:
     with get_readonly_session() as session:
         company = session.execute(select(Company).where(Company.symbol == symbol)).scalar_one_or_none()
@@ -242,27 +272,7 @@ def get_stock_signals(symbol: str, request: Request) -> dict[str, Any]:
     if signal_row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No technical signals for symbol: {symbol}")
 
-    conditions = build_signal_conditions()
     confidence_by_name = {c.signal_name: c for c in confidence_rows}
-
-    results = []
-    for signal_name in TARGET_SIGNAL_HORIZONS:
-        condition_fn = conditions[signal_name]
-        active = bool(condition_fn(signal_row, close_price, None, None))
-
-        if signal_name == DOJI_SIGNAL_NAME and liquidity_tier != DOJI_REQUIRED_LIQUIDITY_TIER:
-            active = False
-
-        confidence = confidence_by_name.get(signal_name)
-        results.append(
-            {
-                "signal_name": signal_name,
-                "active": active,
-                "tier": confidence.tier.value if confidence is not None else None,
-                "avg_win_rate_minus_baseline": confidence.avg_win_rate_minus_baseline if confidence is not None else None,
-                "recommended_holding_period": confidence.recommended_holding_period if confidence is not None else None,
-                "cost_viability_note": confidence.cost_viability_note if confidence is not None else None,
-            }
-        )
+    results = evaluate_target_signal_conditions(signal_row, close_price, liquidity_tier, confidence_by_name)
 
     return {"symbol": symbol, "as_of_date": signal_row.date, "signals": results}

@@ -155,15 +155,71 @@ export type ActiveSignalsResponse = {
   signals: ActiveSignal[];
 };
 
+export type SectorBrokerConcentration = {
+  available: boolean;
+  coverage_reliable?: boolean;
+  symbols_covered: number;
+  total_sector_symbols: number;
+  floorsheet_turnover?: string;
+  top_brokers: {
+    broker_id: string;
+    broker_name: string | null;
+    total_contract_value: string;
+    fraction_of_sector_turnover: string | null;
+  }[];
+  note: string;
+};
+
 export type SectorPerformance = {
   sector: string;
   advance_decline: {
     advances: number;
     declines: number;
+    unchanged: number;
     total_symbols: number;
+    advance_decline_ratio: string | null;
+    interpretation: string;
+    source: string;
+  };
+  sector_index: {
+    index_name: string;
+    source: string;
+    current_value: string | null;
+    percent_change: string | null;
+    points_change: string | null;
   };
   market_cap_weighted_percent_change: string | null;
+  market_cap_weighting: {
+    symbols_used: number;
+    symbols_excluded_no_market_cap: number;
+  };
+  turnover_trend: {
+    today_turnover: string | null;
+    trailing_20_day_avg_turnover: string | null;
+    turnover_vs_trailing_avg_ratio: string | null;
+  };
+  broker_concentration: SectorBrokerConcentration;
 };
+
+export type SectorStock = {
+  symbol: string;
+  company_name: string;
+  latest_close: string | null;
+  percent_change: string | null;
+  active_signal: {
+    signal_name: string;
+    tier: string | null;
+    avg_win_rate_minus_baseline: string | null;
+  } | null;
+};
+
+export async function getSectorStocks(sector: string): Promise<SectorStock[]> {
+  const response = await fetch(`/api/sectors/${encodeURIComponent(sector)}/stocks`, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Failed to load stocks for sector: ${sector}`);
+  }
+  return (await response.json()) as SectorStock[];
+}
 
 async function fetchJson<T>(path: string): Promise<T | null> {
   try {

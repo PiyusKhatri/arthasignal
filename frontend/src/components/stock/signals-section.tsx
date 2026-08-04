@@ -1,21 +1,5 @@
 import type { StockSignal } from "@/lib/market-data";
-
-const TIER_LABELS: Record<string, string> = {
-  high_confidence: "High confidence",
-  weak_or_no_edge: "Weak / no edge",
-  unreliable_low_sample: "Unreliable — low sample",
-  inconsistent_across_horizons: "Inconsistent across horizons",
-  decayed_edge: "Decayed edge",
-  liquidity_inverted: "Liquidity inverted",
-  unstable_multi_dimensional: "Unstable (multi-dimensional)",
-};
-
-function tierLabel(tier: string | null): string {
-  if (tier === null) {
-    return "Unrated";
-  }
-  return TIER_LABELS[tier] ?? tier.replace(/_/g, " ");
-}
+import { isHighConfidenceTier, tierLabel } from "@/lib/signal-tiers";
 
 function formatEdge(value: string | null): string {
   if (value === null) {
@@ -26,7 +10,7 @@ function formatEdge(value: string | null): string {
 }
 
 function SignalCard({ signal }: { signal: StockSignal }) {
-  const isHighConfidence = signal.tier === "high_confidence";
+  const isHighConfidence = isHighConfidenceTier(signal.tier);
 
   return (
     <div className="rounded-lg border border-border bg-card p-4">
