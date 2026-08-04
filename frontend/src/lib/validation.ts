@@ -35,3 +35,32 @@ export function validatePasswordStrength(password: string): string | null {
 export function validatePasswordsMatch(password: string, confirmPassword: string): string | null {
   return password !== confirmPassword ? "Passwords do not match" : null;
 }
+
+export function validateSymbol(symbol: string): string | null {
+  return symbol.trim().length === 0 ? "Symbol is required" : null;
+}
+
+export function validatePositiveNumber(value: string, label: string): string | null {
+  if (value.trim().length === 0) {
+    return `${label} is required`;
+  }
+  const num = Number(value);
+  if (!Number.isFinite(num) || num <= 0) {
+    return `${label} must be a positive number`;
+  }
+  return null;
+}
+
+export function validateDate(value: string): string | null {
+  if (value.trim().length === 0) {
+    return "Purchase date is required";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "Enter a valid date";
+  }
+  if (date.getTime() > Date.now()) {
+    return "Purchase date cannot be in the future";
+  }
+  return null;
+}

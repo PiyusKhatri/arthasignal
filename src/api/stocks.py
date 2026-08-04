@@ -3,7 +3,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, HTTPException, Query, Request, status
 from sqlalchemy import select
 
 from src.api.cache import cached, price_history_cache, technical_signals_cache
@@ -73,6 +73,23 @@ def _load_company(symbol: str) -> Company:
     if company is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Unknown symbol: {symbol}")
     return company
+
+
+@router.get("/search")
+@limiter.limit(PUBLIC_RATE_LIMIT)
+def search_stocks(request: Request, q: str = Query(min_length=1, max_length=50)) -> list[dict[str, Any]]:
+    pattern = f"{q.strip().upper()}%"
+    with get_readonly_session() as session:
+        companies = session.execute(
+            select(Company.symbol, Company.company_name)
+            .where(Company.symbol.like(pattern))
+            .where(Company.instrument_type == "Equity")
+            .where(Company.status == "A")
+            .order_by(Company.symbol)
+            .limit(10)
+        ).all()
+
+    return [{"symbol": row.symbol, "company_name": row.company_name} for row in companies]
 
 
 @router.get("/{symbol}/summary")
