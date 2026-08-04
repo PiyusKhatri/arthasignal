@@ -37,12 +37,20 @@ def run_intraday_pipeline() -> dict[str, Any]:
 
     if quality_summary["should_alert"]:
         coverage = quality_summary["daily_coverage"]
+        zero_coverage = any(v["realized_snapshots"] == 0 for v in coverage.values())
         lines = [
             f"{v['table']}: {v['realized_snapshots']}/{v['expected_snapshots_so_far']} snapshots today "
             f"({(v['coverage_ratio'] or 0) * 100:.0f}%)"
             for v in coverage.values()
         ]
-        send_discord_alert("Intraday snapshot coverage is low today:\n" + "\n".join(lines), severity="warning")
+        if zero_coverage:
+            send_discord_alert(
+                "ZERO INTRADAY SNAPSHOTS - possible silent pipeline failure, not just low coverage:\n"
+                + "\n".join(lines),
+                severity="failure",
+            )
+        else:
+            send_discord_alert("Intraday snapshot coverage is low today:\n" + "\n".join(lines), severity="warning")
 
     return {"price_summary": price_summary, "index_summary": index_summary, "quality_summary": quality_summary}
 

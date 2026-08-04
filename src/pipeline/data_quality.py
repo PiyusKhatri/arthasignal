@@ -7,7 +7,8 @@ from typing import Any
 from sqlalchemy import text
 
 from src.database.connection import get_session
-from src.pipeline.backfill_calendar import is_market_open_today
+from src.pipeline.backfill_calendar import _known_non_trading_weekdays, is_market_open_today
+from src.pipeline.market_hours_guard import SESSION_END, _current_npt_time
 from src.scrapers.symbols import get_all_listed_symbols
 
 logger = logging.getLogger(__name__)
@@ -330,6 +331,60 @@ def _check_signal_call_extraction_liveness(latest_date) -> dict[str, Any]:
     return {"flagged": flagged, "checked_days": recent_days, "rows_created": rows_created}
 
 
+def _check_trading_day_ingestion_gap(_latest_date) -> dict[str, Any]:
+    now_npt = _current_npt_time()
+    today = now_npt.date()
+
+    if now_npt.time() < SESSION_END:
+        return {
+            "flagged": False,
+            "date": today,
+            "reason": "session has not closed yet today, too early to conclude ingestion is missing",
+        }
+
+    non_trading_weekdays = _known_non_trading_weekdays()
+    weekday_pattern_says_trading = today.weekday() not in non_trading_weekdays
+
+    if not weekday_pattern_says_trading:
+        return {"flagged": False, "date": today, "reason": "weekday pattern indicates a non-trading day"}
+
+    with get_session() as session:
+        calendar_row = session.execute(
+            text("SELECT is_trading_day FROM trading_calendar WHERE date = :d"), {"d": today}
+        ).scalar()
+        daily_price_rows_today = session.execute(
+            text("SELECT count(*) FROM daily_prices WHERE date = :d"), {"d": today}
+        ).scalar()
+        intraday_rows_today = session.execute(
+            text("SELECT count(*) FROM intraday_snapshots WHERE snapshot_time::date = :d"), {"d": today}
+        ).scalar()
+
+    reasons = []
+    if calendar_row is None:
+        reasons.append("trading_calendar has no row for today even though the daily pipeline should have run by now")
+    if daily_price_rows_today == 0:
+        reasons.append("daily_prices has zero rows for today despite the weekday pattern indicating a trading day")
+    if intraday_rows_today == 0:
+        reasons.append("intraday_snapshots has zero rows for today despite the weekday pattern indicating a trading day")
+
+    flagged = bool(reasons)
+    if flagged:
+        logger.error(
+            "data_quality: SILENT INGESTION FAILURE SUSPECTED for %s - %s",
+            today,
+            "; ".join(reasons),
+        )
+
+    return {
+        "flagged": flagged,
+        "date": today,
+        "calendar_row_present": calendar_row is not None,
+        "daily_price_rows_today": daily_price_rows_today,
+        "intraday_snapshot_rows_today": intraday_rows_today,
+        "reasons": reasons,
+    }
+
+
 def check_daily_pipeline_health() -> dict[str, Any]:
     latest_date = _latest_price_date()
     if latest_date is None:
@@ -348,6 +403,7 @@ def check_daily_pipeline_health() -> dict[str, Any]:
         ("fundamentals_table_freshness", _check_fundamentals_table_freshness),
         ("sector_fundamental_baseline_freshness", _check_sector_fundamental_baseline_freshness),
         ("signal_call_extraction_liveness", _check_signal_call_extraction_liveness),
+        ("trading_day_ingestion_gap", _check_trading_day_ingestion_gap),
     ):
         try:
             results[name] = check(latest_date)

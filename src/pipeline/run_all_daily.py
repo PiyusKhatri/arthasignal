@@ -6,7 +6,7 @@ from datetime import date, timedelta
 from typing import Any
 
 from src.notifications.discord_alert import send_discord_alert
-from src.pipeline.backfill_calendar import is_market_open_today
+from src.pipeline.backfill_calendar import is_market_open_today, run_calendar_backfill
 from src.pipeline.backfill_daily_floorsheet import run_daily_floorsheet_backfill
 from src.pipeline.backfill_daily_index import run_daily_index_refresh
 from src.pipeline.backfill_signals import run_signals_backfill
@@ -41,11 +41,38 @@ def run_all_daily() -> dict[str, Any]:
         raise
 
     try:
+        calendar_summary = run_calendar_backfill(attempt_confirmed_for_today=True)
+    except Exception as exc:
+        logger.exception("backfill_calendar.py failed")
+        send_discord_alert(f"backfill_calendar.py failed: {exc}", severity="failure")
+        calendar_summary = {
+            "total_days_processed": 0,
+            "rows_written": 0,
+            "trading_days": 0,
+            "non_trading_days": 0,
+            "unexplained_non_trading_days": 0,
+            "today_row_written": False,
+            "failures": 1,
+        }
+
+    try:
         quality_summary = check_daily_pipeline_health()
     except Exception as exc:
         logger.exception("data_quality check failed")
         send_discord_alert(f"data_quality check failed: {exc}", severity="failure")
         raise
+
+    ingestion_gap = quality_summary.get("results", {}).get("trading_day_ingestion_gap", {})
+    if ingestion_gap.get("flagged"):
+        send_discord_alert(
+            "SILENT INGESTION FAILURE SUSPECTED\n"
+            f"Date: {ingestion_gap.get('date')}\n"
+            f"Trading calendar row present: {ingestion_gap.get('calendar_row_present')}\n"
+            f"daily_prices rows today: {ingestion_gap.get('daily_price_rows_today')}\n"
+            f"intraday_snapshots rows today: {ingestion_gap.get('intraday_snapshot_rows_today')}\n"
+            + "\n".join(ingestion_gap.get("reasons", [])),
+            severity="failure",
+        )
 
     try:
         signals_summary = run_signals_backfill()
@@ -172,9 +199,16 @@ def run_all_daily() -> dict[str, Any]:
             f"Price insert failed: {daily_summary['price_insert_failed']}"
         )
 
+    calendar_status = (
+        f"{calendar_summary.get('rows_written', 0)} rows written, "
+        f"today_row_written={calendar_summary.get('today_row_written', False)}, "
+        f"{calendar_summary.get('unexplained_non_trading_days', 0)} unexplained non-trading days"
+    )
+
     message = (
         f"Daily pipeline completed in {elapsed_seconds:.1f}s\n"
         f"{daily_price_section}\n"
+        f"Trading calendar refresh: {calendar_status}\n"
         f"Data quality flags: {quality_summary['checks_flagged']}/{quality_summary['checks_run']}\n"
         f"Signals computed: {signals_summary['symbols_processed']} symbols, "
         f"{signals_summary['rows_upserted']} rows, {signals_summary['failures']} failures\n"
@@ -189,6 +223,7 @@ def run_all_daily() -> dict[str, Any]:
 
     total_failures = (
         daily_summary["failures"]
+        + calendar_summary.get("failures", 0)
         + signals_summary["failures"]
         + extraction_summary.get("failures", 0)
         + grading_summary.get("failures", 0)
@@ -209,6 +244,7 @@ def run_all_daily() -> dict[str, Any]:
 
     return {
         "daily_summary": daily_summary,
+        "calendar_summary": calendar_summary,
         "quality_summary": quality_summary,
         "signals_summary": signals_summary,
         "extraction_summary": extraction_summary,
