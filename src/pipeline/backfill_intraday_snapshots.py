@@ -6,6 +6,7 @@ from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 from src.database.connection import get_session
 from src.database.models import Company, IntradaySnapshot
@@ -43,14 +44,8 @@ def _insert_snapshots(rows: list[dict[str, Any]]) -> int:
         return len(result.fetchall())
 
 
-def run_intraday_snapshot_backfill() -> dict[str, Any]:
-    if not is_within_intraday_window():
-        logger.info("Outside NEPSE intraday trading window, skipping intraday snapshot backfill")
-        return {"skipped": True, "reason": "outside intraday trading window"}
-
-    snapshot_time = _round_to_nearest_15_minutes(_current_npt_time())
-    logger.info("Fetching intraday snapshot for snapshot_time=%s", snapshot_time)
-
+@retry(reraise=True, stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=8))
+def _fetch_and_store_snapshots(snapshot_time: datetime) -> dict[str, Any]:
     snapshot_rows = get_intraday_snapshot()
     known_symbols = _known_symbols()
 
@@ -65,14 +60,25 @@ def run_intraday_snapshot_backfill() -> dict[str, Any]:
     inserted = _insert_snapshots(rows)
     duplicates_skipped = len(rows) - inserted
 
-    summary = {
-        "skipped": False,
-        "snapshot_time": snapshot_time,
+    return {
         "symbols_fetched": len(snapshot_rows),
         "skipped_unknown_symbol": skipped_unknown_symbol,
         "rows_inserted": inserted,
         "duplicates_skipped": duplicates_skipped,
     }
+
+
+def run_intraday_snapshot_backfill() -> dict[str, Any]:
+    if not is_within_intraday_window():
+        logger.info("Outside NEPSE intraday trading window, skipping intraday snapshot backfill")
+        return {"skipped": True, "reason": "outside intraday trading window"}
+
+    snapshot_time = _round_to_nearest_15_minutes(_current_npt_time())
+    logger.info("Fetching intraday snapshot for snapshot_time=%s", snapshot_time)
+
+    fetch_result = _fetch_and_store_snapshots(snapshot_time)
+
+    summary = {"skipped": False, "snapshot_time": snapshot_time, **fetch_result}
     logger.info("Intraday snapshot backfill summary: %s", summary)
     return summary
 

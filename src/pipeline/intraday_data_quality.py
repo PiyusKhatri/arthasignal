@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import logging
-from datetime import date, datetime
+from datetime import date, datetime, time
 from typing import Any
 
 from sqlalchemy import func, select, text
 
 from src.database.connection import get_session
 from src.database.models import IntradayIndexSnapshot, IntradaySnapshot
+from src.pipeline.backfill_intraday_snapshots import SNAPSHOT_ROUND_MINUTES
 from src.pipeline.market_hours_guard import SESSION_END, SESSION_START, _current_npt_time
 
 logging.basicConfig(level=logging.INFO)
@@ -15,9 +16,14 @@ logger = logging.getLogger(__name__)
 
 SYMBOL_COVERAGE_MIN_RATIO = 0.9
 EXPECTED_INDEX_COUNT = 17
-SNAPSHOT_INTERVAL_MINUTES = 5
+# Distinct snapshot_time rows land on SNAPSHOT_ROUND_MINUTES boundaries (15 min), not on every
+# 5-minute cron trigger - using the cron interval here previously understated real coverage by
+# ~3x and risked constant false "low coverage" alerts even under healthy operation.
+SNAPSHOT_INTERVAL_MINUTES = SNAPSHOT_ROUND_MINUTES
 COVERAGE_ALERT_RATIO_THRESHOLD = 0.3
 COVERAGE_ALERT_MIN_ELAPSED_RATIO = 0.5
+MIDDAY_CHECKPOINT_TIME = time(13, 0)
+GAP_CHECK_THRESHOLD_MINUTES = SNAPSHOT_ROUND_MINUTES + 5
 
 
 def _active_equity_symbol_count() -> int:
@@ -100,6 +106,7 @@ def compute_daily_snapshot_coverage(model: Any, table_name: str, today: date, no
         and coverage_ratio < COVERAGE_ALERT_RATIO_THRESHOLD
         and elapsed_ratio >= COVERAGE_ALERT_MIN_ELAPSED_RATIO
     )
+    midday_checkpoint_reached = now_npt.time() >= MIDDAY_CHECKPOINT_TIME
 
     logger.info(
         "intraday_data_quality: %s coverage for %s - %d/%d expected snapshots so far (%s), elapsed_ratio=%.2f",
@@ -119,7 +126,33 @@ def compute_daily_snapshot_coverage(model: Any, table_name: str, today: date, no
         "coverage_ratio": coverage_ratio,
         "elapsed_session_ratio": round(elapsed_ratio, 3),
         "should_alert": should_alert,
+        "midday_checkpoint_reached": midday_checkpoint_reached,
         "snapshot_times": snapshot_times,
+    }
+
+
+def detect_intraday_gap(model: Any, table_name: str, now_npt: datetime) -> dict[str, Any]:
+    today = now_npt.date()
+    with get_session() as session:
+        last_snapshot_time = session.execute(
+            select(func.max(model.snapshot_time)).where(func.date(model.snapshot_time) == today)
+        ).scalar()
+
+    if last_snapshot_time is None:
+        return {
+            "table": table_name,
+            "gap_detected": False,
+            "minutes_since_last_snapshot": None,
+            "reason": "no snapshots recorded yet today",
+        }
+
+    minutes_since = (now_npt - last_snapshot_time).total_seconds() / 60
+    gap_detected = minutes_since > GAP_CHECK_THRESHOLD_MINUTES
+
+    return {
+        "table": table_name,
+        "gap_detected": gap_detected,
+        "minutes_since_last_snapshot": round(minutes_since, 1),
     }
 
 

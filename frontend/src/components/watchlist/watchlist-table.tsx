@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { TrendingDown, TrendingUp, X } from "lucide-react";
 import type { WatchlistItem } from "@/lib/watchlist-data";
+import { plainLanguageSignalLabel } from "@/lib/signal-labels";
 import { isHighConfidenceTier, tierLabel } from "@/lib/signal-tiers";
 
 function formatPrice(value: string | null): string {
@@ -80,13 +81,14 @@ export function WatchlistTable({ items, onChanged }: { items: WatchlistItem[]; o
                 <td className="px-4 py-3">
                   {item.active_signal ? (
                     <span
+                      title={item.active_signal.signal_name}
                       className={`inline-block rounded-md px-2 py-0.5 text-xs font-medium ${
                         isHighConfidenceTier(item.active_signal.tier)
                           ? "bg-success/10 text-success-text"
                           : "bg-warning/10 text-warning-text"
                       }`}
                     >
-                      {item.active_signal.signal_name} · {tierLabel(item.active_signal.tier)}
+                      {plainLanguageSignalLabel(item.active_signal.signal_name)} · {tierLabel(item.active_signal.tier)}
                     </span>
                   ) : (
                     <span className="text-xs text-text-secondary">No active signal</span>

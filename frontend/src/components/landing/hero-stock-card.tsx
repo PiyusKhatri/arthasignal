@@ -1,5 +1,6 @@
 import { TrendingDown, TrendingUp } from "lucide-react";
 import type { StockSignals, StockSummary } from "@/lib/market-data";
+import { plainLanguageSignalLabel } from "@/lib/signal-labels";
 
 function formatPercent(value: string | null): string {
   if (value === null) {
@@ -44,7 +45,8 @@ export function HeroStockCard({ summary, signals }: { summary: StockSummary; sig
       <div className="mt-5 border-t border-border pt-4">
         {activeSignal ? (
           <div>
-            <p className="text-sm font-medium text-text-primary">{activeSignal.signal_name}</p>
+            <p className="text-sm font-medium text-text-primary">{plainLanguageSignalLabel(activeSignal.signal_name)}</p>
+            <p className="mt-0.5 text-xs text-text-secondary">{activeSignal.signal_name}</p>
             <p className="mt-1 text-xs text-text-secondary">
               Historically {activeSignal.avg_win_rate_minus_baseline}pp above baseline win rate, held{" "}
               {activeSignal.recommended_holding_period?.toLowerCase()}.

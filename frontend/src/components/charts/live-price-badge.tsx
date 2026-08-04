@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { ChartTarget } from "@/components/charts/timeframe-chart";
 
 const POLL_INTERVAL_MS = 60000;
 
@@ -11,14 +12,22 @@ function formatPrice(value: string): string {
   return Number(value).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-export function LivePriceBadge({ symbol }: { symbol: string }) {
+function intradayUrl(target: ChartTarget): string {
+  if (target.kind === "stock") {
+    return `/api/stocks/${encodeURIComponent(target.symbol)}/intraday-today`;
+  }
+  return `/api/market/index-intraday-today`;
+}
+
+export function LivePriceBadge({ target }: { target: ChartTarget }) {
   const [point, setPoint] = useState<IntradayPoint | null>(null);
+  const targetKey = target.kind === "stock" ? target.symbol : "index";
 
   useEffect(() => {
     let ignore = false;
 
     const poll = () => {
-      fetch(`/api/stocks/${encodeURIComponent(symbol)}/intraday-today`, { cache: "no-store" })
+      fetch(intradayUrl(target), { cache: "no-store" })
         .then((response) => (response.ok ? response.json() : null))
         .then((data: IntradayResponse | null) => {
           if (ignore) {
@@ -43,16 +52,20 @@ export function LivePriceBadge({ symbol }: { symbol: string }) {
       ignore = true;
       clearInterval(interval);
     };
-  }, [symbol]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetKey]);
 
   if (!point) {
     return null;
   }
 
+  const prefix = target.kind === "stock" ? "Rs " : "";
+
   return (
     <span className="flex items-center gap-1.5 text-xs font-medium text-success-text" data-testid="live-price-badge">
       <span className="inline-block size-1.5 rounded-full bg-success-text" aria-hidden="true" />
-      Live Rs {formatPrice(point.price)}
+      Live {prefix}
+      {formatPrice(point.price)}
     </span>
   );
 }

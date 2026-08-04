@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LivePriceBadge } from "@/components/charts/live-price-badge";
 import { TimeframeChart } from "@/components/charts/timeframe-chart";
 import { MarketPulseRow } from "@/components/dashboard/market-pulse-row";
 import { PaperTradeBanner } from "@/components/dashboard/paper-trade-banner";
@@ -43,7 +44,10 @@ export default async function DashboardPage() {
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold text-text-primary">NEPSE Index</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-text-primary">NEPSE Index</h2>
+          <LivePriceBadge target={{ kind: "index" }} />
+        </div>
         <div className="mt-4">
           <TimeframeChart target={{ kind: "index" }} />
         </div>

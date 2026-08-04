@@ -1,5 +1,6 @@
 import { TrendingDown, TrendingUp } from "lucide-react";
 import type { ActiveSignal } from "@/lib/market-data";
+import { plainLanguageSignalLabel } from "@/lib/signal-labels";
 
 function formatPercent(value: string | null): string {
   if (value === null) {
@@ -34,7 +35,8 @@ function SignalCard({ signal }: { signal: ActiveSignal }) {
       <p className="mt-3 text-lg font-semibold text-text-primary">Rs {Number(signal.latest_close).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
 
       <div className="mt-3 border-t border-border pt-3">
-        <p className="text-sm text-text-primary">{signal.signal_name}</p>
+        <p className="text-sm text-text-primary">{plainLanguageSignalLabel(signal.signal_name)}</p>
+        <p className="mt-0.5 text-xs text-text-secondary">{signal.signal_name}</p>
         <span
           className={`mt-2 inline-block rounded-md px-2 py-0.5 text-xs font-medium ${
             isHighConfidence ? "bg-accent-text/10 text-accent-text" : "bg-border text-text-secondary"

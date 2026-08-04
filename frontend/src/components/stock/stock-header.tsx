@@ -1,5 +1,5 @@
 import { TrendingDown, TrendingUp } from "lucide-react";
-import { LivePriceBadge } from "@/components/stock/live-price-badge";
+import { LivePriceBadge } from "@/components/charts/live-price-badge";
 import { WatchlistToggleButton } from "@/components/stock/watchlist-toggle-button";
 import type { StockSummary } from "@/lib/market-data";
 
@@ -50,7 +50,7 @@ export function StockHeader({
             {formatPercent(summary.percent_change)}
           </span>
         </div>
-        <LivePriceBadge symbol={summary.symbol} />
+        <LivePriceBadge target={{ kind: "stock", symbol: summary.symbol }} />
         <div className="flex gap-4 text-xs text-text-secondary">
           <span>
             Day high <span className="text-text-primary">{formatPrice(summary.day_high)}</span>

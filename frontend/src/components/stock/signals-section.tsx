@@ -1,4 +1,5 @@
 import type { StockSignal } from "@/lib/market-data";
+import { plainLanguageSignalLabel } from "@/lib/signal-labels";
 import { isHighConfidenceTier, tierLabel } from "@/lib/signal-tiers";
 
 function formatEdge(value: string | null): string {
@@ -15,7 +16,10 @@ function SignalCard({ signal }: { signal: StockSignal }) {
   return (
     <div className="rounded-lg border border-border bg-card p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-semibold text-text-primary">{signal.signal_name}</p>
+        <div>
+          <p className="text-sm font-semibold text-text-primary">{plainLanguageSignalLabel(signal.signal_name)}</p>
+          <p className="mt-0.5 text-xs text-text-secondary">{signal.signal_name}</p>
+        </div>
         <span
           className={`rounded-md px-2 py-0.5 text-xs font-medium ${
             isHighConfidence ? "bg-success/10 text-success-text" : "bg-warning/10 text-warning-text"

@@ -3,6 +3,7 @@
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getSectorStocks, type SectorStock } from "@/lib/market-data";
+import { plainLanguageSignalLabel } from "@/lib/signal-labels";
 import { isHighConfidenceTier, tierLabel } from "@/lib/signal-tiers";
 
 function formatPrice(value: string | null): string {
@@ -97,13 +98,14 @@ export function SectorStocksPanel({ sector }: { sector: string }) {
                 <td className="py-2 pr-4">
                   {stock.active_signal ? (
                     <span
+                      title={stock.active_signal.signal_name}
                       className={`inline-block rounded-md px-2 py-0.5 text-xs font-medium ${
                         isHighConfidenceTier(stock.active_signal.tier)
                           ? "bg-success/10 text-success-text"
                           : "bg-warning/10 text-warning-text"
                       }`}
                     >
-                      {stock.active_signal.signal_name} · {tierLabel(stock.active_signal.tier)}
+                      {plainLanguageSignalLabel(stock.active_signal.signal_name)} · {tierLabel(stock.active_signal.tier)}
                     </span>
                   ) : (
                     <span className="text-xs text-text-secondary">No active signal</span>
