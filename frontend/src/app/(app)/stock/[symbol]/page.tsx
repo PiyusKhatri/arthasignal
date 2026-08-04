@@ -11,17 +11,19 @@ import {
   getStockSummary,
   getStockTechnical,
 } from "@/lib/market-data";
+import { isSymbolWatched } from "@/lib/watchlist-data";
 
 export default async function StockDetailPage({ params }: { params: Promise<{ symbol: string }> }) {
   const { symbol: rawSymbol } = await params;
   const symbol = rawSymbol.toUpperCase();
 
-  const [summary, history, technical, signals, fundamental] = await Promise.all([
+  const [summary, history, technical, signals, fundamental, watchStatus] = await Promise.all([
     getStockSummary(symbol),
     getStockHistory(symbol),
     getStockTechnical(symbol),
     getStockSignals(symbol),
     getStockFundamental(symbol),
+    isSymbolWatched(symbol),
   ]);
 
   if (!summary) {
@@ -30,7 +32,7 @@ export default async function StockDetailPage({ params }: { params: Promise<{ sy
 
   return (
     <div className="flex flex-col gap-8">
-      <StockHeader summary={summary} />
+      <StockHeader summary={summary} isWatching={watchStatus.isWatching} isAuthenticated={watchStatus.isAuthenticated} />
 
       <section>
         <h2 className="text-lg font-semibold text-text-primary">Price chart</h2>

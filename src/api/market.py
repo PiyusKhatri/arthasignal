@@ -31,23 +31,11 @@ def get_sector_performance(request: Request) -> list[dict[str, Any]]:
     return compute_sector_wise_pulse()
 
 
-@router.get("/sectors/{sector}/stocks")
-@limiter.limit(PUBLIC_RATE_LIMIT)
-def get_sector_stocks(sector: str, request: Request) -> list[dict[str, Any]]:
+def build_price_and_signal_rows(symbols: list[str], company_names: dict[str, str]) -> list[dict[str, Any]]:
+    if not symbols:
+        return []
+
     with get_readonly_session() as session:
-        companies = session.execute(
-            select(Company.symbol, Company.company_name)
-            .where(Company.sector == sector)
-            .where(Company.instrument_type == "Equity")
-            .where(Company.status == "A")
-            .order_by(Company.symbol)
-        ).all()
-
-        if not companies:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Unknown sector: {sector}")
-
-        symbols = [row.symbol for row in companies]
-
         price_rows = session.execute(
             text(
                 """
@@ -96,7 +84,6 @@ def get_sector_stocks(sector: str, request: Request) -> list[dict[str, Any]]:
         )
         session.expunge_all()
 
-    company_names = {row.symbol: row.company_name for row in companies}
     confidence_by_name = {row.signal_name: row for row in confidence_rows}
     signal_row_by_symbol = {row.symbol: row for row in signal_rows}
 
@@ -139,6 +126,28 @@ def get_sector_stocks(sector: str, request: Request) -> list[dict[str, Any]]:
             }
         )
 
+    return results
+
+
+@router.get("/sectors/{sector}/stocks")
+@limiter.limit(PUBLIC_RATE_LIMIT)
+def get_sector_stocks(sector: str, request: Request) -> list[dict[str, Any]]:
+    with get_readonly_session() as session:
+        companies = session.execute(
+            select(Company.symbol, Company.company_name)
+            .where(Company.sector == sector)
+            .where(Company.instrument_type == "Equity")
+            .where(Company.status == "A")
+            .order_by(Company.symbol)
+        ).all()
+
+    if not companies:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Unknown sector: {sector}")
+
+    symbols = [row.symbol for row in companies]
+    company_names = {row.symbol: row.company_name for row in companies}
+
+    results = build_price_and_signal_rows(symbols, company_names)
     results.sort(
         key=lambda r: r["percent_change"] if r["percent_change"] is not None else Decimal("-Infinity"),
         reverse=True,

@@ -1,4 +1,5 @@
 import { TrendingDown, TrendingUp } from "lucide-react";
+import { WatchlistToggleButton } from "@/components/stock/watchlist-toggle-button";
 import type { StockSummary } from "@/lib/market-data";
 
 function formatPrice(value: string): string {
@@ -13,16 +14,25 @@ function formatPercent(value: string | null): string {
   return `${num >= 0 ? "+" : ""}${num.toFixed(2)}%`;
 }
 
-export function StockHeader({ summary }: { summary: StockSummary }) {
+export function StockHeader({
+  summary,
+  isWatching,
+  isAuthenticated,
+}: {
+  summary: StockSummary;
+  isWatching: boolean;
+  isAuthenticated: boolean;
+}) {
   const change = Number(summary.percent_change ?? 0);
   const isUp = change >= 0;
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-5 sm:flex-row sm:items-start sm:justify-between">
       <div>
-        <div className="flex items-baseline gap-2">
+        <div className="flex flex-wrap items-baseline gap-2">
           <h1 className="text-2xl font-semibold text-text-primary">{summary.symbol}</h1>
           <span className="text-sm text-text-secondary">{summary.company_name}</span>
+          <WatchlistToggleButton symbol={summary.symbol} initialWatching={isWatching} isAuthenticated={isAuthenticated} />
         </div>
         <p className="mt-1 text-sm text-text-secondary">{summary.sector}</p>
       </div>

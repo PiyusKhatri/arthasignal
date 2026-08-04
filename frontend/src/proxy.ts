@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { ACCESS_TOKEN_COOKIE } from "@/lib/auth-cookies";
 
-const PROTECTED_PATHS = ["/portfolio"];
+const PROTECTED_PATHS = ["/portfolio", "/watchlist"];
 
 export function proxy(request: NextRequest) {
   const isProtected = PROTECTED_PATHS.some(
@@ -18,5 +18,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/portfolio/:path*"],
+  matcher: ["/portfolio/:path*", "/watchlist/:path*"],
 };
