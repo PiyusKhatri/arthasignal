@@ -14,8 +14,12 @@ export function MarketPulseRow({ pulse, topSector }: { pulse: MarketPulse | null
     ? Number(topSector.market_cap_weighted_percent_change)
     : null;
 
-  const indexValue = pulse?.nepse_index?.current_value ?? null;
-  const indexChange = pulse?.nepse_index?.percent_change ?? null;
+  const indexValue = pulse?.nepse_index?.current_value !== undefined && pulse?.nepse_index?.current_value !== null
+    ? Number(pulse.nepse_index.current_value)
+    : null;
+  const indexChange = pulse?.nepse_index?.percent_change !== undefined && pulse?.nepse_index?.percent_change !== null
+    ? Number(pulse.nepse_index.percent_change)
+    : null;
 
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

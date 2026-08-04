@@ -4,17 +4,18 @@ import {
   CandlestickSeries,
   ColorType,
   createChart,
-  LineSeries,
+  HistogramSeries,
   type IChartApi,
   type ISeriesApi,
-  type UTCTimestamp,
+  type MouseEventParams,
 } from "lightweight-charts";
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "@/components/theme-provider";
+import { DrawingPrimitive, type DrawingPoint, type DrawingShape, type DrawingTool } from "@/components/charts/drawing-primitive";
 
 export type ChartTarget = { kind: "stock"; symbol: string } | { kind: "index" };
 
-type RangeKey = "1D" | "1W" | "1M" | "3M" | "6M" | "1Y" | "3Y" | "5Y" | "ALL";
+type RangeKey = "1D" | "1W" | "1M" | "3M" | "6M" | "1Y" | "3Y" | "5Y";
 
 const RANGES: { key: RangeKey; label: string }[] = [
   { key: "1D", label: "1D" },
@@ -25,27 +26,32 @@ const RANGES: { key: RangeKey; label: string }[] = [
   { key: "1Y", label: "1Y" },
   { key: "3Y", label: "3Y" },
   { key: "5Y", label: "5Y" },
-  { key: "ALL", label: "All" },
 ];
 
-const DEFAULT_RANGE: RangeKey = "6M";
+const DEFAULT_RANGE: RangeKey = "1D";
 
-type HistoryPoint = { date: string; open: string; high: string; low: string; close: string };
-type IntradayPoint = { time: number; price: string };
-type IntradayResponse = { has_data: boolean; points: IntradayPoint[] };
+// 1D now means "daily candles" (1 candle = 1 day), not live intraday - it fetches the
+// same full history as 5Y and relies on the readable-bar-spacing zoom below to default
+// to a recent, legible window while the rest stays reachable by scrolling back.
+const BACKEND_RANGE: Record<RangeKey, string> = {
+  "1D": "5Y",
+  "1W": "1W",
+  "1M": "1M",
+  "3M": "3M",
+  "6M": "6M",
+  "1Y": "1Y",
+  "3Y": "3Y",
+  "5Y": "5Y",
+};
+
+type HistoryPoint = { date: string; open: string; high: string; low: string; close: string; volume?: number };
 
 function historyUrl(target: ChartTarget, range: RangeKey): string {
+  const backendRange = BACKEND_RANGE[range];
   if (target.kind === "stock") {
-    return `/api/stocks/${encodeURIComponent(target.symbol)}/history?range=${range}`;
+    return `/api/stocks/${encodeURIComponent(target.symbol)}/history?range=${backendRange}`;
   }
-  return `/api/market/index-history?range=${range}`;
-}
-
-function intradayUrl(target: ChartTarget): string {
-  if (target.kind === "stock") {
-    return `/api/stocks/${encodeURIComponent(target.symbol)}/intraday-today`;
-  }
-  return `/api/market/index-intraday-today`;
+  return `/api/market/index-history?range=${backendRange}`;
 }
 
 function readCssColor(varName: string): string {
@@ -55,34 +61,65 @@ function readCssColor(varName: string): string {
   return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
 }
 
+function hexToRgba(hex: string, alpha: number): string {
+  const parsed = hex.replace("#", "");
+  const bigint = parseInt(parsed.length === 3 ? parsed.split("").map((c) => c + c).join("") : parsed, 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+const READABLE_BAR_SPACING = 6;
+const MAIN_PANE_HEIGHT = 300;
+const VOLUME_PANE_HEIGHT = 100;
+
 type FetchResult = {
   key: string;
   status: "ready" | "error";
   history: HistoryPoint[] | null;
-  intraday: IntradayResponse | null;
 };
 
-const EMPTY_RESULT: FetchResult = { key: "", status: "error", history: null, intraday: null };
+const EMPTY_RESULT: FetchResult = { key: "", status: "error", history: null };
+
+const TOOLS: { key: DrawingTool; label: string }[] = [
+  { key: "trendline", label: "Trend Line" },
+  { key: "zone", label: "S/R Zone" },
+  { key: "text", label: "Text" },
+];
 
 export function TimeframeChart({ target }: { target: ChartTarget }) {
   const [range, setRange] = useState<RangeKey>(DEFAULT_RANGE);
   const [result, setResult] = useState<FetchResult>(EMPTY_RESULT);
+  const [toolState, setToolState] = useState<{ key: string; tool: DrawingTool }>({ key: "", tool: "none" });
   const { theme } = useTheme();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
-  const lineSeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
+  const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
+  const drawingPrimitiveRef = useRef<DrawingPrimitive | null>(null);
+  const drawingToolRef = useRef<DrawingTool>("none");
+  const pendingPointRef = useRef<DrawingPoint | null>(null);
+  const shapesRef = useRef<DrawingShape[]>([]);
+  const nextShapeIdRef = useRef(0);
 
-  const isIntraday = range === "1D";
   const targetKey = target.kind === "stock" ? target.symbol : "index";
   const desiredKey = `${targetKey}:${range}`;
+
+  const drawingTool = toolState.key === desiredKey ? toolState.tool : "none";
+
+  useEffect(() => {
+    drawingToolRef.current = drawingTool;
+    if (containerRef.current) {
+      containerRef.current.style.cursor = drawingTool === "none" ? "default" : "crosshair";
+    }
+  }, [drawingTool]);
 
   useEffect(() => {
     let ignore = false;
 
-    const url = isIntraday ? intradayUrl(target) : historyUrl(target, range);
-    fetch(url, { cache: "no-store" })
+    fetch(historyUrl(target, range), { cache: "no-store" })
       .then((response) => {
         if (!response.ok) {
           throw new Error(`request failed with status ${response.status}`);
@@ -93,38 +130,34 @@ export function TimeframeChart({ target }: { target: ChartTarget }) {
         if (ignore) {
           return;
         }
-        setResult({
-          key: desiredKey,
-          status: "ready",
-          history: isIntraday ? null : (data as HistoryPoint[]),
-          intraday: isIntraday ? (data as IntradayResponse) : null,
-        });
+        setResult({ key: desiredKey, status: "ready", history: data as HistoryPoint[] });
       })
       .catch(() => {
         if (!ignore) {
-          setResult({ key: desiredKey, status: "error", history: null, intraday: null });
+          setResult({ key: desiredKey, status: "error", history: null });
         }
       });
 
     return () => {
       ignore = true;
     };
-  }, [desiredKey, isIntraday, target, range]);
+  }, [desiredKey, target, range]);
 
   const status = result.key !== desiredKey ? "loading" : result.status;
   const history = result.key === desiredKey ? result.history : null;
-  const intraday = result.key === desiredKey ? result.intraday : null;
 
-  const intradayHasData = isIntraday && intraday !== null && intraday.has_data && intraday.points.length > 0;
-  const chartRenderable = status === "ready" && (isIntraday ? intradayHasData : history !== null && history.length > 0);
+  const chartRenderable = status === "ready" && history !== null && history.length > 0;
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container || !chartRenderable) {
+    if (!container || !chartRenderable || !history) {
       return;
     }
 
-    const chart = createChart(container, { width: container.clientWidth, height: 360 });
+    const showVolume = history.length > 0 && history[0].volume !== undefined;
+    const totalHeight = showVolume ? MAIN_PANE_HEIGHT + VOLUME_PANE_HEIGHT : MAIN_PANE_HEIGHT;
+
+    const chart = createChart(container, { width: container.clientWidth, height: totalHeight });
     chartRef.current = chart;
 
     const textColor = readCssColor("--color-text-secondary");
@@ -134,45 +167,130 @@ export function TimeframeChart({ target }: { target: ChartTarget }) {
       layout: { background: { type: ColorType.Solid, color: "transparent" }, textColor },
       grid: { vertLines: { color: borderColor }, horzLines: { color: borderColor } },
       rightPriceScale: { borderColor },
-      timeScale: { borderColor, timeVisible: isIntraday, secondsVisible: false },
+      timeScale: { borderColor, timeVisible: false, secondsVisible: false, barSpacing: READABLE_BAR_SPACING },
     });
 
-    if (isIntraday && intraday) {
-      const lineColor = readCssColor("--color-accent-text");
-      const series = chart.addSeries(LineSeries, { color: lineColor, lineWidth: 2 });
-      lineSeriesRef.current = series;
-      candleSeriesRef.current = null;
-      series.setData(
-        intraday.points.map((point) => ({
-          time: point.time as UTCTimestamp,
-          value: Number(point.price),
-        }))
+    const upColor = readCssColor("--color-success-text");
+    const downColor = readCssColor("--color-danger-text");
+    const series = chart.addSeries(CandlestickSeries, {
+      upColor,
+      downColor,
+      borderUpColor: upColor,
+      borderDownColor: downColor,
+      wickUpColor: upColor,
+      wickDownColor: downColor,
+    });
+    candleSeriesRef.current = series;
+    const barCount = history.length;
+    series.setData(
+      history.map((point) => ({
+        time: point.date,
+        open: Number(point.open),
+        high: Number(point.high),
+        low: Number(point.low),
+        close: Number(point.close),
+      }))
+    );
+
+    if (showVolume) {
+      const volUpColor = hexToRgba(upColor, 0.5);
+      const volDownColor = hexToRgba(downColor, 0.5);
+      const volumeSeries = chart.addSeries(
+        HistogramSeries,
+        { priceFormat: { type: "volume" }, priceLineVisible: false, lastValueVisible: false },
+        1
       );
-    } else if (history) {
-      const upColor = readCssColor("--color-success-text");
-      const downColor = readCssColor("--color-danger-text");
-      const series = chart.addSeries(CandlestickSeries, {
-        upColor,
-        downColor,
-        borderUpColor: upColor,
-        borderDownColor: downColor,
-        wickUpColor: upColor,
-        wickDownColor: downColor,
-      });
-      candleSeriesRef.current = series;
-      lineSeriesRef.current = null;
-      series.setData(
+      volumeSeriesRef.current = volumeSeries;
+      volumeSeries.setData(
         history.map((point) => ({
           time: point.date,
-          open: Number(point.open),
-          high: Number(point.high),
-          low: Number(point.low),
-          close: Number(point.close),
+          value: point.volume ?? 0,
+          color: Number(point.close) >= Number(point.open) ? volUpColor : volDownColor,
         }))
       );
+      chart.panes()[1]?.setHeight(VOLUME_PANE_HEIGHT);
+    } else {
+      volumeSeriesRef.current = null;
     }
 
-    chart.timeScale().fitContent();
+    const maxVisibleBars = Math.max(1, Math.floor(container.clientWidth / READABLE_BAR_SPACING));
+    if (barCount > maxVisibleBars) {
+      chart.timeScale().setVisibleLogicalRange({ from: barCount - maxVisibleBars, to: barCount - 1 });
+    } else {
+      chart.timeScale().fitContent();
+    }
+
+    const drawing = new DrawingPrimitive();
+    drawingPrimitiveRef.current = drawing;
+    shapesRef.current = [];
+    pendingPointRef.current = null;
+    const accent = readCssColor("--color-accent-primary");
+    drawing.setColors(
+      accent,
+      hexToRgba(accent, 0.15),
+      readCssColor("--color-text-primary"),
+      hexToRgba(readCssColor("--color-card"), 0.9)
+    );
+    series.attachPrimitive(drawing);
+
+    const finalizeShape = (kind: "line" | "rect", p1: DrawingPoint, p2: DrawingPoint) => {
+      const shape: DrawingShape = { id: nextShapeIdRef.current++, kind, p1, p2 };
+      shapesRef.current = [...shapesRef.current, shape];
+      drawing.setShapes(shapesRef.current);
+      drawing.setDraft(null);
+      pendingPointRef.current = null;
+      setToolState({ key: desiredKey, tool: "none" });
+    };
+
+    const handleClick = (param: MouseEventParams) => {
+      const tool = drawingToolRef.current;
+      if (tool === "none" || param.logical === undefined || !param.point) {
+        return;
+      }
+      const price = series.coordinateToPrice(param.point.y);
+      if (price === null) {
+        return;
+      }
+      const point: DrawingPoint = { logical: param.logical, price };
+
+      if (tool === "text") {
+        const text = window.prompt("Annotation text:");
+        if (text && text.trim()) {
+          const shape: DrawingShape = { id: nextShapeIdRef.current++, kind: "text", p1: point, text: text.trim() };
+          shapesRef.current = [...shapesRef.current, shape];
+          drawing.setShapes(shapesRef.current);
+        }
+        setToolState({ key: desiredKey, tool: "none" });
+        return;
+      }
+
+      if (!pendingPointRef.current) {
+        pendingPointRef.current = point;
+        return;
+      }
+
+      finalizeShape(tool === "trendline" ? "line" : "rect", pendingPointRef.current, point);
+    };
+
+    const handleCrosshairMove = (param: MouseEventParams) => {
+      const tool = drawingToolRef.current;
+      if (tool === "none" || tool === "text" || !pendingPointRef.current || param.logical === undefined || !param.point) {
+        return;
+      }
+      const price = series.coordinateToPrice(param.point.y);
+      if (price === null) {
+        return;
+      }
+      drawing.setDraft({
+        id: -1,
+        kind: tool === "trendline" ? "line" : "rect",
+        p1: pendingPointRef.current,
+        p2: { logical: param.logical, price },
+      });
+    };
+
+    chart.subscribeClick(handleClick);
+    chart.subscribeCrosshairMove(handleCrosshairMove);
 
     const handleResize = () => {
       chart.applyOptions({ width: container.clientWidth });
@@ -184,9 +302,10 @@ export function TimeframeChart({ target }: { target: ChartTarget }) {
       chart.remove();
       chartRef.current = null;
       candleSeriesRef.current = null;
-      lineSeriesRef.current = null;
+      volumeSeriesRef.current = null;
+      drawingPrimitiveRef.current = null;
     };
-  }, [chartRenderable, isIntraday, history, intraday]);
+  }, [chartRenderable, history, desiredKey]);
 
   useEffect(() => {
     const chart = chartRef.current;
@@ -213,42 +332,100 @@ export function TimeframeChart({ target }: { target: ChartTarget }) {
         wickUpColor: upColor,
         wickDownColor: downColor,
       });
+      if (volumeSeriesRef.current && history) {
+        const volUpColor = hexToRgba(upColor, 0.5);
+        const volDownColor = hexToRgba(downColor, 0.5);
+        volumeSeriesRef.current.setData(
+          history.map((point) => ({
+            time: point.date,
+            value: point.volume ?? 0,
+            color: Number(point.close) >= Number(point.open) ? volUpColor : volDownColor,
+          }))
+        );
+      }
     }
-    if (lineSeriesRef.current) {
-      lineSeriesRef.current.applyOptions({ color: readCssColor("--color-accent-text") });
+    if (drawingPrimitiveRef.current) {
+      const accent = readCssColor("--color-accent-primary");
+      drawingPrimitiveRef.current.setColors(
+        accent,
+        hexToRgba(accent, 0.15),
+        readCssColor("--color-text-primary"),
+        hexToRgba(readCssColor("--color-card"), 0.9)
+      );
     }
-  }, [theme]);
+  }, [theme, history]);
+
+  const toggleDrawingTool = (tool: DrawingTool) => {
+    pendingPointRef.current = null;
+    drawingPrimitiveRef.current?.setDraft(null);
+    setToolState((current) => ({
+      key: desiredKey,
+      tool: current.key === desiredKey && current.tool === tool ? "none" : tool,
+    }));
+  };
+
+  const handleClearDrawings = () => {
+    shapesRef.current = [];
+    pendingPointRef.current = null;
+    drawingPrimitiveRef.current?.setShapes([]);
+    drawingPrimitiveRef.current?.setDraft(null);
+    setToolState({ key: desiredKey, tool: "none" });
+  };
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-3">
-        <div
-          className="inline-flex flex-wrap items-center gap-0.5 rounded-full border border-border bg-card p-0.5"
-          data-testid="timeframe-selector"
-        >
-          {RANGES.map((entry) => (
+      <div
+        className="inline-flex flex-wrap items-center gap-0.5 rounded-full border border-border bg-card p-0.5"
+        data-testid="timeframe-selector"
+      >
+        {RANGES.map((entry) => (
+          <button
+            key={entry.key}
+            type="button"
+            onClick={() => setRange(entry.key)}
+            data-testid={`timeframe-${entry.key}`}
+            aria-pressed={range === entry.key}
+            className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+              range === entry.key ? "bg-accent-primary text-white" : "text-text-secondary hover:text-text-primary"
+            }`}
+          >
+            {entry.label}
+          </button>
+        ))}
+      </div>
+
+      {chartRenderable && (
+        <div className="flex flex-wrap items-center gap-1.5" data-testid="drawing-toolbar">
+          {TOOLS.map((toolEntry) => (
             <button
-              key={entry.key}
+              key={toolEntry.key}
               type="button"
-              onClick={() => setRange(entry.key)}
-              data-testid={`timeframe-${entry.key}`}
-              aria-pressed={range === entry.key}
-              className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
-                range === entry.key
-                  ? "bg-accent-primary text-white"
-                  : "text-text-secondary hover:text-text-primary"
+              onClick={() => toggleDrawingTool(toolEntry.key)}
+              data-testid={`drawing-tool-${toolEntry.key}`}
+              aria-pressed={drawingTool === toolEntry.key}
+              className={`rounded-md border px-2 py-1 text-xs font-medium transition-colors ${
+                drawingTool === toolEntry.key
+                  ? "border-accent-primary bg-accent-primary text-white"
+                  : "border-border text-text-secondary hover:text-text-primary"
               }`}
             >
-              {entry.label}
+              {toolEntry.label}
             </button>
           ))}
+          <button
+            type="button"
+            onClick={handleClearDrawings}
+            data-testid="drawing-tool-clear"
+            className="rounded-md border border-border px-2 py-1 text-xs font-medium text-text-secondary transition-colors hover:text-text-primary"
+          >
+            Clear
+          </button>
+          {drawingTool !== "none" && drawingTool !== "text" && (
+            <span className="text-xs text-text-secondary">Click two points on the chart to place it.</span>
+          )}
+          {drawingTool === "text" && <span className="text-xs text-text-secondary">Click the chart to place text.</span>}
         </div>
-        {isIntraday && (
-          <span className="whitespace-nowrap text-xs font-medium text-success-text" data-testid="today-live-label">
-            Today (live)
-          </span>
-        )}
-      </div>
+      )}
 
       <div className="rounded-lg border border-border bg-card p-4">
         {status === "loading" && (
@@ -261,16 +438,7 @@ export function TimeframeChart({ target }: { target: ChartTarget }) {
           </div>
         )}
 
-        {status === "ready" && isIntraday && !intradayHasData && (
-          <div
-            className="flex h-[360px] items-center justify-center text-sm text-text-secondary"
-            data-testid="intraday-empty-state"
-          >
-            Today&apos;s live data isn&apos;t available yet.
-          </div>
-        )}
-
-        {status === "ready" && !isIntraday && (!history || history.length === 0) && (
+        {status === "ready" && (!history || history.length === 0) && (
           <div className="flex h-[360px] items-center justify-center text-sm text-text-secondary">
             No price history available for this range.
           </div>

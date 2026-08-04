@@ -1,0 +1,58 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+const POLL_INTERVAL_MS = 60000;
+
+type IntradayPoint = { time: number; price: string };
+type IntradayResponse = { has_data: boolean; points: IntradayPoint[] };
+
+function formatPrice(value: string): string {
+  return Number(value).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+export function LivePriceBadge({ symbol }: { symbol: string }) {
+  const [point, setPoint] = useState<IntradayPoint | null>(null);
+
+  useEffect(() => {
+    let ignore = false;
+
+    const poll = () => {
+      fetch(`/api/stocks/${encodeURIComponent(symbol)}/intraday-today`, { cache: "no-store" })
+        .then((response) => (response.ok ? response.json() : null))
+        .then((data: IntradayResponse | null) => {
+          if (ignore) {
+            return;
+          }
+          if (data && data.has_data && data.points.length > 0) {
+            setPoint(data.points[data.points.length - 1]);
+          } else {
+            setPoint(null);
+          }
+        })
+        .catch(() => {
+          if (!ignore) {
+            setPoint(null);
+          }
+        });
+    };
+
+    poll();
+    const interval = setInterval(poll, POLL_INTERVAL_MS);
+    return () => {
+      ignore = true;
+      clearInterval(interval);
+    };
+  }, [symbol]);
+
+  if (!point) {
+    return null;
+  }
+
+  return (
+    <span className="flex items-center gap-1.5 text-xs font-medium text-success-text" data-testid="live-price-badge">
+      <span className="inline-block size-1.5 rounded-full bg-success-text" aria-hidden="true" />
+      Live Rs {formatPrice(point.price)}
+    </span>
+  );
+}

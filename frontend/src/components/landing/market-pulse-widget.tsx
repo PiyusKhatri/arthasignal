@@ -43,10 +43,14 @@ export function MarketPulseWidget({ pulse }: { pulse: MarketPulse | null }) {
             <p className="text-xs text-text-secondary">NEPSE index</p>
             {pulse.nepse_index?.current_value !== null && pulse.nepse_index?.current_value !== undefined ? (
               <p className="mt-2 text-2xl font-semibold text-text-primary">
-                {pulse.nepse_index.current_value.toLocaleString("en-US", { maximumFractionDigits: 2 })}
+                {Number(pulse.nepse_index.current_value).toLocaleString("en-US", { maximumFractionDigits: 2 })}
                 {pulse.nepse_index.percent_change !== null ? (
-                  <span className={`ml-2 text-base font-medium ${pulse.nepse_index.percent_change >= 0 ? "text-success-text" : "text-danger-text"}`}>
-                    {formatSignedPercent(pulse.nepse_index.percent_change)}
+                  <span
+                    className={`ml-2 text-base font-medium ${
+                      Number(pulse.nepse_index.percent_change) >= 0 ? "text-success-text" : "text-danger-text"
+                    }`}
+                  >
+                    {formatSignedPercent(Number(pulse.nepse_index.percent_change))}
                   </span>
                 ) : null}
               </p>

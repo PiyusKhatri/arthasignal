@@ -119,9 +119,9 @@ export type MarketPulse = {
     interpretation: string;
   };
   nepse_index: {
-    current_value: number | null;
-    percent_change: number | null;
-    points_change: number | null;
+    current_value: string | null;
+    percent_change: string | null;
+    points_change: string | null;
   } | null;
   turnover_trend: {
     today_turnover: string | null;
