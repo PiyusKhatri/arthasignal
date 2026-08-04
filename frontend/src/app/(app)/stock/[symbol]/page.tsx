@@ -1,25 +1,18 @@
 import { notFound } from "next/navigation";
+import { TimeframeChart } from "@/components/charts/timeframe-chart";
 import { FundamentalSection } from "@/components/stock/fundamental-section";
-import { PriceChart } from "@/components/stock/price-chart";
 import { SignalsSection } from "@/components/stock/signals-section";
 import { StockHeader } from "@/components/stock/stock-header";
 import { TechnicalAnalysisSection } from "@/components/stock/technical-analysis-section";
-import {
-  getStockFundamental,
-  getStockHistory,
-  getStockSignals,
-  getStockSummary,
-  getStockTechnical,
-} from "@/lib/market-data";
+import { getStockFundamental, getStockSignals, getStockSummary, getStockTechnical } from "@/lib/market-data";
 import { isSymbolWatched } from "@/lib/watchlist-data";
 
 export default async function StockDetailPage({ params }: { params: Promise<{ symbol: string }> }) {
   const { symbol: rawSymbol } = await params;
   const symbol = rawSymbol.toUpperCase();
 
-  const [summary, history, technical, signals, fundamental, watchStatus] = await Promise.all([
+  const [summary, technical, signals, fundamental, watchStatus] = await Promise.all([
     getStockSummary(symbol),
-    getStockHistory(symbol),
     getStockTechnical(symbol),
     getStockSignals(symbol),
     getStockFundamental(symbol),
@@ -36,12 +29,8 @@ export default async function StockDetailPage({ params }: { params: Promise<{ sy
 
       <section>
         <h2 className="text-lg font-semibold text-text-primary">Price chart</h2>
-        <div className="mt-4 rounded-lg border border-border bg-card p-4">
-          {history && history.length > 0 ? (
-            <PriceChart history={history} />
-          ) : (
-            <p className="text-sm text-text-secondary">Price history is temporarily unavailable.</p>
-          )}
+        <div className="mt-4">
+          <TimeframeChart target={{ kind: "stock", symbol }} />
         </div>
       </section>
 

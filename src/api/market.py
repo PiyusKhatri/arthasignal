@@ -1,20 +1,32 @@
 from __future__ import annotations
 
+from datetime import date, timezone
 from decimal import Decimal
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Request, status
-from sqlalchemy import select, text
+from fastapi import APIRouter, HTTPException, Query, Request, status
+from sqlalchemy import func, select, text
 
-from src.api.cache import cached, market_pulse_cache
+from src.api.cache import cached, index_history_cache, intraday_today_cache, market_pulse_cache
+from src.api.chart_ranges import VALID_RANGES, range_cutoff
 from src.api.db_readonly import get_readonly_session
 from src.api.rate_limit import PUBLIC_RATE_LIMIT, limiter
 from src.api.stocks import evaluate_target_signal_conditions
-from src.database.models import Company, SignalConfidence, SignalTimeframe, SymbolLiquidityTier, TechnicalSignal
+from src.database.models import (
+    Company,
+    IntradayIndexSnapshot,
+    MarketIndex,
+    SignalConfidence,
+    SignalTimeframe,
+    SymbolLiquidityTier,
+    TechnicalSignal,
+)
 from src.pipeline.extract_signal_calls import TARGET_SIGNAL_HORIZONS
 from src.pipeline.market_pulse import compute_active_signals, compute_overall_market_pulse, compute_sector_wise_pulse
 
 router = APIRouter(prefix="/market", tags=["market"])
+
+NEPSE_INDEX_NAME = "NEPSE Index"
 
 
 @router.get("/pulse")
@@ -160,3 +172,56 @@ def get_sector_stocks(sector: str, request: Request) -> list[dict[str, Any]]:
 @cached(market_pulse_cache, key_fn=lambda **kwargs: "active-signals")
 def get_active_signals(request: Request) -> dict[str, Any]:
     return compute_active_signals()
+
+
+@router.get("/index-history")
+@limiter.limit(PUBLIC_RATE_LIMIT)
+@cached(index_history_cache, key_fn=lambda **kwargs: kwargs.get("range_"))
+def get_index_history(request: Request, range_: str = Query("6M", alias="range")) -> list[dict[str, Any]]:
+    if range_ not in VALID_RANGES:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid range: {range_}")
+
+    if range_ == "1D":
+        return []
+
+    with get_readonly_session() as session:
+        query = select(MarketIndex).where(MarketIndex.index_name == NEPSE_INDEX_NAME)
+        cutoff = range_cutoff(range_)
+        if cutoff is not None:
+            query = query.where(MarketIndex.date >= cutoff)
+        rows = session.execute(query.order_by(MarketIndex.date.asc())).scalars().all()
+        session.expunge_all()
+
+    if not rows:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No index history available")
+
+    return [
+        {"date": row.date, "open": row.open, "high": row.high, "low": row.low, "close": row.close}
+        for row in rows
+    ]
+
+
+@router.get("/index-intraday-today")
+@limiter.limit(PUBLIC_RATE_LIMIT)
+@cached(intraday_today_cache, key_fn=lambda **kwargs: "index-intraday-today")
+def get_index_intraday_today(request: Request) -> dict[str, Any]:
+    today = date.today()
+    with get_readonly_session() as session:
+        rows = session.execute(
+            select(IntradayIndexSnapshot)
+            .where(IntradayIndexSnapshot.index_name == NEPSE_INDEX_NAME)
+            .where(func.date(IntradayIndexSnapshot.snapshot_time) == today)
+            .order_by(IntradayIndexSnapshot.snapshot_time.asc())
+        ).scalars().all()
+        session.expunge_all()
+
+    points = [
+        {
+            "time": int(row.snapshot_time.astimezone(timezone.utc).timestamp()),
+            "price": row.current_value,
+        }
+        for row in rows
+        if row.current_value is not None
+    ]
+
+    return {"index_name": NEPSE_INDEX_NAME, "date": today, "has_data": bool(points), "points": points}

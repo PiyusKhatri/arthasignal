@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TimeframeChart } from "@/components/charts/timeframe-chart";
 import { MarketPulseRow } from "@/components/dashboard/market-pulse-row";
 import { PaperTradeBanner } from "@/components/dashboard/paper-trade-banner";
 import { SectorPerformanceList } from "@/components/dashboard/sector-performance-list";
@@ -38,6 +39,13 @@ export default async function DashboardPage() {
         <h2 className="text-lg font-semibold text-text-primary">Today&apos;s signals</h2>
         <div className="mt-4">
           <TodaysSignalsRow signals={activeSignals?.signals ?? []} />
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-lg font-semibold text-text-primary">NEPSE Index</h2>
+        <div className="mt-4">
+          <TimeframeChart target={{ kind: "index" }} />
         </div>
       </section>
 

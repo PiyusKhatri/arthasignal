@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+from datetime import date, timezone
 from decimal import Decimal
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query, Request, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 
-from src.api.cache import cached, price_history_cache, technical_signals_cache
+from src.api.cache import cached, intraday_today_cache, price_history_cache, technical_signals_cache
+from src.api.chart_ranges import VALID_RANGES, range_cutoff
 from src.api.db_readonly import get_readonly_session
 from src.api.rate_limit import PUBLIC_RATE_LIMIT, limiter
 from src.database.models import (
@@ -15,6 +17,7 @@ from src.database.models import (
     CorporateAction,
     DailyPrice,
     Fundamental,
+    IntradaySnapshot,
     SectorFundamentalBaseline,
     SignalConfidence,
     SignalTimeframe,
@@ -134,19 +137,24 @@ def get_stock_summary(symbol: str, request: Request) -> dict[str, Any]:
 
 @router.get("/{symbol}/history")
 @limiter.limit(PUBLIC_RATE_LIMIT)
-@cached(price_history_cache, key_fn=lambda **kwargs: (kwargs.get("symbol"), kwargs.get("days")))
-def get_stock_history(symbol: str, request: Request, days: int = 180) -> list[dict[str, Any]]:
+@cached(price_history_cache, key_fn=lambda **kwargs: (kwargs.get("symbol"), kwargs.get("range_")))
+def get_stock_history(
+    symbol: str, request: Request, range_: str = Query("6M", alias="range")
+) -> list[dict[str, Any]]:
     _load_company(symbol)
 
-    days = max(1, min(days, 730))
+    if range_ not in VALID_RANGES:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid range: {range_}")
+
+    if range_ == "1D":
+        return []
 
     with get_readonly_session() as session:
-        rows = session.execute(
-            select(DailyPrice)
-            .where(DailyPrice.symbol == symbol)
-            .order_by(DailyPrice.date.desc())
-            .limit(days)
-        ).scalars().all()
+        query = select(DailyPrice).where(DailyPrice.symbol == symbol)
+        cutoff = range_cutoff(range_)
+        if cutoff is not None:
+            query = query.where(DailyPrice.date >= cutoff)
+        rows = session.execute(query.order_by(DailyPrice.date.asc())).scalars().all()
         session.expunge_all()
 
     if not rows:
@@ -161,8 +169,37 @@ def get_stock_history(symbol: str, request: Request, days: int = 180) -> list[di
             "close": row.close,
             "volume": row.volume,
         }
-        for row in reversed(rows)
+        for row in rows
     ]
+
+
+@router.get("/{symbol}/intraday-today")
+@limiter.limit(PUBLIC_RATE_LIMIT)
+@cached(intraday_today_cache, key_fn=lambda **kwargs: kwargs.get("symbol"))
+def get_stock_intraday_today(symbol: str, request: Request) -> dict[str, Any]:
+    _load_company(symbol)
+
+    today = date.today()
+    with get_readonly_session() as session:
+        rows = session.execute(
+            select(IntradaySnapshot)
+            .where(IntradaySnapshot.symbol == symbol)
+            .where(func.date(IntradaySnapshot.snapshot_time) == today)
+            .order_by(IntradaySnapshot.snapshot_time.asc())
+        ).scalars().all()
+        session.expunge_all()
+
+    points = [
+        {
+            "time": int(row.snapshot_time.astimezone(timezone.utc).timestamp()),
+            "price": row.ltp,
+            "volume": row.volume_so_far,
+        }
+        for row in rows
+        if row.ltp is not None
+    ]
+
+    return {"symbol": symbol, "date": today, "has_data": bool(points), "points": points}
 
 
 @router.get("/{symbol}/technical")

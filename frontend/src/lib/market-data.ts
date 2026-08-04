@@ -17,15 +17,6 @@ export type StockSummary = {
   day_low: string;
 };
 
-export type StockHistoryPoint = {
-  date: string;
-  open: string;
-  high: string;
-  low: string;
-  close: string;
-  volume: number;
-};
-
 export type StockTechnical = {
   symbol: string;
   date: string;
@@ -260,10 +251,6 @@ export async function getSectorPerformance(): Promise<SectorPerformance[] | null
 
 export async function getStockSummary(symbol: string): Promise<StockSummary | null> {
   return fetchJson<StockSummary>(`/stocks/${symbol}/summary`);
-}
-
-export async function getStockHistory(symbol: string, days = 180): Promise<StockHistoryPoint[] | null> {
-  return fetchJson<StockHistoryPoint[]>(`/stocks/${symbol}/history?days=${days}`);
 }
 
 export async function getStockTechnical(symbol: string): Promise<StockTechnical | null> {
