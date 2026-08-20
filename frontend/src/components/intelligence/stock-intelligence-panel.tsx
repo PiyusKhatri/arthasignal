@@ -40,7 +40,7 @@ export function StockIntelligencePanel({ intelligence }: { intelligence: StockIn
       value: prettyLabel(intelligence.technical.sma_50_vs_sma_200),
       state: intelligence.technical.sma_50_vs_sma_200,
     },
-    { label: "Liquidity", value: prettyLabel(intelligence.liquidity.tier), state: intelligence.liquidity.score >= 10 ? "healthy" : "weak" },
+    { label: "Liquidity", value: prettyLabel(intelligence.liquidity.tier), state: intelligence.liquidity.score >= 7 ? "healthy" : "weak" },
     { label: "Signal quality", value: prettyLabel(intelligence.signal_quality), state: intelligence.signal_quality === "high" ? "healthy" : intelligence.signal_quality === "low" ? "weak" : "neutral" },
   ];
 
@@ -51,7 +51,7 @@ export function StockIntelligencePanel({ intelligence }: { intelligence: StockIn
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-accent-text">Decision layer</p>
           <h2 id="artha-intelligence-title" className="mt-1 text-xl font-semibold text-text-primary">Artha Intelligence v2</h2>
           <p className="mt-1 max-w-2xl text-sm text-text-secondary">
-            6-pillar quantitative scoring model, 15+ year backtest evidence, and AI analyst synthesis for {intelligence.company_name}.
+            Evidence-weighted setup scoring using market-wide signal backtests, forward-validation status, NEPSE regime context, liquidity, and fundamentals for {intelligence.company_name}.
           </p>
         </div>
         <div className="text-xs text-text-secondary">
@@ -92,8 +92,8 @@ export function StockIntelligencePanel({ intelligence }: { intelligence: StockIn
         <article className="rounded-xl border border-border bg-card p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-medium uppercase tracking-[0.16em] text-text-secondary">Signal confidence</p>
-              <h3 className="mt-1 text-base font-semibold text-text-primary">Reliability evidence</h3>
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-text-secondary">Evidence confidence</p>
+              <h3 className="mt-1 text-base font-semibold text-text-primary">Historical edge & validation evidence</h3>
             </div>
             <span className="rounded-md border border-border bg-background px-2 py-1 text-xs font-medium text-text-primary">
               {prettyLabel(intelligence.confidence_level)} confidence
@@ -120,7 +120,7 @@ export function StockIntelligencePanel({ intelligence }: { intelligence: StockIn
             </div>
           ) : (
             <p className="mt-4 rounded-lg border border-border bg-background p-4 text-sm text-text-secondary">
-              No active stock-specific signal currently has a confidence record. Reliability contributes zero points until validated evidence is available.
+              No active validated signal currently has a historical confidence record. Reliability contributes zero points until evidence is available.
             </p>
           )}
         </article>
@@ -128,7 +128,7 @@ export function StockIntelligencePanel({ intelligence }: { intelligence: StockIn
         <article className="rounded-xl border border-border bg-card p-5">
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.16em] text-text-secondary">Historical validation</p>
-            <h3 className="mt-1 text-base font-semibold text-text-primary">Backtest performance</h3>
+            <h3 className="mt-1 text-base font-semibold text-text-primary">Market-wide signal backtests</h3>
           </div>
 
           {intelligence.backtest_summary.length > 0 ? (
@@ -155,10 +155,13 @@ export function StockIntelligencePanel({ intelligence }: { intelligence: StockIn
                   ))}
                 </tbody>
               </table>
+              <p className="mt-3 text-xs leading-relaxed text-text-secondary">
+                These rows describe how the signal behaved across the historical market universe; they are not stock-specific probability estimates.
+              </p>
             </div>
           ) : (
             <p className="mt-4 rounded-lg border border-border bg-background p-4 text-sm text-text-secondary">
-              No historical backtest rows match the stock&apos;s current signal set.
+              No market-wide historical backtest rows match the stock&apos;s current validated signal set.
             </p>
           )}
         </article>
