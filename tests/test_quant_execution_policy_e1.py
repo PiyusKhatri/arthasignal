@@ -135,6 +135,46 @@ def test_e1_holding_cap_applies_without_new_decision() -> None:
     assert result["mean_completed_holding_sessions"] == pytest.approx(2.0)
 
 
+def test_sparse_historical_absence_does_not_fake_an_ineligibility_exit() -> None:
+    dates = _dates(4)
+    predictions = [
+        _candidate("AAA", dates[0], final_score=0.90, baseline_percentile=0.90),
+        _candidate("BBB", dates[1], final_score=0.88, baseline_percentile=0.88),
+    ]
+    observed = {
+        dates[0]: {"AAA"},
+        dates[1]: {"BBB"},
+    }
+    result = simulate_execution_policy_e1(
+        market_dates=dates,
+        predictions_by_date=group_predictions_by_date(predictions),
+        observed_symbols_by_date=observed,
+        price_history=_prices(["AAA", "BBB"], dates),
+        mode="v41",
+        max_positions=1,
+        max_holding_sessions=20,
+    )
+    assert result["exit_reasons"]["ineligible"] == 0
+    assert result["sampled_absence_holds"] >= 1
+
+
+def test_complete_forward_absence_is_a_real_ineligibility_exit() -> None:
+    dates = _dates(4)
+    predictions = [
+        _candidate("AAA", dates[0], final_score=0.90, baseline_percentile=0.90),
+        _candidate("BBB", dates[1], final_score=0.88, baseline_percentile=0.88),
+    ]
+    result = simulate_execution_policy_e1(
+        market_dates=dates,
+        predictions_by_date=group_predictions_by_date(predictions),
+        price_history=_prices(["AAA", "BBB"], dates),
+        mode="v41",
+        max_positions=1,
+        max_holding_sessions=20,
+    )
+    assert result["exit_reasons"]["ineligible"] == 1
+
+
 def test_e1_reduces_turnover_when_top_rank_oscillates_inside_margin() -> None:
     dates = _dates(8)
     predictions: list[dict] = []
