@@ -67,5 +67,8 @@ jobs:
       - name: Run daily market pipeline
         run: python -m src.pipeline.run_all_daily
 
+      - name: Retrain pooled quant model when weekly interval is due
+        run: python -m src.pipeline.train_quant_models --limit 400 --if-due
+
       - name: Grade and capture probabilistic shadow signals
         run: python -m src.pipeline.quant_shadow
