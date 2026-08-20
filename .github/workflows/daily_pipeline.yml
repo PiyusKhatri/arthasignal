@@ -72,3 +72,6 @@ jobs:
 
       - name: Grade and capture probabilistic shadow signals
         run: python -m src.pipeline.quant_shadow
+
+      - name: Grade and capture frozen V4.1 challenger shadow
+        run: python -m src.pipeline.v41_shadow
