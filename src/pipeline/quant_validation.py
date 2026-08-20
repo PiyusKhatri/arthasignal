@@ -3,8 +3,7 @@ from __future__ import annotations
 import math
 from collections import defaultdict
 from datetime import date
-from statistics import mean
-from typing import Any
+from typing import Any, Iterable
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -50,20 +49,8 @@ def _load_rows(session: Session) -> list[QuantShadowSignal]:
     )
 
 
-def build_quant_validation_status(session: Session | None = None) -> dict[str, Any]:
-    owns_session = session is None
-    if owns_session:
-        context = get_session()
-        session = context.__enter__()
-    else:
-        context = None
-
-    try:
-        rows = _load_rows(session)
-    finally:
-        if context is not None:
-            context.__exit__(None, None, None)
-
+def evaluate_quant_validation_rows(rows: Iterable[Any]) -> dict[str, Any]:
+    rows = list(rows)
     resolved = [
         row
         for row in rows
@@ -150,3 +137,12 @@ def build_quant_validation_status(session: Session | None = None) -> dict[str, A
             "precommitted calibration/precision gate passes. Historical backtests cannot bypass this gate."
         ),
     }
+
+
+def build_quant_validation_status(session: Session | None = None) -> dict[str, Any]:
+    if session is not None:
+        return evaluate_quant_validation_rows(_load_rows(session))
+
+    with get_session() as owned_session:
+        rows = _load_rows(owned_session)
+    return evaluate_quant_validation_rows(rows)
