@@ -40,9 +40,15 @@ function pretty(value: string | undefined): string {
   return value.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-function percent(value: number | null | undefined, digits = 1): string {
+function probabilityPercent(value: number | null | undefined, digits = 1): string {
   if (value === null || value === undefined || Number.isNaN(value)) return "N/A";
-  return `${(Math.abs(value) <= 1 ? value * 100 : value).toFixed(digits)}%`;
+  return `${(value * 100).toFixed(digits)}%`;
+}
+
+function percentagePoints(value: number | null | undefined, digits = 1): string {
+  if (value === null || value === undefined || Number.isNaN(value)) return "N/A";
+  const prefix = value > 0 ? "+" : "";
+  return `${prefix}${value.toFixed(digits)}%`;
 }
 
 function tone(value: string | undefined): string {
@@ -86,7 +92,7 @@ export function QuantResearchSummary({ research }: { research: QuantResearchPayl
         <div className="grid min-w-full grid-cols-2 gap-3 sm:grid-cols-4 lg:min-w-[520px]">
           <div className="rounded-lg border border-border bg-background p-3">
             <p className="text-[11px] text-text-secondary">Research probability</p>
-            <p className="mt-1 text-lg font-semibold tabular-nums text-text-primary">{percent(probability)}</p>
+            <p className="mt-1 text-lg font-semibold tabular-nums text-text-primary">{probabilityPercent(probability)}</p>
           </div>
           <div className="rounded-lg border border-border bg-background p-3">
             <p className="text-[11px] text-text-secondary">Evidence confidence</p>
@@ -95,7 +101,7 @@ export function QuantResearchSummary({ research }: { research: QuantResearchPayl
           <div className="rounded-lg border border-border bg-background p-3">
             <p className="text-[11px] text-text-secondary">Expected excess</p>
             <p className="mt-1 text-lg font-semibold tabular-nums text-text-primary">
-              {percent(decision.expected_excess_return_20d_percent)}
+              {percentagePoints(decision.expected_excess_return_20d_percent)}
             </p>
           </div>
           <div className="rounded-lg border border-border bg-background p-3">
@@ -118,7 +124,7 @@ export function QuantResearchSummary({ research }: { research: QuantResearchPayl
         </div>
         <div>
           <p className="text-xs text-text-secondary">Relative strength vs NEPSE</p>
-          <p className="mt-1 text-sm font-semibold text-text-primary">{percent(research.relative_strength?.vs_nepse_20d_percent)}</p>
+          <p className="mt-1 text-sm font-semibold text-text-primary">{percentagePoints(research.relative_strength?.vs_nepse_20d_percent)}</p>
         </div>
         <div>
           <p className="text-xs text-text-secondary">Event risk</p>
@@ -134,7 +140,7 @@ export function QuantResearchSummary({ research }: { research: QuantResearchPayl
             <ul className="mt-2 space-y-2">
               {(decision.reasons ?? []).map((reason) => <li key={reason}>• {reason}</li>)}
               <li>• Historical analogue effective sample: {analogCount || "insufficient"}</li>
-              <li>• 25th-percentile analogue excess return: {percent(research.historical_analogs?.downside_25th_percent)}</li>
+              <li>• 25th-percentile analogue excess return: {percentagePoints(research.historical_analogs?.downside_25th_percent)}</li>
             </ul>
           </div>
           <div>
