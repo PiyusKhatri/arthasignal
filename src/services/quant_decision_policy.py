@@ -8,23 +8,27 @@ from typing import Any, Sequence
 
 V3_EXECUTION_HURDLE_PERCENT = 1.00
 V3_RISK_THRESHOLDS = (-3.0, -5.0, -8.0)
-V3_POLICY_VERSION = "2026-08-21-regime-risk-v1"
+V3_POLICY_VERSION = "2026-08-21-regime-risk-v2"
 BOOTSTRAP_ITERATIONS = 1000
 BOOTSTRAP_SEED = 20260821
 
 MARKET_CAPACITY = {
-    "strong_positive": 10,
-    "positive": 5,
+    "strong_bull": 10,
+    "bull": 5,
+    "recovery": 5,
     "sideways": 3,
-    "negative": 0,
-    "stress": 0,
+    "distribution": 0,
+    "bear": 0,
+    "high_stress": 0,
 }
 MARKET_MIN_EXECUTION_PROBABILITY = {
-    "strong_positive": 0.52,
-    "positive": 0.54,
+    "strong_bull": 0.52,
+    "bull": 0.54,
+    "recovery": 0.54,
     "sideways": 0.60,
-    "negative": 1.01,
-    "stress": 1.01,
+    "distribution": 1.01,
+    "bear": 1.01,
+    "high_stress": 1.01,
 }
 MAX_RISK_LADDER_SCORE = 0.55
 
@@ -47,36 +51,88 @@ def _percentile(values: Sequence[float], fraction: float) -> float | None:
 
 
 def infer_market_return_20d(row: dict[str, Any]) -> float:
+    context = row.get("regime_context", {})
+    if context.get("market_return_20d_percent") is not None:
+        return float(context["market_return_20d_percent"])
     features = row.get("features", {})
     stock_return = float(features.get("return_20d", 0.0))
     relative_strength = float(features.get("relative_strength_market_20d", 0.0))
     return stock_return - relative_strength
 
 
-def _classify_market_return(market_return: float) -> str:
+def _fallback_market_state(market_return: float) -> str:
     if market_return >= 6.0:
-        return "strong_positive"
+        return "strong_bull"
     if market_return >= 2.0:
-        return "positive"
+        return "bull"
     if market_return > -2.0:
         return "sideways"
     if market_return > -6.0:
-        return "negative"
-    return "stress"
+        return "bear"
+    return "high_stress"
+
+
+def _market_state_from_context(context: dict[str, Any]) -> str | None:
+    latest = context.get("market_close")
+    sma50 = context.get("market_sma50")
+    sma200 = context.get("market_sma200")
+    ret20 = context.get("market_return_20d_percent")
+    ret60 = context.get("market_return_60d_percent")
+    drawdown = context.get("market_drawdown_252d_percent")
+    volatility = context.get("market_annualized_volatility_60d_percent")
+    if latest is None or ret20 is None:
+        return None
+
+    latest = float(latest)
+    r20 = float(ret20)
+    r60 = float(ret60 or 0.0)
+    dd = float(drawdown or 0.0)
+    vol = float(volatility or 0.0)
+    sma50_value = float(sma50) if sma50 is not None else None
+    sma200_value = float(sma200) if sma200 is not None else None
+
+    if sma200_value is not None and latest < sma200_value and dd <= -18.0 and vol >= 28.0:
+        return "high_stress"
+    if (
+        sma200_value is not None
+        and sma50_value is not None
+        and latest > sma50_value > sma200_value
+        and r60 >= 10.0
+    ):
+        return "strong_bull"
+    if sma200_value is not None and latest > sma200_value and r20 > 0.0:
+        return "bull"
+    if sma50_value is not None and latest > sma50_value and r20 > 0.0 and (
+        sma200_value is None or latest <= sma200_value
+    ):
+        return "recovery"
+    if sma200_value is not None and latest > sma200_value and r20 < 0.0:
+        return "distribution"
+    if sma200_value is not None and latest < sma200_value and r20 < 0.0:
+        return "bear"
+    return "sideways"
 
 
 def classify_market_regime(row: dict[str, Any]) -> str:
-    return _classify_market_return(infer_market_return_20d(row))
+    context_state = _market_state_from_context(row.get("regime_context", {}))
+    return context_state or _fallback_market_state(infer_market_return_20d(row))
 
 
 def consensus_market_regime(rows: Sequence[dict[str, Any]]) -> str:
-    """Use the same-date median to damp stock-specific missing-session noise."""
+    """Prefer exact index context; otherwise use same-date median fallback."""
+    for row in rows:
+        state = _market_state_from_context(row.get("regime_context", {}))
+        if state is not None:
+            return state
     if not rows:
-        return "stress"
-    return _classify_market_return(median(infer_market_return_20d(row) for row in rows))
+        return "high_stress"
+    return _fallback_market_state(median(infer_market_return_20d(row) for row in rows))
 
 
 def sector_relative_strength_20d(row: dict[str, Any]) -> float:
+    context = row.get("regime_context", {})
+    if context.get("sector_relative_strength_20d_percent") is not None:
+        return float(context["sector_relative_strength_20d_percent"])
     features = row.get("features", {})
     stock_vs_market = float(features.get("relative_strength_market_20d", 0.0))
     stock_vs_sector = float(features.get("relative_strength_sector_20d", 0.0))
@@ -115,7 +171,7 @@ def monotonic_risk_ladder(
     probability_5pct: float,
     probability_8pct: float,
 ) -> dict[str, float]:
-    """Enforce the natural nesting P(>3% loss) >= P(>5%) >= P(>8%)."""
+    """Enforce P(>3% adverse) >= P(>5%) >= P(>8%)."""
     p8 = _clamp(probability_8pct)
     p5 = max(_clamp(probability_5pct), p8)
     p3 = max(_clamp(probability_3pct), p5)
@@ -144,7 +200,6 @@ def _date_rank_percentiles(rows: Sequence[dict[str, Any]], scores: Sequence[floa
 
 
 def stabilize_regime_labels(candidates: Sequence[dict[str, Any]]) -> None:
-    """Apply same-date market consensus and same-date/sector consensus in place."""
     by_date: dict[Any, list[dict[str, Any]]] = defaultdict(list)
     by_date_sector: dict[tuple[Any, str], list[dict[str, Any]]] = defaultdict(list)
     for candidate in candidates:
@@ -295,9 +350,7 @@ def evaluate_dynamic_selection(
             1.0 - len(active_days) / len(eligible_days) if eligible_days else None
         ),
         "average_names_per_active_date": len(rows) / len(active_days) if active_days else None,
-        "precision_after_cost": (
-            mean(1.0 if value > 0.0 else 0.0 for value in net_excess) if net_excess else None
-        ),
+        "precision_after_cost": mean(1.0 if value > 0.0 else 0.0 for value in net_excess) if net_excess else None,
         "mean_net_excess_return_percent": mean(net_excess) if net_excess else None,
         "median_net_excess_return_percent": median(net_excess) if net_excess else None,
         "severe_drawdown_rate": mean(1.0 if flag else 0.0 for flag in severe) if severe else None,
@@ -364,6 +417,8 @@ def non_overlapping_dynamic_portfolio(
     years = len(cohorts) * 20.0 / 252.0
     portfolio_cagr = (portfolio_wealth ** (1.0 / years) - 1.0) * 100.0 if years > 0 else None
     market_cagr = (market_wealth ** (1.0 / years) - 1.0) * 100.0 if years > 0 else None
+    cohort_boundary_dd = _max_drawdown(portfolio_curve)
+    market_boundary_dd = _max_drawdown(market_curve)
 
     return {
         "cohorts": len(cohorts),
@@ -379,9 +434,16 @@ def non_overlapping_dynamic_portfolio(
         "nepse_compounded_return_percent": (market_wealth - 1.0) * 100.0 if cohorts else None,
         "portfolio_approx_cagr_percent": portfolio_cagr,
         "nepse_approx_cagr_percent": market_cagr,
-        "portfolio_max_drawdown_percent": _max_drawdown(portfolio_curve),
-        "nepse_max_drawdown_percent": _max_drawdown(market_curve),
+        "portfolio_max_drawdown_percent": cohort_boundary_dd,
+        "nepse_max_drawdown_percent": market_boundary_dd,
+        "portfolio_cohort_boundary_max_drawdown_percent": cohort_boundary_dd,
+        "nepse_cohort_boundary_max_drawdown_percent": market_boundary_dd,
         "mean_selected_path_adverse_percent": mean(float(row["mean_adverse_percent"]) for row in cohorts) if cohorts else None,
+        "worst_mean_selected_path_adverse_percent": min(float(row["mean_adverse_percent"]) for row in cohorts) if cohorts else None,
+        "drawdown_note": (
+            "Cohort-boundary drawdown is not an intraperiod mark-to-market drawdown. "
+            "Mean/worst selected path adverse excursion is reported separately as a downside diagnostic."
+        ),
     }
 
 
