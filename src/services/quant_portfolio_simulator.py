@@ -39,10 +39,15 @@ def _max_drawdown(curve: Sequence[float]) -> float | None:
     return worst * 100.0
 
 
+def _exact_price(price_history: dict[str, dict[Any, float]], symbol: str, trading_date: Any) -> float | None:
+    value = price_history.get(symbol, {}).get(trading_date)
+    return float(value) if value is not None and float(value) > 0 else None
+
+
 def _asof_price(price_history: dict[str, dict[Any, float]], symbol: str, trading_date: Any, cache: dict[str, float]) -> float | None:
-    exact = price_history.get(symbol, {}).get(trading_date)
-    if exact is not None and float(exact) > 0:
-        cache[symbol] = float(exact)
+    exact = _exact_price(price_history, symbol, trading_date)
+    if exact is not None:
+        cache[symbol] = exact
     return cache.get(symbol)
 
 
@@ -57,9 +62,9 @@ def simulate_rebalance_portfolio(
 ) -> dict[str, Any]:
     """Simulate equal-weight rebalancing on every available frozen decision date.
 
-    Trades occur at the decision-date close. Only names selected by that day's
-    frozen signal may be held. A position is force-closed after the configured
-    market-session holding cap even when no new signal arrives that day.
+    Valuation may carry the last traded price across a no-trade session, but an
+    actual buy/sell requires an exact stock print on that session. This prevents
+    a thin name from receiving an impossible execution at a stale marked price.
     """
     dates = sorted(market_dates)
     if not dates:
@@ -77,6 +82,8 @@ def simulate_rebalance_portfolio(
     total_cost = 0.0
     buys = 0
     sells = 0
+    blocked_trade_attempts = 0
+    terminal_stale_liquidations = 0
     completed_holding_sessions: list[int] = []
     active_position_counts: list[int] = []
     previous_wealth = 1.0
@@ -88,10 +95,23 @@ def simulate_rebalance_portfolio(
     def portfolio_value(trading_date: Any) -> float:
         return cash + sum(position_value(symbol, trading_date) for symbol in list(shares))
 
-    def sell(symbol: str, notional: float, trading_date: Any, *, fully_close: bool = False, date_index: int) -> None:
-        nonlocal cash, total_trade_notional, total_cost, sells
-        price = _asof_price(price_history, symbol, trading_date, last_prices)
+    def sell(
+        symbol: str,
+        notional: float,
+        trading_date: Any,
+        *,
+        fully_close: bool = False,
+        date_index: int,
+        allow_stale: bool = False,
+    ) -> None:
+        nonlocal cash, total_trade_notional, total_cost, sells, blocked_trade_attempts, terminal_stale_liquidations
+        price = _exact_price(price_history, symbol, trading_date)
+        if price is None and allow_stale:
+            price = _asof_price(price_history, symbol, trading_date, last_prices)
+            if price is not None:
+                terminal_stale_liquidations += 1
         if price is None or price <= 0 or symbol not in shares:
+            blocked_trade_attempts += 1
             return
         current_value = shares[symbol] * price
         amount = min(max(0.0, notional), current_value)
@@ -110,10 +130,12 @@ def simulate_rebalance_portfolio(
             completed_holding_sessions.append(max(0, date_index - started))
 
     def buy(symbol: str, notional: float, trading_date: Any, *, date_index: int) -> None:
-        nonlocal cash, total_trade_notional, total_cost, buys
-        price = _asof_price(price_history, symbol, trading_date, last_prices)
+        nonlocal cash, total_trade_notional, total_cost, buys, blocked_trade_attempts
+        price = _exact_price(price_history, symbol, trading_date)
         if price is None or price <= 0:
+            blocked_trade_attempts += 1
             return
+        last_prices[symbol] = price
         amount = min(max(0.0, notional), cash / max(1e-12, 1.0 + side_cost))
         if amount <= 1e-12:
             return
@@ -126,9 +148,10 @@ def simulate_rebalance_portfolio(
         entry_index.setdefault(symbol, date_index)
 
     for date_index, trading_date in enumerate(dates):
-        # Refresh marks, then enforce the holding cap whether or not a new model
-        # decision exists on this session.
         portfolio_value(trading_date)
+
+        # Holding caps are checked every NEPSE session. If the stock does not
+        # trade, the exit remains pending until an executable print appears.
         expired = [
             symbol
             for symbol, started in list(entry_index.items())
@@ -147,7 +170,7 @@ def simulate_rebalance_portfolio(
             target = {
                 symbol
                 for symbol in requested
-                if _asof_price(price_history, symbol, trading_date, last_prices) is not None
+                if symbol in shares or _exact_price(price_history, symbol, trading_date) is not None
             }
 
             for symbol in list(shares):
@@ -174,13 +197,22 @@ def simulate_rebalance_portfolio(
         active_position_counts.append(len(shares))
         previous_wealth = end_wealth
 
-    # Charge the economically unavoidable terminal sell-side cost.
+    # Close remaining inventory for a comparable terminal wealth. If a stock did
+    # not print on the final market date, use its last marked price only here and
+    # expose that approximation explicitly in the output.
     if dates and shares:
         final_date = dates[-1]
         final_index = len(dates) - 1
         before = portfolio_value(final_date)
         for symbol in list(shares):
-            sell(symbol, position_value(symbol, final_date), final_date, fully_close=True, date_index=final_index)
+            sell(
+                symbol,
+                position_value(symbol, final_date),
+                final_date,
+                fully_close=True,
+                date_index=final_index,
+                allow_stale=True,
+            )
         after = cash
         if before > 0 and daily_returns:
             terminal_factor = after / before
@@ -215,6 +247,8 @@ def simulate_rebalance_portfolio(
         "annualized_turnover_x": total_trade_notional / years,
         "buy_transactions": buys,
         "sell_transactions": sells,
+        "blocked_trade_attempts_no_exact_price": blocked_trade_attempts,
+        "terminal_stale_liquidations": terminal_stale_liquidations,
         "mean_positions": mean(active_position_counts) if active_position_counts else 0.0,
         "mean_completed_holding_sessions": mean(completed_holding_sessions) if completed_holding_sessions else None,
         "median_completed_holding_sessions": median(completed_holding_sessions) if completed_holding_sessions else None,
