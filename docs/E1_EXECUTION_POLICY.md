@@ -102,6 +102,28 @@ E1 can become a candidate for a separate forward execution shadow only when all 
 
 Failure does not authorize changing these thresholds after seeing the result. A materially changed execution rule requires E2 (or another new version).
 
+## Frozen diagnostics protocol
+
+After the first E1 result, diagnostics are performed under `2026-08-21-e1-diagnostics-v1`. This diagnostics layer is explanatory only and must not change the E1 execution rules, V4.1 predictions, research thresholds, or forward ledger.
+
+The diagnostics command is:
+
+```bash
+python -m src.pipeline.diagnose_execution_policy_e1 --limit 400 --folds 4
+```
+
+It reports:
+
+- buy/sell turnover notional and transaction fees by exit reason;
+- holding-period distribution overall and by exit reason;
+- completed-trade behavior by year, market regime, sector, sector regime, liquidity, V4.1 `PROMOTE`/`HOLD`, baseline-rank bucket, holding-duration bucket, and exit reason;
+- fixed contiguous 20-session E1-minus-momentum blocks;
+- rolling 60-, 120-, and 252-session E1-minus-momentum windows;
+- the worst and best periods with their contemporaneous market-regime, override-action, and sector mix; and
+- fold-level compounded E1-minus-momentum results.
+
+These diagnostics are used to determine whether E1's remaining instability has a defensible structural cause. They do **not** authorize changing the 0.12 replacement margin, the 30x turnover gate, the 20-session holding cap, or any other frozen E1 parameter. A structural change suggested by the diagnostics must be implemented under a new execution-policy version.
+
 ## Forward V4.1 shadow remains untouched
 
 The predictive forward ledger continues to collect frozen V4.1 predictions independently of E1. E1 must not rewrite historical or future V4.1 prediction rows.
