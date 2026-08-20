@@ -59,7 +59,7 @@ def simulate_rebalance_portfolio(
 
     Trades occur at the decision-date close. Only names selected by that day's
     frozen signal may be held. A position is force-closed after the configured
-    market-session holding cap and may be re-entered only if it is still selected.
+    market-session holding cap even when no new signal arrives that day.
     """
     dates = sorted(market_dates)
     if not dates:
@@ -126,11 +126,19 @@ def simulate_rebalance_portfolio(
         entry_index.setdefault(symbol, date_index)
 
     for date_index, trading_date in enumerate(dates):
-        # Mark existing positions before any close-of-day rebalance.
-        pre_rebalance_wealth = portfolio_value(trading_date)
+        # Refresh marks, then enforce the holding cap whether or not a new model
+        # decision exists on this session.
+        portfolio_value(trading_date)
+        expired = [
+            symbol
+            for symbol, started in list(entry_index.items())
+            if date_index - started >= max_holding_sessions
+        ]
+        for symbol in expired:
+            sell(symbol, position_value(symbol, trading_date), trading_date, fully_close=True, date_index=date_index)
 
         if trading_date in signals_by_date:
-            requested = []
+            requested: list[str] = []
             for symbol in signals_by_date[trading_date]:
                 if symbol not in requested:
                     requested.append(symbol)
@@ -142,20 +150,13 @@ def simulate_rebalance_portfolio(
                 if _asof_price(price_history, symbol, trading_date, last_prices) is not None
             }
 
-            expired = {
-                symbol
-                for symbol, started in entry_index.items()
-                if date_index - started >= max_holding_sessions
-            }
-            # Sell names that are no longer selected and force-roll expired holdings.
             for symbol in list(shares):
-                if symbol not in target or symbol in expired:
+                if symbol not in target:
                     sell(symbol, position_value(symbol, trading_date), trading_date, fully_close=True, date_index=date_index)
 
             if target:
                 wealth_after_exits = portfolio_value(trading_date)
                 target_value = wealth_after_exits / len(target)
-                # Reduce overweight positions first to create cash for underweights.
                 for symbol in sorted(target):
                     current = position_value(symbol, trading_date) if symbol in shares else 0.0
                     if current > target_value:
