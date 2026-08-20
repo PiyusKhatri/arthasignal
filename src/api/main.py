@@ -4,6 +4,7 @@ import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from sqlalchemy import text
@@ -43,13 +44,15 @@ app.include_router(watchlist.router)
 
 
 @app.get("/health")
-def health() -> dict:
+def health() -> dict | JSONResponse:
     try:
         with get_session() as session:
             session.execute(text("SELECT 1"))
-        database_status = "ok"
     except Exception:
         logger.exception("Health check database connectivity failed")
-        database_status = "unreachable"
+        return JSONResponse(
+            status_code=503,
+            content={"status": "degraded", "database": "unreachable"},
+        )
 
-    return {"status": "ok", "database": database_status}
+    return {"status": "ok", "database": "ok"}
