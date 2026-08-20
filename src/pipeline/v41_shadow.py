@@ -8,7 +8,7 @@ import logging
 from datetime import date, datetime, timezone
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from src.database.connection import get_session
@@ -23,6 +23,7 @@ from src.services.quant_v41_artifact import (
     score_v41_candidate_rows,
     train_frozen_v41_model,
 )
+from src.services.quant_v41_heartbeat import record_v41_shadow_heartbeat
 from src.services.quant_v41_live import build_current_v41_rows
 from src.services.quant_v41_validation import build_v41_forward_validation_status
 
@@ -81,10 +82,22 @@ def capture_v41_shadow_signals(*, limit: int = 300, train_if_missing: bool = Fal
         current = build_current_v41_rows(session, limit=limit)
         candidates = current.get("candidates", [])
         if not candidates:
+            heartbeat = record_v41_shadow_heartbeat(
+                session,
+                model=model,
+                current=current,
+                run_status="abstained",
+                candidate_rows=0,
+                v41_selected=0,
+                baseline_selected=0,
+                rows_inserted=0,
+                extra_details={"reason": current.get("reason") or "no_current_candidates"},
+            )
             return {
                 "status": "no_current_candidates",
                 "model_version": model["model_version"],
                 "artifact_fingerprint": model["artifact_fingerprint"],
+                "heartbeat": heartbeat,
                 "current": {key: value for key, value in current.items() if key not in {"rows", "candidates"}},
             }
 
@@ -92,7 +105,19 @@ def capture_v41_shadow_signals(*, limit: int = 300, train_if_missing: bool = Fal
         predictions = scored.get("predictions", [])
         selection = scored.get("selection", {"selected": [], "days": []})
         if not predictions:
-            return {"status": "scoring_failed", "model_version": model["model_version"]}
+            heartbeat = record_v41_shadow_heartbeat(
+                session,
+                model=model,
+                current=current,
+                run_status="failed",
+                candidate_rows=len(candidates),
+                failure_code="scoring_failed",
+            )
+            return {
+                "status": "scoring_failed",
+                "model_version": model["model_version"],
+                "heartbeat": heartbeat,
+            }
 
         baseline = matched_baseline_selection(candidates, selection_counts(selection))
         v41_selected = {candidate["row"]["symbol"] for candidate in selection.get("selected", [])}
@@ -167,6 +192,20 @@ def capture_v41_shadow_signals(*, limit: int = 300, train_if_missing: bool = Fal
             index_elements=["model_snapshot_id", "symbol", "as_of_date"]
         ).returning(QuantV41ShadowSignal.id)
         inserted = len(session.execute(stmt).fetchall())
+        heartbeat = record_v41_shadow_heartbeat(
+            session,
+            model=model,
+            current=current,
+            run_status="captured",
+            candidate_rows=len(predictions),
+            v41_selected=len(v41_selected),
+            baseline_selected=len(baseline_selected),
+            rows_inserted=inserted,
+            extra_details={
+                "prepared_prediction_rows": len(rows),
+                "existing_prediction_rows": max(0, len(rows) - inserted),
+            },
+        )
 
     return {
         "status": "captured",
@@ -178,6 +217,7 @@ def capture_v41_shadow_signals(*, limit: int = 300, train_if_missing: bool = Fal
         "v41_selected": len(v41_selected),
         "baseline_selected": len(baseline_selected),
         "rows_inserted": inserted,
+        "heartbeat": heartbeat,
         "training": training,
         "current": {key: value for key, value in current.items() if key not in {"rows", "candidates"}},
     }
