@@ -8,7 +8,7 @@ from typing import Any, Sequence
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from src.database.quant_models import QuantV41ShadowSignal
+from src.database.quant_models import QuantV41ShadowRun, QuantV41ShadowSignal
 from src.services.quant_residual_alpha import V4_EXECUTION_HURDLE_PERCENT
 from src.services.quant_v41_artifact import V41_FROZEN_MODEL_VERSION
 
@@ -93,11 +93,55 @@ def _non_overlapping(comparisons: Sequence[dict[str, Any]]) -> list[dict[str, An
     return cohorts
 
 
+def _heartbeat_summary(runs: Sequence[QuantV41ShadowRun]) -> dict[str, Any]:
+    by_date: dict[Any, list[QuantV41ShadowRun]] = defaultdict(list)
+    for run in runs:
+        by_date[run.as_of_date].append(run)
+    successful_dates = {
+        trading_date
+        for trading_date, date_runs in by_date.items()
+        if any(run.run_status in {"captured", "abstained"} for run in date_runs)
+    }
+    failed_only_dates = {
+        trading_date
+        for trading_date, date_runs in by_date.items()
+        if date_runs and not any(run.run_status in {"captured", "abstained"} for run in date_runs)
+    }
+    latest = runs[-1] if runs else None
+    return {
+        "attempts": len(runs),
+        "unique_market_dates": len(by_date),
+        "successful_market_dates": len(successful_dates),
+        "failed_only_market_dates": len(failed_only_dates),
+        "captured_attempts": sum(run.run_status == "captured" for run in runs),
+        "abstained_attempts": sum(run.run_status == "abstained" for run in runs),
+        "failed_attempts": sum(run.run_status == "failed" for run in runs),
+        "latest": (
+            {
+                "as_of_date": latest.as_of_date.isoformat(),
+                "run_status": latest.run_status,
+                "candidate_rows": latest.candidate_rows,
+                "v41_selected": latest.v41_selected,
+                "baseline_selected": latest.baseline_selected,
+                "run_fingerprint": latest.run_fingerprint,
+                "created_at": latest.created_at.isoformat(),
+            }
+            if latest is not None
+            else None
+        ),
+    }
+
+
 def build_v41_forward_validation_status(session: Session) -> dict[str, Any]:
     rows = session.execute(
         select(QuantV41ShadowSignal)
         .where(QuantV41ShadowSignal.model_version == V41_FROZEN_MODEL_VERSION)
         .order_by(QuantV41ShadowSignal.as_of_date, QuantV41ShadowSignal.symbol)
+    ).scalars().all()
+    runs = session.execute(
+        select(QuantV41ShadowRun)
+        .where(QuantV41ShadowRun.model_version == V41_FROZEN_MODEL_VERSION)
+        .order_by(QuantV41ShadowRun.as_of_date, QuantV41ShadowRun.created_at, QuantV41ShadowRun.id)
     ).scalars().all()
 
     pending = sum(row.status == "pending" for row in rows)
@@ -153,6 +197,7 @@ def build_v41_forward_validation_status(session: Session) -> dict[str, Any]:
         "model_version": V41_FROZEN_MODEL_VERSION,
         "status": "pass" if passed else ("review" if mature else "collecting"),
         "public_promotion_automatic": False,
+        "heartbeat": _heartbeat_summary(runs),
         "ledger": {
             "rows": len(rows),
             "pending": pending,
@@ -184,6 +229,7 @@ def build_v41_forward_validation_status(session: Session) -> dict[str, Any]:
         "checks": checks,
         "note": (
             "This forward gate never promotes V4.1 automatically. A pass only means the frozen challenger has earned "
-            "manual review as a possible successor to the current live champion."
+            "manual review as a possible successor to the current live champion. Heartbeat rows are append-only audit "
+            "evidence and do not alter the statistical gate."
         ),
     }
