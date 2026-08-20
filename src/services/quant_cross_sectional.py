@@ -9,8 +9,15 @@ from src.database.models import Company
 from src.services.quant_features import build_feature_row
 from src.services.quant_model_store import load_latest_quant_model, predict_persisted_quant_model
 
+_MODEL_NOT_PROVIDED = object()
 
-def build_cross_sectional_prediction(session: Session, symbol: str) -> dict[str, Any]:
+
+def build_cross_sectional_prediction(
+    session: Session,
+    symbol: str,
+    *,
+    preloaded_model: dict[str, Any] | None | object = _MODEL_NOT_PROVIDED,
+) -> dict[str, Any]:
     """Score today's stock state with the latest persisted pooled NEPSE model."""
     from src.services.nepse_quant_research import NEPSE_INDEX_NAME, _load_index_series, _load_stock_series, _sector_index_name
 
@@ -18,8 +25,8 @@ def build_cross_sectional_prediction(session: Session, symbol: str) -> dict[str,
     if company is None:
         return {"available": False, "candidate_available": False, "reason": "unknown_symbol"}
 
-    model = load_latest_quant_model(session)
-    if model is None:
+    model = load_latest_quant_model(session) if preloaded_model is _MODEL_NOT_PROVIDED else preloaded_model
+    if model is None or not isinstance(model, dict):
         return {"available": False, "candidate_available": False, "reason": "no_trained_model"}
 
     stock = _load_stock_series(session, symbol)
@@ -136,11 +143,16 @@ def enhance_quant_research_with_cross_sectional(
     session: Session,
     symbol: str,
     research: dict[str, Any] | None,
+    *,
+    preloaded_model: dict[str, Any] | None | object = _MODEL_NOT_PROVIDED,
 ) -> dict[str, Any] | None:
     if research is None:
         return None
 
-    cross = build_cross_sectional_prediction(session, symbol)
+    if preloaded_model is _MODEL_NOT_PROVIDED:
+        cross = build_cross_sectional_prediction(session, symbol)
+    else:
+        cross = build_cross_sectional_prediction(session, symbol, preloaded_model=preloaded_model)
     research["cross_sectional_ml"] = cross
     if not cross.get("available"):
         return research
