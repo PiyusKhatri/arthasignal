@@ -8,7 +8,7 @@ on:
 jobs:
   run-daily-pipeline:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DATABASE_URL_READONLY: ${{ secrets.DATABASE_URL_READONLY || secrets.DATABASE_URL }}
@@ -61,5 +61,11 @@ jobs:
           print("Database connectivity check passed")
           PY
 
-      - name: Run daily pipeline
+      - name: Ensure schema extensions exist
+        run: python -m src.database.init_db
+
+      - name: Run daily market pipeline
         run: python -m src.pipeline.run_all_daily
+
+      - name: Grade and capture probabilistic shadow signals
+        run: python -m src.pipeline.quant_shadow
