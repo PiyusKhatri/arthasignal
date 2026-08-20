@@ -31,6 +31,20 @@ export default async function StockDetailPage({ params }: { params: Promise<{ sy
     notFound();
   }
 
+  const chartIntelligence = intelligence
+    ? {
+        score: intelligence.artha_score,
+        rating: intelligence.rating,
+        confidence: intelligence.confidence_level,
+        asOfDate: intelligence.as_of_date,
+        signals: intelligence.signals.map((signal) => ({
+          signalName: signal.signal_name,
+          status: signal.status,
+          entryDate: signal.entry_date,
+        })),
+      }
+    : null;
+
   return (
     <div className="flex flex-col gap-8">
       <StockHeader summary={summary} isWatching={watchStatus.isWatching} isAuthenticated={watchStatus.isAuthenticated} />
@@ -47,9 +61,17 @@ export default async function StockDetailPage({ params }: { params: Promise<{ sy
       )}
 
       <section>
-        <h2 className="text-lg font-semibold text-text-primary">Price chart</h2>
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-text-secondary">Analysis workspace</p>
+            <h2 className="mt-1 text-lg font-semibold text-text-primary">Price & technical chart</h2>
+          </div>
+          <p className="max-w-xl text-right text-xs text-text-secondary">
+            Draw, compare, replay and layer indicators directly on the same NEPSE price history used by Artha Intelligence.
+          </p>
+        </div>
         <div className="mt-4">
-          <TimeframeChart target={{ kind: "stock", symbol }} />
+          <TimeframeChart target={{ kind: "stock", symbol }} artha={chartIntelligence} />
         </div>
       </section>
 
