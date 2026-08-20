@@ -594,7 +594,7 @@ export function TimeframeChart({ target, artha }: { target: ChartTarget; artha?:
           const distance = Math.abs(param.point.y - y);
           if (!nearest || distance < nearest.distance) nearest = { price: candidate, distance };
         }
-        if (nearest && nearest.distance <= DRAWING_SNAP_PIXELS) price = nearest.price;
+        if (nearest && nearest.distance <= DRAWING_SNAP_PIXELS) price = nearest.price as unknown as typeof price;
       }
       return { time: param.time as Time, price };
     };
