@@ -58,6 +58,7 @@ def load_latest_quant_model(session: Session) -> dict[str, Any] | None:
         "ranker": _load_booster(row.ranker_blob),
         "calibrator": calibrator,
         "metrics": metrics,
+        "promotable": bool(metrics.get("promotion_gate", {}).get("promotable")),
     }
 
 
@@ -68,6 +69,8 @@ def predict_persisted_quant_model(
     if not model or not xgboost_available():
         return {
             "available": False,
+            "candidate_available": False,
+            "promotable": False,
             "model_version": model.get("model_version") if model else ARTHA_XGB_MODEL_VERSION,
             "raw_probability": None,
             "calibrated_probability": None,
@@ -92,12 +95,16 @@ def predict_persisted_quant_model(
             rank_score = float(rankings[0])
 
     calibrated = calibrate_probability(raw_probability, model.get("calibrator"))
+    promotable = bool(model.get("promotable"))
     return {
-        "available": calibrated is not None,
+        "available": promotable and calibrated is not None,
+        "candidate_available": calibrated is not None,
+        "promotable": promotable,
         "model_version": model.get("model_version"),
         "trained_through": model.get("trained_through"),
         "raw_probability": raw_probability,
         "calibrated_probability": calibrated,
         "rank_score": rank_score,
         "holdout_metrics": model.get("metrics", {}).get("test", {}),
+        "promotion_gate": model.get("metrics", {}).get("promotion_gate", {}),
     }
