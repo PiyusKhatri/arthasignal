@@ -11,7 +11,6 @@ from src.services.quant_xgboost import calibrate_probability, xgboost_available
 
 ARTHA_XGB_MODEL_VERSION = "artha-xgb-cross-sectional-v1"
 SHADOW_PREDICTION_VERSION = "nepse-quant-xgb-v2"
-MODEL_HISTORY_SCAN_LIMIT = 12
 
 
 def _load_booster(blob: bytes | None) -> Any | None:
@@ -46,7 +45,6 @@ def load_latest_quant_model(session: Session) -> dict[str, Any] | None:
         select(QuantModelSnapshot)
         .where(QuantModelSnapshot.model_version == ARTHA_XGB_MODEL_VERSION)
         .order_by(QuantModelSnapshot.created_at.desc(), QuantModelSnapshot.id.desc())
-        .limit(MODEL_HISTORY_SCAN_LIMIT)
     ).scalars().all()
     if not rows:
         return None
