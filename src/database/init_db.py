@@ -5,7 +5,7 @@ import logging
 from src.database.auth_models import RefreshSession  # noqa: F401 - registers table metadata
 from src.database.connection import engine
 from src.database.models import Base
-from src.database.quant_models import QuantShadowSignal  # noqa: F401 - registers quant validation table
+from src.database.quant_models import QuantModelSnapshot, QuantShadowSignal  # noqa: F401 - registers quant tables
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
