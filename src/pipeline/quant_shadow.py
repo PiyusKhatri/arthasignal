@@ -12,11 +12,14 @@ from src.database.connection import get_session
 from src.database.models import Company, CorporateAction, DailyPrice, MarketIndex, SymbolLiquidityTier
 from src.database.quant_models import QuantShadowSignal
 from src.services.nepse_quant_research import NEPSE_INDEX_NAME, build_quant_research
+from src.services.quant_cross_sectional import enhance_quant_research_with_cross_sectional
 from src.services.quant_features import DEFAULT_HORIZON_DAYS, FEATURE_VERSION, ROUND_TRIP_COST_PERCENT
+from src.services.quant_model_store import SHADOW_PREDICTION_VERSION
 
 logger = logging.getLogger(__name__)
 VOID_SEARCH_CAP_TRADING_DAYS = 3
 INVESTABLE_LIQUIDITY_TIERS = ("high_liquidity", "medium_liquidity")
+SUPPORTED_SHADOW_VERSIONS = (FEATURE_VERSION, SHADOW_PREDICTION_VERSION)
 
 
 def _latest_entry_prices(session, symbol: str) -> tuple[date, float, float] | None:
@@ -58,6 +61,7 @@ def capture_quant_shadow_signals(limit: int = 300) -> dict[str, Any]:
         skipped = 0
         failures: list[str] = []
         created_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        version_counts: dict[str, int] = {}
 
         for symbol in symbols:
             try:
@@ -65,12 +69,19 @@ def capture_quant_shadow_signals(limit: int = 300) -> dict[str, Any]:
                 if not research:
                     skipped += 1
                     continue
+                research = enhance_quant_research_with_cross_sectional(session, symbol, research)
+                if not research:
+                    skipped += 1
+                    continue
+
                 decision = research.get("decision", {})
                 probability = decision.get("probability_outperform_nepse_after_cost")
                 if probability is None:
                     skipped += 1
                     continue
 
+                cross = research.get("cross_sectional_ml", {})
+                prediction_version = SHADOW_PREDICTION_VERSION if cross.get("available") else FEATURE_VERSION
                 prices = _latest_entry_prices(session, symbol)
                 if prices is None:
                     skipped += 1
@@ -82,7 +93,7 @@ def capture_quant_shadow_signals(limit: int = 300) -> dict[str, Any]:
                         "symbol": symbol,
                         "as_of_date": as_of_date,
                         "horizon_days": DEFAULT_HORIZON_DAYS,
-                        "feature_version": FEATURE_VERSION,
+                        "feature_version": prediction_version,
                         "decision": str(decision.get("research_label") or "neutral"),
                         "probability_outperform": float(probability),
                         "confidence_score": int(decision.get("confidence_score") or 0),
@@ -93,6 +104,7 @@ def capture_quant_shadow_signals(limit: int = 300) -> dict[str, Any]:
                         "created_at": created_at,
                     }
                 )
+                version_counts[prediction_version] = version_counts.get(prediction_version, 0) + 1
             except Exception as exc:
                 logger.exception("Failed to capture quant shadow signal for %s", symbol)
                 failures.append(f"{symbol}:{type(exc).__name__}")
@@ -107,6 +119,8 @@ def capture_quant_shadow_signals(limit: int = 300) -> dict[str, Any]:
 
     summary = {
         "feature_version": FEATURE_VERSION,
+        "promoted_prediction_version": SHADOW_PREDICTION_VERSION,
+        "prepared_by_version": version_counts,
         "liquidity_tiers": list(INVESTABLE_LIQUIDITY_TIERS),
         "symbols_considered": len(symbols),
         "rows_prepared": len(rows),
@@ -151,7 +165,10 @@ def grade_quant_shadow_signals(as_of: date | None = None) -> dict[str, Any]:
         trading_dates = _market_trading_dates(session)
         pending = session.execute(
             select(QuantShadowSignal)
-            .where(QuantShadowSignal.status == "pending", QuantShadowSignal.feature_version == FEATURE_VERSION)
+            .where(
+                QuantShadowSignal.status == "pending",
+                QuantShadowSignal.feature_version.in_(SUPPORTED_SHADOW_VERSIONS),
+            )
             .order_by(QuantShadowSignal.as_of_date, QuantShadowSignal.symbol)
         ).scalars().all()
 
@@ -238,7 +255,7 @@ def grade_quant_shadow_signals(as_of: date | None = None) -> dict[str, Any]:
                 losses += 1
 
     summary = {
-        "feature_version": FEATURE_VERSION,
+        "supported_versions": list(SUPPORTED_SHADOW_VERSIONS),
         "pending_before_run": len(pending),
         "resolved": resolved,
         "voided": voided,
