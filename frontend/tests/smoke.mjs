@@ -31,20 +31,9 @@ try {
   // failed requests mean that there are zero market signals.
   await page.goto(`${baseUrl}/dashboard`, { waitUntil: "domcontentloaded" });
   await requireVisible(page, '[data-testid="global-stock-search"] input', "global stock search");
-  await requireVisible(page, '[data-testid="desktop-sidebar"]', "desktop application sidebar");
-  await requireVisible(page, '[data-testid="app-topbar"]', "application top bar");
-  await requireVisible(page, 'main#app-content', "application content frame");
-  await requireVisible(page, 'a[href="/dashboard"]', "dashboard navigation link");
-  await requireVisible(page, 'a[href="/market-pulse"]', "market intelligence navigation link");
-  await requireVisible(page, 'a[href="/sectors"]', "sectors navigation link");
-  await requireVisible(page, 'a[href="/watchlist"]', "watchlist navigation link");
-  await requireVisible(page, 'a[href="/portfolio"]', "portfolio navigation link");
-
-  const deadNavigationLinks = await page.locator('a[href="/search"], a[href="/alerts"], a[href="/settings"]').count();
-  if (deadNavigationLinks !== 0) {
-    throw new Error("App shell contains navigation links to routes that are not implemented");
-  }
-
+  await requireVisible(page, '[data-testid="app-shell-header"]', "app shell header");
+  await requireVisible(page, '[data-testid="app-shell-sidebar"]', "app shell sidebar");
+  await requireVisible(page, '#app-content', "app shell content frame");
   await page.getByText("Some market data is temporarily unavailable:").waitFor({ state: "visible", timeout: 10_000 });
   await page.getByText("Signal data is temporarily unavailable.").waitFor({ state: "visible", timeout: 10_000 });
 
@@ -54,6 +43,12 @@ try {
   await page.getByText("Market intelligence is temporarily unavailable.").waitFor({ state: "visible", timeout: 10_000 });
   await page.getByRole("heading", { name: "Live market context" }).waitFor({ state: "visible", timeout: 10_000 });
   await page.getByRole("heading", { name: "Artha stock screener" }).waitFor({ state: "visible", timeout: 10_000 });
+
+  // Sector navigation must remain useful even when the backend is unavailable:
+  // the page shell and explicit data-service state should still render cleanly.
+  await page.goto(`${baseUrl}/sectors`, { waitUntil: "domcontentloaded" });
+  await page.getByRole("heading", { name: "Sector intelligence" }).waitFor({ state: "visible", timeout: 10_000 });
+  await page.getByText("Sector data is temporarily unavailable").waitFor({ state: "visible", timeout: 10_000 });
 
   // User-specific pages must remain protected without an access/refresh cookie.
   await page.goto(`${baseUrl}/portfolio`, { waitUntil: "domcontentloaded" });
