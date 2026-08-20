@@ -7,6 +7,7 @@ from src.database.quant_models import (
     QuantRobustnessRun,
     QuantShadowSignal,
     QuantV41ModelSnapshot,
+    QuantV41ShadowRun,
     QuantV41ShadowSignal,
 )
 
@@ -124,5 +125,29 @@ def test_v41_forward_shadow_table_is_registered() -> None:
         "realized_excess_return_percent",
         "realized_mae_percent",
         "realized_mfe_percent",
+    }
+    assert expected.issubset(table.columns.keys())
+
+
+def test_v41_shadow_run_heartbeat_table_is_registered() -> None:
+    assert QuantV41ShadowRun.__tablename__ == "quant_v41_shadow_runs"
+    table = Base.metadata.tables["quant_v41_shadow_runs"]
+    expected = {
+        "model_snapshot_id",
+        "as_of_date",
+        "model_version",
+        "policy_version",
+        "artifact_fingerprint",
+        "run_status",
+        "symbols_considered",
+        "eligible_rows",
+        "candidate_rows",
+        "v41_selected",
+        "baseline_selected",
+        "rows_inserted",
+        "failure_code",
+        "details_json",
+        "run_fingerprint",
+        "created_at",
     }
     assert expected.issubset(table.columns.keys())
