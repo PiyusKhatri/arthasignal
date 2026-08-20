@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { TimeframeChart } from "@/components/charts/timeframe-chart";
+import { QuantResearchSummary, type QuantResearchPayload } from "@/components/intelligence/quant-research-summary";
 import { StockIntelligencePanel } from "@/components/intelligence/stock-intelligence-panel";
 import { FundamentalSection } from "@/components/stock/fundamental-section";
 import { SignalsSection } from "@/components/stock/signals-section";
@@ -31,6 +32,11 @@ export default async function StockDetailPage({ params }: { params: Promise<{ sy
     notFound();
   }
 
+  const intelligenceWithResearch = intelligence as
+    | (typeof intelligence & { quant_research?: QuantResearchPayload | null })
+    | null;
+  const quantResearch = intelligenceWithResearch?.quant_research ?? null;
+
   const chartIntelligence = intelligence
     ? {
         score: intelligence.artha_score,
@@ -49,6 +55,8 @@ export default async function StockDetailPage({ params }: { params: Promise<{ sy
   return (
     <div className="flex flex-col gap-8">
       <StockHeader summary={summary} isWatching={watchStatus.isWatching} isAuthenticated={watchStatus.isAuthenticated} />
+
+      {quantResearch ? <QuantResearchSummary research={quantResearch} /> : null}
 
       {intelligence ? (
         <StockIntelligencePanel intelligence={intelligence} />
