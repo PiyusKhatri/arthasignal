@@ -2,7 +2,13 @@ from __future__ import annotations
 
 from src.api.main import app
 from src.database.models import Base
-from src.database.quant_models import QuantModelSnapshot, QuantRobustnessRun, QuantShadowSignal
+from src.database.quant_models import (
+    QuantModelSnapshot,
+    QuantRobustnessRun,
+    QuantShadowSignal,
+    QuantV41ModelSnapshot,
+    QuantV41ShadowSignal,
+)
 
 
 def _collect_paths(obj) -> set[str]:
@@ -73,5 +79,50 @@ def test_quant_robustness_audit_table_is_registered_in_metadata() -> None:
         "gate_status",
         "report_json",
         "created_at",
+    }
+    assert expected.issubset(table.columns.keys())
+
+
+def test_v41_frozen_model_snapshot_is_registered() -> None:
+    assert QuantV41ModelSnapshot.__tablename__ == "quant_v41_model_snapshots"
+    table = Base.metadata.tables["quant_v41_model_snapshots"]
+    expected = {
+        "model_version",
+        "policy_version",
+        "trained_through",
+        "residual_regressor_blob",
+        "residual_classifier_blob",
+        "mae_regressor_blob",
+        "mfe_regressor_blob",
+        "baseline_expectation_json",
+        "residual_calibrator_json",
+        "probability_calibrator_json",
+        "artifact_fingerprint",
+    }
+    assert expected.issubset(table.columns.keys())
+
+
+def test_v41_forward_shadow_table_is_registered() -> None:
+    assert QuantV41ShadowSignal.__tablename__ == "quant_v41_shadow_signals"
+    table = Base.metadata.tables["quant_v41_shadow_signals"]
+    expected = {
+        "model_snapshot_id",
+        "symbol",
+        "as_of_date",
+        "prediction_fingerprint",
+        "baseline_rank",
+        "v41_rank",
+        "selected_v41",
+        "selected_baseline",
+        "override_action",
+        "predicted_residual_alpha_percent",
+        "probability_positive_residual",
+        "predicted_mae_percent",
+        "predicted_mfe_percent",
+        "entry_price",
+        "status",
+        "realized_excess_return_percent",
+        "realized_mae_percent",
+        "realized_mfe_percent",
     }
     assert expected.issubset(table.columns.keys())
