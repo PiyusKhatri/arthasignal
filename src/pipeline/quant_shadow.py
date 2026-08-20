@@ -14,7 +14,7 @@ from src.database.quant_models import QuantShadowSignal
 from src.services.nepse_quant_research import NEPSE_INDEX_NAME, build_quant_research
 from src.services.quant_cross_sectional import enhance_quant_research_with_cross_sectional
 from src.services.quant_features import DEFAULT_HORIZON_DAYS, FEATURE_VERSION, ROUND_TRIP_COST_PERCENT
-from src.services.quant_model_store import SHADOW_PREDICTION_VERSION
+from src.services.quant_model_store import SHADOW_PREDICTION_VERSION, load_latest_quant_model
 
 logger = logging.getLogger(__name__)
 VOID_SEARCH_CAP_TRADING_DAYS = 3
@@ -56,6 +56,7 @@ def capture_quant_shadow_signals(limit: int = 300) -> dict[str, Any]:
             .order_by(SymbolLiquidityTier.avg_daily_turnover.desc(), Company.symbol)
             .limit(limit)
         ).scalars().all()
+        pooled_model = load_latest_quant_model(session)
 
         rows: list[dict[str, Any]] = []
         skipped = 0
@@ -69,7 +70,12 @@ def capture_quant_shadow_signals(limit: int = 300) -> dict[str, Any]:
                 if not research:
                     skipped += 1
                     continue
-                research = enhance_quant_research_with_cross_sectional(session, symbol, research)
+                research = enhance_quant_research_with_cross_sectional(
+                    session,
+                    symbol,
+                    research,
+                    preloaded_model=pooled_model,
+                )
                 if not research:
                     skipped += 1
                     continue
@@ -120,6 +126,8 @@ def capture_quant_shadow_signals(limit: int = 300) -> dict[str, Any]:
     summary = {
         "feature_version": FEATURE_VERSION,
         "promoted_prediction_version": SHADOW_PREDICTION_VERSION,
+        "pooled_model_loaded": pooled_model is not None,
+        "pooled_model_promotable": bool(pooled_model and pooled_model.get("promotable")),
         "prepared_by_version": version_counts,
         "liquidity_tiers": list(INVESTABLE_LIQUIDITY_TIERS),
         "symbols_considered": len(symbols),
