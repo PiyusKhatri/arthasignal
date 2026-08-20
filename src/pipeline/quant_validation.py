@@ -10,9 +10,10 @@ from sqlalchemy.orm import Session
 
 from src.database.connection import get_session
 from src.database.quant_models import QuantShadowSignal
-from src.services.quant_features import FEATURE_VERSION, evaluate_predictions
+from src.services.quant_features import evaluate_predictions
+from src.services.quant_model_store import SHADOW_PREDICTION_VERSION
 
-QUANT_VALIDATION_POLICY_VERSION = "2026-08-21-v1"
+QUANT_VALIDATION_POLICY_VERSION = "2026-08-21-xgb-v2"
 QUANT_VALIDATION_START_DATE = date(2026, 8, 21)
 HIGH_CONFIDENCE_THRESHOLD = 0.65
 MIN_RESOLVED_CALLS = 80
@@ -39,7 +40,7 @@ def _load_rows(session: Session) -> list[QuantShadowSignal]:
         session.execute(
             select(QuantShadowSignal)
             .where(
-                QuantShadowSignal.feature_version == FEATURE_VERSION,
+                QuantShadowSignal.feature_version == SHADOW_PREDICTION_VERSION,
                 QuantShadowSignal.as_of_date >= QUANT_VALIDATION_START_DATE,
             )
             .order_by(QuantShadowSignal.as_of_date, QuantShadowSignal.symbol)
@@ -109,7 +110,7 @@ def evaluate_quant_validation_rows(rows: Iterable[Any]) -> dict[str, Any]:
 
     return {
         "policy_version": QUANT_VALIDATION_POLICY_VERSION,
-        "feature_version": FEATURE_VERSION,
+        "prediction_version": SHADOW_PREDICTION_VERSION,
         "protocol_start_date": QUANT_VALIDATION_START_DATE.isoformat(),
         "gate_status": gate_status,
         "public_high_confidence_enabled": gate_status == "pass",
@@ -134,8 +135,9 @@ def evaluate_quant_validation_rows(rows: Iterable[Any]) -> dict[str, Any]:
         "decision_counts": dict(decision_counts),
         "metrics": metrics,
         "note": (
-            "Public high-confidence labels remain disabled until enough forward shadow calls resolve and every "
-            "precommitted calibration/precision gate passes. Historical backtests cannot bypass this gate."
+            "Public high-confidence labels remain disabled until enough forward calls from the promoted cross-sectional "
+            "XGBoost ensemble resolve and every precommitted calibration/precision gate passes. Historical backtests and "
+            "older model versions cannot bypass this gate."
         ),
     }
 
