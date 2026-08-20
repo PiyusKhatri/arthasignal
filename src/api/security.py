@@ -43,6 +43,9 @@ def _create_token(subject: str, expires_delta: timedelta, token_type: str) -> st
         "sub": subject,
         "type": token_type,
         "iat": now,
+        # Millisecond precision lets security events invalidate access tokens
+        # issued earlier in the same second without rejecting a fresh login.
+        "iat_ms": int(now.timestamp() * 1000),
         "exp": now + expires_delta,
     }
     return jwt.encode(payload, _jwt_secret_key(), algorithm=JWT_ALGORITHM)
