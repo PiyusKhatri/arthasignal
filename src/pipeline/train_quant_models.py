@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from sqlalchemy import select
@@ -17,6 +17,7 @@ from src.services.quant_features import (
     DEFAULT_HORIZON_DAYS,
     FEATURE_NAMES,
     FEATURE_VERSION,
+    ROUND_TRIP_COST_PERCENT,
     build_labeled_feature_rows,
     evaluate_predictions,
     feature_vector,
@@ -41,6 +42,42 @@ HISTORICAL_STEP = 5
 MIN_POOLED_ROWS = 2500
 MIN_TEST_ROWS = 500
 MIN_TEST_DATES = 20
+RETRAIN_INTERVAL_DAYS = 7
+
+
+def model_training_due(now: datetime | None = None) -> dict[str, Any]:
+    """Keep predictions daily while limiting model-parameter churn to a weekly cadence."""
+    now = now or datetime.now(timezone.utc).replace(tzinfo=None)
+    with get_session() as session:
+        latest = session.execute(
+            select(QuantModelSnapshot)
+            .where(QuantModelSnapshot.model_version == ARTHA_XGB_MODEL_VERSION)
+            .order_by(QuantModelSnapshot.created_at.desc(), QuantModelSnapshot.id.desc())
+            .limit(1)
+        ).scalar_one_or_none()
+
+    if latest is None:
+        return {
+            "due": True,
+            "reason": "no_existing_snapshot",
+            "last_trained_at": None,
+            "minimum_interval_days": RETRAIN_INTERVAL_DAYS,
+        }
+
+    last_created = latest.created_at
+    due_at = last_created + timedelta(days=RETRAIN_INTERVAL_DAYS)
+    return {
+        "due": now >= due_at,
+        "reason": "weekly_interval_elapsed" if now >= due_at else "recent_snapshot_still_current",
+        "last_trained_at": last_created.isoformat(),
+        "next_due_at": due_at.isoformat(),
+        "minimum_interval_days": RETRAIN_INTERVAL_DAYS,
+        "current_snapshot_promotable": bool(
+            json.loads(latest.metrics_json).get("promotion_gate", {}).get("promotable")
+            if latest.metrics_json
+            else False
+        ),
+    }
 
 
 def _build_pooled_rows(limit: int = DEFAULT_SYMBOL_LIMIT) -> tuple[list[dict[str, Any]], dict[str, Any]]:
@@ -112,6 +149,10 @@ def _build_pooled_rows(limit: int = DEFAULT_SYMBOL_LIMIT) -> tuple[list[dict[str
         "failures": len(failures),
         "failure_samples": failures[:10],
         "market_index_rows": len(market["closes"]),
+        "survivorship_note": (
+            "The trainer includes every Equity company currently present in the local company master, not only active names. "
+            "Historical delisted/suspended coverage is still incomplete, so holdout metrics must retain the repository's known survivor-bias caveat."
+        ),
     }
 
 
@@ -238,7 +279,8 @@ def train_quant_models(limit: int = DEFAULT_SYMBOL_LIMIT) -> dict[str, Any]:
     }
     promotable = all(promotion_checks.values())
 
-    # After untouched evaluation, fit the production artifact on every matured historical observation.
+    # After untouched evaluation, fit the stored candidate on every matured historical observation.
+    # Live inference still ignores it unless the untouched holdout promotion gate above passed.
     production_classifier = fit_xgb_classifier(pooled)
     production_ranker = fit_xgb_ranker(pooled)
     if production_classifier is None or production_ranker is None:
@@ -252,7 +294,10 @@ def train_quant_models(limit: int = DEFAULT_SYMBOL_LIMIT) -> dict[str, Any]:
     metrics = {
         "model_version": ARTHA_XGB_MODEL_VERSION,
         "feature_version": FEATURE_VERSION,
-        "target": f"20D stock excess return vs NEPSE > {0.50:.2f}% cost hurdle",
+        "target": (
+            f"{DEFAULT_HORIZON_DAYS}D stock excess return vs NEPSE > "
+            f"{ROUND_TRIP_COST_PERCENT:.2f}% cost hurdle"
+        ),
         "split": {
             "train_rows": len(train_rows),
             "calibration_rows": len(calibration_rows),
@@ -325,8 +370,32 @@ def train_quant_models(limit: int = DEFAULT_SYMBOL_LIMIT) -> dict[str, Any]:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train leakage-safe pooled XGBoost models for ArthaSignal")
     parser.add_argument("--limit", type=int, default=DEFAULT_SYMBOL_LIMIT, help="Maximum equity symbols to include")
+    parser.add_argument(
+        "--if-due",
+        action="store_true",
+        help="Skip the expensive retrain when a snapshot was created less than seven days ago",
+    )
     args = parser.parse_args()
-    print(json.dumps(train_quant_models(limit=args.limit), indent=2, default=str))
+
+    due_check = model_training_due() if args.if_due else None
+    if due_check is not None and not due_check["due"]:
+        print(
+            json.dumps(
+                {
+                    "status": "not_due",
+                    "model_version": ARTHA_XGB_MODEL_VERSION,
+                    "retrain": due_check,
+                },
+                indent=2,
+                default=str,
+            )
+        )
+        return
+
+    result = train_quant_models(limit=args.limit)
+    if due_check is not None:
+        result["retrain"] = due_check
+    print(json.dumps(result, indent=2, default=str))
 
 
 if __name__ == "__main__":
