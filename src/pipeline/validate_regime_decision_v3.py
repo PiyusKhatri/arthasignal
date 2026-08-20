@@ -3,12 +3,17 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import math
+from bisect import bisect_right
 from collections import defaultdict
-from statistics import mean
+from statistics import mean, pstdev
 from typing import Any
 
+from src.database.connection import get_session
 from src.pipeline.train_quant_models import DEFAULT_SYMBOL_LIMIT, _build_pooled_rows, _rank_scores
+from src.services.nepse_quant_research import NEPSE_INDEX_NAME, _load_index_series, _sector_index_name
 from src.services.quant_decision_policy import (
+    MARKET_CAPACITY,
     V3_EXECUTION_HURDLE_PERCENT,
     V3_POLICY_VERSION,
     V3_RISK_THRESHOLDS,
@@ -40,6 +45,91 @@ MIN_BASELINE_BEATING_FOLDS = 3
 MIN_RELATIVE_RISK_REDUCTION = 0.15
 MIN_HIGH_CONFIDENCE_CALLS = 30
 MIN_HIGH_CONFIDENCE_DATES = 20
+
+
+def _safe_return(current: float | None, previous: float | None) -> float | None:
+    if current is None or previous is None or previous == 0:
+        return None
+    return (current / previous - 1.0) * 100.0
+
+
+def _index_context(series: dict[str, list[Any]], target_date: Any) -> dict[str, float | None]:
+    dates = series.get("dates", [])
+    closes = series.get("closes", [])
+    if not dates or not closes:
+        return {}
+    index = bisect_right(dates, target_date) - 1
+    if index < 20:
+        return {}
+
+    latest = float(closes[index])
+    ret20 = _safe_return(latest, float(closes[index - 20]))
+    ret60 = _safe_return(latest, float(closes[index - 60])) if index >= 60 else None
+    sma50 = mean(float(value) for value in closes[index - 49 : index + 1]) if index >= 49 else None
+    sma200 = mean(float(value) for value in closes[index - 199 : index + 1]) if index >= 199 else None
+    peak_window = [float(value) for value in closes[max(0, index - 251) : index + 1]]
+    peak = max(peak_window) if peak_window else latest
+    drawdown = _safe_return(latest, peak)
+
+    vol_window = [float(value) for value in closes[max(0, index - 60) : index + 1]]
+    daily_returns = [
+        current / previous - 1.0
+        for previous, current in zip(vol_window[:-1], vol_window[1:])
+        if previous > 0
+    ]
+    volatility = pstdev(daily_returns) * math.sqrt(252.0) * 100.0 if len(daily_returns) >= 2 else None
+    return {
+        "close": latest,
+        "return_20d_percent": ret20,
+        "return_60d_percent": ret60,
+        "sma50": sma50,
+        "sma200": sma200,
+        "drawdown_252d_percent": drawdown,
+        "annualized_volatility_60d_percent": volatility,
+    }
+
+
+def _attach_exact_regime_context(rows: list[dict[str, Any]]) -> None:
+    """Attach only index information available on each historical row date."""
+    sectors = sorted({str(row.get("sector") or "") for row in rows if row.get("sector")})
+    with get_session() as session:
+        market_series = _load_index_series(session, NEPSE_INDEX_NAME)
+        sector_series: dict[str, dict[str, list[Any]]] = {}
+        for sector in sectors:
+            index_name = _sector_index_name(session, sector)
+            sector_series[sector] = _load_index_series(session, index_name)
+
+    market_cache: dict[Any, dict[str, float | None]] = {}
+    sector_cache: dict[tuple[str, Any], dict[str, float | None]] = {}
+    for row in rows:
+        trading_date = row["date"]
+        if trading_date not in market_cache:
+            market_cache[trading_date] = _index_context(market_series, trading_date)
+        market = market_cache[trading_date]
+
+        sector = str(row.get("sector") or "")
+        sector_key = (sector, trading_date)
+        if sector_key not in sector_cache:
+            sector_cache[sector_key] = _index_context(sector_series.get(sector, {}), trading_date)
+        sector_context = sector_cache[sector_key]
+
+        market_return = market.get("return_20d_percent")
+        sector_return = sector_context.get("return_20d_percent")
+        row["regime_context"] = {
+            "market_close": market.get("close"),
+            "market_return_20d_percent": market_return,
+            "market_return_60d_percent": market.get("return_60d_percent"),
+            "market_sma50": market.get("sma50"),
+            "market_sma200": market.get("sma200"),
+            "market_drawdown_252d_percent": market.get("drawdown_252d_percent"),
+            "market_annualized_volatility_60d_percent": market.get("annualized_volatility_60d_percent"),
+            "sector_return_20d_percent": sector_return,
+            "sector_relative_strength_20d_percent": (
+                float(sector_return) - float(market_return)
+                if sector_return is not None and market_return is not None
+                else None
+            ),
+        }
 
 
 def _normalized_feature(row: dict[str, Any], name: str) -> float:
@@ -78,15 +168,12 @@ def _calibrated_predictions(
     return [float(value) for value in calibrated if value is not None]
 
 
-def _regime_matched_baseline(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    """Give the fixed multifactor baseline the same market/sector opportunity set as v3."""
-    capacities = {
-        "strong_positive": 10,
-        "positive": 5,
-        "sideways": 3,
-        "negative": 0,
-        "stress": 0,
-    }
+def _regime_matched_baseline(
+    rows: list[dict[str, Any]],
+    *,
+    selected_counts: dict[Any, int] | None = None,
+) -> dict[str, Any]:
+    """Use identical regime rules; optionally force the exact v3 breadth per date."""
     grouped: dict[Any, list[dict[str, Any]]] = defaultdict(list)
     for row in rows:
         grouped[row["date"]].append(row)
@@ -96,7 +183,9 @@ def _regime_matched_baseline(rows: list[dict[str, Any]]) -> dict[str, Any]:
     for trading_date in sorted(grouped):
         date_rows = grouped[trading_date]
         market = consensus_market_regime(date_rows)
-        capacity = capacities[market]
+        capacity = MARKET_CAPACITY[market]
+        if selected_counts is not None:
+            capacity = min(capacity, max(0, int(selected_counts.get(trading_date, 0))))
 
         sector_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
         for row in date_rows:
@@ -108,12 +197,13 @@ def _regime_matched_baseline(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
         eligible = []
         for row in date_rows:
-            sector = sector_labels[str(row.get("sector") or "unknown")]
-            if sector == "lagging":
+            sector_state = sector_labels[str(row.get("sector") or "unknown")]
+            if sector_state == "lagging":
                 continue
-            if market == "sideways" and sector != "leading":
+            if market == "sideways" and sector_state != "leading":
                 continue
             eligible.append(row)
+
         ranked = sorted(eligible, key=_fixed_multifactor_score, reverse=True)[:capacity]
         selected.extend({"row": row, "market_regime": market} for row in ranked)
         day_summaries.append(
@@ -125,6 +215,10 @@ def _regime_matched_baseline(rows: list[dict[str, Any]]) -> dict[str, Any]:
             }
         )
     return {"selected": selected, "days": day_summaries}
+
+
+def _selected_counts(selection: dict[str, Any]) -> dict[Any, int]:
+    return {day["date"]: int(day.get("selected") or 0) for day in selection.get("days", [])}
 
 
 def _fit_fold(fold: dict[str, Any]) -> dict[str, Any] | None:
@@ -175,8 +269,8 @@ def _fit_fold(fold: dict[str, Any]) -> dict[str, Any] | None:
 
     selection = select_dynamic_setups(candidates)
     selection_metrics = evaluate_dynamic_selection(selection, cost_percent=V3_EXECUTION_HURDLE_PERCENT)
-    baseline_selection = _regime_matched_baseline(test)
-    baseline_metrics = evaluate_dynamic_selection(baseline_selection, cost_percent=V3_EXECUTION_HURDLE_PERCENT)
+    capacity_baseline = _regime_matched_baseline(test)
+    matched_breadth_baseline = _regime_matched_baseline(test, selected_counts=_selected_counts(selection))
 
     return {
         "fold": fold["fold"],
@@ -192,11 +286,10 @@ def _fit_fold(fold: dict[str, Any]) -> dict[str, Any] | None:
             "test_dates": len({row["date"] for row in test}),
         },
         "selection": selection_metrics,
-        "regime_matched_baseline": baseline_metrics,
+        "regime_capacity_baseline": evaluate_dynamic_selection(capacity_baseline, cost_percent=V3_EXECUTION_HURDLE_PERCENT),
+        "matched_breadth_baseline": evaluate_dynamic_selection(matched_breadth_baseline, cost_percent=V3_EXECUTION_HURDLE_PERCENT),
         "_test_rows": test,
         "_execution_probabilities": execution_probabilities,
-        "_risk_probability_sets": risk_probability_sets,
-        "_candidates": candidates,
         "_selection": selection,
     }
 
@@ -213,11 +306,7 @@ def _merge_selections(selections: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def _high_confidence_summary(rows: list[dict[str, Any]], probabilities: list[float]) -> dict[str, Any]:
-    pairs = [
-        (row, probability)
-        for row, probability in zip(rows, probabilities)
-        if float(probability) >= 0.65
-    ]
+    pairs = [(row, probability) for row, probability in zip(rows, probabilities) if float(probability) >= 0.65]
     return {
         "calls": len(pairs),
         "independent_dates": len({row["date"] for row, _ in pairs}),
@@ -229,9 +318,7 @@ def _high_confidence_summary(rows: list[dict[str, Any]], probabilities: list[flo
             if pairs
             else None
         ),
-        "mean_excess_return_percent": (
-            mean(float(row["excess_return_percent"]) for row, _ in pairs) if pairs else None
-        ),
+        "mean_excess_return_percent": mean(float(row["excess_return_percent"]) for row, _ in pairs) if pairs else None,
     }
 
 
@@ -244,6 +331,7 @@ def validate_v3_decision_policy(
         return {"status": "xgboost_unavailable", "model_version": V3_MODEL_VERSION}
 
     pooled, universe = _build_pooled_rows(limit=limit)
+    _attach_exact_regime_context(pooled)
     fold_specs = expanding_nested_folds(pooled, folds=folds)
     if not fold_specs:
         return {
@@ -281,27 +369,24 @@ def validate_v3_decision_policy(
     for result in raw_results:
         all_rows.extend(result.pop("_test_rows"))
         all_execution_probabilities.extend(result.pop("_execution_probabilities"))
-        result.pop("_risk_probability_sets")
-        result.pop("_candidates")
         all_selections.append(result.pop("_selection"))
         fold_summaries.append(result)
 
     aggregate_selection = _merge_selections(all_selections)
-    aggregate_metrics = evaluate_dynamic_selection(
-        aggregate_selection,
+    aggregate_metrics = evaluate_dynamic_selection(aggregate_selection, cost_percent=V3_EXECUTION_HURDLE_PERCENT)
+    aggregate_portfolio = non_overlapping_dynamic_portfolio(aggregate_selection, cost_percent=V3_EXECUTION_HURDLE_PERCENT)
+
+    capacity_baseline_selection = _regime_matched_baseline(all_rows)
+    matched_breadth_selection = _regime_matched_baseline(
+        all_rows,
+        selected_counts=_selected_counts(aggregate_selection),
+    )
+    capacity_baseline_metrics = evaluate_dynamic_selection(
+        capacity_baseline_selection,
         cost_percent=V3_EXECUTION_HURDLE_PERCENT,
     )
-    aggregate_portfolio = non_overlapping_dynamic_portfolio(
-        aggregate_selection,
-        cost_percent=V3_EXECUTION_HURDLE_PERCENT,
-    )
-    baseline_selection = _regime_matched_baseline(all_rows)
-    baseline_metrics = evaluate_dynamic_selection(
-        baseline_selection,
-        cost_percent=V3_EXECUTION_HURDLE_PERCENT,
-    )
-    baseline_portfolio = non_overlapping_dynamic_portfolio(
-        baseline_selection,
+    matched_breadth_metrics = evaluate_dynamic_selection(
+        matched_breadth_selection,
         cost_percent=V3_EXECUTION_HURDLE_PERCENT,
     )
 
@@ -324,18 +409,18 @@ def validate_v3_decision_policy(
         1
         for fold in fold_summaries
         if fold.get("selection", {}).get("mean_net_excess_return_percent") is not None
-        and fold.get("regime_matched_baseline", {}).get("mean_net_excess_return_percent") is not None
+        and fold.get("matched_breadth_baseline", {}).get("mean_net_excess_return_percent") is not None
         and float(fold["selection"]["mean_net_excess_return_percent"])
-        > float(fold["regime_matched_baseline"]["mean_net_excess_return_percent"])
+        > float(fold["matched_breadth_baseline"]["mean_net_excess_return_percent"])
     )
 
     portfolio_low = aggregate_portfolio.get("mean_net_excess_bootstrap_95", {}).get("low")
-    portfolio_dd = aggregate_portfolio.get("portfolio_max_drawdown_percent")
-    market_dd = aggregate_portfolio.get("nepse_max_drawdown_percent")
+    portfolio_dd = aggregate_portfolio.get("portfolio_cohort_boundary_max_drawdown_percent")
+    market_dd = aggregate_portfolio.get("nepse_cohort_boundary_max_drawdown_percent")
     checks = {
         "enough_valid_outer_folds": len(fold_summaries) >= MIN_VALID_FOLDS,
         "positive_after_1pct_in_at_least_3_folds": positive_folds >= MIN_POSITIVE_FOLDS,
-        "beats_regime_matched_baseline_in_at_least_3_folds": baseline_beating_folds >= MIN_BASELINE_BEATING_FOLDS,
+        "beats_matched_breadth_baseline_in_at_least_3_folds": baseline_beating_folds >= MIN_BASELINE_BEATING_FOLDS,
         "aggregate_mean_net_excess_positive": (
             aggregate_metrics.get("mean_net_excess_return_percent") is not None
             and float(aggregate_metrics["mean_net_excess_return_percent"]) > 0.0
@@ -344,24 +429,21 @@ def validate_v3_decision_policy(
             aggregate_metrics.get("median_net_excess_return_percent") is not None
             and float(aggregate_metrics["median_net_excess_return_percent"]) > 0.0
         ),
-        "aggregate_mean_beats_regime_matched_baseline": (
+        "aggregate_mean_beats_matched_breadth_baseline": (
             aggregate_metrics.get("mean_net_excess_return_percent") is not None
-            and baseline_metrics.get("mean_net_excess_return_percent") is not None
+            and matched_breadth_metrics.get("mean_net_excess_return_percent") is not None
             and float(aggregate_metrics["mean_net_excess_return_percent"])
-            > float(baseline_metrics["mean_net_excess_return_percent"])
+            > float(matched_breadth_metrics["mean_net_excess_return_percent"])
         ),
         "severe_drawdown_relative_reduction_at_least_15pct": (
-            relative_risk_reduction is not None
-            and float(relative_risk_reduction) >= MIN_RELATIVE_RISK_REDUCTION
+            relative_risk_reduction is not None and float(relative_risk_reduction) >= MIN_RELATIVE_RISK_REDUCTION
         ),
         "high_confidence_density_adequate": (
             int(high_confidence.get("calls") or 0) >= MIN_HIGH_CONFIDENCE_CALLS
             and int(high_confidence.get("independent_dates") or 0) >= MIN_HIGH_CONFIDENCE_DATES
         ),
-        "non_overlap_bootstrap_lower_bound_positive": (
-            portfolio_low is not None and float(portfolio_low) > 0.0
-        ),
-        "portfolio_drawdown_not_more_than_25pct_worse_than_nepse": (
+        "non_overlap_bootstrap_lower_bound_positive": portfolio_low is not None and float(portfolio_low) > 0.0,
+        "cohort_boundary_drawdown_not_more_than_25pct_worse_than_nepse": (
             portfolio_dd is not None
             and market_dd is not None
             and abs(float(portfolio_dd)) <= abs(float(market_dd)) * 1.25
@@ -377,16 +459,10 @@ def validate_v3_decision_policy(
         "policy": {
             "execution_hurdle_percent": V3_EXECUTION_HURDLE_PERCENT,
             "risk_thresholds_percent": list(V3_RISK_THRESHOLDS),
-            "dynamic_capacity": {
-                "strong_positive": 10,
-                "positive": 5,
-                "sideways": 3,
-                "negative": 0,
-                "stress": 0,
-            },
-            "abstention": "negative/stress markets, lagging sectors, excessive risk, or insufficient probability",
+            "dynamic_capacity": MARKET_CAPACITY,
+            "abstention": "distribution/bear/high-stress markets, lagging sectors, excessive risk, or insufficient probability",
             "score": "55% execution probability + 20% rank percentile + 25% downside safety",
-            "regime_consensus": "same-date market median and same-date/sector median",
+            "historical_regime": "exact point-in-time NEPSE SMA50/SMA200, 20D/60D return, 60D volatility and 252D drawdown",
         },
         "pooled_rows": len(pooled),
         "valid_outer_folds": len(fold_summaries),
@@ -394,8 +470,8 @@ def validate_v3_decision_policy(
         "total_nested_test_dates": len({row["date"] for row in all_rows}),
         "dynamic_selection": aggregate_metrics,
         "non_overlapping_portfolio": aggregate_portfolio,
-        "regime_matched_baseline": baseline_metrics,
-        "regime_matched_baseline_portfolio": baseline_portfolio,
+        "regime_capacity_baseline": capacity_baseline_metrics,
+        "matched_breadth_baseline": matched_breadth_metrics,
         "risk": {
             "universe_severe_drawdown_rate": universe_risk,
             "selected_severe_drawdown_rate": selected_risk,
@@ -405,7 +481,7 @@ def validate_v3_decision_policy(
         "calibration_buckets": calibration,
         "fold_consistency": {
             "positive_after_1pct_folds": positive_folds,
-            "beats_regime_matched_baseline_folds": baseline_beating_folds,
+            "beats_matched_breadth_baseline_folds": baseline_beating_folds,
             "folds": fold_summaries,
         },
         "research_gate": {"status": "pass" if passed else "review", "checks": checks},
