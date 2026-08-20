@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Index, Integer, Numeric, String, UniqueConstraint
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Index, Integer, LargeBinary, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.database.models import Base
@@ -49,4 +49,29 @@ class QuantShadowSignal(Base):
     realized_excess_return_percent: Mapped[float | None] = mapped_column(Numeric(14, 6), nullable=True)
     success_after_cost: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     void_reason: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class QuantModelSnapshot(Base):
+    """Immutable trained model artifact plus untouched historical test metrics."""
+
+    __tablename__ = "quant_model_snapshots"
+    __table_args__ = (
+        UniqueConstraint("model_version", "trained_through", name="uq_quant_model_version_date"),
+        Index("ix_quant_model_snapshot_trained_through", "trained_through"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    model_version: Mapped[str] = mapped_column(String(60), nullable=False)
+    feature_version: Mapped[str] = mapped_column(String(60), nullable=False)
+    trained_through: Mapped[date] = mapped_column(Date, nullable=False)
+    horizon_days: Mapped[int] = mapped_column(Integer, nullable=False)
+    training_rows: Mapped[int] = mapped_column(Integer, nullable=False)
+    calibration_rows: Mapped[int] = mapped_column(Integer, nullable=False)
+    test_rows: Mapped[int] = mapped_column(Integer, nullable=False)
+    classifier_blob: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)
+    ranker_blob: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)
+    calibration_intercept: Mapped[float | None] = mapped_column(Numeric(14, 8), nullable=True)
+    calibration_slope: Mapped[float | None] = mapped_column(Numeric(14, 8), nullable=True)
+    metrics_json: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
