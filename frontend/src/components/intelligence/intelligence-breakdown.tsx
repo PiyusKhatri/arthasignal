@@ -8,12 +8,12 @@ const SCORE_PILLARS: {
   description: string;
   colorClass: string;
 }[] = [
-  { key: "trend", label: "Trend Strength", weight: "30%", max: 30, description: "SMA50/SMA200 structure & 200 SMA baseline", colorClass: "bg-emerald-500" },
-  { key: "momentum", label: "Momentum", weight: "20%", max: 20, description: "RSI channels and MACD signal trajectory", colorClass: "bg-blue-500" },
-  { key: "liquidity", label: "Market Liquidity", weight: "15%", max: 15, description: "Execution safety and volume turnover tier", colorClass: "bg-cyan-500" },
-  { key: "reliability", label: "Signal Reliability", weight: "15%", max: 15, description: "15-year historical backtest statistical edge", colorClass: "bg-indigo-500" },
-  { key: "valuation", label: "Valuation / Health", weight: "10%", max: 10, description: "P/E relative ratio and EPS profitability", colorClass: "bg-amber-500" },
-  { key: "risk_adjustment", label: "Risk Control", weight: "10%", max: 10, description: "Overbought / volatility preservation buffer", colorClass: "bg-rose-500" },
+  { key: "trend", label: "Trend Structure", weight: "20%", max: 20, description: "SMA50/SMA200 structure and price vs long-term baseline", colorClass: "bg-emerald-500" },
+  { key: "momentum", label: "Momentum", weight: "15%", max: 15, description: "RSI state and MACD confirmation", colorClass: "bg-blue-500" },
+  { key: "liquidity", label: "Liquidity", weight: "10%", max: 10, description: "Execution quality based on the current liquidity tier", colorClass: "bg-cyan-500" },
+  { key: "reliability", label: "Historical Evidence", weight: "30%", max: 30, description: "Market-wide signal edge vs baseline, sample depth, and confidence tier", colorClass: "bg-indigo-500" },
+  { key: "valuation", label: "Fundamental Health", weight: "10%", max: 10, description: "Conservative EPS, P/E and P/B health contribution", colorClass: "bg-amber-500" },
+  { key: "risk_adjustment", label: "Regime / Risk Control", weight: "15%", max: 15, description: "NEPSE regime, volatility, trend-break and overbought risk", colorClass: "bg-rose-500" },
 ];
 
 export function IntelligenceBreakdown({ scores }: { scores: StockIntelligence["scores"] }) {
@@ -22,10 +22,10 @@ export function IntelligenceBreakdown({ scores }: { scores: StockIntelligence["s
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.16em] text-text-secondary">Pillar breakdown</p>
-          <h3 className="mt-1 text-base font-semibold text-text-primary">6-Pillar Artha Score Model</h3>
+          <h3 className="mt-1 text-base font-semibold text-text-primary">Evidence-Weighted Artha Score</h3>
         </div>
         <span className="rounded-md border border-border bg-background px-2.5 py-1 text-xs font-semibold text-accent-text">
-          100% Weighted
+          100 points
         </span>
       </div>
 
