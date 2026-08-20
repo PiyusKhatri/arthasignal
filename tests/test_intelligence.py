@@ -14,8 +14,23 @@ from src.services.stock_intelligence import (
 )
 
 
+def _collect_paths(obj) -> set[str]:
+    """Recursively collect all route paths, including through _IncludedRouter."""
+    paths: set[str] = set()
+    path = getattr(obj, "path", None)
+    if path:
+        paths.add(path)
+    for route in getattr(obj, "routes", []):
+        paths |= _collect_paths(route)
+    # FastAPI wraps sub-routers in _IncludedRouter; real routes live in .original_router
+    orig = getattr(obj, "original_router", None)
+    if orig is not None:
+        paths |= _collect_paths(orig)
+    return paths
+
+
 def test_intelligence_routes_are_registered() -> None:
-    paths = {route.path for route in app.routes}
+    paths = _collect_paths(app)
     assert "/stocks/{symbol}/intelligence" in paths
     assert "/market/intelligence" in paths
 
