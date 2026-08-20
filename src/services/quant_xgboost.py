@@ -7,6 +7,8 @@ from typing import Any, Sequence
 
 from src.services.quant_features import FEATURE_NAMES, feature_vector
 
+MIN_RANK_GROUP_SIZE = 10
+
 
 def _clamp(value: float, low: float, high: float) -> float:
     return max(low, min(high, value))
@@ -172,7 +174,7 @@ def calibrate_probability(probability: float | None, calibrator: dict[str, float
 
 
 def fit_xgb_ranker(rows: Sequence[dict[str, Any]], *, num_boost_round: int = 180) -> Any | None:
-    """Fit a cross-sectional LambdaMART model grouped by trading date."""
+    """Fit a cross-sectional LambdaMART model grouped by sufficiently broad trading dates."""
     if len(rows) < 500 or not xgboost_available():
         return None
     import xgboost as xgb
@@ -180,10 +182,15 @@ def fit_xgb_ranker(rows: Sequence[dict[str, Any]], *, num_boost_round: int = 180
     grouped: dict[Any, list[dict[str, Any]]] = defaultdict(list)
     for row in rows:
         grouped[row["date"]].append(row)
+    grouped = {
+        trading_date: date_rows
+        for trading_date, date_rows in grouped.items()
+        if len(date_rows) >= MIN_RANK_GROUP_SIZE
+    }
     dates = sorted(grouped)
     ordered = [row for trading_date in dates for row in grouped[trading_date]]
     group_sizes = [len(grouped[trading_date]) for trading_date in dates]
-    if len(group_sizes) < 20 or max(group_sizes, default=0) < 5:
+    if len(group_sizes) < 20 or len(ordered) < 500:
         return None
 
     # Five relevance levels derived only from the already-observed forward excess return.
@@ -253,9 +260,9 @@ def precision_at_k_by_date(
     precisions: list[float] = []
     returns: list[float] = []
     for date_rows in grouped.values():
-        ranked = sorted(date_rows, key=lambda item: item[1], reverse=True)[: max(1, min(k, len(date_rows)))]
-        if not ranked:
+        if len(date_rows) < k:
             continue
+        ranked = sorted(date_rows, key=lambda item: item[1], reverse=True)[:k]
         precisions.append(mean(1.0 if row["success"] else 0.0 for row, _ in ranked))
         returns.append(mean(float(row["excess_return_percent"]) for row, _ in ranked))
 
