@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from src.api.main import app
 from src.database.models import Base
-from src.database.quant_models import QuantShadowSignal
+from src.database.quant_models import QuantModelSnapshot, QuantShadowSignal
 
 
 def _collect_paths(obj) -> set[str]:
@@ -38,5 +38,26 @@ def test_quant_shadow_table_is_registered_in_metadata() -> None:
         "confidence_score",
         "realized_excess_return_percent",
         "success_after_cost",
+    }
+    assert expected.issubset(table.columns.keys())
+
+
+def test_quant_model_snapshot_table_is_registered_in_metadata() -> None:
+    assert QuantModelSnapshot.__tablename__ == "quant_model_snapshots"
+    assert "quant_model_snapshots" in Base.metadata.tables
+    table = Base.metadata.tables["quant_model_snapshots"]
+    expected = {
+        "model_version",
+        "feature_version",
+        "trained_through",
+        "horizon_days",
+        "training_rows",
+        "calibration_rows",
+        "test_rows",
+        "classifier_blob",
+        "ranker_blob",
+        "calibration_intercept",
+        "calibration_slope",
+        "metrics_json",
     }
     assert expected.issubset(table.columns.keys())
