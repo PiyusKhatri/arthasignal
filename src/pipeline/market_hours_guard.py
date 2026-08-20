@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime, time, timedelta, timezone
 
-from src.pipeline.backfill_calendar import is_market_open_today
+from src.pipeline.backfill_calendar import is_trading_day
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ def is_within_intraday_window() -> bool:
     now_npt = _current_npt_time()
     _warn_if_near_boundary(now_npt)
 
-    if not is_market_open_today():
+    if not is_trading_day(now_npt.date()):
         return False
 
     return SESSION_START <= now_npt.time() <= SESSION_END
@@ -50,8 +50,8 @@ def is_within_intraday_window() -> bool:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     now_npt = _current_npt_time()
-    trading_day = is_market_open_today()
+    trading_day = is_trading_day(now_npt.date())
     result = is_within_intraday_window()
     print(f"current NPT time: {now_npt.strftime('%Y-%m-%d %H:%M:%S %z')}")
-    print(f"is_market_open_today(): {trading_day}")
+    print(f"is_trading_day(): {trading_day}")
     print(f"is_within_intraday_window(): {result}")
