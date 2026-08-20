@@ -56,22 +56,38 @@ def test_regime_inference_is_point_in_time_and_sector_relative() -> None:
     sideways = _row(date(2024, 1, 2), "B", market_return=0.0, sector_relative=0.0)
     stress = _row(date(2024, 1, 3), "C", market_return=-7.0, sector_relative=-3.0)
 
-    assert classify_market_regime(strong) == "strong_positive"
+    assert classify_market_regime(strong) == "strong_bull"
     assert classify_market_regime(sideways) == "sideways"
-    assert classify_market_regime(stress) == "stress"
+    assert classify_market_regime(stress) == "high_stress"
     assert classify_sector_regime(strong) == "leading"
     assert classify_sector_regime(sideways) == "neutral"
     assert classify_sector_regime(stress) == "lagging"
 
 
-def test_consensus_regime_uses_median_not_one_outlier() -> None:
+def test_exact_index_context_overrides_stock_level_fallback() -> None:
+    row = _row(date(2024, 1, 1), "A", market_return=-8.0, sector_relative=-3.0)
+    row["regime_context"] = {
+        "market_close": 2200.0,
+        "market_sma50": 2100.0,
+        "market_sma200": 1950.0,
+        "market_return_20d_percent": 4.0,
+        "market_return_60d_percent": 12.0,
+        "market_drawdown_252d_percent": -4.0,
+        "market_annualized_volatility_60d_percent": 20.0,
+        "sector_relative_strength_20d_percent": 3.5,
+    }
+    assert classify_market_regime(row) == "strong_bull"
+    assert classify_sector_regime(row) == "leading"
+
+
+def test_consensus_regime_uses_median_not_one_outlier_without_exact_context() -> None:
     trading_date = date(2024, 1, 1)
     rows = [
         _row(trading_date, "A", market_return=4.0, sector_relative=3.0),
         _row(trading_date, "B", market_return=4.5, sector_relative=2.5),
         _row(trading_date, "C", market_return=-12.0, sector_relative=-8.0),
     ]
-    assert consensus_market_regime(rows) == "positive"
+    assert consensus_market_regime(rows) == "bull"
     assert consensus_sector_regime(rows) == "leading"
 
 
