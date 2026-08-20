@@ -24,3 +24,17 @@ class RefreshSession(Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     revoked: Mapped[bool] = mapped_column(nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class UserAuthState(Base):
+    """Per-user access-token revocation watermark.
+
+    Access tokens issued before valid_after are rejected. This allows password
+    resets and other security events to invalidate already-issued short-lived
+    access tokens without changing the legacy users table.
+    """
+
+    __tablename__ = "user_auth_state"
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    valid_after: Mapped[datetime] = mapped_column(DateTime, nullable=False)
