@@ -28,6 +28,7 @@ export default async function DashboardPage() {
     pulse === null ? "market pulse" : null,
     activeSignals === null ? "signals" : null,
     sectors === null ? "sector performance" : null,
+    watchlist.length === 0 && WATCHLIST_SYMBOLS.length > 0 ? "watchlist quotes" : null,
   ].filter((value): value is string => value !== null);
 
   return (
