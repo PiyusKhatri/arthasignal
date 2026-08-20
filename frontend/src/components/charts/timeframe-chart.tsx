@@ -72,6 +72,8 @@ type HoverSnapshot = {
   volume?: number;
   changePercent: number | null;
   indicators: Array<{ label: string; value: number }>;
+  signals: string[];
+  patterns: string[];
 };
 
 type PersistedLayout = {
@@ -137,6 +139,26 @@ function targetKey(target: ChartTarget) { return target.kind === "stock" ? targe
 function layoutKey(target: ChartTarget) { return `artha-chart-layout:v2:${targetKey(target)}`; }
 function isIntraday(interval: IntervalKey) { return ["5m", "15m", "30m", "1H"].includes(interval); }
 function intradayMinutes(interval: IntervalKey) { return interval === "15m" ? 15 : interval === "30m" ? 30 : interval === "1H" ? 60 : 5; }
+
+type SignalAction = "buy" | "sell" | "watch";
+
+function classifySignal(signalName: string): SignalAction {
+  const name = signalName.toLowerCase();
+  if (name.includes("rsi_14 < 30")) return "buy";
+  if (name.includes("close < bollinger_lower")) return "buy";
+  if (name.includes("rsi_14 > 70")) return "sell";
+  if (name.includes("doji")) return "watch";
+  return "watch";
+}
+
+function humanizeSignal(signalName: string): string {
+  const name = signalName.toLowerCase();
+  if (name.includes("rsi_14 < 30")) return "RSI oversold";
+  if (name.includes("close < bollinger_lower")) return "Bollinger lower break";
+  if (name.includes("rsi_14 > 70")) return "RSI overbought";
+  if (name.includes("doji")) return "Doji";
+  return signalName;
+}
 function historyUrl(target: ChartTarget, range = "ALL") {
   return target.kind === "stock"
     ? `/api/stocks/${encodeURIComponent(target.symbol)}/history?range=${range}`
@@ -439,33 +461,58 @@ export function TimeframeChart({ target, artha }: { target: ChartTarget; artha?:
     }
 
     if (showAutoAnalysis) {
-      if (levels.support !== null) mainSeries.createPriceLine({ price: levels.support, color: rgba(up, 0.75), lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: true, title: "Auto support" });
-      if (levels.resistance !== null) mainSeries.createPriceLine({ price: levels.resistance, color: rgba(down, 0.75), lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: true, title: "Auto resistance" });
+      if (levels.support !== null) mainSeries.createPriceLine({ price: levels.support, color: rgba(up, 0.75), lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: true, title: "Support" });
+      if (levels.resistance !== null) mainSeries.createPriceLine({ price: levels.resistance, color: rgba(down, 0.75), lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: true, title: "Resistance" });
       drawing.setShapes([...drawingsRef.current, ...autoDrawingShapes]);
     }
 
     const markerItems: SeriesMarker<Time>[] = [];
-    if (artha?.signals?.length) {
-      markerItems.push(...artha.signals
-        .filter((signal) => signal.entryDate && replayBars.some((bar) => String(bar.time) === signal.entryDate))
-        .slice(-12)
-        .map((signal) => ({
-          time: signal.entryDate as Time,
-          position: signal.status.toLowerCase().includes("win") ? "belowBar" as const : "aboveBar" as const,
-          color: signal.status.toLowerCase().includes("win") ? up : warning,
-          shape: signal.status.toLowerCase().includes("win") ? "arrowUp" as const : "square" as const,
-          text: `Artha: ${signal.signalName}`,
-        })));
+
+    // --- Artha signal markers: grouped by candle, one marker per time ---
+    const signalGroups = new Map<string, { action: SignalAction; reasons: string[] }>();
+    for (const signal of artha?.signals ?? []) {
+      if (!signal.entryDate) continue;
+      if (!replayBars.some((bar) => String(bar.time) === signal.entryDate)) continue;
+      const key = signal.entryDate;
+      const action = classifySignal(signal.signalName);
+      const reason = humanizeSignal(signal.signalName);
+      const existing = signalGroups.get(key);
+      if (!existing) {
+        signalGroups.set(key, { action, reasons: [reason] });
+      } else {
+        existing.reasons.push(reason);
+        // mixed buy+sell → watch
+        if (existing.action !== action) existing.action = "watch";
+      }
     }
+    for (const [time, group] of signalGroups.entries()) {
+      const count = group.reasons.length;
+      const text =
+        group.action === "buy"
+          ? count > 1 ? `BUY ×${count}` : "BUY"
+          : group.action === "sell"
+          ? count > 1 ? `SELL ×${count}` : "SELL"
+          : count > 1 ? `WATCH ×${count}` : "WATCH";
+      markerItems.push({
+        time: time as Time,
+        position: group.action === "sell" ? "aboveBar" : "belowBar",
+        color: group.action === "buy" ? up : group.action === "sell" ? down : warning,
+        shape: group.action === "buy" ? "arrowUp" : group.action === "sell" ? "arrowDown" : "circle",
+        text,
+      });
+    }
+
+    // --- Pattern markers: compact dots only, no label clutter ---
     if (patterns.length > 0) {
-      markerItems.push(...patterns.slice(-80).map((marker) => ({
+      markerItems.push(...patterns.slice(-20).map((marker) => ({
         time: marker.time as Time,
         position: marker.direction === "bearish" ? "aboveBar" as const : "belowBar" as const,
-        color: marker.direction === "bearish" ? down : marker.direction === "bullish" ? up : warning,
-        shape: marker.direction === "bearish" ? "arrowDown" as const : marker.direction === "bullish" ? "arrowUp" as const : "circle" as const,
-        text: marker.label,
+        color: marker.direction === "bearish" ? rgba(down, 0.6) : marker.direction === "bullish" ? rgba(up, 0.6) : rgba(warning, 0.6),
+        shape: "circle" as const,
+        text: "",
       })));
     }
+
     if (markerItems.length) {
       markerItems.sort((a, b) => String(a.time).localeCompare(String(b.time)));
       const markerAnchor = chart.addSeries(LineSeries, { color: "transparent", lineVisible: false, priceLineVisible: false, lastValueVisible: false });
@@ -514,7 +561,25 @@ export function TimeframeChart({ target, artha }: { target: ChartTarget; artha?:
         const bar = index >= 0 ? replayBars[index] : null;
         if (bar) {
           const prev = index > 0 ? replayBars[index - 1].close : null;
-          setHover({ time: bar.time as Time, open: bar.open, high: bar.high, low: bar.low, close: bar.close, volume: bar.volume, changePercent: prev ? ((bar.close - prev) / prev) * 100 : null, indicators: indicatorValueAt(analysis, bar.time as Time, indicators) });
+          const barTimeStr = String(bar.time);
+          const hoveredSignals = (artha?.signals ?? [])
+            .filter((s) => s.entryDate === barTimeStr)
+            .map((s) => humanizeSignal(s.signalName));
+          const hoveredPatterns = patterns
+            .filter((p) => String(p.time) === barTimeStr)
+            .map((p) => p.label);
+          setHover({
+            time: bar.time as Time,
+            open: bar.open,
+            high: bar.high,
+            low: bar.low,
+            close: bar.close,
+            volume: bar.volume,
+            changePercent: prev ? ((bar.close - prev) / prev) * 100 : null,
+            indicators: indicatorValueAt(analysis, bar.time as Time, indicators),
+            signals: hoveredSignals,
+            patterns: hoveredPatterns,
+          });
         }
       }
       const tool = toolRef.current;
@@ -552,7 +617,7 @@ export function TimeframeChart({ target, artha }: { target: ChartTarget; artha?:
     return () => window.removeEventListener("keydown", onKeyDown);
   });
 
-  const latest = hover ?? (replayBars.length ? (() => { const bar = replayBars[replayBars.length - 1]; const prev = replayBars.length > 1 ? replayBars[replayBars.length - 2].close : null; return { time: bar.time as Time, open: bar.open, high: bar.high, low: bar.low, close: bar.close, volume: bar.volume, changePercent: prev ? ((bar.close - prev) / prev) * 100 : null, indicators: indicatorValueAt(analysis, bar.time as Time, indicators) } satisfies HoverSnapshot; })() : null);
+  const latest = hover ?? (replayBars.length ? (() => { const bar = replayBars[replayBars.length - 1]; const prev = replayBars.length > 1 ? replayBars[replayBars.length - 2].close : null; return { time: bar.time as Time, open: bar.open, high: bar.high, low: bar.low, close: bar.close, volume: bar.volume, changePercent: prev ? ((bar.close - prev) / prev) * 100 : null, indicators: indicatorValueAt(analysis, bar.time as Time, indicators), signals: [], patterns: [] } satisfies HoverSnapshot; })() : null);
 
   return (
     <div ref={shellRef} className={fullScreen ? "fixed inset-0 z-[100] flex flex-col overflow-auto bg-background p-3 sm:p-5" : "flex flex-col gap-3"} data-testid="advanced-chart-workspace">
@@ -578,7 +643,7 @@ export function TimeframeChart({ target, artha }: { target: ChartTarget; artha?:
         </div>
       </div>
 
-      {latest && <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-xs text-text-secondary"><span className="font-medium text-text-primary">{String(latest.time)}</span><span>O <b className="text-text-primary">{latest.open.toFixed(2)}</b></span><span>H <b className="text-text-primary">{latest.high.toFixed(2)}</b></span><span>L <b className="text-text-primary">{latest.low.toFixed(2)}</b></span><span>C <b className="text-text-primary">{latest.close.toFixed(2)}</b></span>{latest.changePercent !== null && <span className={latest.changePercent >= 0 ? "text-success-text" : "text-danger-text"}>{latest.changePercent >= 0 ? "+" : ""}{latest.changePercent.toFixed(2)}%</span>}{latest.volume !== undefined && <span>Vol {Math.round(latest.volume).toLocaleString()}</span>}{latest.indicators.map((entry) => <span key={entry.label}>{entry.label} <b className="text-text-primary">{entry.value.toFixed(2)}</b></span>)}</div>}
+      {latest && <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-xs text-text-secondary"><span className="font-medium text-text-primary">{String(latest.time)}</span><span>O <b className="text-text-primary">{latest.open.toFixed(2)}</b></span><span>H <b className="text-text-primary">{latest.high.toFixed(2)}</b></span><span>L <b className="text-text-primary">{latest.low.toFixed(2)}</b></span><span>C <b className="text-text-primary">{latest.close.toFixed(2)}</b></span>{latest.changePercent !== null && <span className={latest.changePercent >= 0 ? "text-success-text" : "text-danger-text"}>{latest.changePercent >= 0 ? "+" : ""}{latest.changePercent.toFixed(2)}%</span>}{latest.volume !== undefined && <span>Vol {Math.round(latest.volume).toLocaleString()}</span>}{latest.indicators.map((entry) => <span key={entry.label}>{entry.label} <b className="text-text-primary">{entry.value.toFixed(2)}</b></span>)}{latest.signals.length > 0 && <span>Signal <b className="text-text-primary">{latest.signals.join(", ")}</b></span>}{latest.patterns.length > 0 && <span>Pattern <b className="text-text-primary">{latest.patterns.join(", ")}</b></span>}</div>}
 
       <div className="flex flex-wrap items-center gap-1 rounded-lg border border-border bg-card p-1.5" data-testid="drawing-toolbar">
         {DRAWING_TOOLS.map((tool) => <button key={tool.key} type="button" onClick={() => selectTool(tool.key)} aria-pressed={drawingTool === tool.key} className={`rounded-md px-2 py-1 text-xs ${drawingTool === tool.key ? "bg-accent-primary text-white" : "text-text-secondary hover:bg-background hover:text-text-primary"}`}>{tool.label}</button>)}
