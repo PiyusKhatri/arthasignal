@@ -41,6 +41,7 @@ export default async function StockDetailPage({ params }: { params: Promise<{ sy
           signalName: signal.signal_name,
           status: signal.status,
           entryDate: signal.entry_date,
+          direction: signal.direction,
         })),
       }
     : null;

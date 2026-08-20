@@ -52,6 +52,16 @@ export type PatternMarker = {
   label: string;
 };
 
+export type AutoLevels = {
+  support: number | null;
+  resistance: number | null;
+  supportTouches: number;
+  resistanceTouches: number;
+  lowSwing: ChartBar[];
+  highSwing: ChartBar[];
+  tolerance: number;
+};
+
 function compact(values: Array<number | null>, bars: ChartBar[]): IndicatorPoint[] {
   const result: IndicatorPoint[] = [];
   for (let i = 0; i < values.length; i += 1) {
@@ -339,6 +349,7 @@ export function heikinAshi(bars: ChartBar[]): ChartBar[] {
 }
 
 export function resampleBars(bars: ChartBar[], mode: "1W" | "1M"): ChartBar[] {
+  const ordered = [...bars].sort((a, b) => String(a.time).localeCompare(String(b.time)));
   const groups = new Map<string, ChartBar[]>();
   const keyFor = (bar: ChartBar) => {
     const date = new Date(typeof bar.time === "number" ? bar.time * 1000 : `${bar.time}T00:00:00Z`);
@@ -350,7 +361,7 @@ export function resampleBars(bars: ChartBar[], mode: "1W" | "1M"): ChartBar[] {
     const week = Math.ceil((((thursday.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
     return `${thursday.getUTCFullYear()}-${week}`;
   };
-  for (const bar of bars) {
+  for (const bar of ordered) {
     const key = keyFor(bar);
     const group = groups.get(key) ?? [];
     group.push(bar);
@@ -366,18 +377,24 @@ export function resampleBars(bars: ChartBar[], mode: "1W" | "1M"): ChartBar[] {
   }));
 }
 
+const NEPAL_TIME_OFFSET_SECONDS = (5 * 60 + 45) * 60;
+
 export function aggregateIntraday(points: Array<{ time: number; price: number; volume?: number }>, minutes: number): ChartBar[] {
   if (points.length === 0) return [];
   const bucketSeconds = minutes * 60;
+  const ordered = [...points].sort((a, b) => a.time - b.time);
   const groups = new Map<number, Array<{ time: number; price: number; volume?: number }>>();
-  for (const point of points) {
-    const bucket = Math.floor(point.time / bucketSeconds) * bucketSeconds;
+  for (const point of ordered) {
+    // Anchor buckets to Nepal local clock rather than UTC. This matters for
+    // 30m and 1H bars because Nepal's UTC offset is +05:45.
+    const bucket = Math.floor((point.time + NEPAL_TIME_OFFSET_SECONDS) / bucketSeconds) * bucketSeconds - NEPAL_TIME_OFFSET_SECONDS;
     const group = groups.get(bucket) ?? [];
     group.push(point);
     groups.set(bucket, group);
   }
   let previousCumulativeVolume = 0;
   return Array.from(groups.entries()).sort((a, b) => a[0] - b[0]).map(([time, group]) => {
+    group.sort((a, b) => a.time - b.time);
     const last = group[group.length - 1];
     const cumulativeVolume = last.volume ?? previousCumulativeVolume;
     const volume = Math.max(0, cumulativeVolume - previousCumulativeVolume);
@@ -395,7 +412,10 @@ export function aggregateIntraday(points: Array<{ time: number; price: number; v
 
 export function filterBarsByRange(bars: ChartBar[], range: string): ChartBar[] {
   if (range === "ALL" || bars.length === 0) return bars;
-  const days: Record<string, number> = { "1D": 1, "5D": 5, "1M": 30, "3M": 91, "6M": 182, "YTD": 0, "1Y": 365, "3Y": 1095, "5Y": 1825 };
+  if (range === "1D") return bars.slice(-1);
+  if (range === "5D") return bars.slice(-5);
+
+  const days: Record<string, number> = { "1M": 30, "3M": 91, "6M": 182, "YTD": 0, "1Y": 365, "3Y": 1095, "5Y": 1825 };
   const last = bars[bars.length - 1];
   const lastDate = new Date(typeof last.time === "number" ? last.time * 1000 : `${last.time}T00:00:00Z`);
   let cutoff: Date;
@@ -421,36 +441,158 @@ export function detectPatterns(bars: ChartBar[]): PatternMarker[] {
   });
   for (let i = 0; i < bars.length; i += 1) {
     const s = stats[i];
+    const downTrend = i >= 3 && bars[i - 1].close < bars[i - 3].close;
+    const upTrend = i >= 3 && bars[i - 1].close > bars[i - 3].close;
     if (s.range > 0 && s.body <= 0.05 * s.range) markers.push({ time: bars[i].time, direction: "neutral", label: "Doji" });
-    if (s.range > 0 && s.body > 0 && s.lower >= 2 * s.body && s.upper <= 0.1 * s.range) markers.push({ time: bars[i].time, direction: "bullish", label: "Hammer" });
-    if (s.range > 0 && s.body > 0 && s.upper >= 2 * s.body && s.lower <= 0.1 * s.range) markers.push({ time: bars[i].time, direction: "bearish", label: "Shooting Star" });
+    if (downTrend && s.range > 0 && s.body > 0 && s.lower >= 2 * s.body && s.upper <= Math.max(s.body, 0.12 * s.range)) {
+      markers.push({ time: bars[i].time, direction: "bullish", label: "Hammer" });
+    }
+    if (upTrend && s.range > 0 && s.body > 0 && s.upper >= 2 * s.body && s.lower <= Math.max(s.body, 0.12 * s.range)) {
+      markers.push({ time: bars[i].time, direction: "bearish", label: "Shooting Star" });
+    }
     if (i > 0) {
       const prev = stats[i - 1];
-      const contains = s.bodyTop > prev.bodyTop && s.bodyBottom < prev.bodyBottom;
+      const contains = s.bodyTop >= prev.bodyTop && s.bodyBottom <= prev.bodyBottom;
       if (contains && !prev.bullish && s.bullish) markers.push({ time: bars[i].time, direction: "bullish", label: "Bull Engulf" });
       if (contains && prev.bullish && !s.bullish) markers.push({ time: bars[i].time, direction: "bearish", label: "Bear Engulf" });
-      const contained = s.bodyTop < prev.bodyTop && s.bodyBottom > prev.bodyBottom && prev.body > 0 && s.body <= 0.5 * prev.body;
-      if (contained && !prev.bullish) markers.push({ time: bars[i].time, direction: "bullish", label: "Bull Harami" });
-      if (contained && prev.bullish) markers.push({ time: bars[i].time, direction: "bearish", label: "Bear Harami" });
+      const contained = s.bodyTop <= prev.bodyTop && s.bodyBottom >= prev.bodyBottom && prev.body > 0 && s.body <= 0.5 * prev.body;
+      if (downTrend && contained && !prev.bullish && s.bullish) markers.push({ time: bars[i].time, direction: "bullish", label: "Bull Harami" });
+      if (upTrend && contained && prev.bullish && !s.bullish) markers.push({ time: bars[i].time, direction: "bearish", label: "Bear Harami" });
     }
   }
   return markers;
 }
 
-export function autoLevels(bars: ChartBar[]) {
-  if (bars.length < 10) return { support: null as number | null, resistance: null as number | null, lowSwing: [] as ChartBar[], highSwing: [] as ChartBar[] };
-  const lows: ChartBar[] = [];
-  const highs: ChartBar[] = [];
-  for (let i = 2; i < bars.length - 2; i += 1) {
-    const window = bars.slice(i - 2, i + 3);
-    if (bars[i].low === Math.min(...window.map((bar) => bar.low))) lows.push(bars[i]);
-    if (bars[i].high === Math.max(...window.map((bar) => bar.high))) highs.push(bars[i]);
+type PivotPoint = { index: number; price: number; bar: ChartBar };
+type PriceCluster = { price: number; touches: number; latestIndex: number; points: PivotPoint[] };
+
+function typicalTolerance(bars: ChartBar[]): number {
+  const recent = bars.slice(-Math.min(20, bars.length));
+  if (recent.length === 0) return 0;
+  const ranges = recent.map((bar, index) => {
+    if (index === 0) return bar.high - bar.low;
+    const prevClose = recent[index - 1].close;
+    return Math.max(bar.high - bar.low, Math.abs(bar.high - prevClose), Math.abs(bar.low - prevClose));
+  });
+  const averageTrueRange = ranges.reduce((sum, value) => sum + value, 0) / ranges.length;
+  const lastClose = recent[recent.length - 1].close;
+  return Math.max(lastClose * 0.006, averageTrueRange * 0.45);
+}
+
+function findPivots(bars: ChartBar[], side: "low" | "high"): PivotPoint[] {
+  const window = bars.length >= 120 ? 3 : 2;
+  const points: PivotPoint[] = [];
+  for (let i = window; i < bars.length - window; i += 1) {
+    const value = side === "low" ? bars[i].low : bars[i].high;
+    let extreme = true;
+    for (let j = i - window; j <= i + window; j += 1) {
+      if (j === i) continue;
+      const candidate = side === "low" ? bars[j].low : bars[j].high;
+      if (side === "low" ? candidate < value : candidate > value) {
+        extreme = false;
+        break;
+      }
+    }
+    if (!extreme) continue;
+    const previous = points[points.length - 1];
+    if (previous && i - previous.index <= window) {
+      const replace = side === "low" ? value < previous.price : value > previous.price;
+      if (replace) points[points.length - 1] = { index: i, price: value, bar: bars[i] };
+      continue;
+    }
+    points.push({ index: i, price: value, bar: bars[i] });
   }
-  const recentLows = lows.slice(-5);
-  const recentHighs = highs.slice(-5);
+  return points;
+}
+
+function clusterPivots(points: PivotPoint[], tolerance: number): PriceCluster[] {
+  const clusters: PriceCluster[] = [];
+  for (const point of points) {
+    let bestIndex = -1;
+    let bestDistance = Number.POSITIVE_INFINITY;
+    clusters.forEach((cluster, index) => {
+      const distance = Math.abs(cluster.price - point.price);
+      if (distance <= tolerance && distance < bestDistance) {
+        bestIndex = index;
+        bestDistance = distance;
+      }
+    });
+    if (bestIndex === -1) {
+      clusters.push({ price: point.price, touches: 1, latestIndex: point.index, points: [point] });
+      continue;
+    }
+    const cluster = clusters[bestIndex];
+    cluster.points.push(point);
+    cluster.touches += 1;
+    cluster.latestIndex = Math.max(cluster.latestIndex, point.index);
+    cluster.price = cluster.points.reduce((sum, item) => sum + item.price, 0) / cluster.points.length;
+  }
+  return clusters;
+}
+
+function pickLevel(clusters: PriceCluster[], lastClose: number, side: "support" | "resistance", tolerance: number, barCount: number): PriceCluster | null {
+  const candidates = clusters.filter((cluster) => {
+    if (cluster.touches < 2) return false;
+    return side === "support" ? cluster.price <= lastClose + tolerance * 0.25 : cluster.price >= lastClose - tolerance * 0.25;
+  });
+  let best: { cluster: PriceCluster; score: number } | null = null;
+  for (const cluster of candidates) {
+    const distance = Math.abs(cluster.price - lastClose) / Math.max(lastClose, 1);
+    const recency = cluster.latestIndex / Math.max(1, barCount - 1);
+    const score = cluster.touches * 6 + recency * 2 - distance * 18;
+    if (!best || score > best.score) best = { cluster, score };
+  }
+  return best?.cluster ?? null;
+}
+
+function bestTrendPair(points: PivotPoint[], bars: ChartBar[], side: "low" | "high", tolerance: number): ChartBar[] {
+  const recent = points.slice(-10);
+  let best: { a: PivotPoint; b: PivotPoint; score: number } | null = null;
+  for (let i = 0; i < recent.length - 1; i += 1) {
+    for (let j = i + 1; j < recent.length; j += 1) {
+      const a = recent[i];
+      const b = recent[j];
+      const span = b.index - a.index;
+      if (span < Math.max(4, Math.floor(bars.length * 0.07))) continue;
+      const slope = (b.price - a.price) / span;
+      if (Math.abs(slope) * span < tolerance * 0.5) continue;
+
+      let touches = 0;
+      let violations = 0;
+      for (const point of recent) {
+        if (point.index < a.index) continue;
+        const expected = a.price + slope * (point.index - a.index);
+        const delta = point.price - expected;
+        if (Math.abs(delta) <= tolerance) touches += 1;
+        if (side === "low" ? delta < -tolerance * 1.2 : delta > tolerance * 1.2) violations += 1;
+      }
+      if (touches < 2 || violations > 1) continue;
+      const recency = b.index / Math.max(1, bars.length - 1);
+      const score = touches * 6 + (span / Math.max(1, bars.length)) * 4 + recency * 2 - violations * 8;
+      if (!best || score > best.score) best = { a, b, score };
+    }
+  }
+  return best ? [best.a.bar, best.b.bar] : [];
+}
+
+export function autoLevels(bars: ChartBar[]): AutoLevels {
+  if (bars.length < 12) {
+    return { support: null, resistance: null, supportTouches: 0, resistanceTouches: 0, lowSwing: [], highSwing: [], tolerance: 0 };
+  }
+  const tolerance = typicalTolerance(bars);
+  const lowPivots = findPivots(bars, "low");
+  const highPivots = findPivots(bars, "high");
+  const lastClose = bars[bars.length - 1].close;
+  const supportCluster = pickLevel(clusterPivots(lowPivots, tolerance), lastClose, "support", tolerance, bars.length);
+  const resistanceCluster = pickLevel(clusterPivots(highPivots, tolerance), lastClose, "resistance", tolerance, bars.length);
+
   return {
-    support: recentLows.length ? recentLows.reduce((sum, bar) => sum + bar.low, 0) / recentLows.length : null,
-    resistance: recentHighs.length ? recentHighs.reduce((sum, bar) => sum + bar.high, 0) / recentHighs.length : null,
-    lowSwing: lows.slice(-2), highSwing: highs.slice(-2),
+    support: supportCluster?.price ?? null,
+    resistance: resistanceCluster?.price ?? null,
+    supportTouches: supportCluster?.touches ?? 0,
+    resistanceTouches: resistanceCluster?.touches ?? 0,
+    lowSwing: bestTrendPair(lowPivots, bars, "low", tolerance),
+    highSwing: bestTrendPair(highPivots, bars, "high", tolerance),
+    tolerance,
   };
 }

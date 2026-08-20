@@ -164,6 +164,7 @@ export type StockIntelligence = {
     status: string;
     entry_date: string | null;
     forward_days_horizon: number;
+    direction: "bullish" | "bearish" | "neutral";
   }[];
   risk: {
     level: "low" | "medium" | "high";

@@ -9,6 +9,7 @@ from src.services.stock_intelligence import (
     _confidence_score,
     _liquidity_score,
     _rating,
+    _signal_direction,
     _signal_quality,
     _trend_strength,
 )
@@ -22,7 +23,6 @@ def _collect_paths(obj) -> set[str]:
         paths.add(path)
     for route in getattr(obj, "routes", []):
         paths |= _collect_paths(route)
-    # FastAPI wraps sub-routers in _IncludedRouter; real routes live in .original_router
     orig = getattr(obj, "original_router", None)
     if orig is not None:
         paths |= _collect_paths(orig)
@@ -91,3 +91,11 @@ def test_backtest_summary_exposes_horizon_and_return() -> None:
             "average_return": 0.043,
         }
     ]
+
+
+def test_chart_signal_direction_is_explicit_and_stable() -> None:
+    assert _signal_direction("rsi_14 < 30 (oversold)") == "bullish"
+    assert _signal_direction("close < bollinger_lower") == "bullish"
+    assert _signal_direction("rsi_14 > 70 (overbought)") == "bearish"
+    assert _signal_direction("doji") == "neutral"
+    assert _signal_direction("unknown signal") == "neutral"

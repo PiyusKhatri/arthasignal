@@ -18,6 +18,7 @@ from src.database.models import (
     SymbolLiquidityTier,
     TechnicalSignal,
 )
+from src.pipeline.signal_validation_policy import VALIDATION_PROTOCOL_START_DATE, VALIDATION_SIGNAL_SPECS
 
 
 def _number(value: Any) -> float | None:
@@ -86,6 +87,14 @@ def _signal_quality(reliability_score: int, signal_names: set[str]) -> str:
     if reliability_score >= 10 or signal_names:
         return "medium"
     return "low"
+
+
+def _signal_direction(signal_name: str) -> str:
+    if signal_name in {"rsi_14 < 30 (oversold)", "close < bollinger_lower"}:
+        return "bullish"
+    if signal_name == "rsi_14 > 70 (overbought)":
+        return "bearish"
+    return "neutral"
 
 
 def _backtest_summary(rows: Iterable[Any]) -> list[dict[str, Any]]:
@@ -268,6 +277,7 @@ def _build_payload(
                 "status": _enum_value(call.status),
                 "entry_date": call.entry_date.isoformat() if call.entry_date else None,
                 "forward_days_horizon": call.forward_days_horizon,
+                "direction": _signal_direction(str(call.signal_name)),
             }
             for call in calls_list
         ],
@@ -297,9 +307,17 @@ def build_stock_intelligence(session: Session, symbol: str) -> dict[str, Any] | 
         select(SymbolLiquidityTier.liquidity_tier).where(SymbolLiquidityTier.symbol == symbol)
     ).scalar_one_or_none()
 
+    validated_signal_names = tuple(VALIDATION_SIGNAL_SPECS)
     calls = (
         session.execute(
-            select(SignalCall).where(SignalCall.symbol == symbol).order_by(SignalCall.created_at.desc()).limit(10)
+            select(SignalCall)
+            .where(
+                SignalCall.symbol == symbol,
+                SignalCall.entry_date >= VALIDATION_PROTOCOL_START_DATE,
+                SignalCall.signal_name.in_(validated_signal_names),
+            )
+            .order_by(SignalCall.entry_date.desc(), SignalCall.created_at.desc())
+            .limit(10)
         )
         .scalars()
         .all()
@@ -393,11 +411,17 @@ def build_market_intelligence(session: Session, limit: int = 200) -> dict[str, A
     ).all()
     liquidity_by_symbol = {row.symbol: row.liquidity_tier for row in liquidity_rows}
 
+    validated_signal_names = tuple(VALIDATION_SIGNAL_SPECS)
     pending_calls = (
         session.execute(
             select(SignalCall)
-            .where(SignalCall.symbol.in_(symbols), SignalCall.status == SignalCallStatus.PENDING)
-            .order_by(SignalCall.created_at.desc())
+            .where(
+                SignalCall.symbol.in_(symbols),
+                SignalCall.status == SignalCallStatus.PENDING,
+                SignalCall.entry_date >= VALIDATION_PROTOCOL_START_DATE,
+                SignalCall.signal_name.in_(validated_signal_names),
+            )
+            .order_by(SignalCall.entry_date.desc(), SignalCall.created_at.desc())
         )
         .scalars()
         .all()

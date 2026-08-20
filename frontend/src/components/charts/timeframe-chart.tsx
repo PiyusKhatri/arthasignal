@@ -47,7 +47,12 @@ export type ArthaChartSnapshot = {
   rating: string;
   confidence: string;
   asOfDate: string | null;
-  signals: Array<{ signalName: string; status: string; entryDate: string | null }>;
+  signals: Array<{
+    signalName: string;
+    status: string;
+    entryDate: string | null;
+    direction?: "bullish" | "bearish" | "neutral";
+  }>;
 };
 
 type IntervalKey = "5m" | "15m" | "30m" | "1H" | "1D" | "1W" | "1M";
@@ -122,6 +127,7 @@ const DEFAULT_INDICATORS: IndicatorKey[] = ["sma20", "sma50"];
 const MAIN_PANE_HEIGHT = 380;
 const SUB_PANE_HEIGHT = 125;
 const VOLUME_PANE_HEIGHT = 90;
+const DRAWING_SNAP_PIXELS = 12;
 
 function css(name: string, fallback: string): string {
   if (typeof window === "undefined") return fallback;
@@ -140,25 +146,37 @@ function layoutKey(target: ChartTarget) { return `artha-chart-layout:v2:${target
 function isIntraday(interval: IntervalKey) { return ["5m", "15m", "30m", "1H"].includes(interval); }
 function intradayMinutes(interval: IntervalKey) { return interval === "15m" ? 15 : interval === "30m" ? 30 : interval === "1H" ? 60 : 5; }
 
+function rangeAllowed(interval: IntervalKey, range: RangeKey): boolean {
+  if (isIntraday(interval)) return false;
+  if (interval === "1W") return !["1D", "5D"].includes(range);
+  if (interval === "1M") return !["1D", "5D", "1M", "3M"].includes(range);
+  return true;
+}
+
+function fallbackRange(interval: IntervalKey): RangeKey {
+  if (interval === "1W") return "6M";
+  if (interval === "1M") return "1Y";
+  return "6M";
+}
+
 type SignalAction = "buy" | "sell" | "watch";
 
-function classifySignal(signalName: string): SignalAction {
-  const name = signalName.toLowerCase();
-  if (name.includes("rsi_14 < 30")) return "buy";
-  if (name.includes("close < bollinger_lower")) return "buy";
-  if (name.includes("rsi_14 > 70")) return "sell";
-  if (name.includes("doji")) return "watch";
-  return "watch";
+function classifySignal(signal: ArthaChartSnapshot["signals"][number]): SignalAction | null {
+  if (signal.direction === "bullish") return "buy";
+  if (signal.direction === "bearish") return "sell";
+  if (signal.direction === "neutral") return "watch";
+  return null;
 }
 
 function humanizeSignal(signalName: string): string {
   const name = signalName.toLowerCase();
-  if (name.includes("rsi_14 < 30")) return "RSI oversold";
-  if (name.includes("close < bollinger_lower")) return "Bollinger lower break";
-  if (name.includes("rsi_14 > 70")) return "RSI overbought";
-  if (name.includes("doji")) return "Doji";
+  if (name.includes("rsi_14 < 30")) return "RSI oversold setup";
+  if (name.includes("close < bollinger_lower")) return "Below lower Bollinger Band";
+  if (name.includes("rsi_14 > 70")) return "RSI overbought risk";
+  if (name.includes("doji")) return "Doji watch";
   return signalName;
 }
+
 function historyUrl(target: ChartTarget, range = "ALL") {
   return target.kind === "stock"
     ? `/api/stocks/${encodeURIComponent(target.symbol)}/history?range=${range}`
@@ -176,7 +194,9 @@ function compareUrl(symbol: string) {
 function mapHistory(rows: HistoryPoint[]): ChartBar[] {
   return rows.map((row) => ({
     time: row.date, open: Number(row.open), high: Number(row.high), low: Number(row.low), close: Number(row.close), volume: row.volume,
-  })).filter((bar) => [bar.open, bar.high, bar.low, bar.close].every(Number.isFinite));
+  }))
+    .filter((bar) => [bar.open, bar.high, bar.low, bar.close].every(Number.isFinite))
+    .sort((a, b) => String(a.time).localeCompare(String(b.time)));
 }
 
 function indicatorValueAt(bundle: IndicatorBundle, time: Time, enabled: IndicatorKey[]) {
@@ -233,6 +253,7 @@ export function TimeframeChart({ target, artha }: { target: ChartTarget; artha?:
   const [indicatorMenu, setIndicatorMenu] = useState(false);
   const [compareMenu, setCompareMenu] = useState(false);
   const [fullScreen, setFullScreen] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState(900);
   const [rawBars, setRawBars] = useState<ChartBar[]>([]);
   const [compareBars, setCompareBars] = useState<ChartBar[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
@@ -255,6 +276,34 @@ export function TimeframeChart({ target, artha }: { target: ChartTarget; artha?:
   const nextIdRef = useRef(1);
 
   useEffect(() => { toolRef.current = drawingTool; }, [drawingTool]);
+
+  useEffect(() => {
+    const syncViewport = () => setViewportHeight(window.innerHeight);
+    const syncFullscreen = () => {
+      syncViewport();
+      if (document.fullscreenElement === shellRef.current) setFullScreen(true);
+      else if (document.fullscreenElement === null) setFullScreen(false);
+    };
+    syncViewport();
+    window.addEventListener("resize", syncViewport);
+    document.addEventListener("fullscreenchange", syncFullscreen);
+    return () => {
+      window.removeEventListener("resize", syncViewport);
+      document.removeEventListener("fullscreenchange", syncFullscreen);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!fullScreen || document.fullscreenElement === shellRef.current) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = previous; };
+  }, [fullScreen]);
+
+  useEffect(() => {
+    if (!isIntraday(interval) && !rangeAllowed(interval, range)) setRange(fallbackRange(interval));
+  }, [interval, range]);
+
   useEffect(() => {
     try {
       const saved = localStorage.getItem(layoutKey(target));
@@ -329,8 +378,12 @@ export function TimeframeChart({ target, artha }: { target: ChartTarget; artha?:
   const autoDrawingShapes = useMemo<DrawingShape[]>(() => {
     if (!showAutoAnalysis) return [];
     const shapes: DrawingShape[] = [];
-    if (levels.lowSwing.length === 2 && levels.lowSwing[1].low > levels.lowSwing[0].low) shapes.push({ id: -101, kind: "ray", p1: { time: levels.lowSwing[0].time as Time, price: levels.lowSwing[0].low }, p2: { time: levels.lowSwing[1].time as Time, price: levels.lowSwing[1].low } });
-    if (levels.highSwing.length === 2 && levels.highSwing[1].high < levels.highSwing[0].high) shapes.push({ id: -102, kind: "ray", p1: { time: levels.highSwing[0].time as Time, price: levels.highSwing[0].high }, p2: { time: levels.highSwing[1].time as Time, price: levels.highSwing[1].high } });
+    if (levels.lowSwing.length === 2) {
+      shapes.push({ id: -101, kind: "ray", p1: { time: levels.lowSwing[0].time as Time, price: levels.lowSwing[0].low }, p2: { time: levels.lowSwing[1].time as Time, price: levels.lowSwing[1].low } });
+    }
+    if (levels.highSwing.length === 2) {
+      shapes.push({ id: -102, kind: "ray", p1: { time: levels.highSwing[0].time as Time, price: levels.highSwing[0].high }, p2: { time: levels.highSwing[1].time as Time, price: levels.highSwing[1].high } });
+    }
     return shapes;
   }, [levels, showAutoAnalysis]);
 
@@ -361,8 +414,10 @@ export function TimeframeChart({ target, artha }: { target: ChartTarget; artha?:
     return bars;
   }, [compare, compareBars, interval, range, replayIndex, replayBars]);
 
+  const visibleRanges = useMemo(() => RANGES.filter((key) => rangeAllowed(interval, key)), [interval]);
   const panelCount = ["rsi14", "macd", "stochastic", "atr14", "obv", "cci20", "roc12"].filter((key) => indicators.includes(key as IndicatorKey)).length;
   const totalHeight = MAIN_PANE_HEIGHT + (replayBars.some((bar) => bar.volume !== undefined) ? VOLUME_PANE_HEIGHT : 0) + panelCount * SUB_PANE_HEIGHT;
+  const activeChartHeight = fullScreen ? Math.max(520, viewportHeight - 190) : totalHeight;
 
   useEffect(() => {
     const container = containerRef.current;
@@ -379,12 +434,15 @@ export function TimeframeChart({ target, artha }: { target: ChartTarget; artha?:
 
     const chart = createChart(container, {
       width: container.clientWidth,
-      height: totalHeight,
+      height: activeChartHeight,
       layout: { background: { type: ColorType.Solid, color: "transparent" }, textColor: text, attributionLogo: true, panes: { enableResize: true, separatorColor: border, separatorHoverColor: accentStrong } },
-      grid: { vertLines: { color: border }, horzLines: { color: border } },
+      grid: { vertLines: { color: rgba(border, 0.65) }, horzLines: { color: rgba(border, 0.65) } },
       rightPriceScale: { borderColor: border, mode: scaleMode === "log" ? PriceScaleMode.Logarithmic : scaleMode === "percent" ? PriceScaleMode.Percentage : PriceScaleMode.Normal },
-      timeScale: { borderColor: border, timeVisible: isIntraday(interval), secondsVisible: false, barSpacing: isIntraday(interval) ? 9 : 7, rightOffset: 4 },
+      timeScale: { borderColor: border, timeVisible: isIntraday(interval), secondsVisible: false, barSpacing: isIntraday(interval) ? 9 : 7, rightOffset: 5, lockVisibleTimeRangeOnResize: true, rightBarStaysOnScroll: true },
       crosshair: { vertLine: { color: text, labelBackgroundColor: accentStrong }, horzLine: { color: text, labelBackgroundColor: accentStrong } },
+      handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: true },
+      handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true },
+      kineticScroll: { mouse: true, touch: true },
     });
     chartRef.current = chart;
 
@@ -461,53 +519,43 @@ export function TimeframeChart({ target, artha }: { target: ChartTarget; artha?:
     }
 
     if (showAutoAnalysis) {
-      if (levels.support !== null) mainSeries.createPriceLine({ price: levels.support, color: rgba(up, 0.75), lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: true, title: "Support" });
-      if (levels.resistance !== null) mainSeries.createPriceLine({ price: levels.resistance, color: rgba(down, 0.75), lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: true, title: "Resistance" });
+      if (levels.support !== null) mainSeries.createPriceLine({ price: levels.support, color: rgba(up, 0.78), lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: true, title: `Support · ${levels.supportTouches}x` });
+      if (levels.resistance !== null) mainSeries.createPriceLine({ price: levels.resistance, color: rgba(down, 0.78), lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: true, title: `Resistance · ${levels.resistanceTouches}x` });
       drawing.setShapes([...drawingsRef.current, ...autoDrawingShapes]);
     }
 
     const markerItems: SeriesMarker<Time>[] = [];
-
-    // --- Artha signal markers: grouped by candle, one marker per time ---
     const signalGroups = new Map<string, { action: SignalAction; reasons: string[] }>();
     for (const signal of artha?.signals ?? []) {
       if (!signal.entryDate) continue;
       if (!replayBars.some((bar) => String(bar.time) === signal.entryDate)) continue;
-      const key = signal.entryDate;
-      const action = classifySignal(signal.signalName);
+      const action = classifySignal(signal);
+      if (!action) continue;
       const reason = humanizeSignal(signal.signalName);
-      const existing = signalGroups.get(key);
-      if (!existing) {
-        signalGroups.set(key, { action, reasons: [reason] });
-      } else {
+      const existing = signalGroups.get(signal.entryDate);
+      if (!existing) signalGroups.set(signal.entryDate, { action, reasons: [reason] });
+      else {
         existing.reasons.push(reason);
-        // mixed buy+sell → watch
         if (existing.action !== action) existing.action = "watch";
       }
     }
     for (const [time, group] of signalGroups.entries()) {
       const count = group.reasons.length;
-      const text =
-        group.action === "buy"
-          ? count > 1 ? `BUY ×${count}` : "BUY"
-          : group.action === "sell"
-          ? count > 1 ? `SELL ×${count}` : "SELL"
-          : count > 1 ? `WATCH ×${count}` : "WATCH";
+      const label = group.action === "buy" ? "BUY" : group.action === "sell" ? "SELL" : "WATCH";
       markerItems.push({
         time: time as Time,
         position: group.action === "sell" ? "aboveBar" : "belowBar",
         color: group.action === "buy" ? up : group.action === "sell" ? down : warning,
         shape: group.action === "buy" ? "arrowUp" : group.action === "sell" ? "arrowDown" : "circle",
-        text,
+        text: count > 1 ? `${label} ×${count}` : label,
       });
     }
 
-    // --- Pattern markers: compact dots only, no label clutter ---
     if (patterns.length > 0) {
       markerItems.push(...patterns.slice(-20).map((marker) => ({
         time: marker.time as Time,
         position: marker.direction === "bearish" ? "aboveBar" as const : "belowBar" as const,
-        color: marker.direction === "bearish" ? rgba(down, 0.6) : marker.direction === "bullish" ? rgba(up, 0.6) : rgba(warning, 0.6),
+        color: marker.direction === "bearish" ? rgba(down, 0.55) : marker.direction === "bullish" ? rgba(up, 0.55) : rgba(warning, 0.55),
         shape: "circle" as const,
         text: "",
       })));
@@ -535,7 +583,19 @@ export function TimeframeChart({ target, artha }: { target: ChartTarget; artha?:
     };
     const pointFromParam = (param: MouseEventParams): DrawingPoint | null => {
       if (!param.point || param.time === undefined) return null;
-      const price = mainSeries.coordinateToPrice(param.point.y); if (price === null) return null;
+      const rawPrice = mainSeries.coordinateToPrice(param.point.y); if (rawPrice === null) return null;
+      let price = rawPrice;
+      const bar = replayBars.find((entry) => entry.time === param.time);
+      if (bar) {
+        let nearest: { price: number; distance: number } | null = null;
+        for (const candidate of [bar.open, bar.high, bar.low, bar.close]) {
+          const y = mainSeries.priceToCoordinate(candidate);
+          if (y === null) continue;
+          const distance = Math.abs(param.point.y - y);
+          if (!nearest || distance < nearest.distance) nearest = { price: candidate, distance };
+        }
+        if (nearest && nearest.distance <= DRAWING_SNAP_PIXELS) price = nearest.price;
+      }
       return { time: param.time as Time, price };
     };
     const handleClick = (param: MouseEventParams) => {
@@ -563,22 +623,13 @@ export function TimeframeChart({ target, artha }: { target: ChartTarget; artha?:
           const prev = index > 0 ? replayBars[index - 1].close : null;
           const barTimeStr = String(bar.time);
           const hoveredSignals = (artha?.signals ?? [])
-            .filter((s) => s.entryDate === barTimeStr)
-            .map((s) => humanizeSignal(s.signalName));
-          const hoveredPatterns = patterns
-            .filter((p) => String(p.time) === barTimeStr)
-            .map((p) => p.label);
+            .filter((signal) => signal.entryDate === barTimeStr && classifySignal(signal) !== null)
+            .map((signal) => humanizeSignal(signal.signalName));
+          const hoveredPatterns = patterns.filter((pattern) => String(pattern.time) === barTimeStr).map((pattern) => pattern.label);
           setHover({
-            time: bar.time as Time,
-            open: bar.open,
-            high: bar.high,
-            low: bar.low,
-            close: bar.close,
-            volume: bar.volume,
+            time: bar.time as Time, open: bar.open, high: bar.high, low: bar.low, close: bar.close, volume: bar.volume,
             changePercent: prev ? ((bar.close - prev) / prev) * 100 : null,
-            indicators: indicatorValueAt(analysis, bar.time as Time, indicators),
-            signals: hoveredSignals,
-            patterns: hoveredPatterns,
+            indicators: indicatorValueAt(analysis, bar.time as Time, indicators), signals: hoveredSignals, patterns: hoveredPatterns,
           });
         }
       }
@@ -590,23 +641,44 @@ export function TimeframeChart({ target, artha }: { target: ChartTarget; artha?:
     };
     chart.subscribeClick(handleClick); chart.subscribeCrosshairMove(handleMove);
 
-    const resize = () => chart.resize(container.clientWidth, totalHeight);
+    const resize = () => chart.resize(container.clientWidth, activeChartHeight);
+    const observer = new ResizeObserver(resize);
+    observer.observe(container);
     window.addEventListener("resize", resize);
-    if (displayBars.length > 120 && !isIntraday(interval)) chart.timeScale().setVisibleLogicalRange({ from: Math.max(0, displayBars.length - 100), to: displayBars.length - 1 }); else chart.timeScale().fitContent();
+    chart.timeScale().fitContent();
 
     return () => {
-      window.removeEventListener("resize", resize); chart.unsubscribeClick(handleClick); chart.unsubscribeCrosshairMove(handleMove); chart.remove(); chartRef.current = null; drawingRef.current = null;
+      observer.disconnect(); window.removeEventListener("resize", resize); chart.unsubscribeClick(handleClick); chart.unsubscribeCrosshairMove(handleMove); chart.remove(); chartRef.current = null; drawingRef.current = null;
     };
-  }, [status, displayBars, replayBars, analysis, indicators, chartStyle, scaleMode, interval, totalHeight, compare, visibleCompare, showAutoAnalysis, levels, patterns, theme, artha, autoDrawingShapes, fullScreen]);
+  }, [status, displayBars, replayBars, analysis, indicators, chartStyle, scaleMode, interval, activeChartHeight, compare, visibleCompare, showAutoAnalysis, levels, patterns, theme, artha, autoDrawingShapes]);
 
   const selectTool = (tool: DrawingTool) => { pendingRef.current = null; drawingRef.current?.setDraft(null); setDrawingTool((current) => current === tool ? "none" : tool); };
-  const undo = () => { setUndoStack((stack) => { if (!stack.length) return stack; const previous = stack[stack.length - 1]; setRedoStack((redo) => [...redo, drawingsRef.current]); setDrawings(previous); return stack.slice(0, -1); }); };
+  const undo = () => { setUndoStack((stack) => { if (!stack.length) return stack; const previous = stack[stack.length - 1]; setRedoStack((redoItems) => [...redoItems, drawingsRef.current]); setDrawings(previous); return stack.slice(0, -1); }); };
   const redo = () => { setRedoStack((stack) => { if (!stack.length) return stack; const next = stack[stack.length - 1]; setUndoStack((undoItems) => [...undoItems, drawingsRef.current]); setDrawings(next); return stack.slice(0, -1); }); };
   const clearDrawings = () => { if (!drawings.length) return; setUndoStack((stack) => [...stack, drawings]); setRedoStack([]); setDrawings([]); };
   const resetLayout = () => { localStorage.removeItem(layoutKey(target)); setInterval("1D"); setRange("6M"); setChartStyle("candles"); setScaleMode("linear"); setIndicators(DEFAULT_INDICATORS); setCompare(null); setShowPatterns(false); setShowAutoAnalysis(true); setDrawings([]); setReplayIndex(null); };
   const exportPng = () => { const canvas = chartRef.current?.takeScreenshot(true, false); if (!canvas) return; const link = document.createElement("a"); link.download = `${targetKey(target)}-chart.png`; link.href = canvas.toDataURL("image/png"); link.click(); };
   const startReplay = () => { if (rangedBars.length < 10) return; setReplayIndex(Math.max(5, Math.floor(rangedBars.length * 0.65))); setReplayPlaying(false); };
   const toggleIndicator = (key: IndicatorKey) => setIndicators((current) => current.includes(key) ? current.filter((entry) => entry !== key) : [...current, key]);
+  const toggleFullScreen = async () => {
+    const shell = shellRef.current;
+    if (!shell) return;
+    if (document.fullscreenElement === shell) {
+      await document.exitFullscreen().catch(() => undefined);
+      return;
+    }
+    if (document.fullscreenElement) await document.exitFullscreen().catch(() => undefined);
+    if (shell.requestFullscreen) {
+      try {
+        await shell.requestFullscreen();
+        return;
+      } catch {
+        setFullScreen(true);
+        return;
+      }
+    }
+    setFullScreen((value) => !value);
+  };
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -620,10 +692,11 @@ export function TimeframeChart({ target, artha }: { target: ChartTarget; artha?:
   const latest = hover ?? (replayBars.length ? (() => { const bar = replayBars[replayBars.length - 1]; const prev = replayBars.length > 1 ? replayBars[replayBars.length - 2].close : null; return { time: bar.time as Time, open: bar.open, high: bar.high, low: bar.low, close: bar.close, volume: bar.volume, changePercent: prev ? ((bar.close - prev) / prev) * 100 : null, indicators: indicatorValueAt(analysis, bar.time as Time, indicators), signals: [], patterns: [] } satisfies HoverSnapshot; })() : null);
 
   return (
-    <div ref={shellRef} className={fullScreen ? "fixed inset-0 z-[100] flex flex-col overflow-auto bg-background p-3 sm:p-5" : "flex flex-col gap-3"} data-testid="advanced-chart-workspace">
+    <div ref={shellRef} className={fullScreen ? "fixed inset-0 z-[100] flex min-h-0 flex-col gap-2 overflow-hidden bg-background p-2" : "flex flex-col gap-3"} data-testid="advanced-chart-workspace">
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-2">
-        <strong className="mr-1 text-sm text-text-primary">{targetKey(target)}</strong>{artha ? <span className="rounded-md border border-border bg-background px-2 py-1 text-[11px] font-semibold text-accent-text">Artha {artha.score}/100 · {artha.rating.replaceAll("_", " ")} · {artha.confidence}</span> : null}
-        <select value={interval} onChange={(event) => { setInterval(event.target.value as IntervalKey); setReplayIndex(null); }} className="rounded-md border border-border bg-background px-2 py-1.5 text-xs text-text-primary" aria-label="Chart interval">{INTERVALS.map((key) => <option key={key}>{key}</option>)}</select>
+        <strong className="mr-1 text-sm text-text-primary">{targetKey(target)}</strong>
+        {artha ? <span className="rounded-md border border-border bg-background px-2 py-1 text-[11px] font-semibold text-accent-text">Artha {artha.score}/100 · {artha.rating.replaceAll("_", " ")} · {artha.confidence}</span> : null}
+        <select value={interval} onChange={(event) => { const next = event.target.value as IntervalKey; setInterval(next); if (!isIntraday(next) && !rangeAllowed(next, range)) setRange(fallbackRange(next)); setReplayIndex(null); }} className="rounded-md border border-border bg-background px-2 py-1.5 text-xs text-text-primary" aria-label="Chart interval">{INTERVALS.map((key) => <option key={key}>{key}</option>)}</select>
         <select value={chartStyle} onChange={(event) => setChartStyle(event.target.value as ChartStyle)} className="rounded-md border border-border bg-background px-2 py-1.5 text-xs text-text-primary" aria-label="Chart style">{CHART_STYLES.map((entry) => <option key={entry.key} value={entry.key}>{entry.label}</option>)}</select>
         <select value={scaleMode} onChange={(event) => setScaleMode(event.target.value as ScaleMode)} className="rounded-md border border-border bg-background px-2 py-1.5 text-xs text-text-primary" aria-label="Price scale"><option value="linear">Linear</option><option value="log">Log</option><option value="percent">%</option></select>
         <div className="relative">
@@ -635,11 +708,11 @@ export function TimeframeChart({ target, artha }: { target: ChartTarget; artha?:
           {compareMenu && <div className="absolute left-0 top-full z-30 mt-2 w-64 rounded-xl border border-border bg-card p-3 shadow-xl"><div className="flex gap-2"><input value={compareDraft} onChange={(event) => setCompareDraft(event.target.value)} placeholder="NEPSE or symbol" className="min-w-0 flex-1 rounded-md border border-border bg-background px-2 py-1.5 text-xs text-text-primary" /><button type="button" onClick={() => { const value = compareDraft.trim().toUpperCase(); setCompare(value || null); setCompareMenu(false); }} className="rounded-md bg-accent-primary px-2 py-1 text-xs text-white">Add</button></div><button type="button" onClick={() => { setCompare("NEPSE"); setCompareMenu(false); }} className="mt-2 text-xs text-accent-text">Compare with NEPSE</button>{compare && <button type="button" onClick={() => { setCompare(null); setCompareMenu(false); }} className="ml-3 text-xs text-danger-text">Remove</button>}</div>}
         </div>
         <button type="button" onClick={() => setShowPatterns((value) => !value)} aria-pressed={showPatterns} className={`rounded-md border px-2.5 py-1.5 text-xs ${showPatterns ? "border-accent-primary bg-accent-primary text-white" : "border-border text-text-secondary"}`}>Patterns</button>
-        <button type="button" onClick={() => setShowAutoAnalysis((value) => !value)} aria-pressed={showAutoAnalysis} className={`rounded-md border px-2.5 py-1.5 text-xs ${showAutoAnalysis ? "border-accent-primary bg-accent-primary text-white" : "border-border text-text-secondary"}`}>Auto S/R</button>
+        <button type="button" onClick={() => setShowAutoAnalysis((value) => !value)} aria-pressed={showAutoAnalysis} className={`rounded-md border px-2.5 py-1.5 text-xs ${showAutoAnalysis ? "border-accent-primary bg-accent-primary text-white" : "border-border text-text-secondary"}`}>Auto analysis</button>
         <div className="ml-auto flex flex-wrap gap-1">
           <button type="button" onClick={() => chartRef.current?.timeScale().fitContent()} className="rounded-md border border-border px-2 py-1.5 text-xs text-text-secondary">Fit</button>
           <button type="button" onClick={exportPng} className="rounded-md border border-border px-2 py-1.5 text-xs text-text-secondary">PNG</button>
-          <button type="button" onClick={() => setFullScreen((value) => !value)} className="rounded-md border border-border px-2 py-1.5 text-xs text-text-secondary">{fullScreen ? "Exit full" : "Fullscreen"}</button>
+          <button type="button" onClick={() => void toggleFullScreen()} className="rounded-md border border-border px-2 py-1.5 text-xs text-text-secondary">{fullScreen ? "Exit full" : "Fullscreen"}</button>
         </div>
       </div>
 
@@ -648,21 +721,26 @@ export function TimeframeChart({ target, artha }: { target: ChartTarget; artha?:
       <div className="flex flex-wrap items-center gap-1 rounded-lg border border-border bg-card p-1.5" data-testid="drawing-toolbar">
         {DRAWING_TOOLS.map((tool) => <button key={tool.key} type="button" onClick={() => selectTool(tool.key)} aria-pressed={drawingTool === tool.key} className={`rounded-md px-2 py-1 text-xs ${drawingTool === tool.key ? "bg-accent-primary text-white" : "text-text-secondary hover:bg-background hover:text-text-primary"}`}>{tool.label}</button>)}
         <span className="mx-1 h-5 w-px bg-border" />
+        <span className="rounded-md bg-background px-2 py-1 text-[10px] font-medium text-text-secondary" title="Drawing anchors snap to nearby candle OHLC values">Magnet on</span>
         <button type="button" disabled={!undoStack.length} onClick={undo} className="rounded-md px-2 py-1 text-xs text-text-secondary disabled:opacity-30">Undo</button>
         <button type="button" disabled={!redoStack.length} onClick={redo} className="rounded-md px-2 py-1 text-xs text-text-secondary disabled:opacity-30">Redo</button>
         <button type="button" onClick={clearDrawings} className="rounded-md px-2 py-1 text-xs text-danger-text">Clear</button>
         {drawingTool !== "none" && <span className="ml-2 text-[11px] text-text-secondary">{DRAWING_TOOLS.find((tool) => tool.key === drawingTool)?.points === 2 ? "Click two chart points" : drawingTool === "eraser" ? "Click near a drawing" : "Click the chart"}</span>}
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-2 sm:p-3">
+      <div className={`rounded-xl border border-border bg-card p-2 sm:p-3 ${fullScreen ? "min-h-0 flex-1" : ""}`}>
         {status === "loading" && <div className="flex h-[420px] items-center justify-center text-sm text-text-secondary">Loading chart…</div>}
         {status === "error" && <div className="flex h-[420px] items-center justify-center text-sm text-text-secondary">Chart data is temporarily unavailable.</div>}
         {status === "ready" && displayBars.length === 0 && <div className="flex h-[420px] items-center justify-center text-sm text-text-secondary">No data is available for this interval.</div>}
-        <div ref={containerRef} className={status === "ready" && displayBars.length ? "w-full" : "hidden"} data-testid="timeframe-chart" />
+        <div ref={containerRef} style={{ height: status === "ready" && displayBars.length ? activeChartHeight : undefined }} className={status === "ready" && displayBars.length ? "w-full" : "hidden"} data-testid="timeframe-chart" />
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <div className="inline-flex flex-wrap items-center gap-0.5 rounded-full border border-border bg-card p-0.5" data-testid="timeframe-selector">{RANGES.map((key) => <button key={key} type="button" disabled={isIntraday(interval)} onClick={() => { setRange(key); setReplayIndex(null); }} aria-pressed={range === key} className={`rounded-full px-2.5 py-1 text-xs font-medium disabled:opacity-30 ${range === key ? "bg-accent-primary text-white" : "text-text-secondary hover:text-text-primary"}`}>{key}</button>)}</div>
+        {isIntraday(interval) ? (
+          <div className="rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-text-secondary" data-testid="timeframe-selector">Today · NEPSE intraday capture</div>
+        ) : (
+          <div className="inline-flex flex-wrap items-center gap-0.5 rounded-full border border-border bg-card p-0.5" data-testid="timeframe-selector">{visibleRanges.map((key) => <button key={key} type="button" onClick={() => { setRange(key); setReplayIndex(null); }} aria-pressed={range === key} className={`rounded-full px-2.5 py-1 text-xs font-medium ${range === key ? "bg-accent-primary text-white" : "text-text-secondary hover:text-text-primary"}`}>{key === "ALL" ? "All" : key}</button>)}</div>
+        )}
         <div className="ml-auto flex items-center gap-1">
           {replayIndex === null ? <button type="button" disabled={isIntraday(interval) || rangedBars.length < 10} onClick={startReplay} className="rounded-md border border-border px-2.5 py-1 text-xs text-text-secondary disabled:opacity-30">Replay</button> : <><button type="button" onClick={() => setReplayIndex((value) => value === null ? null : Math.max(1, value - 1))} className="rounded-md border border-border px-2 py-1 text-xs text-text-secondary">−1</button><button type="button" onClick={() => setReplayPlaying((value) => !value)} className="rounded-md border border-border px-2 py-1 text-xs text-text-secondary">{replayPlaying ? "Pause" : "Play"}</button><button type="button" onClick={() => setReplayIndex((value) => value === null ? null : Math.min(rangedBars.length - 1, value + 1))} className="rounded-md border border-border px-2 py-1 text-xs text-text-secondary">+1</button><span className="px-1 text-xs text-warning-text">Future hidden</span><button type="button" onClick={() => { setReplayIndex(null); setReplayPlaying(false); }} className="rounded-md border border-border px-2 py-1 text-xs text-text-secondary">Live</button></>}
           <button type="button" onClick={resetLayout} className="rounded-md border border-border px-2.5 py-1 text-xs text-text-secondary">Reset layout</button>
