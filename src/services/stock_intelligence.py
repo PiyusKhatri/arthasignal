@@ -16,13 +16,13 @@ from src.database.models import (
     Fundamental,
     MarketIndex,
     SignalCall,
-    SignalCallStatus,
     SignalConfidence,
     SignalTimeframe,
     SymbolLiquidityTier,
     TechnicalSignal,
 )
-from src.pipeline.signal_validation_policy import VALIDATION_PROTOCOL_START_DATE, VALIDATION_SIGNAL_SPECS
+from src.pipeline.run_signal_backtests import build_signal_conditions
+from src.pipeline.signal_validation_policy import VALIDATION_SIGNAL_SPECS
 from src.pipeline.validation_status import build_validation_status
 
 NEPSE_INDEX_NAME = "NEPSE Index"
@@ -69,7 +69,7 @@ def _unique(items: Iterable[str]) -> list[str]:
 
 
 def _rating(score: int, confidence_score: int = 100, has_signal: bool = True) -> str:
-    """Return a setup label without letting a technical-only score imply certainty."""
+    """Keep strong labels gated by current signal evidence and uncertainty."""
     if score >= 80 and confidence_score >= 70 and has_signal:
         return "strong_setup"
     if score >= 65 and confidence_score >= 45 and has_signal:
@@ -91,7 +91,7 @@ def _liquidity_score(tier: Any) -> int:
 
 
 def _confidence_score(rows: Iterable[Any], signal_names: set[str]) -> int:
-    """Compatibility helper: classify historical evidence quality on a 0-100 scale."""
+    """Compatibility helper: classify historical evidence quality on 0-100."""
     score = 0
     for row in rows:
         if row.signal_name not in signal_names:
@@ -135,14 +135,38 @@ def _signal_quality(reliability_score: int, signal_names: set[str]) -> str:
 
 def _signal_direction(signal_name: str) -> str:
     """
-    The v1 forward-validation ledger is long-only: every call is graded by
-    whether the future price is above the entry price. Do not label an
-    overbought condition as a short/bearish trade when the validation engine
-    does not test a short return.
+    v1 validation is long-only: a win means future price > entry price.
+    Therefore an overbought observation is not represented as a short trade.
     """
     if signal_name in {"rsi_14 < 30 (oversold)", "close < bollinger_lower"}:
         return "bullish"
     return "neutral"
+
+
+def _active_validation_signal_names(
+    technical: TechnicalSignal | None,
+    price: Any,
+    liquidity: Any,
+) -> set[str]:
+    """Evaluate today's signal state from the latest snapshot, never from an open validation call."""
+    if technical is None or price is None:
+        return set()
+
+    conditions = build_signal_conditions()
+    active: set[str] = set()
+    liquidity_value = str(liquidity) if liquidity is not None else None
+
+    for signal_name, spec in VALIDATION_SIGNAL_SPECS.items():
+        condition = conditions.get(signal_name)
+        if condition is None:
+            continue
+        if not bool(condition(technical, price, None, None)):
+            continue
+        if spec.required_liquidity_tier and liquidity_value != spec.required_liquidity_tier:
+            continue
+        active.add(signal_name)
+
+    return active
 
 
 def _backtest_summary(rows: Iterable[Any]) -> list[dict[str, Any]]:
@@ -249,11 +273,10 @@ def _historical_evidence(
     signal_names: set[str],
 ) -> dict[str, Any]:
     """
-    Convert existing backtest/confidence tables into evidence points.
+    Convert market-wide signal backtests into evidence points.
 
-    BacktestResult is market-wide signal evidence, not a stock-specific
-    "similar setups" table. The payload states this scope explicitly so the
-    UI/AI layer cannot overclaim what the data proves.
+    These tables do not contain stock-specific nearest-neighbour setups, so the
+    payload states their scope explicitly and the AI/UI must not claim they do.
     """
     if not signal_names:
         return {
@@ -362,7 +385,6 @@ def _historical_evidence(
             return_points = 1
 
     reliability_score = min(30, edge_points + sample_points + tier_points + return_points)
-
     coverage_ratio = len(set(tiers_by_signal) & signal_names) / max(len(signal_names), 1)
     sample_confidence = min(1.0, min_sample_size / 500.0) if min_sample_size else 0.0
     edge_confidence = min(1.0, max(average_edge or 0.0, 0.0) / 5.0)
@@ -553,10 +575,15 @@ def _build_payload(
     fundamental: Fundamental | None = None,
     market_regime: dict[str, Any] | None = None,
     validation_status: dict[str, Any] | None = None,
+    active_signal_names: set[str] | None = None,
     include_ai: bool = True,
 ) -> dict[str, Any]:
     calls_list = list(calls)
-    signal_names = {str(call.signal_name) for call in calls_list if getattr(call, "signal_name", None)}
+    if active_signal_names is None:
+        signal_names = {str(call.signal_name) for call in calls_list if getattr(call, "signal_name", None)}
+    else:
+        signal_names = set(active_signal_names)
+
     confidence_list = list(confidence_rows)
     backtest_list = list(backtests)
     market_regime = market_regime or _classify_market_regime([])
@@ -729,13 +756,14 @@ def _build_payload(
     backtest_data = _backtest_summary(backtest_list)
     signals_data = [
         {
-            "signal_name": call.signal_name,
-            "status": _enum_value(call.status),
-            "entry_date": call.entry_date.isoformat() if call.entry_date else None,
-            "forward_days_horizon": call.forward_days_horizon,
-            "direction": _signal_direction(str(call.signal_name)),
+            "signal_name": signal_name,
+            "status": "active",
+            "entry_date": None,
+            "forward_days_horizon": VALIDATION_SIGNAL_SPECS[signal_name].horizon_trading_days,
+            "direction": _signal_direction(signal_name),
         }
-        for call in calls_list
+        for signal_name in sorted(signal_names)
+        if signal_name in VALIDATION_SIGNAL_SPECS
     ]
 
     scores_breakdown = {
@@ -847,24 +875,7 @@ def build_stock_intelligence(session: Session, symbol: str) -> dict[str, Any] | 
         select(SymbolLiquidityTier.liquidity_tier).where(SymbolLiquidityTier.symbol == symbol)
     ).scalar_one_or_none()
 
-    validated_signal_names = tuple(VALIDATION_SIGNAL_SPECS)
-    calls = (
-        session.execute(
-            select(SignalCall)
-            .where(
-                SignalCall.symbol == symbol,
-                SignalCall.status == SignalCallStatus.PENDING,
-                SignalCall.entry_date >= VALIDATION_PROTOCOL_START_DATE,
-                SignalCall.signal_name.in_(validated_signal_names),
-            )
-            .order_by(SignalCall.entry_date.desc(), SignalCall.created_at.desc())
-            .limit(10)
-        )
-        .scalars()
-        .all()
-    )
-    signal_names = {str(call.signal_name) for call in calls if getattr(call, "signal_name", None)}
-
+    signal_names = _active_validation_signal_names(technical, price, liquidity)
     if signal_names:
         confidence = (
             session.execute(select(SignalConfidence).where(SignalConfidence.signal_name.in_(signal_names)))
@@ -895,7 +906,8 @@ def build_stock_intelligence(session: Session, symbol: str) -> dict[str, Any] | 
         fundamental=fundamental,
         price=price,
         liquidity=liquidity,
-        calls=calls,
+        calls=[],
+        active_signal_names=signal_names,
         confidence_rows=confidence,
         backtests=backtests,
         market_regime=market_regime,
@@ -970,25 +982,6 @@ def build_market_intelligence(session: Session, limit: int = 200) -> dict[str, A
     ).all()
     liquidity_by_symbol = {row.symbol: row.liquidity_tier for row in liquidity_rows}
 
-    validated_signal_names = tuple(VALIDATION_SIGNAL_SPECS)
-    pending_calls = (
-        session.execute(
-            select(SignalCall)
-            .where(
-                SignalCall.symbol.in_(symbols),
-                SignalCall.status == SignalCallStatus.PENDING,
-                SignalCall.entry_date >= VALIDATION_PROTOCOL_START_DATE,
-                SignalCall.signal_name.in_(validated_signal_names),
-            )
-            .order_by(SignalCall.entry_date.desc(), SignalCall.created_at.desc())
-        )
-        .scalars()
-        .all()
-    )
-    calls_by_symbol: dict[str, list[SignalCall]] = defaultdict(list)
-    for call in pending_calls:
-        calls_by_symbol[call.symbol].append(call)
-
     confidence_rows = session.execute(select(SignalConfidence)).scalars().all()
     confidence_by_signal: dict[str, list[SignalConfidence]] = defaultdict(list)
     for row in confidence_rows:
@@ -1006,8 +999,10 @@ def build_market_intelligence(session: Session, limit: int = 200) -> dict[str, A
     latest_dates: list[str] = []
     for company in companies:
         technical = technical_by_symbol.get(company.symbol)
-        calls = calls_by_symbol.get(company.symbol, [])[:10]
-        current_signal_names = {str(call.signal_name) for call in calls}
+        price = price_by_symbol.get(company.symbol)
+        liquidity = liquidity_by_symbol.get(company.symbol)
+        current_signal_names = _active_validation_signal_names(technical, price, liquidity)
+
         scoped_confidence = [
             row for signal_name in current_signal_names for row in confidence_by_signal.get(signal_name, [])
         ]
@@ -1021,9 +1016,10 @@ def build_market_intelligence(session: Session, limit: int = 200) -> dict[str, A
             sector=company.sector,
             technical=technical,
             fundamental=fundamental_by_symbol.get(company.symbol),
-            price=price_by_symbol.get(company.symbol),
-            liquidity=liquidity_by_symbol.get(company.symbol),
-            calls=calls,
+            price=price,
+            liquidity=liquidity,
+            calls=[],
+            active_signal_names=current_signal_names,
             confidence_rows=scoped_confidence,
             backtests=scoped_backtests,
             market_regime=market_regime,
@@ -1065,10 +1061,16 @@ def build_market_intelligence(session: Session, limit: int = 200) -> dict[str, A
 
     analyzed = len(stocks)
     average_score = sum(row["artha_score"] for row in stocks) / analyzed if analyzed else 0.0
-    positive_share = sum(1 for row in stocks if row["rating"] in {"positive_setup", "strong_setup"}) / analyzed if analyzed else 0.0
+    positive_share = (
+        sum(1 for row in stocks if row["rating"] in {"positive_setup", "strong_setup"}) / analyzed
+        if analyzed
+        else 0.0
+    )
     weak_share = sum(1 for row in stocks if row["rating"] == "weak") / analyzed if analyzed else 0.0
     high_confidence_share = (
-        sum(1 for row in stocks if row["confidence_level"] == "high") / analyzed if analyzed else 0.0
+        sum(1 for row in stocks if row["confidence_level"] == "high" and row["active_signals"]) / analyzed
+        if analyzed
+        else 0.0
     )
 
     regime_state = market_regime.get("state", "unavailable")
@@ -1112,7 +1114,9 @@ def build_market_intelligence(session: Session, limit: int = 200) -> dict[str, A
                 "sector": sector,
                 "average_artha_score": round(avg_score, 1),
                 "trend": "bullish" if avg_trend >= 16 else "neutral" if avg_trend >= 9 else "bearish",
-                "high_confidence_count": sum(1 for item in rows if item["confidence_level"] == "high"),
+                "high_confidence_count": sum(
+                    1 for item in rows if item["confidence_level"] == "high" and item["active_signals"]
+                ),
                 "stock_count": len(rows),
                 "top_symbol": rows[0]["symbol"],
                 "top_score": rows[0]["artha_score"],
@@ -1120,7 +1124,14 @@ def build_market_intelligence(session: Session, limit: int = 200) -> dict[str, A
         )
     sector_insights.sort(key=lambda row: row["average_artha_score"], reverse=True)
 
-    high_confidence = [row for row in stocks if row["confidence_level"] == "high" and row["active_signals"]]
+    opportunities = [
+        row
+        for row in stocks
+        if row["active_signals"] and row["rating"] in {"positive_setup", "strong_setup"}
+    ]
+    high_confidence = [
+        row for row in stocks if row["confidence_level"] == "high" and row["active_signals"]
+    ]
 
     return {
         "as_of_date": max(latest_dates) if latest_dates else None,
@@ -1138,7 +1149,7 @@ def build_market_intelligence(session: Session, limit: int = 200) -> dict[str, A
             "annualized_volatility_percent": market_regime.get("annualized_volatility_percent"),
             "forward_validation_status": validation_status.get("overall_status"),
         },
-        "top_opportunities": stocks[:8],
+        "top_opportunities": opportunities[:8],
         "high_confidence_signals": high_confidence[:8],
         "sector_insights": sector_insights,
         "stocks": stocks,
