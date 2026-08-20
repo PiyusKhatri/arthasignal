@@ -9,6 +9,8 @@ from src.services.quant_decision_policy import (
     calibration_buckets,
     classify_market_regime,
     classify_sector_regime,
+    consensus_market_regime,
+    consensus_sector_regime,
     monotonic_risk_ladder,
     non_overlapping_dynamic_portfolio,
     select_dynamic_setups,
@@ -23,6 +25,7 @@ def _row(
     sector_relative: float = 3.0,
     excess_return: float = 3.0,
     adverse: float = -2.0,
+    sector: str = "Bank",
 ) -> dict:
     stock_vs_market = 3.0
     stock_return = market_return + stock_vs_market
@@ -31,7 +34,7 @@ def _row(
         "date": trading_date,
         "label_end_date": trading_date + timedelta(days=28),
         "symbol": symbol,
-        "sector": "Bank",
+        "sector": sector,
         "stock_return_percent": market_return + excess_return,
         "market_return_percent": market_return,
         "excess_return_percent": excess_return,
@@ -59,6 +62,17 @@ def test_regime_inference_is_point_in_time_and_sector_relative() -> None:
     assert classify_sector_regime(strong) == "leading"
     assert classify_sector_regime(sideways) == "neutral"
     assert classify_sector_regime(stress) == "lagging"
+
+
+def test_consensus_regime_uses_median_not_one_outlier() -> None:
+    trading_date = date(2024, 1, 1)
+    rows = [
+        _row(trading_date, "A", market_return=4.0, sector_relative=3.0),
+        _row(trading_date, "B", market_return=4.5, sector_relative=2.5),
+        _row(trading_date, "C", market_return=-12.0, sector_relative=-8.0),
+    ]
+    assert consensus_market_regime(rows) == "positive"
+    assert consensus_sector_regime(rows) == "leading"
 
 
 def test_risk_ladder_enforces_nested_adverse_probabilities() -> None:
@@ -100,10 +114,7 @@ def test_dynamic_capacity_reduces_breadth_and_abstains_in_bad_regimes() -> None:
 
     candidates = build_v3_candidate_scores(rows, execution, (risk3, risk5, risk8), ranks)
     selection = select_dynamic_setups(candidates)
-    selected_by_date = {
-        day["date"]: day["selected"]
-        for day in selection["days"]
-    }
+    selected_by_date = {day["date"]: day["selected"] for day in selection["days"]}
 
     assert selected_by_date[dates[0]] == 10
     assert selected_by_date[dates[1]] == 5
@@ -115,9 +126,9 @@ def test_dynamic_capacity_reduces_breadth_and_abstains_in_bad_regimes() -> None:
 def test_lagging_sector_and_excessive_risk_are_rejected() -> None:
     trading_date = date(2024, 1, 1)
     rows = [
-        _row(trading_date, "GOOD", market_return=4.0, sector_relative=3.0),
-        _row(trading_date, "LAG", market_return=4.0, sector_relative=-3.0),
-        _row(trading_date, "RISK", market_return=4.0, sector_relative=3.0),
+        _row(trading_date, "GOOD", market_return=4.0, sector_relative=3.0, sector="Bank"),
+        _row(trading_date, "LAG", market_return=4.0, sector_relative=-3.0, sector="Hydro"),
+        _row(trading_date, "RISK", market_return=4.0, sector_relative=3.0, sector="Finance"),
     ]
     candidates = build_v3_candidate_scores(
         rows,
