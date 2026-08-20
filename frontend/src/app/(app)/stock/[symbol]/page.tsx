@@ -59,7 +59,20 @@ export default async function StockDetailPage({ params }: { params: Promise<{ sy
       {quantResearch ? <QuantResearchSummary research={quantResearch} /> : null}
 
       {intelligence ? (
-        <StockIntelligencePanel intelligence={intelligence} />
+        <details className="rounded-xl border border-border bg-card">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 marker:hidden">
+            <div>
+              <p className="text-sm font-semibold text-text-primary">View supporting Artha Score analysis</p>
+              <p className="mt-1 text-xs text-text-secondary">
+                Technical setup score, evidence breakdown, risks and detailed historical signal statistics.
+              </p>
+            </div>
+            <span className="text-lg text-text-secondary" aria-hidden="true">+</span>
+          </summary>
+          <div className="border-t border-border p-5">
+            <StockIntelligencePanel intelligence={intelligence} />
+          </div>
+        </details>
       ) : (
         <section className="rounded-xl border border-warning/30 bg-warning/10 p-5">
           <h2 className="text-base font-semibold text-text-primary">Artha Intelligence is temporarily unavailable</h2>
