@@ -105,8 +105,8 @@ def simulate_execution_policy_e1(
     Historical V4.1 rows were sampled every five stock observations. When
     `observed_symbols_by_date` is supplied, a missing candidate is treated as an
     ineligibility signal only if that stock actually had a fresh OOS observation
-    on the date. Otherwise E1 carries the last valid candidate score rather than
-    manufacturing turnover from the historical sampling scheme.
+    on the date. With complete forward data, omit this argument and ordinary
+    candidate absence is treated as a real loss of eligibility.
     """
     dates = sorted(market_dates)
     if not dates:
@@ -114,6 +114,7 @@ def simulate_execution_policy_e1(
     if mode not in {"v41", "baseline"}:
         raise ValueError("mode must be 'v41' or 'baseline'")
 
+    sampling_aware = observed_symbols_by_date is not None
     observed_symbols_by_date = observed_symbols_by_date or {}
     side_cost = max(0.0, float(round_trip_cost_percent)) / 200.0
     cash = 1.0
@@ -241,7 +242,7 @@ def simulate_execution_policy_e1(
             sell(symbol, trading_date, date_index=date_index, reason="expired")
 
         has_prediction_date = trading_date in predictions_by_date
-        has_observation_date = trading_date in observed_symbols_by_date
+        has_observation_date = sampling_aware and trading_date in observed_symbols_by_date
         if has_prediction_date or has_observation_date:
             date_candidates = list(predictions_by_date.get(trading_date, []))
             candidate_map = {_candidate_symbol(candidate): candidate for candidate in date_candidates}
@@ -258,12 +259,11 @@ def simulate_execution_policy_e1(
                     if not _hold_eligible(candidate, mode):
                         sell(symbol, trading_date, date_index=date_index, reason="ineligible")
                         continue
-                elif symbol in observed_today:
-                    # A fresh row existed but the symbol failed the candidate filter.
+                elif not sampling_aware or symbol in observed_today:
+                    # Complete forward data: absence is genuine. Historical sparse
+                    # data: exit only when a fresh row proves the name failed the filter.
                     sell(symbol, trading_date, date_index=date_index, reason="ineligible")
                 else:
-                    # No new row for this symbol: do not confuse sparse research
-                    # sampling with a genuine loss of eligibility.
                     sampled_absence_holds += 1
 
             ranked_entries = sorted(
@@ -381,7 +381,7 @@ def simulate_execution_policy_e1(
         "policy_version": E1_POLICY_VERSION,
         "mode": mode,
         "sessions": len(dates),
-        "decision_dates": len(set(predictions_by_date) | set(observed_symbols_by_date)),
+        "decision_dates": len(set(predictions_by_date) | (set(observed_symbols_by_date) if sampling_aware else set())),
         "max_positions": max_positions,
         "max_holding_sessions": max_holding_sessions,
         "round_trip_cost_percent": round_trip_cost_percent,
