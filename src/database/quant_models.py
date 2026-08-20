@@ -75,3 +75,24 @@ class QuantModelSnapshot(Base):
     calibration_slope: Mapped[float | None] = mapped_column(Numeric(14, 8), nullable=True)
     metrics_json: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class QuantRobustnessRun(Base):
+    """Immutable robustness audit linked to one exact trained model snapshot."""
+
+    __tablename__ = "quant_robustness_runs"
+    __table_args__ = (
+        UniqueConstraint("model_snapshot_id", "policy_version", name="uq_quant_robustness_snapshot_policy"),
+        Index("ix_quant_robustness_created_at", "created_at"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    model_snapshot_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("quant_model_snapshots.id"),
+        nullable=False,
+    )
+    policy_version: Mapped[str] = mapped_column(String(60), nullable=False)
+    gate_status: Mapped[str] = mapped_column(String(20), nullable=False)
+    report_json: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
