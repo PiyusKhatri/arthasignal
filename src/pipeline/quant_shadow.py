@@ -9,13 +9,14 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from src.database.connection import get_session
-from src.database.models import Company, CorporateAction, DailyPrice, MarketIndex
+from src.database.models import Company, CorporateAction, DailyPrice, MarketIndex, SymbolLiquidityTier
 from src.database.quant_models import QuantShadowSignal
 from src.services.nepse_quant_research import NEPSE_INDEX_NAME, build_quant_research
 from src.services.quant_features import DEFAULT_HORIZON_DAYS, FEATURE_VERSION, ROUND_TRIP_COST_PERCENT
 
 logger = logging.getLogger(__name__)
 VOID_SEARCH_CAP_TRADING_DAYS = 3
+INVESTABLE_LIQUIDITY_TIERS = ("high_liquidity", "medium_liquidity")
 
 
 def _latest_entry_prices(session, symbol: str) -> tuple[date, float, float] | None:
@@ -43,8 +44,13 @@ def capture_quant_shadow_signals(limit: int = 300) -> dict[str, Any]:
     with get_session() as session:
         symbols = session.execute(
             select(Company.symbol)
-            .where(Company.instrument_type == "Equity", Company.status == "A")
-            .order_by(Company.symbol)
+            .join(SymbolLiquidityTier, SymbolLiquidityTier.symbol == Company.symbol)
+            .where(
+                Company.instrument_type == "Equity",
+                Company.status == "A",
+                SymbolLiquidityTier.liquidity_tier.in_(INVESTABLE_LIQUIDITY_TIERS),
+            )
+            .order_by(SymbolLiquidityTier.avg_daily_turnover.desc(), Company.symbol)
             .limit(limit)
         ).scalars().all()
 
@@ -101,6 +107,7 @@ def capture_quant_shadow_signals(limit: int = 300) -> dict[str, Any]:
 
     summary = {
         "feature_version": FEATURE_VERSION,
+        "liquidity_tiers": list(INVESTABLE_LIQUIDITY_TIERS),
         "symbols_considered": len(symbols),
         "rows_prepared": len(rows),
         "rows_inserted": inserted,
