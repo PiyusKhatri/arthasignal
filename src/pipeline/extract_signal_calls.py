@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import bisect
+import hashlib
+import inspect
 import logging
-import os
-import subprocess
 from datetime import date, datetime, timezone
 from decimal import Decimal
 from typing import Any
@@ -28,15 +28,17 @@ DOJI_SIGNAL_NAME = "doji"
 DOJI_REQUIRED_LIQUIDITY_TIER = VALIDATION_SIGNAL_SPECS[DOJI_SIGNAL_NAME].required_liquidity_tier
 
 
-def _resolve_commit_hash() -> str:
-    github_sha = os.environ.get("GITHUB_SHA")
-    if github_sha:
-        return github_sha
-    try:
-        result = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True)
-        return result.stdout.strip() or "unknown"
-    except (OSError, subprocess.CalledProcessError):
-        return "unknown"
+def _resolve_signal_logic_hash() -> str:
+    """Return a stable fingerprint of the signal-definition function.
+
+    The database column is historically named signal_logic_commit_hash and is
+    40 characters wide. A SHA-1 source fingerprint fits that contract and,
+    unlike the repository HEAD, changes only when the signal-definition source
+    itself changes.
+    """
+
+    source = inspect.getsource(build_signal_conditions)
+    return hashlib.sha1(source.encode("utf-8")).hexdigest()
 
 
 def _load_high_liquidity_symbols() -> set[str]:
@@ -159,7 +161,7 @@ def extract_signal_calls(start_date: date, end_date: date) -> dict[str, Any]:
     signal_entries = _load_signal_entries()
     open_index = _load_open_price_index()
     high_liquidity_symbols = _load_high_liquidity_symbols()
-    commit_hash = _resolve_commit_hash()
+    signal_logic_hash = _resolve_signal_logic_hash()
     created_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
     rows: list[dict[str, Any]] = []
@@ -188,7 +190,7 @@ def extract_signal_calls(start_date: date, end_date: date) -> dict[str, Any]:
                     "entry_price": entry_price,
                     "status": SignalCallStatus.PENDING,
                     "forward_days_horizon": horizon,
-                    "signal_logic_commit_hash": commit_hash,
+                    "signal_logic_commit_hash": signal_logic_hash,
                     "created_at": created_at,
                 }
             )
@@ -201,7 +203,7 @@ def extract_signal_calls(start_date: date, end_date: date) -> dict[str, Any]:
     summary = {
         "policy_version": VALIDATION_POLICY_VERSION,
         "effective_start": effective_start.isoformat(),
-        "signal_logic_commit_hash": commit_hash,
+        "signal_logic_hash": signal_logic_hash,
         "rows_extracted": len(rows),
         "rows_inserted": inserted,
         "skipped_missing_next_day_price": skipped_missing_price,
