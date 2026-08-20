@@ -122,8 +122,17 @@ def _date_percentiles(rows: Sequence[dict[str, Any]], scores: Sequence[float]) -
     for pairs in grouped.values():
         ordered = sorted(pairs, key=lambda item: item[1])
         denominator = max(1, len(ordered) - 1)
-        for position, (original_index, _) in enumerate(ordered):
-            percentiles[original_index] = position / denominator
+        
+        # Handle ties by assigning the average rank percentile
+        value_positions = defaultdict(list)
+        for position, (original_index, value) in enumerate(ordered):
+            value_positions[value].append((original_index, position))
+            
+        for value, group in value_positions.items():
+            avg_position = sum(p for _, p in group) / len(group)
+            for original_index, _ in group:
+                percentiles[original_index] = avg_position / denominator
+
     return percentiles
 
 

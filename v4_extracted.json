@@ -1,0 +1,54 @@
+{
+  "development_verdict": "continue_research",
+  "summary": {
+    "positive_after_1pct_folds": 3,
+    "beats_exact_same_breadth_baseline_folds": 2,
+    "selected_rows": 942,
+    "active_dates": 391,
+    "precision_after_1pct": 0.5031847133757962,
+    "mean_net_excess_percent": 3.1155756227850997,
+    "median_net_excess_percent": 0.07473403111892907,
+    "baseline_mean_net_excess_percent": 1.8039232241025192,
+    "baseline_median_net_excess_percent": -0.8242609642844174,
+    "mean_incremental_alpha_percent": 1.5283085832255452,
+    "median_incremental_alpha_percent": 0.09359463118668643,
+    "incremental_bootstrap_95": {
+      "low": 0.4764896413480726,
+      "high": 2.6479729459053605
+    },
+    "selected_severe_drawdown_rate": 0.5159235668789809,
+    "baseline_severe_drawdown_rate": 0.5636942675159236,
+    "relative_risk_reduction_vs_baseline": 0.0847457627118644,
+    "selected_mean_mae_percent": 6.2496743495665985,
+    "baseline_mean_mae_percent": 7.231599810764995,
+    "selected_mean_mfe_percent": 13.096961590810023,
+    "baseline_mean_mfe_percent": 12.997192877607482,
+    "non_overlap_cohorts": 43,
+    "non_overlap_mean_incremental_alpha_percent": 1.227830898421203,
+    "non_overlap_incremental_bootstrap_95": {
+      "low": -1.7285115253012504,
+      "high": 4.268941544306079
+    },
+    "v4_approx_cagr_percent": -6.397139507227045,
+    "baseline_approx_cagr_percent": -21.211015430106016,
+    "nepse_approx_cagr_percent": 16.74040378357904
+  },
+  "residual_prediction_buckets": null,
+  "research_gate": {
+    "status": "review",
+    "checks": {
+      "enough_valid_outer_folds": true,
+      "positive_after_1pct_in_at_least_3_folds": true,
+      "beats_exact_same_breadth_baseline_in_at_least_3_folds": false,
+      "aggregate_mean_incremental_alpha_positive": true,
+      "aggregate_median_incremental_alpha_positive": true,
+      "aggregate_selected_median_net_excess_positive": true,
+      "risk_reduction_vs_same_breadth_baseline_at_least_10pct": false,
+      "enough_selected_rows": true,
+      "enough_active_dates": true,
+      "same_breadth_incremental_bootstrap_lower_bound_positive": true,
+      "non_overlap_incremental_bootstrap_lower_bound_positive": false
+    }
+  },
+  "aggregate_metrics": null
+}

@@ -31,7 +31,7 @@ def _dated_rows(days: int = 100) -> list[dict]:
 
 
 def test_chronological_split_purges_overlapping_forward_labels() -> None:
-    split = chronological_three_way_split(_dated_rows(120))
+    split = chronological_three_way_split(_dated_rows(200))
     assert split["train"] and split["calibration"] and split["test"]
 
     calibration_start = min(row["date"] for row in split["calibration"])

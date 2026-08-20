@@ -1,0 +1,2103 @@
+{
+  "summary": {
+    "e1_v41": {
+      "sessions": 1409,
+      "decision_dates": 1389,
+      "total_return_percent": 68.57900856028016,
+      "approx_cagr_percent": 9.790272115500231,
+      "annualized_volatility_percent": 19.952138747349988,
+      "sharpe_like": 0.5673173338397288,
+      "max_drawdown_percent": -37.361735528282395,
+      "total_transaction_cost_percent_of_initial_capital": 95.74090275706295,
+      "cumulative_turnover_x_initial_capital": 191.48180551412582,
+      "annualized_turnover_x": 34.24656848087985,
+      "buy_transactions": 272,
+      "sell_transactions": 272,
+      "replacements": 97,
+      "blocked_buy_attempts": 0,
+      "blocked_sell_attempts": 507,
+      "sampled_absence_holds": 2257,
+      "mean_positions": 1.8736692689850958,
+      "mean_completed_holding_sessions": 9.705882352941176,
+      "median_completed_holding_sessions": 5.0,
+      "exit_reasons": {
+        "expired": 35,
+        "ineligible": 114,
+        "reject": 26
+      }
+    },
+    "e1_momentum_baseline": {
+      "sessions": 1409,
+      "decision_dates": 1389,
+      "total_return_percent": -38.147743177020985,
+      "approx_cagr_percent": -8.233559064498387,
+      "annualized_volatility_percent": 29.09418850015124,
+      "sharpe_like": -0.15034102195936397,
+      "max_drawdown_percent": -85.18062150018402,
+      "total_transaction_cost_percent_of_initial_capital": 213.62000197644363,
+      "cumulative_turnover_x_initial_capital": 427.2400039528873,
+      "annualized_turnover_x": 76.41198083472506,
+      "buy_transactions": 579,
+      "sell_transactions": 579,
+      "replacements": 269,
+      "blocked_buy_attempts": 0,
+      "blocked_sell_attempts": 0,
+      "sampled_absence_holds": 3405,
+      "mean_positions": 3.0241305890702628,
+      "mean_completed_holding_sessions": 7.3592400690846285,
+      "median_completed_holding_sessions": 5,
+      "exit_reasons": {
+        "expired": 50,
+        "ineligible": 260,
+        "reject": 0
+      }
+    },
+    "dominant_turnover_source": {
+      "reason": "ineligible",
+      "sell_count": 114,
+      "sell_notional_x_initial_capital": 41.45593096190469,
+      "share_of_sell_notional": 0.42931707410863806,
+      "sell_fees_x_initial_capital": 0.20727965480952346
+    },
+    "completed_trades": 272,
+    "negative_20_session_block_rate": 0.41428571428571426
+  },
+  "turnover_sources": {
+    "buy_count": 272,
+    "sell_count": 272,
+    "buy_notional_x_initial_capital": 94.91930320047629,
+    "sell_notional_x_initial_capital": 96.56250231364972,
+    "by_exit_reason": {
+      "expired": {
+        "sell_count": 35,
+        "sell_notional_x_initial_capital": 13.813362624929837,
+        "share_of_sell_notional": 0.14305100110249766,
+        "sell_fees_x_initial_capital": 0.06906681312464918
+      },
+      "ineligible": {
+        "sell_count": 114,
+        "sell_notional_x_initial_capital": 41.45593096190469,
+        "share_of_sell_notional": 0.42931707410863806,
+        "sell_fees_x_initial_capital": 0.20727965480952346
+      },
+      "reject": {
+        "sell_count": 26,
+        "sell_notional_x_initial_capital": 7.7766255746300486,
+        "share_of_sell_notional": 0.08053463185295659,
+        "sell_fees_x_initial_capital": 0.03888312787315024
+      },
+      "replacement": {
+        "sell_count": 97,
+        "sell_notional_x_initial_capital": 33.51658315218514,
+        "share_of_sell_notional": 0.3470972929359077,
+        "sell_fees_x_initial_capital": 0.1675829157609257
+      }
+    }
+  },
+  "holding_periods": {
+    "completed_trades": 272,
+    "mean_sessions": 9.705882352941176,
+    "median_sessions": 5.0,
+    "p25_sessions": 5.0,
+    "p75_sessions": 10.0,
+    "by_exit_reason": {
+      "expired": {
+        "trades": 35,
+        "mean_sessions": 33.08571428571429,
+        "median_sessions": 20
+      },
+      "ineligible": {
+        "trades": 114,
+        "mean_sessions": 7.166666666666667,
+        "median_sessions": 5.0
+      },
+      "reject": {
+        "trades": 26,
+        "mean_sessions": 6.730769230769231,
+        "median_sessions": 5.0
+      },
+      "replacement": {
+        "trades": 97,
+        "mean_sessions": 5.051546391752577,
+        "median_sessions": 4
+      }
+    }
+  },
+  "replacement_diagnostics": {
+    "completed_replacements": 97,
+    "mean_holding_sessions_before_replacement": 5.051546391752577,
+    "mean_gross_return_before_replacement_percent": 1.0333429197824324
+  },
+  "fold_diagnostics": [
+    {
+      "fold": 1,
+      "test_start": "2020-08-16",
+      "test_end": "2022-01-20",
+      "sessions": 347,
+      "v41_return_percent": 109.70203680161568,
+      "baseline_return_percent": 188.0498704015955,
+      "incremental_return_percent": -78.34783359997984,
+      "context": {
+        "prediction_rows": 1760,
+        "market_regimes": {
+          "strong_bull": 1312,
+          "bull": 380,
+          "sideways": 47,
+          "recovery": 21
+        },
+        "override_actions": {
+          "hold": 1314,
+          "reject": 389,
+          "promote": 57
+        },
+        "top_sectors": {
+          "Hydro Power": 417,
+          "Microfinance": 337,
+          "Finance": 243,
+          "Commercial Banks": 198,
+          "Development Banks": 193,
+          "Non Life Insurance": 112,
+          "Life Insurance": 84,
+          "Investment": 84
+        }
+      }
+    },
+    {
+      "fold": 2,
+      "test_start": "2022-01-23",
+      "test_end": "2023-07-05",
+      "sessions": 347,
+      "v41_return_percent": 0.90153377020874,
+      "baseline_return_percent": -8.251753801867567,
+      "incremental_return_percent": 9.153287572076307,
+      "context": {
+        "prediction_rows": 824,
+        "market_regimes": {
+          "bull": 401,
+          "recovery": 317,
+          "sideways": 98,
+          "strong_bull": 8
+        },
+        "override_actions": {
+          "hold": 734,
+          "reject": 48,
+          "promote": 42
+        },
+        "top_sectors": {
+          "Hydro Power": 228,
+          "Finance": 137,
+          "Microfinance": 127,
+          "Non Life Insurance": 70,
+          "Development Banks": 69,
+          "Life Insurance": 54,
+          "Investment": 50,
+          "Commercial Banks": 37
+        }
+      }
+    },
+    {
+      "fold": 3,
+      "test_start": "2023-07-06",
+      "test_end": "2025-01-12",
+      "sessions": 347,
+      "v41_return_percent": 27.193044467936957,
+      "baseline_return_percent": -44.078343888640745,
+      "incremental_return_percent": 71.2713883565777,
+      "context": {
+        "prediction_rows": 1512,
+        "market_regimes": {
+          "bull": 886,
+          "strong_bull": 574,
+          "sideways": 36,
+          "recovery": 16
+        },
+        "override_actions": {
+          "hold": 1363,
+          "reject": 149
+        },
+        "top_sectors": {
+          "Hydro Power": 528,
+          "Finance": 199,
+          "Commercial Banks": 188,
+          "Microfinance": 176,
+          "Development Banks": 148,
+          "Investment": 71,
+          "Non Life Insurance": 65,
+          "Life Insurance": 56
+        }
+      }
+    },
+    {
+      "fold": 4,
+      "test_start": "2025-01-13",
+      "test_end": "2026-07-23",
+      "sessions": 348,
+      "v41_return_percent": -37.36173552828238,
+      "baseline_return_percent": -53.669095408178734,
+      "incremental_return_percent": 16.307359879896353,
+      "context": {
+        "prediction_rows": 1442,
+        "market_regimes": {
+          "bull": 932,
+          "recovery": 280,
+          "sideways": 118,
+          "strong_bull": 112
+        },
+        "override_actions": {
+          "hold": 1266,
+          "reject": 133,
+          "promote": 43
+        },
+        "top_sectors": {
+          "Hydro Power": 509,
+          "Commercial Banks": 257,
+          "Development Banks": 166,
+          "Microfinance": 101,
+          "Life Insurance": 95,
+          "Finance": 91,
+          "Others": 64,
+          "Investment": 56
+        }
+      }
+    }
+  ],
+  "contiguous_20_session_blocks": {
+    "block_length": 20,
+    "blocks": 70,
+    "positive_block_rate": 0.5857142857142857,
+    "mean_incremental_return_percent": 1.1204824553223995,
+    "median_incremental_return_percent": 1.5515258457269363,
+    "worst_10": [
+      {
+        "start": "2020-11-12",
+        "end": "2020-12-14",
+        "strategy_return_percent": -2.4329153228434097,
+        "baseline_return_percent": 22.83443641796761,
+        "incremental_return_percent": -25.26735174081102,
+        "context": {
+          "prediction_rows": 66,
+          "market_regimes": {
+            "strong_bull": 66
+          },
+          "override_actions": {
+            "hold": 40,
+            "reject": 26
+          },
+          "top_sectors": {
+            "Life Insurance": 14,
+            "Hydro Power": 12,
+            "Investment": 11,
+            "Non Life Insurance": 11,
+            "Others": 8,
+            "Manufacturing And Processing": 7,
+            "Tradings": 2,
+            "Hotels And Tourism": 1
+          }
+        }
+      },
+      {
+        "start": "2021-05-12",
+        "end": "2021-06-09",
+        "strategy_return_percent": 20.655268006496396,
+        "baseline_return_percent": 44.02210146571343,
+        "incremental_return_percent": -23.366833459217037,
+        "context": {
+          "prediction_rows": 137,
+          "market_regimes": {
+            "strong_bull": 71,
+            "bull": 66
+          },
+          "override_actions": {
+            "hold": 109,
+            "reject": 19,
+            "promote": 9
+          },
+          "top_sectors": {
+            "Hydro Power": 41,
+            "Finance": 26,
+            "Development Banks": 24,
+            "Microfinance": 15,
+            "Non Life Insurance": 10,
+            "Commercial Banks": 7,
+            "Life Insurance": 4,
+            "Others": 3
+          }
+        }
+      },
+      {
+        "start": "2024-07-02",
+        "end": "2024-07-29",
+        "strategy_return_percent": 0.0,
+        "baseline_return_percent": 14.279871751334783,
+        "incremental_return_percent": -14.279871751334783,
+        "context": {
+          "prediction_rows": 157,
+          "market_regimes": {
+            "strong_bull": 93,
+            "bull": 64
+          },
+          "override_actions": {
+            "hold": 138,
+            "reject": 19
+          },
+          "top_sectors": {
+            "Hydro Power": 38,
+            "Commercial Banks": 36,
+            "Finance": 23,
+            "Development Banks": 21,
+            "Microfinance": 11,
+            "Investment": 11,
+            "Life Insurance": 9,
+            "Hotels And Tourism": 4
+          }
+        }
+      },
+      {
+        "start": "2021-04-13",
+        "end": "2021-05-11",
+        "strategy_return_percent": -6.522557372230264,
+        "baseline_return_percent": 4.1675846363056435,
+        "incremental_return_percent": -10.690142008535908,
+        "context": {
+          "prediction_rows": 91,
+          "market_regimes": {
+            "strong_bull": 62,
+            "bull": 29
+          },
+          "override_actions": {
+            "hold": 83,
+            "promote": 7,
+            "reject": 1
+          },
+          "top_sectors": {
+            "Microfinance": 35,
+            "Hydro Power": 25,
+            "Development Banks": 14,
+            "Finance": 7,
+            "Commercial Banks": 4,
+            "Non Life Insurance": 3,
+            "Others": 2,
+            "Manufacturing And Processing": 1
+          }
+        }
+      },
+      {
+        "start": "2021-01-12",
+        "end": "2021-02-09",
+        "strategy_return_percent": 4.710858709440391,
+        "baseline_return_percent": 13.699105810571144,
+        "incremental_return_percent": -8.988247101130753,
+        "context": {
+          "prediction_rows": 149,
+          "market_regimes": {
+            "strong_bull": 149
+          },
+          "override_actions": {
+            "hold": 78,
+            "reject": 67,
+            "promote": 4
+          },
+          "top_sectors": {
+            "Microfinance": 52,
+            "Finance": 17,
+            "Commercial Banks": 16,
+            "Hydro Power": 15,
+            "Development Banks": 13,
+            "Non Life Insurance": 12,
+            "Life Insurance": 10,
+            "Investment": 7
+          }
+        }
+      },
+      {
+        "start": "2021-07-08",
+        "end": "2021-08-05",
+        "strategy_return_percent": 9.340258258982171,
+        "baseline_return_percent": 17.708051791237644,
+        "incremental_return_percent": -8.367793532255472,
+        "context": {
+          "prediction_rows": 109,
+          "market_regimes": {
+            "strong_bull": 109
+          },
+          "override_actions": {
+            "hold": 97,
+            "promote": 9,
+            "reject": 3
+          },
+          "top_sectors": {
+            "Hydro Power": 32,
+            "Finance": 32,
+            "Development Banks": 20,
+            "Commercial Banks": 15,
+            "Microfinance": 4,
+            "Hotels And Tourism": 2,
+            "Manufacturing And Processing": 2,
+            "Investment": 2
+          }
+        }
+      },
+      {
+        "start": "2024-11-11",
+        "end": "2024-12-09",
+        "strategy_return_percent": 0.0,
+        "baseline_return_percent": 8.328660309265047,
+        "incremental_return_percent": -8.328660309265047,
+        "context": {
+          "prediction_rows": 128,
+          "market_regimes": {
+            "bull": 128
+          },
+          "override_actions": {
+            "hold": 121,
+            "reject": 7
+          },
+          "top_sectors": {
+            "Hydro Power": 71,
+            "Development Banks": 21,
+            "Finance": 16,
+            "Microfinance": 7,
+            "Life Insurance": 4,
+            "Hotels And Tourism": 3,
+            "Others": 2,
+            "Non Life Insurance": 2
+          }
+        }
+      },
+      {
+        "start": "2020-08-16",
+        "end": "2020-09-13",
+        "strategy_return_percent": 1.13485284684689,
+        "baseline_return_percent": 9.155433052941685,
+        "incremental_return_percent": -8.020580206094795,
+        "context": {
+          "prediction_rows": 70,
+          "market_regimes": {
+            "bull": 46,
+            "strong_bull": 24
+          },
+          "override_actions": {
+            "reject": 36,
+            "hold": 33,
+            "promote": 1
+          },
+          "top_sectors": {
+            "Hydro Power": 21,
+            "Microfinance": 19,
+            "Non Life Insurance": 11,
+            "Life Insurance": 10,
+            "Investment": 5,
+            "Manufacturing And Processing": 3,
+            "Others": 1
+          }
+        }
+      },
+      {
+        "start": "2025-06-18",
+        "end": "2025-07-15",
+        "strategy_return_percent": -11.013678342172517,
+        "baseline_return_percent": -3.5971517389899565,
+        "incremental_return_percent": -7.41652660318256,
+        "context": {
+          "prediction_rows": 94,
+          "market_regimes": {
+            "bull": 80,
+            "recovery": 8,
+            "sideways": 6
+          },
+          "override_actions": {
+            "hold": 78,
+            "promote": 13,
+            "reject": 3
+          },
+          "top_sectors": {
+            "Hydro Power": 27,
+            "Commercial Banks": 23,
+            "Development Banks": 11,
+            "Life Insurance": 7,
+            "Non Life Insurance": 7,
+            "Finance": 7,
+            "Microfinance": 7,
+            "Investment": 2
+          }
+        }
+      },
+      {
+        "start": "2020-10-12",
+        "end": "2020-11-11",
+        "strategy_return_percent": -1.5369135336675832,
+        "baseline_return_percent": 4.980087811755496,
+        "incremental_return_percent": -6.517001345423079,
+        "context": {
+          "prediction_rows": 132,
+          "market_regimes": {
+            "strong_bull": 93,
+            "bull": 39
+          },
+          "override_actions": {
+            "hold": 125,
+            "reject": 7
+          },
+          "top_sectors": {
+            "Hydro Power": 35,
+            "Commercial Banks": 28,
+            "Finance": 27,
+            "Development Banks": 13,
+            "Microfinance": 9,
+            "Investment": 7,
+            "Non Life Insurance": 6,
+            "Others": 5
+          }
+        }
+      }
+    ],
+    "best_10": [
+      {
+        "start": "2021-06-10",
+        "end": "2021-07-07",
+        "strategy_return_percent": 9.854797848683239,
+        "baseline_return_percent": -9.587285721348904,
+        "incremental_return_percent": 19.442083570032143,
+        "context": {
+          "prediction_rows": 107,
+          "market_regimes": {
+            "strong_bull": 91,
+            "bull": 16
+          },
+          "override_actions": {
+            "hold": 75,
+            "reject": 31,
+            "promote": 1
+          },
+          "top_sectors": {
+            "Finance": 28,
+            "Development Banks": 24,
+            "Commercial Banks": 21,
+            "Hydro Power": 16,
+            "Non Life Insurance": 7,
+            "Investment": 5,
+            "Manufacturing And Processing": 2,
+            "Others": 2
+          }
+        }
+      },
+      {
+        "start": "2025-04-17",
+        "end": "2025-05-18",
+        "strategy_return_percent": -0.25356974610455385,
+        "baseline_return_percent": -16.623508581119818,
+        "incremental_return_percent": 16.369938835015265,
+        "context": {
+          "prediction_rows": 72,
+          "market_regimes": {
+            "bull": 72
+          },
+          "override_actions": {
+            "hold": 67,
+            "reject": 5
+          },
+          "top_sectors": {
+            "Hydro Power": 29,
+            "Commercial Banks": 11,
+            "Investment": 8,
+            "Others": 7,
+            "Development Banks": 6,
+            "Life Insurance": 4,
+            "Manufacturing And Processing": 3,
+            "Tradings": 2
+          }
+        }
+      },
+      {
+        "start": "2024-09-02",
+        "end": "2024-10-01",
+        "strategy_return_percent": 0.0,
+        "baseline_return_percent": -15.896213369322687,
+        "incremental_return_percent": 15.896213369322687,
+        "context": {
+          "prediction_rows": 80,
+          "market_regimes": {
+            "strong_bull": 80
+          },
+          "override_actions": {
+            "hold": 74,
+            "reject": 6
+          },
+          "top_sectors": {
+            "Hydro Power": 21,
+            "Commercial Banks": 15,
+            "Development Banks": 11,
+            "Finance": 9,
+            "Non Life Insurance": 7,
+            "Life Insurance": 6,
+            "Investment": 6,
+            "Microfinance": 3
+          }
+        }
+      },
+      {
+        "start": "2021-08-08",
+        "end": "2021-09-07",
+        "strategy_return_percent": 5.706304092584191,
+        "baseline_return_percent": -6.499619450617445,
+        "incremental_return_percent": 12.205923543201635,
+        "context": {
+          "prediction_rows": 101,
+          "market_regimes": {
+            "strong_bull": 93,
+            "bull": 8
+          },
+          "override_actions": {
+            "hold": 86,
+            "promote": 9,
+            "reject": 6
+          },
+          "top_sectors": {
+            "Hydro Power": 39,
+            "Finance": 24,
+            "Development Banks": 19,
+            "Investment": 6,
+            "Commercial Banks": 4,
+            "Microfinance": 4,
+            "Manufacturing And Processing": 3,
+            "Non Life Insurance": 1
+          }
+        }
+      },
+      {
+        "start": "2024-02-27",
+        "end": "2024-03-27",
+        "strategy_return_percent": 0.0,
+        "baseline_return_percent": -11.612759478406886,
+        "incremental_return_percent": 11.612759478406886,
+        "context": {
+          "prediction_rows": 88,
+          "market_regimes": {
+            "bull": 80,
+            "strong_bull": 8
+          },
+          "override_actions": {
+            "hold": 88
+          },
+          "top_sectors": {
+            "Microfinance": 24,
+            "Finance": 15,
+            "Development Banks": 14,
+            "Commercial Banks": 8,
+            "Non Life Insurance": 7,
+            "Hydro Power": 6,
+            "Life Insurance": 5,
+            "Investment": 4
+          }
+        }
+      },
+      {
+        "start": "2024-07-30",
+        "end": "2024-09-01",
+        "strategy_return_percent": 0.0,
+        "baseline_return_percent": -10.717817579674271,
+        "incremental_return_percent": 10.717817579674271,
+        "context": {
+          "prediction_rows": 160,
+          "market_regimes": {
+            "strong_bull": 160
+          },
+          "override_actions": {
+            "hold": 106,
+            "reject": 54
+          },
+          "top_sectors": {
+            "Hydro Power": 55,
+            "Commercial Banks": 31,
+            "Finance": 27,
+            "Investment": 17,
+            "Life Insurance": 9,
+            "Development Banks": 8,
+            "Others": 8,
+            "Hotels And Tourism": 4
+          }
+        }
+      },
+      {
+        "start": "2023-07-16",
+        "end": "2023-08-10",
+        "strategy_return_percent": 1.622996981403979,
+        "baseline_return_percent": -8.468090087441437,
+        "incremental_return_percent": 10.091087068845416,
+        "context": {
+          "prediction_rows": 113,
+          "market_regimes": {
+            "strong_bull": 105,
+            "bull": 8
+          },
+          "override_actions": {
+            "hold": 113
+          },
+          "top_sectors": {
+            "Commercial Banks": 39,
+            "Finance": 23,
+            "Development Banks": 20,
+            "Microfinance": 11,
+            "Non Life Insurance": 6,
+            "Investment": 4,
+            "Others": 3,
+            "Hotels And Tourism": 3
+          }
+        }
+      },
+      {
+        "start": "2024-05-02",
+        "end": "2024-06-02",
+        "strategy_return_percent": 0.0,
+        "baseline_return_percent": -8.430310109901995,
+        "incremental_return_percent": 8.430310109901995,
+        "context": {
+          "prediction_rows": 88,
+          "market_regimes": {
+            "bull": 88
+          },
+          "override_actions": {
+            "hold": 88
+          },
+          "top_sectors": {
+            "Microfinance": 39,
+            "Commercial Banks": 18,
+            "Finance": 10,
+            "Development Banks": 8,
+            "Hydro Power": 6,
+            "Non Life Insurance": 3,
+            "Hotels And Tourism": 3,
+            "Investment": 1
+          }
+        }
+      },
+      {
+        "start": "2024-03-28",
+        "end": "2024-04-30",
+        "strategy_return_percent": 0.0,
+        "baseline_return_percent": -8.294649299100653,
+        "incremental_return_percent": 8.294649299100653,
+        "context": {
+          "prediction_rows": 47,
+          "market_regimes": {
+            "bull": 32,
+            "sideways": 15
+          },
+          "override_actions": {
+            "hold": 47
+          },
+          "top_sectors": {
+            "Microfinance": 21,
+            "Finance": 14,
+            "Development Banks": 3,
+            "Life Insurance": 3,
+            "Non Life Insurance": 3,
+            "Commercial Banks": 2,
+            "Investment": 1
+          }
+        }
+      },
+      {
+        "start": "2026-07-13",
+        "end": "2026-08-07",
+        "strategy_return_percent": 0.0,
+        "baseline_return_percent": -8.256974811722595,
+        "incremental_return_percent": 8.256974811722595,
+        "context": {
+          "prediction_rows": 32,
+          "market_regimes": {
+            "bull": 32
+          },
+          "override_actions": {
+            "hold": 24,
+            "reject": 8
+          },
+          "top_sectors": {
+            "Commercial Banks": 9,
+            "Hydro Power": 9,
+            "Development Banks": 4,
+            "Manufacturing And Processing": 4,
+            "Finance": 2,
+            "Others": 2,
+            "Non Life Insurance": 1,
+            "Investment": 1
+          }
+        }
+      }
+    ]
+  },
+  "rolling_incremental_performance": {
+    "60": {
+      "windows": 1350,
+      "mean_incremental_return_percent": 3.275618487875247,
+      "median_incremental_return_percent": 3.3347046440809933,
+      "positive_window_rate": 0.6866666666666666,
+      "worst_5": [
+        {
+          "start": "2020-09-02",
+          "end": "2020-12-02",
+          "strategy_return_percent": 31.354021054175195,
+          "baseline_return_percent": 95.50254668815421,
+          "incremental_return_percent": -64.14852563397902,
+          "strategy_max_drawdown_percent": -8.319836403310877,
+          "baseline_max_drawdown_percent": -9.636968393526645,
+          "context": {
+            "prediction_rows": 357,
+            "market_regimes": {
+              "strong_bull": 296,
+              "bull": 61
+            },
+            "override_actions": {
+              "hold": 258,
+              "reject": 89,
+              "promote": 10
+            },
+            "top_sectors": {
+              "Hydro Power": 102,
+              "Non Life Insurance": 40,
+              "Finance": 40,
+              "Commercial Banks": 39,
+              "Microfinance": 34,
+              "Life Insurance": 28,
+              "Investment": 24,
+              "Development Banks": 22
+            }
+          }
+        },
+        {
+          "start": "2020-09-03",
+          "end": "2020-12-03",
+          "strategy_return_percent": 34.08157116898143,
+          "baseline_return_percent": 93.90742319300878,
+          "incremental_return_percent": -59.825852024027355,
+          "strategy_max_drawdown_percent": -8.319836403310877,
+          "baseline_max_drawdown_percent": -9.636968393526669,
+          "context": {
+            "prediction_rows": 356,
+            "market_regimes": {
+              "strong_bull": 297,
+              "bull": 59
+            },
+            "override_actions": {
+              "hold": 256,
+              "reject": 90,
+              "promote": 10
+            },
+            "top_sectors": {
+              "Hydro Power": 101,
+              "Finance": 40,
+              "Non Life Insurance": 39,
+              "Commercial Banks": 39,
+              "Microfinance": 34,
+              "Life Insurance": 28,
+              "Investment": 24,
+              "Development Banks": 22
+            }
+          }
+        },
+        {
+          "start": "2020-08-31",
+          "end": "2020-12-01",
+          "strategy_return_percent": 33.00573455179845,
+          "baseline_return_percent": 87.44510958934903,
+          "incremental_return_percent": -54.43937503755058,
+          "strategy_max_drawdown_percent": -8.319836403310866,
+          "baseline_max_drawdown_percent": -9.636968393526645,
+          "context": {
+            "prediction_rows": 362,
+            "market_regimes": {
+              "strong_bull": 295,
+              "bull": 67
+            },
+            "override_actions": {
+              "hold": 262,
+              "reject": 90,
+              "promote": 10
+            },
+            "top_sectors": {
+              "Hydro Power": 107,
+              "Non Life Insurance": 40,
+              "Finance": 40,
+              "Commercial Banks": 39,
+              "Microfinance": 34,
+              "Life Insurance": 28,
+              "Investment": 24,
+              "Development Banks": 22
+            }
+          }
+        },
+        {
+          "start": "2020-10-29",
+          "end": "2021-01-26",
+          "strategy_return_percent": 3.872998881939349,
+          "baseline_return_percent": 56.772351962104,
+          "incremental_return_percent": -52.899353080164644,
+          "strategy_max_drawdown_percent": -12.809564644189175,
+          "baseline_max_drawdown_percent": -12.0986370661473,
+          "context": {
+            "prediction_rows": 358,
+            "market_regimes": {
+              "strong_bull": 358
+            },
+            "override_actions": {
+              "hold": 280,
+              "reject": 76,
+              "promote": 2
+            },
+            "top_sectors": {
+              "Microfinance": 87,
+              "Commercial Banks": 76,
+              "Hydro Power": 47,
+              "Life Insurance": 34,
+              "Investment": 26,
+              "Finance": 23,
+              "Non Life Insurance": 22,
+              "Others": 15
+            }
+          }
+        },
+        {
+          "start": "2020-10-28",
+          "end": "2021-01-25",
+          "strategy_return_percent": 7.854648279872634,
+          "baseline_return_percent": 60.17114386598013,
+          "incremental_return_percent": -52.31649558610749,
+          "strategy_max_drawdown_percent": -12.809564644189141,
+          "baseline_max_drawdown_percent": -12.0986370661473,
+          "context": {
+            "prediction_rows": 359,
+            "market_regimes": {
+              "strong_bull": 359
+            },
+            "override_actions": {
+              "hold": 282,
+              "reject": 76,
+              "promote": 1
+            },
+            "top_sectors": {
+              "Microfinance": 85,
+              "Commercial Banks": 78,
+              "Hydro Power": 47,
+              "Life Insurance": 34,
+              "Investment": 26,
+              "Finance": 22,
+              "Non Life Insurance": 21,
+              "Development Banks": 15
+            }
+          }
+        }
+      ],
+      "best_5": [
+        {
+          "start": "2024-01-03",
+          "end": "2024-04-01",
+          "strategy_return_percent": 15.397910461721231,
+          "baseline_return_percent": -16.28954126065576,
+          "incremental_return_percent": 31.68745172237699,
+          "strategy_max_drawdown_percent": 0.0,
+          "baseline_max_drawdown_percent": -27.060469693342913,
+          "context": {
+            "prediction_rows": 335,
+            "market_regimes": {
+              "bull": 216,
+              "strong_bull": 112,
+              "sideways": 7
+            },
+            "override_actions": {
+              "hold": 335
+            },
+            "top_sectors": {
+              "Hydro Power": 192,
+              "Microfinance": 37,
+              "Finance": 28,
+              "Development Banks": 21,
+              "Non Life Insurance": 14,
+              "Investment": 13,
+              "Commercial Banks": 10,
+              "Life Insurance": 8
+            }
+          }
+        },
+        {
+          "start": "2024-01-02",
+          "end": "2024-03-31",
+          "strategy_return_percent": 15.686647187667525,
+          "baseline_return_percent": -15.588745234770386,
+          "incremental_return_percent": 31.27539242243791,
+          "strategy_max_drawdown_percent": 0.0,
+          "baseline_max_drawdown_percent": -25.688043058037437,
+          "context": {
+            "prediction_rows": 336,
+            "market_regimes": {
+              "bull": 224,
+              "strong_bull": 112
+            },
+            "override_actions": {
+              "hold": 336
+            },
+            "top_sectors": {
+              "Hydro Power": 198,
+              "Microfinance": 33,
+              "Finance": 25,
+              "Development Banks": 21,
+              "Non Life Insurance": 16,
+              "Investment": 13,
+              "Commercial Banks": 10,
+              "Life Insurance": 8
+            }
+          }
+        },
+        {
+          "start": "2024-01-04",
+          "end": "2024-04-02",
+          "strategy_return_percent": 11.93269292626411,
+          "baseline_return_percent": -17.809666479398956,
+          "incremental_return_percent": 29.742359405663066,
+          "strategy_max_drawdown_percent": 0.0,
+          "baseline_max_drawdown_percent": -27.06046969334295,
+          "context": {
+            "prediction_rows": 335,
+            "market_regimes": {
+              "bull": 208,
+              "strong_bull": 112,
+              "sideways": 15
+            },
+            "override_actions": {
+              "hold": 335
+            },
+            "top_sectors": {
+              "Hydro Power": 185,
+              "Microfinance": 41,
+              "Finance": 32,
+              "Development Banks": 21,
+              "Non Life Insurance": 14,
+              "Investment": 12,
+              "Commercial Banks": 10,
+              "Life Insurance": 8
+            }
+          }
+        },
+        {
+          "start": "2024-01-21",
+          "end": "2024-04-21",
+          "strategy_return_percent": 0.0,
+          "baseline_return_percent": -29.345081496754087,
+          "incremental_return_percent": 29.345081496754087,
+          "strategy_max_drawdown_percent": 0.0,
+          "baseline_max_drawdown_percent": -29.345081496754087,
+          "context": {
+            "prediction_rows": 271,
+            "market_regimes": {
+              "bull": 144,
+              "strong_bull": 112,
+              "sideways": 15
+            },
+            "override_actions": {
+              "hold": 271
+            },
+            "top_sectors": {
+              "Hydro Power": 124,
+              "Microfinance": 48,
+              "Finance": 34,
+              "Development Banks": 20,
+              "Non Life Insurance": 12,
+              "Commercial Banks": 10,
+              "Life Insurance": 8,
+              "Investment": 7
+            }
+          }
+        },
+        {
+          "start": "2021-06-09",
+          "end": "2021-09-06",
+          "strategy_return_percent": 30.978938036809044,
+          "baseline_return_percent": 2.1318651293360524,
+          "incremental_return_percent": 28.84707290747299,
+          "strategy_max_drawdown_percent": -10.221872391296639,
+          "baseline_max_drawdown_percent": -22.43552789359192,
+          "context": {
+            "prediction_rows": 325,
+            "market_regimes": {
+              "strong_bull": 301,
+              "bull": 24
+            },
+            "override_actions": {
+              "hold": 262,
+              "reject": 44,
+              "promote": 19
+            },
+            "top_sectors": {
+              "Hydro Power": 90,
+              "Finance": 85,
+              "Development Banks": 66,
+              "Commercial Banks": 40,
+              "Investment": 13,
+              "Non Life Insurance": 9,
+              "Microfinance": 8,
+              "Manufacturing And Processing": 7
+            }
+          }
+        }
+      ]
+    },
+    "120": {
+      "windows": 1290,
+      "mean_incremental_return_percent": 8.201507544638542,
+      "median_incremental_return_percent": 10.049271004098737,
+      "positive_window_rate": 0.7674418604651163,
+      "worst_5": [
+        {
+          "start": "2020-08-20",
+          "end": "2021-02-15",
+          "strategy_return_percent": 39.85620061380371,
+          "baseline_return_percent": 129.48008568167975,
+          "incremental_return_percent": -89.62388506787605,
+          "strategy_max_drawdown_percent": -12.809564644189154,
+          "baseline_max_drawdown_percent": -12.098637066147289,
+          "context": {
+            "prediction_rows": 734,
+            "market_regimes": {
+              "strong_bull": 649,
+              "bull": 85
+            },
+            "override_actions": {
+              "hold": 502,
+              "reject": 218,
+              "promote": 14
+            },
+            "top_sectors": {
+              "Microfinance": 165,
+              "Hydro Power": 150,
+              "Commercial Banks": 103,
+              "Life Insurance": 65,
+              "Finance": 59,
+              "Non Life Insurance": 58,
+              "Investment": 46,
+              "Development Banks": 36
+            }
+          }
+        },
+        {
+          "start": "2020-08-23",
+          "end": "2021-02-16",
+          "strategy_return_percent": 37.36004954467458,
+          "baseline_return_percent": 122.32747884071911,
+          "incremental_return_percent": -84.96742929604453,
+          "strategy_max_drawdown_percent": -12.809564644189154,
+          "baseline_max_drawdown_percent": -12.098637066147289,
+          "context": {
+            "prediction_rows": 742,
+            "market_regimes": {
+              "strong_bull": 657,
+              "bull": 85
+            },
+            "override_actions": {
+              "hold": 502,
+              "reject": 226,
+              "promote": 14
+            },
+            "top_sectors": {
+              "Microfinance": 168,
+              "Hydro Power": 153,
+              "Commercial Banks": 103,
+              "Life Insurance": 65,
+              "Finance": 60,
+              "Non Life Insurance": 59,
+              "Investment": 46,
+              "Development Banks": 36
+            }
+          }
+        },
+        {
+          "start": "2020-08-24",
+          "end": "2021-02-17",
+          "strategy_return_percent": 36.5414229803817,
+          "baseline_return_percent": 121.43421289853782,
+          "incremental_return_percent": -84.89278991815613,
+          "strategy_max_drawdown_percent": -12.809564644189154,
+          "baseline_max_drawdown_percent": -12.098637066147289,
+          "context": {
+            "prediction_rows": 749,
+            "market_regimes": {
+              "strong_bull": 664,
+              "bull": 85
+            },
+            "override_actions": {
+              "hold": 503,
+              "reject": 232,
+              "promote": 14
+            },
+            "top_sectors": {
+              "Microfinance": 169,
+              "Hydro Power": 153,
+              "Commercial Banks": 105,
+              "Life Insurance": 67,
+              "Non Life Insurance": 60,
+              "Finance": 60,
+              "Investment": 47,
+              "Development Banks": 36
+            }
+          }
+        },
+        {
+          "start": "2020-08-16",
+          "end": "2021-02-09",
+          "strategy_return_percent": 43.69520472304753,
+          "baseline_return_percent": 128.5308552311096,
+          "incremental_return_percent": -84.83565050806206,
+          "strategy_max_drawdown_percent": -12.809564644189154,
+          "baseline_max_drawdown_percent": -12.098637066147289,
+          "context": {
+            "prediction_rows": 708,
+            "market_regimes": {
+              "strong_bull": 623,
+              "bull": 85
+            },
+            "override_actions": {
+              "hold": 494,
+              "reject": 200,
+              "promote": 14
+            },
+            "top_sectors": {
+              "Microfinance": 151,
+              "Hydro Power": 150,
+              "Commercial Banks": 103,
+              "Life Insurance": 62,
+              "Finance": 57,
+              "Non Life Insurance": 55,
+              "Investment": 45,
+              "Development Banks": 35
+            }
+          }
+        },
+        {
+          "start": "2020-08-18",
+          "end": "2021-02-11",
+          "strategy_return_percent": 37.00185615137457,
+          "baseline_return_percent": 121.11476860062247,
+          "incremental_return_percent": -84.1129124492479,
+          "strategy_max_drawdown_percent": -12.809564644189154,
+          "baseline_max_drawdown_percent": -12.098637066147289,
+          "context": {
+            "prediction_rows": 718,
+            "market_regimes": {
+              "strong_bull": 633,
+              "bull": 85
+            },
+            "override_actions": {
+              "hold": 498,
+              "reject": 206,
+              "promote": 14
+            },
+            "top_sectors": {
+              "Microfinance": 155,
+              "Hydro Power": 150,
+              "Commercial Banks": 103,
+              "Life Insurance": 64,
+              "Finance": 57,
+              "Non Life Insurance": 56,
+              "Investment": 46,
+              "Development Banks": 36
+            }
+          }
+        }
+      ],
+      "best_5": [
+        {
+          "start": "2023-11-27",
+          "end": "2024-05-30",
+          "strategy_return_percent": 25.356921055395954,
+          "baseline_return_percent": -23.92566483523949,
+          "incremental_return_percent": 49.282585890635445,
+          "strategy_max_drawdown_percent": -4.919522549316325,
+          "baseline_max_drawdown_percent": -35.23057581097787,
+          "context": {
+            "prediction_rows": 575,
+            "market_regimes": {
+              "bull": 416,
+              "strong_bull": 112,
+              "sideways": 31,
+              "recovery": 16
+            },
+            "override_actions": {
+              "hold": 574,
+              "reject": 1
+            },
+            "top_sectors": {
+              "Hydro Power": 266,
+              "Microfinance": 90,
+              "Finance": 53,
+              "Non Life Insurance": 40,
+              "Development Banks": 40,
+              "Commercial Banks": 25,
+              "Investment": 19,
+              "Life Insurance": 14
+            }
+          }
+        },
+        {
+          "start": "2023-09-27",
+          "end": "2024-04-10",
+          "strategy_return_percent": 25.356921055395954,
+          "baseline_return_percent": -23.74781642304583,
+          "incremental_return_percent": 49.104737478441784,
+          "strategy_max_drawdown_percent": -4.919522549316325,
+          "baseline_max_drawdown_percent": -29.351775305731596,
+          "context": {
+            "prediction_rows": 500,
+            "market_regimes": {
+              "bull": 336,
+              "strong_bull": 112,
+              "sideways": 36,
+              "recovery": 16
+            },
+            "override_actions": {
+              "hold": 499,
+              "reject": 1
+            },
+            "top_sectors": {
+              "Hydro Power": 263,
+              "Microfinance": 53,
+              "Finance": 43,
+              "Non Life Insurance": 38,
+              "Development Banks": 32,
+              "Investment": 20,
+              "Life Insurance": 16,
+              "Others": 10
+            }
+          }
+        },
+        {
+          "start": "2023-11-28",
+          "end": "2024-06-02",
+          "strategy_return_percent": 25.356921055395954,
+          "baseline_return_percent": -23.206602416757427,
+          "incremental_return_percent": 48.56352347215338,
+          "strategy_max_drawdown_percent": -4.919522549316325,
+          "baseline_max_drawdown_percent": -35.54683784345558,
+          "context": {
+            "prediction_rows": 576,
+            "market_regimes": {
+              "bull": 424,
+              "strong_bull": 112,
+              "sideways": 24,
+              "recovery": 16
+            },
+            "override_actions": {
+              "hold": 576
+            },
+            "top_sectors": {
+              "Hydro Power": 269,
+              "Microfinance": 92,
+              "Finance": 53,
+              "Non Life Insurance": 38,
+              "Development Banks": 37,
+              "Commercial Banks": 28,
+              "Investment": 17,
+              "Life Insurance": 14
+            }
+          }
+        },
+        {
+          "start": "2023-11-22",
+          "end": "2024-05-26",
+          "strategy_return_percent": 25.356921055395954,
+          "baseline_return_percent": -21.923879327632267,
+          "incremental_return_percent": 47.28080038302822,
+          "strategy_max_drawdown_percent": -4.919522549316325,
+          "baseline_max_drawdown_percent": -33.193893909829555,
+          "context": {
+            "prediction_rows": 556,
+            "market_regimes": {
+              "bull": 392,
+              "strong_bull": 112,
+              "sideways": 36,
+              "recovery": 16
+            },
+            "override_actions": {
+              "hold": 555,
+              "reject": 1
+            },
+            "top_sectors": {
+              "Hydro Power": 264,
+              "Microfinance": 80,
+              "Finance": 53,
+              "Non Life Insurance": 41,
+              "Development Banks": 38,
+              "Investment": 20,
+              "Commercial Banks": 19,
+              "Life Insurance": 16
+            }
+          }
+        },
+        {
+          "start": "2023-12-17",
+          "end": "2024-06-20",
+          "strategy_return_percent": 18.228139975512782,
+          "baseline_return_percent": -28.5508197617504,
+          "incremental_return_percent": 46.77895973726318,
+          "strategy_max_drawdown_percent": -4.919522549316335,
+          "baseline_max_drawdown_percent": -36.901121193803036,
+          "context": {
+            "prediction_rows": 623,
+            "market_regimes": {
+              "bull": 496,
+              "strong_bull": 112,
+              "sideways": 15
+            },
+            "override_actions": {
+              "hold": 621,
+              "reject": 2
+            },
+            "top_sectors": {
+              "Hydro Power": 284,
+              "Microfinance": 125,
+              "Finance": 57,
+              "Commercial Banks": 36,
+              "Development Banks": 33,
+              "Non Life Insurance": 30,
+              "Investment": 23,
+              "Hotels And Tourism": 12
+            }
+          }
+        }
+      ]
+    },
+    "252": {
+      "windows": 1158,
+      "mean_incremental_return_percent": 22.086196059734476,
+      "median_incremental_return_percent": 22.843878926201022,
+      "positive_window_rate": 0.9162348877374784,
+      "worst_5": [
+        {
+          "start": "2020-08-17",
+          "end": "2021-08-26",
+          "strategy_return_percent": 121.91742044393253,
+          "baseline_return_percent": 282.6226594991843,
+          "incremental_return_percent": -160.70523905525175,
+          "strategy_max_drawdown_percent": -12.809564644189154,
+          "baseline_max_drawdown_percent": -22.43552789359192,
+          "context": {
+            "prediction_rows": 1516,
+            "market_regimes": {
+              "strong_bull": 1312,
+              "bull": 204
+            },
+            "override_actions": {
+              "hold": 1135,
+              "reject": 324,
+              "promote": 57
+            },
+            "top_sectors": {
+              "Hydro Power": 353,
+              "Microfinance": 306,
+              "Finance": 191,
+              "Commercial Banks": 187,
+              "Development Banks": 153,
+              "Non Life Insurance": 98,
+              "Investment": 76,
+              "Life Insurance": 74
+            }
+          }
+        },
+        {
+          "start": "2020-08-18",
+          "end": "2021-08-29",
+          "strategy_return_percent": 116.8585584089818,
+          "baseline_return_percent": 269.90942600979116,
+          "incremental_return_percent": -153.05086760080934,
+          "strategy_max_drawdown_percent": -12.809564644189154,
+          "baseline_max_drawdown_percent": -22.43552789359192,
+          "context": {
+            "prediction_rows": 1516,
+            "market_regimes": {
+              "strong_bull": 1312,
+              "bull": 204
+            },
+            "override_actions": {
+              "hold": 1135,
+              "reject": 324,
+              "promote": 57
+            },
+            "top_sectors": {
+              "Hydro Power": 353,
+              "Microfinance": 306,
+              "Finance": 191,
+              "Commercial Banks": 187,
+              "Development Banks": 153,
+              "Non Life Insurance": 98,
+              "Investment": 76,
+              "Life Insurance": 74
+            }
+          }
+        },
+        {
+          "start": "2020-08-16",
+          "end": "2021-08-25",
+          "strategy_return_percent": 115.39451030401952,
+          "baseline_return_percent": 267.2904287871813,
+          "incremental_return_percent": -151.8959184831618,
+          "strategy_max_drawdown_percent": -12.809564644189154,
+          "baseline_max_drawdown_percent": -22.43552789359192,
+          "context": {
+            "prediction_rows": 1508,
+            "market_regimes": {
+              "strong_bull": 1304,
+              "bull": 204
+            },
+            "override_actions": {
+              "hold": 1129,
+              "reject": 324,
+              "promote": 55
+            },
+            "top_sectors": {
+              "Hydro Power": 350,
+              "Microfinance": 306,
+              "Finance": 187,
+              "Commercial Banks": 187,
+              "Development Banks": 152,
+              "Non Life Insurance": 98,
+              "Investment": 76,
+              "Life Insurance": 74
+            }
+          }
+        },
+        {
+          "start": "2020-08-19",
+          "end": "2021-08-31",
+          "strategy_return_percent": 111.21087407084448,
+          "baseline_return_percent": 256.2950635902037,
+          "incremental_return_percent": -145.08418951935923,
+          "strategy_max_drawdown_percent": -12.809564644189154,
+          "baseline_max_drawdown_percent": -22.43552789359192,
+          "context": {
+            "prediction_rows": 1516,
+            "market_regimes": {
+              "strong_bull": 1312,
+              "bull": 204
+            },
+            "override_actions": {
+              "hold": 1135,
+              "reject": 324,
+              "promote": 57
+            },
+            "top_sectors": {
+              "Hydro Power": 353,
+              "Microfinance": 306,
+              "Finance": 191,
+              "Commercial Banks": 187,
+              "Development Banks": 153,
+              "Non Life Insurance": 98,
+              "Investment": 76,
+              "Life Insurance": 74
+            }
+          }
+        },
+        {
+          "start": "2020-08-20",
+          "end": "2021-09-01",
+          "strategy_return_percent": 110.42182631365351,
+          "baseline_return_percent": 248.6007691026773,
+          "incremental_return_percent": -138.17894278902378,
+          "strategy_max_drawdown_percent": -12.809564644189154,
+          "baseline_max_drawdown_percent": -22.43552789359192,
+          "context": {
+            "prediction_rows": 1516,
+            "market_regimes": {
+              "strong_bull": 1312,
+              "bull": 204
+            },
+            "override_actions": {
+              "hold": 1135,
+              "reject": 324,
+              "promote": 57
+            },
+            "top_sectors": {
+              "Hydro Power": 353,
+              "Microfinance": 306,
+              "Finance": 191,
+              "Commercial Banks": 187,
+              "Development Banks": 153,
+              "Non Life Insurance": 98,
+              "Investment": 76,
+              "Life Insurance": 74
+            }
+          }
+        }
+      ],
+      "best_5": [
+        {
+          "start": "2023-06-06",
+          "end": "2024-07-08",
+          "strategy_return_percent": 43.68436102228392,
+          "baseline_return_percent": -30.260943036175803,
+          "incremental_return_percent": 73.94530405845973,
+          "strategy_max_drawdown_percent": -7.399558712163879,
+          "baseline_max_drawdown_percent": -40.92702258073775,
+          "context": {
+            "prediction_rows": 1068,
+            "market_regimes": {
+              "bull": 767,
+              "strong_bull": 225,
+              "recovery": 40,
+              "sideways": 36
+            },
+            "override_actions": {
+              "hold": 1047,
+              "promote": 11,
+              "reject": 10
+            },
+            "top_sectors": {
+              "Hydro Power": 348,
+              "Microfinance": 186,
+              "Finance": 142,
+              "Development Banks": 94,
+              "Commercial Banks": 79,
+              "Non Life Insurance": 73,
+              "Investment": 50,
+              "Life Insurance": 33
+            }
+          }
+        },
+        {
+          "start": "2023-05-31",
+          "end": "2024-07-02",
+          "strategy_return_percent": 41.54259231348496,
+          "baseline_return_percent": -32.255429876135146,
+          "incremental_return_percent": 73.7980221896201,
+          "strategy_max_drawdown_percent": -7.3995587121638895,
+          "baseline_max_drawdown_percent": -40.92702258073771,
+          "context": {
+            "prediction_rows": 1052,
+            "market_regimes": {
+              "bull": 735,
+              "strong_bull": 225,
+              "recovery": 56,
+              "sideways": 36
+            },
+            "override_actions": {
+              "hold": 1031,
+              "promote": 11,
+              "reject": 10
+            },
+            "top_sectors": {
+              "Hydro Power": 342,
+              "Microfinance": 187,
+              "Finance": 138,
+              "Development Banks": 89,
+              "Commercial Banks": 78,
+              "Non Life Insurance": 76,
+              "Investment": 48,
+              "Life Insurance": 32
+            }
+          }
+        },
+        {
+          "start": "2023-06-01",
+          "end": "2024-07-03",
+          "strategy_return_percent": 46.07875567458275,
+          "baseline_return_percent": -27.33558997851646,
+          "incremental_return_percent": 73.41434565309922,
+          "strategy_max_drawdown_percent": -7.399558712163879,
+          "baseline_max_drawdown_percent": -40.92702258073776,
+          "context": {
+            "prediction_rows": 1060,
+            "market_regimes": {
+              "bull": 743,
+              "strong_bull": 225,
+              "recovery": 56,
+              "sideways": 36
+            },
+            "override_actions": {
+              "hold": 1039,
+              "promote": 11,
+              "reject": 10
+            },
+            "top_sectors": {
+              "Hydro Power": 346,
+              "Microfinance": 188,
+              "Finance": 139,
+              "Development Banks": 90,
+              "Commercial Banks": 78,
+              "Non Life Insurance": 76,
+              "Investment": 48,
+              "Life Insurance": 32
+            }
+          }
+        },
+        {
+          "start": "2023-06-05",
+          "end": "2024-07-07",
+          "strategy_return_percent": 41.514498630307315,
+          "baseline_return_percent": -30.06553194433098,
+          "incremental_return_percent": 71.5800305746383,
+          "strategy_max_drawdown_percent": -7.399558712163879,
+          "baseline_max_drawdown_percent": -40.92702258073771,
+          "context": {
+            "prediction_rows": 1068,
+            "market_regimes": {
+              "bull": 759,
+              "strong_bull": 225,
+              "recovery": 48,
+              "sideways": 36
+            },
+            "override_actions": {
+              "hold": 1046,
+              "reject": 11,
+              "promote": 11
+            },
+            "top_sectors": {
+              "Hydro Power": 348,
+              "Microfinance": 187,
+              "Finance": 142,
+              "Development Banks": 93,
+              "Commercial Banks": 78,
+              "Non Life Insurance": 75,
+              "Investment": 49,
+              "Life Insurance": 33
+            }
+          }
+        },
+        {
+          "start": "2023-05-30",
+          "end": "2024-07-01",
+          "strategy_return_percent": 37.24484417342142,
+          "baseline_return_percent": -34.13971934815301,
+          "incremental_return_percent": 71.38456352157442,
+          "strategy_max_drawdown_percent": -7.3995587121639,
+          "baseline_max_drawdown_percent": -40.63165769364146,
+          "context": {
+            "prediction_rows": 1044,
+            "market_regimes": {
+              "bull": 727,
+              "strong_bull": 225,
+              "recovery": 56,
+              "sideways": 36
+            },
+            "override_actions": {
+              "hold": 1023,
+              "promote": 11,
+              "reject": 10
+            },
+            "top_sectors": {
+              "Hydro Power": 341,
+              "Microfinance": 184,
+              "Finance": 135,
+              "Development Banks": 88,
+              "Commercial Banks": 78,
+              "Non Life Insurance": 76,
+              "Investment": 48,
+              "Life Insurance": 32
+            }
+          }
+        }
+      ]
+    }
+  },
+  "trade_breakdowns": {
+    "market_regime": {
+      "bull": {
+        "trades": 89,
+        "mean_gross_return_percent": 2.816002034916761,
+        "median_gross_return_percent": -0.24906444737896605,
+        "positive_trade_rate": 0.449438202247191,
+        "mean_holding_sessions": 8.719101123595506,
+        "sell_notional_x_initial_capital": 33.138205075375446
+      },
+      "recovery": {
+        "trades": 72,
+        "mean_gross_return_percent": 1.0310326119061146,
+        "median_gross_return_percent": -1.1532348166581718,
+        "positive_trade_rate": 0.4583333333333333,
+        "mean_holding_sessions": 7.972222222222222,
+        "sell_notional_x_initial_capital": 29.074361537019772
+      },
+      "sideways": {
+        "trades": 18,
+        "mean_gross_return_percent": 1.4520896859765968,
+        "median_gross_return_percent": 0.7605095752945434,
+        "positive_trade_rate": 0.6111111111111112,
+        "mean_holding_sessions": 6.277777777777778,
+        "sell_notional_x_initial_capital": 7.111320506641667
+      },
+      "strong_bull": {
+        "trades": 93,
+        "mean_gross_return_percent": 2.8773317662648994,
+        "median_gross_return_percent": 0.7295158713831018,
+        "positive_trade_rate": 0.5483870967741935,
+        "mean_holding_sessions": 12.655913978494624,
+        "sell_notional_x_initial_capital": 27.23861519461283
+      }
+    },
+    "sector": {
+      "Commercial Banks": {
+        "trades": 20,
+        "mean_gross_return_percent": -0.6388477831723549,
+        "median_gross_return_percent": -0.5163953981635605,
+        "positive_trade_rate": 0.45,
+        "mean_holding_sessions": 6.9,
+        "sell_notional_x_initial_capital": 6.616242986832119
+      },
+      "Development Banks": {
+        "trades": 20,
+        "mean_gross_return_percent": 5.056042442292547,
+        "median_gross_return_percent": 0.23016058367012482,
+        "positive_trade_rate": 0.5,
+        "mean_holding_sessions": 6.6,
+        "sell_notional_x_initial_capital": 7.621676755761482
+      },
+      "Finance": {
+        "trades": 35,
+        "mean_gross_return_percent": 0.05067574741429966,
+        "median_gross_return_percent": -0.6281407035175879,
+        "positive_trade_rate": 0.45714285714285713,
+        "mean_holding_sessions": 9.6,
+        "sell_notional_x_initial_capital": 12.692512863627089
+      },
+      "Hotels And Tourism": {
+        "trades": 7,
+        "mean_gross_return_percent": 0.16313109032854367,
+        "median_gross_return_percent": -1.0659512709830898,
+        "positive_trade_rate": 0.2857142857142857,
+        "mean_holding_sessions": 5.428571428571429,
+        "sell_notional_x_initial_capital": 2.5343282540676575
+      },
+      "Hydro Power": {
+        "trades": 83,
+        "mean_gross_return_percent": 4.2735884611050885,
+        "median_gross_return_percent": -0.5263157894736858,
+        "positive_trade_rate": 0.4578313253012048,
+        "mean_holding_sessions": 7.879518072289157,
+        "sell_notional_x_initial_capital": 30.10596008016275
+      },
+      "Investment": {
+        "trades": 9,
+        "mean_gross_return_percent": 1.1304955064148785,
+        "median_gross_return_percent": -2.1977966380389846,
+        "positive_trade_rate": 0.4444444444444444,
+        "mean_holding_sessions": 8,
+        "sell_notional_x_initial_capital": 2.8571477624821244
+      },
+      "Life Insurance": {
+        "trades": 11,
+        "mean_gross_return_percent": -0.5067139584100087,
+        "median_gross_return_percent": -2.032622215427926,
+        "positive_trade_rate": 0.45454545454545453,
+        "mean_holding_sessions": 9.363636363636363,
+        "sell_notional_x_initial_capital": 4.168539575007986
+      },
+      "Manufacturing And Processing": {
+        "trades": 8,
+        "mean_gross_return_percent": -1.4382442950972851,
+        "median_gross_return_percent": -1.854830502916066,
+        "positive_trade_rate": 0.375,
+        "mean_holding_sessions": 10.125,
+        "sell_notional_x_initial_capital": 3.289372606163181
+      },
+      "Microfinance": {
+        "trades": 49,
+        "mean_gross_return_percent": 1.649628489423169,
+        "median_gross_return_percent": 1.7592613696117088,
+        "positive_trade_rate": 0.5918367346938775,
+        "mean_holding_sessions": 16.775510204081634,
+        "sell_notional_x_initial_capital": 16.156246362095985
+      },
+      "Non Life Insurance": {
+        "trades": 27,
+        "mean_gross_return_percent": 3.820202789688425,
+        "median_gross_return_percent": 4.423061167050357,
+        "positive_trade_rate": 0.6666666666666666,
+        "mean_holding_sessions": 8.481481481481481,
+        "sell_notional_x_initial_capital": 9.418072169184647
+      },
+      "Others": {
+        "trades": 3,
+        "mean_gross_return_percent": -1.483743142882795,
+        "median_gross_return_percent": -4.239427510379512,
+        "positive_trade_rate": 0.3333333333333333,
+        "mean_holding_sessions": 11.666666666666666,
+        "sell_notional_x_initial_capital": 1.1024028982646992
+      }
+    },
+    "liquidity_bucket": {
+      "high": {
+        "trades": 105,
+        "mean_gross_return_percent": 1.2010317176155816,
+        "median_gross_return_percent": -0.6281407035175879,
+        "positive_trade_rate": 0.4857142857142857,
+        "mean_holding_sessions": 8.00952380952381,
+        "sell_notional_x_initial_capital": 38.236148685937025
+      },
+      "medium": {
+        "trades": 167,
+        "mean_gross_return_percent": 2.948980044463535,
+        "median_gross_return_percent": 0.026440150041806554,
+        "positive_trade_rate": 0.5029940119760479,
+        "mean_holding_sessions": 10.77245508982036,
+        "sell_notional_x_initial_capital": 58.32635362771269
+      }
+    },
+    "override_action": {
+      "hold": {
+        "trades": 219,
+        "mean_gross_return_percent": 2.6936699147696452,
+        "median_gross_return_percent": 0.1506024096385561,
+        "positive_trade_rate": 0.5068493150684932,
+        "mean_holding_sessions": 10.187214611872147,
+        "sell_notional_x_initial_capital": 77.28553320328768
+      },
+      "promote": {
+        "trades": 53,
+        "mean_gross_return_percent": 0.5410242724621526,
+        "median_gross_return_percent": -0.6281407035175879,
+        "positive_trade_rate": 0.4528301886792453,
+        "mean_holding_sessions": 7.716981132075472,
+        "sell_notional_x_initial_capital": 19.276969110362028
+      }
+    },
+    "baseline_rank_bucket": {
+      "rank_6_10": {
+        "trades": 43,
+        "mean_gross_return_percent": -0.11893495656447566,
+        "median_gross_return_percent": -0.14471780028944004,
+        "positive_trade_rate": 0.4883720930232558,
+        "mean_holding_sessions": 4.511627906976744,
+        "sell_notional_x_initial_capital": 13.917759111950586
+      },
+      "top_5": {
+        "trades": 229,
+        "mean_gross_return_percent": 2.723590396975191,
+        "median_gross_return_percent": 0.0,
+        "positive_trade_rate": 0.4978165938864629,
+        "mean_holding_sessions": 10.681222707423581,
+        "sell_notional_x_initial_capital": 82.64474320169913
+      }
+    },
+    "holding_bucket": {
+      "0_2": {
+        "trades": 34,
+        "mean_gross_return_percent": 1.0676963116892506,
+        "median_gross_return_percent": 0.4968234986208797,
+        "positive_trade_rate": 0.5882352941176471,
+        "mean_holding_sessions": 1.3529411764705883,
+        "sell_notional_x_initial_capital": 11.649801145169569
+      },
+      "11_15": {
+        "trades": 17,
+        "mean_gross_return_percent": 0.8369008372185448,
+        "median_gross_return_percent": 0.6112312389468633,
+        "positive_trade_rate": 0.5882352941176471,
+        "mean_holding_sessions": 13.882352941176471,
+        "sell_notional_x_initial_capital": 5.82453630423794
+      },
+      "16_20_plus": {
+        "trades": 35,
+        "mean_gross_return_percent": 12.349017695859958,
+        "median_gross_return_percent": 7.322164134622877,
+        "positive_trade_rate": 0.7428571428571429,
+        "mean_holding_sessions": 33.08571428571429,
+        "sell_notional_x_initial_capital": 13.813362624929837
+      },
+      "3_5": {
+        "trades": 115,
+        "mean_gross_return_percent": 0.5898666315359218,
+        "median_gross_return_percent": -1.353521449873818,
+        "positive_trade_rate": 0.3739130434782609,
+        "mean_holding_sessions": 4.791304347826087,
+        "sell_notional_x_initial_capital": 39.57560483068182
+      },
+      "6_10": {
+        "trades": 71,
+        "mean_gross_return_percent": 0.9578693938474234,
+        "median_gross_return_percent": 0.25382056980993717,
+        "positive_trade_rate": 0.5070422535211268,
+        "mean_holding_sessions": 9.140845070422536,
+        "sell_notional_x_initial_capital": 25.699197408630553
+      }
+    },
+    "exit_reason": {
+      "expired": {
+        "trades": 35,
+        "mean_gross_return_percent": 12.349017695859958,
+        "median_gross_return_percent": 7.322164134622877,
+        "positive_trade_rate": 0.7428571428571429,
+        "mean_holding_sessions": 33.08571428571429,
+        "sell_notional_x_initial_capital": 13.813362624929837
+      },
+      "ineligible": {
+        "trades": 114,
+        "mean_gross_return_percent": -1.4468162229348798,
+        "median_gross_return_percent": -2.022057142114164,
+        "positive_trade_rate": 0.3508771929824561,
+        "mean_holding_sessions": 7.166666666666667,
+        "sell_notional_x_initial_capital": 41.45593096190469
+      },
+      "reject": {
+        "trades": 26,
+        "mean_gross_return_percent": 9.656737100601084,
+        "median_gross_return_percent": 5.336573016383639,
+        "positive_trade_rate": 0.7692307692307693,
+        "mean_holding_sessions": 6.730769230769231,
+        "sell_notional_x_initial_capital": 7.7766255746300486
+      },
+      "replacement": {
+        "trades": 97,
+        "mean_gross_return_percent": 1.0333429197824324,
+        "median_gross_return_percent": 0.026440150041806554,
+        "positive_trade_rate": 0.5051546391752577,
+        "mean_holding_sessions": 5.051546391752577,
+        "sell_notional_x_initial_capital": 33.51658315218514
+      }
+    },
+    "year": {
+      "2020": {
+        "trades": 45,
+        "mean_gross_return_percent": 4.323586935397845,
+        "median_gross_return_percent": 2.5423312732829606,
+        "positive_trade_rate": 0.6888888888888889,
+        "mean_holding_sessions": 18.355555555555554,
+        "sell_notional_x_initial_capital": 10.978533782201946
+      },
+      "2021": {
+        "trades": 77,
+        "mean_gross_return_percent": 3.715621797042269,
+        "median_gross_return_percent": -0.24906444737896605,
+        "positive_trade_rate": 0.4805194805194805,
+        "mean_holding_sessions": 7.805194805194805,
+        "sell_notional_x_initial_capital": 24.837912670128077
+      },
+      "2022": {
+        "trades": 47,
+        "mean_gross_return_percent": 1.3003762001322656,
+        "median_gross_return_percent": -1.3698630136986356,
+        "positive_trade_rate": 0.46808510638297873,
+        "mean_holding_sessions": 7.170212765957447,
+        "sell_notional_x_initial_capital": 18.184664946619822
+      },
+      "2023": {
+        "trades": 46,
+        "mean_gross_return_percent": 5.381038223912593,
+        "median_gross_return_percent": 3.1652408817081423,
+        "positive_trade_rate": 0.6521739130434783,
+        "mean_holding_sessions": 9.26086956521739,
+        "sell_notional_x_initial_capital": 18.789780588856736
+      },
+      "2025": {
+        "trades": 29,
+        "mean_gross_return_percent": -3.6122409187850435,
+        "median_gross_return_percent": -2.895899237421007,
+        "positive_trade_rate": 0.27586206896551724,
+        "mean_holding_sessions": 9.241379310344827,
+        "sell_notional_x_initial_capital": 13.047036113285785
+      },
+      "2026": {
+        "trades": 28,
+        "mean_gross_return_percent": -2.355955205412174,
+        "median_gross_return_percent": -2.606260175955816,
+        "positive_trade_rate": 0.25,
+        "mean_holding_sessions": 6.5,
+        "sell_notional_x_initial_capital": 10.724574212557354
+      }
+    }
+  }
+}

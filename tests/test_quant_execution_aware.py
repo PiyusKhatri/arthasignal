@@ -62,7 +62,7 @@ def test_downside_target_marks_only_severe_adverse_excursions() -> None:
 
 
 def test_nested_folds_purge_forward_labels_at_every_boundary() -> None:
-    folds = expanding_nested_folds(_rows(), folds=4)
+    folds = expanding_nested_folds(_rows(1000), folds=4)
     assert len(folds) >= 3
     seen_test_dates: set[date] = set()
 

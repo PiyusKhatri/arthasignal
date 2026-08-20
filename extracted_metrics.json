@@ -1,0 +1,1003 @@
+{
+  "development_verdict": "continue_research",
+  "execution_metrics": {
+    "samples": 49457,
+    "brier_score": 0.23888256645059605,
+    "high_confidence_threshold": 0.65,
+    "high_confidence_samples": 32,
+    "high_confidence_precision": 0.59375,
+    "coverage": 0.0006470267100713752,
+    "calibration_bins": [
+      {
+        "range": "0.1-0.2",
+        "count": 2,
+        "mean_predicted_probability": 0.18492193985774713,
+        "observed_success_rate": 1.0
+      },
+      {
+        "range": "0.2-0.3",
+        "count": 468,
+        "mean_predicted_probability": 0.28315252101740124,
+        "observed_success_rate": 0.38247863247863245
+      },
+      {
+        "range": "0.3-0.4",
+        "count": 21250,
+        "mean_predicted_probability": 0.3684622099452773,
+        "observed_success_rate": 0.36710588235294117
+      },
+      {
+        "range": "0.4-0.5",
+        "count": 24335,
+        "mean_predicted_probability": 0.4400436511743457,
+        "observed_success_rate": 0.4021368399424697
+      },
+      {
+        "range": "0.5-0.6",
+        "count": 3262,
+        "mean_predicted_probability": 0.5278095137950116,
+        "observed_success_rate": 0.4334763948497854
+      },
+      {
+        "range": "0.6-0.7",
+        "count": 134,
+        "mean_predicted_probability": 0.633448938905941,
+        "observed_success_rate": 0.5373134328358209
+      },
+      {
+        "range": "0.7-0.8",
+        "count": 6,
+        "mean_predicted_probability": 0.7199711335112925,
+        "observed_success_rate": 0.5
+      }
+    ],
+    "high_confidence_mean_excess_return_percent": 8.746316070941605
+  },
+  "high_confidence": {
+    "probability_threshold": 0.65,
+    "calls": 32,
+    "independent_entry_dates": 28,
+    "precision": 0.59375,
+    "precision_wilson_95": {
+      "low": 0.42260024875382873,
+      "high": 0.7448036515733456
+    },
+    "precision_date_cluster_bootstrap_95": {
+      "iterations": 1000,
+      "low_95": 0.3939123376623377,
+      "high_95": 0.78125
+    },
+    "mean_excess_return_percent": 8.746316070941605,
+    "median_excess_return_percent": 9.112187046590948,
+    "mean_excess_date_cluster_bootstrap_95": {
+      "iterations": 1000,
+      "low_95": 1.1959921068941335,
+      "high_95": 15.782076748654942
+    },
+    "note": "Wilson treats calls as Bernoulli observations; the date-cluster bootstrap is the more conservative interval when same-day NEPSE stocks are correlated."
+  },
+  "top_k": {
+    "p_at_5": {
+      "dates": 1738,
+      "precision_after_cost": 0.4277330264672037,
+      "mean_net_excess_return_percent": 0.515635812941544
+    },
+    "p_at_10": {
+      "dates": 1736,
+      "precision_after_cost": 0.4226382488479263,
+      "mean_net_excess_return_percent": 0.44205116095753205
+    },
+    "p_at_20": {
+      "dates": 1411,
+      "precision_after_cost": 0.4077958894401134,
+      "mean_net_excess_return_percent": 0.20993919766871763
+    }
+  },
+  "risk_selection": {
+    "threshold_percent": -5.0,
+    "eligible_dates": 1736,
+    "selected_rows": 17360,
+    "universe_severe_drawdown_rate": 0.45777139737549793,
+    "selected_severe_drawdown_rate": 0.4423963133640553,
+    "relative_risk_reduction": 0.03358681669407759
+  },
+  "non_overlapping_portfolio": {
+    "top_k": 10,
+    "round_trip_cost_percent": 1.0,
+    "cohorts": 51,
+    "first_entry_date": "2018-12-16",
+    "last_entry_date": "2026-07-09",
+    "mean_net_excess_return_percent": 0.4996380554409129,
+    "median_net_excess_return_percent": -0.11671058428490699,
+    "positive_excess_cohort_rate": 0.47058823529411764,
+    "mean_net_excess_bootstrap_95": {
+      "low": -0.80876722781651,
+      "high": 1.9766786811373287
+    },
+    "portfolio_compounded_return_percent": 141.47179743982684,
+    "nepse_compounded_return_percent": 97.71922847550107,
+    "portfolio_approx_cagr_percent": 24.334177582210902,
+    "nepse_approx_cagr_percent": 18.3427057705154,
+    "portfolio_max_drawdown_percent": -22.8310739767683,
+    "nepse_max_drawdown_percent": -15.028563073885293,
+    "mean_selected_path_adverse_percent": -4.986877515420415,
+    "recent_cohorts": [
+      {
+        "date": "2025-11-20",
+        "end_date": "2025-12-21",
+        "holdings": 10,
+        "gross_stock_return_percent": 3.4125179497441636,
+        "net_stock_return_percent": 2.4125179497441636,
+        "market_return_percent": 1.3596116064976904,
+        "net_excess_return_percent": 1.0529063432464731,
+        "mean_max_adverse_percent": -1.3358671548463141
+      },
+      {
+        "date": "2025-12-22",
+        "end_date": "2026-01-26",
+        "holdings": 10,
+        "gross_stock_return_percent": 9.693853416304673,
+        "net_stock_return_percent": 8.693853416304673,
+        "market_return_percent": 7.278756862091806,
+        "net_excess_return_percent": 1.4150965542128668,
+        "mean_max_adverse_percent": -1.3564871327156836
+      },
+      {
+        "date": "2026-01-27",
+        "end_date": "2026-03-01",
+        "holdings": 10,
+        "gross_stock_return_percent": -2.2365164763166443,
+        "net_stock_return_percent": -3.2365164763166443,
+        "market_return_percent": -1.927005585895536,
+        "net_excess_return_percent": -1.3095108904211084,
+        "mean_max_adverse_percent": -4.335647328600784
+      },
+      {
+        "date": "2026-03-03",
+        "end_date": "2026-04-06",
+        "holdings": 10,
+        "gross_stock_return_percent": 2.735256385483318,
+        "net_stock_return_percent": 1.7352563854833178,
+        "market_return_percent": 1.7522645244775203,
+        "net_excess_return_percent": -0.017008138994202504,
+        "mean_max_adverse_percent": -0.772909343156114
+      },
+      {
+        "date": "2026-04-07",
+        "end_date": "2026-05-07",
+        "holdings": 10,
+        "gross_stock_return_percent": -6.713133760895682,
+        "net_stock_return_percent": -7.713133760895682,
+        "market_return_percent": -1.4230797127729122,
+        "net_excess_return_percent": -6.290054048122769,
+        "mean_max_adverse_percent": -7.919868414285257
+      },
+      {
+        "date": "2026-05-08",
+        "end_date": "2026-06-09",
+        "holdings": 10,
+        "gross_stock_return_percent": -0.34883116831272015,
+        "net_stock_return_percent": -1.34883116831272,
+        "market_return_percent": -0.439240252763462,
+        "net_excess_return_percent": -0.9095909155492581,
+        "mean_max_adverse_percent": -3.0858476864985396
+      },
+      {
+        "date": "2026-06-10",
+        "end_date": "2026-07-08",
+        "holdings": 10,
+        "gross_stock_return_percent": -1.6828038848782056,
+        "net_stock_return_percent": -2.6828038848782056,
+        "market_return_percent": -4.1876053023021225,
+        "net_excess_return_percent": 1.5048014174239168,
+        "mean_max_adverse_percent": -3.6089295106012096
+      },
+      {
+        "date": "2026-07-09",
+        "end_date": "2026-08-06",
+        "holdings": 10,
+        "gross_stock_return_percent": 3.9651769960097405,
+        "net_stock_return_percent": 2.9651769960097405,
+        "market_return_percent": 2.0073637928914145,
+        "net_excess_return_percent": 0.957813203118326,
+        "mean_max_adverse_percent": -2.057264045918864
+      }
+    ],
+    "note": "This is a conservative non-overlapping cohort backtest, not a daily marked-to-market execution simulator. Approximate CAGR assumes each independent cohort represents 20 trading days."
+  },
+  "best_stronger_baseline_p10": 0.40898617511520735,
+  "model_p10": 0.4226382488479263,
+  "fold_consistency": {
+    "positive_after_1pct_cost_folds": 2,
+    "beats_baseline_folds": 3,
+    "folds": [
+      {
+        "fold": 1,
+        "period": {
+          "calibration_start": "2017-02-02",
+          "test_start": "2018-12-13",
+          "test_end": "2020-12-21"
+        },
+        "sizes": {
+          "train": 9686,
+          "calibration": 6107,
+          "test": 7894,
+          "test_dates": 434
+        },
+        "execution": {
+          "samples": 7894,
+          "brier_score": 0.24068874333857884,
+          "high_confidence_threshold": 0.65,
+          "high_confidence_samples": 1,
+          "high_confidence_precision": 0.0,
+          "coverage": 0.0001266784899923993,
+          "calibration_bins": [
+            {
+              "range": "0.1-0.2",
+              "count": 2,
+              "mean_predicted_probability": 0.18492193985774713,
+              "observed_success_rate": 1.0
+            },
+            {
+              "range": "0.2-0.3",
+              "count": 212,
+              "mean_predicted_probability": 0.27796511300798377,
+              "observed_success_rate": 0.41509433962264153
+            },
+            {
+              "range": "0.3-0.4",
+              "count": 4676,
+              "mean_predicted_probability": 0.36490264159160063,
+              "observed_success_rate": 0.380453378956373
+            },
+            {
+              "range": "0.4-0.5",
+              "count": 2813,
+              "mean_predicted_probability": 0.43268627429573786,
+              "observed_success_rate": 0.4159260575897618
+            },
+            {
+              "range": "0.5-0.6",
+              "count": 187,
+              "mean_predicted_probability": 0.5299432303160725,
+              "observed_success_rate": 0.31016042780748665
+            },
+            {
+              "range": "0.6-0.7",
+              "count": 4,
+              "mean_predicted_probability": 0.6259941937868844,
+              "observed_success_rate": 0.0
+            }
+          ],
+          "high_confidence_mean_excess_return_percent": -5.39494833997688
+        },
+        "risk": {
+          "samples": 7894,
+          "brier_score": 0.24517493700530668,
+          "high_confidence_threshold": 0.65,
+          "high_confidence_samples": 36,
+          "high_confidence_precision": 0.6111111111111112,
+          "coverage": 0.004560425639726374,
+          "calibration_bins": [
+            {
+              "range": "0.3-0.4",
+              "count": 161,
+              "mean_predicted_probability": 0.38089351718814496,
+              "observed_success_rate": 0.062111801242236024
+            },
+            {
+              "range": "0.4-0.5",
+              "count": 3101,
+              "mean_predicted_probability": 0.46485351098640665,
+              "observed_success_rate": 0.24669461464043857
+            },
+            {
+              "range": "0.5-0.6",
+              "count": 4389,
+              "mean_predicted_probability": 0.5376500371750829,
+              "observed_success_rate": 0.4064707222601959
+            },
+            {
+              "range": "0.6-0.7",
+              "count": 243,
+              "mean_predicted_probability": 0.6245659794811654,
+              "observed_success_rate": 0.4897119341563786
+            }
+          ],
+          "high_confidence_mean_excess_return_percent": -7.851499622701764
+        },
+        "top_k": {
+          "p_at_5": {
+            "dates": 434,
+            "precision_after_cost": 0.4046082949308756,
+            "mean_net_excess_return_percent": -0.5234389796878512
+          },
+          "p_at_10": {
+            "dates": 432,
+            "precision_after_cost": 0.40069444444444446,
+            "mean_net_excess_return_percent": -0.45034627114374287
+          },
+          "p_at_20": {
+            "dates": 162,
+            "precision_after_cost": 0.37993827160493826,
+            "mean_net_excess_return_percent": -0.4519639845489353
+          }
+        },
+        "risk_selection": {
+          "threshold_percent": -5.0,
+          "eligible_dates": 432,
+          "selected_rows": 4320,
+          "universe_severe_drawdown_rate": 0.3392449961996453,
+          "selected_severe_drawdown_rate": 0.31527777777777777,
+          "relative_risk_reduction": 0.07064870135258494
+        },
+        "baselines": {
+          "market_relative_momentum": {
+            "p_at_5": {
+              "dates": 434,
+              "precision_after_cost": 0.43870967741935485,
+              "mean_net_excess_return_percent": 1.7075155889620175
+            },
+            "p_at_10": {
+              "dates": 432,
+              "precision_after_cost": 0.41597222222222224,
+              "mean_net_excess_return_percent": 0.8164784447601365
+            },
+            "p_at_20": {
+              "dates": 162,
+              "precision_after_cost": 0.38209876543209875,
+              "mean_net_excess_return_percent": -0.32821565144901504
+            }
+          },
+          "sector_relative_momentum": {
+            "p_at_5": {
+              "dates": 434,
+              "precision_after_cost": 0.41382488479262675,
+              "mean_net_excess_return_percent": 1.3843046569887067
+            },
+            "p_at_10": {
+              "dates": 432,
+              "precision_after_cost": 0.4085648148148148,
+              "mean_net_excess_return_percent": 0.5325578323455458
+            },
+            "p_at_20": {
+              "dates": 162,
+              "precision_after_cost": 0.38209876543209875,
+              "mean_net_excess_return_percent": -0.34389204385574634
+            }
+          },
+          "fixed_multifactor": {
+            "p_at_5": {
+              "dates": 434,
+              "precision_after_cost": 0.4373271889400922,
+              "mean_net_excess_return_percent": 1.6252383432203024
+            },
+            "p_at_10": {
+              "dates": 432,
+              "precision_after_cost": 0.4201388888888889,
+              "mean_net_excess_return_percent": 0.7743930132682225
+            },
+            "p_at_20": {
+              "dates": 162,
+              "precision_after_cost": 0.38271604938271603,
+              "mean_net_excess_return_percent": -0.3084111191478446
+            }
+          }
+        },
+        "best_baseline_p10": 0.4201388888888889,
+        "execution_calibration_available": true,
+        "risk_calibration_available": true
+      },
+      {
+        "fold": 2,
+        "period": {
+          "calibration_start": "2018-12-13",
+          "test_start": "2020-12-22",
+          "test_end": "2022-09-21"
+        },
+        "sizes": {
+          "train": 16065,
+          "calibration": 7473,
+          "test": 10794,
+          "test_dates": 434
+        },
+        "execution": {
+          "samples": 10794,
+          "brier_score": 0.24311456508798215,
+          "high_confidence_threshold": 0.65,
+          "high_confidence_samples": 7,
+          "high_confidence_precision": 0.8571428571428571,
+          "coverage": 0.0006485084306095979,
+          "calibration_bins": [
+            {
+              "range": "0.2-0.3",
+              "count": 238,
+              "mean_predicted_probability": 0.2873238742078907,
+              "observed_success_rate": 0.36134453781512604
+            },
+            {
+              "range": "0.3-0.4",
+              "count": 5469,
+              "mean_predicted_probability": 0.35717186774173393,
+              "observed_success_rate": 0.38763942219784236
+            },
+            {
+              "range": "0.4-0.5",
+              "count": 4461,
+              "mean_predicted_probability": 0.44085899929966915,
+              "observed_success_rate": 0.46715982963461106
+            },
+            {
+              "range": "0.5-0.6",
+              "count": 588,
+              "mean_predicted_probability": 0.5293291811382644,
+              "observed_success_rate": 0.5612244897959183
+            },
+            {
+              "range": "0.6-0.7",
+              "count": 36,
+              "mean_predicted_probability": 0.6322123659448128,
+              "observed_success_rate": 0.7222222222222222
+            },
+            {
+              "range": "0.7-0.8",
+              "count": 2,
+              "mean_predicted_probability": 0.7216801909548628,
+              "observed_success_rate": 0.5
+            }
+          ],
+          "high_confidence_mean_excess_return_percent": 14.404146821196354
+        },
+        "risk": {
+          "samples": 10794,
+          "brier_score": 0.2933718911756757,
+          "high_confidence_threshold": 0.65,
+          "high_confidence_samples": 16,
+          "high_confidence_precision": 0.9375,
+          "coverage": 0.0014823049842505095,
+          "calibration_bins": [
+            {
+              "range": "0.1-0.2",
+              "count": 169,
+              "mean_predicted_probability": 0.16981182511676143,
+              "observed_success_rate": 0.4319526627218935
+            },
+            {
+              "range": "0.2-0.3",
+              "count": 1759,
+              "mean_predicted_probability": 0.26521891438497724,
+              "observed_success_rate": 0.504263786242183
+            },
+            {
+              "range": "0.3-0.4",
+              "count": 5760,
+              "mean_predicted_probability": 0.3519927999797085,
+              "observed_success_rate": 0.6104166666666667
+            },
+            {
+              "range": "0.4-0.5",
+              "count": 2460,
+              "mean_predicted_probability": 0.4377643997151227,
+              "observed_success_rate": 0.6707317073170732
+            },
+            {
+              "range": "0.5-0.6",
+              "count": 577,
+              "mean_predicted_probability": 0.539127998072325,
+              "observed_success_rate": 0.75736568457539
+            },
+            {
+              "range": "0.6-0.7",
+              "count": 67,
+              "mean_predicted_probability": 0.6280912482828949,
+              "observed_success_rate": 0.8208955223880597
+            },
+            {
+              "range": "0.7-0.8",
+              "count": 2,
+              "mean_predicted_probability": 0.7113613858876398,
+              "observed_success_rate": 1.0
+            }
+          ],
+          "high_confidence_mean_excess_return_percent": -16.631199753788522
+        },
+        "top_k": {
+          "p_at_5": {
+            "dates": 434,
+            "precision_after_cost": 0.507373271889401,
+            "mean_net_excess_return_percent": 2.8543083204159823
+          },
+          "p_at_10": {
+            "dates": 434,
+            "precision_after_cost": 0.48502304147465436,
+            "mean_net_excess_return_percent": 2.404095743652453
+          },
+          "p_at_20": {
+            "dates": 381,
+            "precision_after_cost": 0.4526246719160105,
+            "mean_net_excess_return_percent": 1.517496009903541
+          }
+        },
+        "risk_selection": {
+          "threshold_percent": -5.0,
+          "eligible_dates": 434,
+          "selected_rows": 4340,
+          "universe_severe_drawdown_rate": 0.6133036872336484,
+          "selected_severe_drawdown_rate": 0.5854838709677419,
+          "relative_risk_reduction": 0.04536058863658521
+        },
+        "baselines": {
+          "market_relative_momentum": {
+            "p_at_5": {
+              "dates": 434,
+              "precision_after_cost": 0.4345622119815668,
+              "mean_net_excess_return_percent": 1.1615831619168875
+            },
+            "p_at_10": {
+              "dates": 434,
+              "precision_after_cost": 0.43640552995391707,
+              "mean_net_excess_return_percent": 1.2272987463688836
+            },
+            "p_at_20": {
+              "dates": 381,
+              "precision_after_cost": 0.43031496062992125,
+              "mean_net_excess_return_percent": 0.9715586054011116
+            }
+          },
+          "sector_relative_momentum": {
+            "p_at_5": {
+              "dates": 434,
+              "precision_after_cost": 0.41382488479262675,
+              "mean_net_excess_return_percent": 1.0684496073690233
+            },
+            "p_at_10": {
+              "dates": 434,
+              "precision_after_cost": 0.40829493087557606,
+              "mean_net_excess_return_percent": 0.9689063253179596
+            },
+            "p_at_20": {
+              "dates": 381,
+              "precision_after_cost": 0.42532808398950134,
+              "mean_net_excess_return_percent": 0.9073430879001
+            }
+          },
+          "fixed_multifactor": {
+            "p_at_5": {
+              "dates": 434,
+              "precision_after_cost": 0.43640552995391707,
+              "mean_net_excess_return_percent": 1.2599665455868823
+            },
+            "p_at_10": {
+              "dates": 434,
+              "precision_after_cost": 0.4430875576036866,
+              "mean_net_excess_return_percent": 1.584160933771323
+            },
+            "p_at_20": {
+              "dates": 381,
+              "precision_after_cost": 0.42952755905511814,
+              "mean_net_excess_return_percent": 1.018415398901347
+            }
+          }
+        },
+        "best_baseline_p10": 0.4430875576036866,
+        "execution_calibration_available": true,
+        "risk_calibration_available": true
+      },
+      {
+        "fold": 3,
+        "period": {
+          "calibration_start": "2020-12-22",
+          "test_start": "2022-09-22",
+          "test_end": "2024-08-18"
+        },
+        "sizes": {
+          "train": 23886,
+          "calibration": 10204,
+          "test": 14246,
+          "test_dates": 434
+        },
+        "execution": {
+          "samples": 14246,
+          "brier_score": 0.24458835088457637,
+          "high_confidence_threshold": 0.65,
+          "high_confidence_samples": 11,
+          "high_confidence_precision": 0.36363636363636365,
+          "coverage": 0.000772146567457532,
+          "calibration_bins": [
+            {
+              "range": "0.2-0.3",
+              "count": 12,
+              "mean_predicted_probability": 0.29084901146803854,
+              "observed_success_rate": 0.3333333333333333
+            },
+            {
+              "range": "0.3-0.4",
+              "count": 4770,
+              "mean_predicted_probability": 0.37286784330595535,
+              "observed_success_rate": 0.38805031446540883
+            },
+            {
+              "range": "0.4-0.5",
+              "count": 7790,
+              "mean_predicted_probability": 0.4439692601882109,
+              "observed_success_rate": 0.43825417201540434
+            },
+            {
+              "range": "0.5-0.6",
+              "count": 1609,
+              "mean_predicted_probability": 0.528913090218576,
+              "observed_success_rate": 0.4344313238036047
+            },
+            {
+              "range": "0.6-0.7",
+              "count": 64,
+              "mean_predicted_probability": 0.6307668269295552,
+              "observed_success_rate": 0.421875
+            },
+            {
+              "range": "0.7-0.8",
+              "count": 1,
+              "mean_predicted_probability": 0.7178509843323516,
+              "observed_success_rate": 1.0
+            }
+          ],
+          "high_confidence_mean_excess_return_percent": 5.36368519531447
+        },
+        "risk": {
+          "samples": 14246,
+          "brier_score": 0.2566483696126867,
+          "high_confidence_threshold": 0.65,
+          "high_confidence_samples": 2014,
+          "high_confidence_precision": 0.5655412115193644,
+          "coverage": 0.1413730169872245,
+          "calibration_bins": [
+            {
+              "range": "0.1-0.2",
+              "count": 1,
+              "mean_predicted_probability": 0.17522322227968276,
+              "observed_success_rate": 0.0
+            },
+            {
+              "range": "0.2-0.3",
+              "count": 62,
+              "mean_predicted_probability": 0.27386447026708555,
+              "observed_success_rate": 0.0967741935483871
+            },
+            {
+              "range": "0.3-0.4",
+              "count": 384,
+              "mean_predicted_probability": 0.36361613930649656,
+              "observed_success_rate": 0.20052083333333334
+            },
+            {
+              "range": "0.4-0.5",
+              "count": 1784,
+              "mean_predicted_probability": 0.4622285804340733,
+              "observed_success_rate": 0.2853139013452915
+            },
+            {
+              "range": "0.5-0.6",
+              "count": 6515,
+              "mean_predicted_probability": 0.5605041386955781,
+              "observed_success_rate": 0.40184190330007674
+            },
+            {
+              "range": "0.6-0.7",
+              "count": 4875,
+              "mean_predicted_probability": 0.6357345454392577,
+              "observed_success_rate": 0.5306666666666666
+            },
+            {
+              "range": "0.7-0.8",
+              "count": 601,
+              "mean_predicted_probability": 0.7342258710319965,
+              "observed_success_rate": 0.5274542429284526
+            },
+            {
+              "range": "0.8-0.9",
+              "count": 24,
+              "mean_predicted_probability": 0.8152623957539781,
+              "observed_success_rate": 0.75
+            }
+          ],
+          "high_confidence_mean_excess_return_percent": -6.90144285699205
+        },
+        "top_k": {
+          "p_at_5": {
+            "dates": 434,
+            "precision_after_cost": 0.423963133640553,
+            "mean_net_excess_return_percent": 0.3684018997667302
+          },
+          "p_at_10": {
+            "dates": 434,
+            "precision_after_cost": 0.44377880184331797,
+            "mean_net_excess_return_percent": 0.6016506652596377
+          },
+          "p_at_20": {
+            "dates": 432,
+            "precision_after_cost": 0.434375,
+            "mean_net_excess_return_percent": 0.4647201756684807
+          }
+        },
+        "risk_selection": {
+          "threshold_percent": -5.0,
+          "eligible_dates": 434,
+          "selected_rows": 4340,
+          "universe_severe_drawdown_rate": 0.430436613786326,
+          "selected_severe_drawdown_rate": 0.43525345622119815,
+          "relative_risk_reduction": -0.011190596433005462
+        },
+        "baselines": {
+          "market_relative_momentum": {
+            "p_at_5": {
+              "dates": 434,
+              "precision_after_cost": 0.44055299539170506,
+              "mean_net_excess_return_percent": 0.8254121087022986
+            },
+            "p_at_10": {
+              "dates": 434,
+              "precision_after_cost": 0.44055299539170506,
+              "mean_net_excess_return_percent": 0.740476024175247
+            },
+            "p_at_20": {
+              "dates": 432,
+              "precision_after_cost": 0.4354166666666667,
+              "mean_net_excess_return_percent": 0.452783387692013
+            }
+          },
+          "sector_relative_momentum": {
+            "p_at_5": {
+              "dates": 434,
+              "precision_after_cost": 0.4161290322580645,
+              "mean_net_excess_return_percent": 0.11916796464218454
+            },
+            "p_at_10": {
+              "dates": 434,
+              "precision_after_cost": 0.4241935483870968,
+              "mean_net_excess_return_percent": 0.20130187263043947
+            },
+            "p_at_20": {
+              "dates": 432,
+              "precision_after_cost": 0.41793981481481485,
+              "mean_net_excess_return_percent": -0.012784043129324003
+            }
+          },
+          "fixed_multifactor": {
+            "p_at_5": {
+              "dates": 434,
+              "precision_after_cost": 0.4290322580645161,
+              "mean_net_excess_return_percent": 0.6782867062510574
+            },
+            "p_at_10": {
+              "dates": 434,
+              "precision_after_cost": 0.4391705069124424,
+              "mean_net_excess_return_percent": 0.6312036753987962
+            },
+            "p_at_20": {
+              "dates": 432,
+              "precision_after_cost": 0.430787037037037,
+              "mean_net_excess_return_percent": 0.33971429082427573
+            }
+          }
+        },
+        "best_baseline_p10": 0.44055299539170506,
+        "execution_calibration_available": true,
+        "risk_calibration_available": true
+      },
+      {
+        "fold": 4,
+        "period": {
+          "calibration_start": "2022-09-22",
+          "test_start": "2024-08-21",
+          "test_end": "2026-07-23"
+        },
+        "sizes": {
+          "train": 34509,
+          "calibration": 13509,
+          "test": 16523,
+          "test_dates": 436
+        },
+        "execution": {
+          "samples": 16523,
+          "brier_score": 0.23033552543551616,
+          "high_confidence_threshold": 0.65,
+          "high_confidence_samples": 13,
+          "high_confidence_precision": 0.6923076923076923,
+          "coverage": 0.0007867820613690008,
+          "calibration_bins": [
+            {
+              "range": "0.2-0.3",
+              "count": 6,
+              "mean_predicted_probability": 0.2855842798927963,
+              "observed_success_rate": 0.16666666666666666
+            },
+            {
+              "range": "0.3-0.4",
+              "count": 6335,
+              "mean_predicted_probability": 0.3775192820845885,
+              "observed_success_rate": 0.3237569060773481
+            },
+            {
+              "range": "0.4-0.5",
+              "count": 9271,
+              "mean_predicted_probability": 0.4385851827194266,
+              "observed_success_rate": 0.33631754934742747
+            },
+            {
+              "range": "0.5-0.6",
+              "count": 878,
+              "mean_predicted_probability": 0.5243149535982166,
+              "observed_success_rate": 0.3724373576309795
+            },
+            {
+              "range": "0.6-0.7",
+              "count": 30,
+              "mean_predicted_probability": 0.6416486313581254,
+              "observed_success_rate": 0.6333333333333333
+            },
+            {
+              "range": "0.7-0.8",
+              "count": 3,
+              "mean_predicted_probability": 0.719538478275226,
+              "observed_success_rate": 0.3333333333333333
+            }
+          ],
+          "high_confidence_mean_excess_return_percent": 9.649807516405739
+        },
+        "risk": {
+          "samples": 16523,
+          "brier_score": 0.2399363934351276,
+          "high_confidence_threshold": 0.65,
+          "high_confidence_samples": 56,
+          "high_confidence_precision": 0.7321428571428571,
+          "coverage": 0.003389215033589542,
+          "calibration_bins": [
+            {
+              "range": "0.0-0.1",
+              "count": 4,
+              "mean_predicted_probability": 0.092815137472178,
+              "observed_success_rate": 0.5
+            },
+            {
+              "range": "0.1-0.2",
+              "count": 776,
+              "mean_predicted_probability": 0.16372065321340248,
+              "observed_success_rate": 0.20103092783505155
+            },
+            {
+              "range": "0.2-0.3",
+              "count": 2373,
+              "mean_predicted_probability": 0.2574192696138451,
+              "observed_success_rate": 0.30172777075431945
+            },
+            {
+              "range": "0.3-0.4",
+              "count": 4743,
+              "mean_predicted_probability": 0.3560022138412143,
+              "observed_success_rate": 0.42083069787054606
+            },
+            {
+              "range": "0.4-0.5",
+              "count": 6402,
+              "mean_predicted_probability": 0.4469368246912292,
+              "observed_success_rate": 0.49812558575445176
+            },
+            {
+              "range": "0.5-0.6",
+              "count": 2008,
+              "mean_predicted_probability": 0.533209384248784,
+              "observed_success_rate": 0.4995019920318725
+            },
+            {
+              "range": "0.6-0.7",
+              "count": 210,
+              "mean_predicted_probability": 0.6324225468609743,
+              "observed_success_rate": 0.6714285714285714
+            },
+            {
+              "range": "0.7-0.8",
+              "count": 7,
+              "mean_predicted_probability": 0.7183181735104421,
+              "observed_success_rate": 1.0
+            }
+          ],
+          "high_confidence_mean_excess_return_percent": -10.005356377577415
+        },
+        "top_k": {
+          "p_at_5": {
+            "dates": 436,
+            "precision_after_cost": 0.37522935779816513,
+            "mean_net_excess_return_percent": -0.6314419162439593
+          },
+          "p_at_10": {
+            "dates": 436,
+            "precision_after_cost": 0.36123853211009177,
+            "mean_net_excess_return_percent": -0.7856503140171438
+          },
+          "p_at_20": {
+            "dates": 436,
+            "precision_after_cost": 0.3526376146788991,
+            "mean_net_excess_return_percent": -0.9391805556296896
+          }
+        },
+        "risk_selection": {
+          "threshold_percent": -5.0,
+          "eligible_dates": 436,
+          "selected_rows": 4360,
+          "universe_severe_drawdown_rate": 0.4363614355746535,
+          "selected_severe_drawdown_rate": 0.43302752293577984,
+          "relative_risk_reduction": 0.007640254997518636
+        },
+        "baselines": {
+          "market_relative_momentum": {
+            "p_at_5": {
+              "dates": 436,
+              "precision_after_cost": 0.3206422018348624,
+              "mean_net_excess_return_percent": -1.363420146066556
+            },
+            "p_at_10": {
+              "dates": 436,
+              "precision_after_cost": 0.318348623853211,
+              "mean_net_excess_return_percent": -1.24393655816014
+            },
+            "p_at_20": {
+              "dates": 436,
+              "precision_after_cost": 0.32763761467889907,
+              "mean_net_excess_return_percent": -1.131620731066511
+            }
+          },
+          "sector_relative_momentum": {
+            "p_at_5": {
+              "dates": 436,
+              "precision_after_cost": 0.3279816513761468,
+              "mean_net_excess_return_percent": -1.0893795993799418
+            },
+            "p_at_10": {
+              "dates": 436,
+              "precision_after_cost": 0.3268348623853211,
+              "mean_net_excess_return_percent": -1.1186428930508496
+            },
+            "p_at_20": {
+              "dates": 436,
+              "precision_after_cost": 0.3330275229357798,
+              "mean_net_excess_return_percent": -0.9828302668419813
+            }
+          },
+          "fixed_multifactor": {
+            "p_at_5": {
+              "dates": 436,
+              "precision_after_cost": 0.32706422018348624,
+              "mean_net_excess_return_percent": -1.1704721015834276
+            },
+            "p_at_10": {
+              "dates": 436,
+              "precision_after_cost": 0.3339449541284404,
+              "mean_net_excess_return_percent": -1.044358249291498
+            },
+            "p_at_20": {
+              "dates": 436,
+              "precision_after_cost": 0.33555045871559636,
+              "mean_net_excess_return_percent": -1.0109383938248468
+            }
+          }
+        },
+        "best_baseline_p10": 0.3339449541284404,
+        "execution_calibration_available": true,
+        "risk_calibration_available": true
+      }
+    ]
+  },
+  "research_gate": {
+    "status": "review",
+    "checks": {
+      "enough_valid_outer_folds": true,
+      "most_folds_positive_after_1pct_cost": false,
+      "most_folds_beat_stronger_baselines": true,
+      "aggregate_top10_beats_stronger_baselines": true,
+      "aggregate_top10_net_excess_positive_at_1pct": true,
+      "downside_rate_reduced_in_top10": true,
+      "enough_high_confidence_density": true,
+      "non_overlap_bootstrap_lower_bound_positive": false
+    }
+  }
+}

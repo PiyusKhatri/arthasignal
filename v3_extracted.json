@@ -1,0 +1,111 @@
+{
+  "development_verdict": "continue_research",
+  "summary": {
+    "development_verdict": "continue_research",
+    "valid_outer_folds": 3,
+    "positive_after_1pct_folds": 2,
+    "beats_matched_breadth_baseline_folds": 2,
+    "raw_pooled_rows": 65870,
+    "investable_pooled_rows": 43310,
+    "selected_rows": 33,
+    "active_dates": 30,
+    "abstention_rate_on_eligible_dates": 0.949748743718593,
+    "precision_after_1pct": 0.45454545454545453,
+    "mean_net_excess_percent": 0.014738931377716943,
+    "median_net_excess_percent": -2.160500478802229,
+    "matched_breadth_mean_net_excess_percent": 6.970327071860995,
+    "selected_severe_drawdown_rate": 0.5151515151515151,
+    "matched_breadth_severe_drawdown_rate": 0.5151515151515151,
+    "risk_reduction_vs_matched_breadth": 0.0,
+    "high_confidence_calls": 55,
+    "high_confidence_dates": 42,
+    "non_overlap_cohorts": 13,
+    "non_overlap_mean_net_excess_percent": -0.20837607728778898,
+    "non_overlap_bootstrap_95": {
+      "low": -2.6431804176870735,
+      "high": 2.173952748224252
+    },
+    "portfolio_approx_cagr_percent": -13.936437641094134,
+    "nepse_approx_cagr_percent": -9.350583421284519,
+    "portfolio_cohort_boundary_max_drawdown_percent": -25.753827517249974,
+    "nepse_cohort_boundary_max_drawdown_percent": -21.061881700507612
+  },
+  "risk": {
+    "universe_severe_drawdown_rate": 0.4856500562008243,
+    "matched_breadth_severe_drawdown_rate": 0.5151515151515151,
+    "selected_severe_drawdown_rate": 0.5151515151515151,
+    "relative_risk_reduction_vs_universe": -0.060746330766389356,
+    "relative_risk_reduction_vs_matched_breadth": 0.0
+  },
+  "calibration_buckets": {
+    "lt_50": {
+      "calls": 25136,
+      "independent_dates": 1233,
+      "mean_predicted_probability": 0.38804392483320455,
+      "actual_success_rate": 0.37324952259707195,
+      "mean_excess_return_percent": 0.3589299809704707,
+      "median_excess_return_percent": -0.6267725926572603,
+      "severe_drawdown_rate": 0.48177912157861236
+    },
+    "50_55": {
+      "calls": 1054,
+      "independent_dates": 613,
+      "mean_predicted_probability": 0.5201326564628259,
+      "actual_success_rate": 0.4335863377609108,
+      "mean_excess_return_percent": 1.9019948589708517,
+      "median_excess_return_percent": -0.036905469621789866,
+      "severe_drawdown_rate": 0.5132827324478179
+    },
+    "55_60": {
+      "calls": 332,
+      "independent_dates": 251,
+      "mean_predicted_probability": 0.5717745002295037,
+      "actual_success_rate": 0.4246987951807229,
+      "mean_excess_return_percent": 1.8789155293252255,
+      "median_excess_return_percent": -0.4865724276945591,
+      "severe_drawdown_rate": 0.6295180722891566
+    },
+    "60_65": {
+      "calls": 113,
+      "independent_dates": 92,
+      "mean_predicted_probability": 0.6229318043016862,
+      "actual_success_rate": 0.5486725663716814,
+      "mean_excess_return_percent": 3.7769611886612076,
+      "median_excess_return_percent": 2.027634198244055,
+      "severe_drawdown_rate": 0.6460176991150443
+    },
+    "65_70": {
+      "calls": 41,
+      "independent_dates": 33,
+      "mean_predicted_probability": 0.6741140778008187,
+      "actual_success_rate": 0.6097560975609756,
+      "mean_excess_return_percent": 4.442722737840944,
+      "median_excess_return_percent": 5.014489453747608,
+      "severe_drawdown_rate": 0.5121951219512195
+    },
+    "70_plus": {
+      "calls": 14,
+      "independent_dates": 13,
+      "mean_predicted_probability": 0.733641198938468,
+      "actual_success_rate": 0.5,
+      "mean_excess_return_percent": 0.8996067935266338,
+      "median_excess_return_percent": 2.296792239603973,
+      "severe_drawdown_rate": 0.5714285714285714
+    }
+  },
+  "research_gate": {
+    "status": "review",
+    "checks": {
+      "enough_valid_outer_folds": true,
+      "positive_after_1pct_in_at_least_3_folds": false,
+      "beats_matched_breadth_baseline_in_at_least_3_folds": false,
+      "aggregate_mean_net_excess_positive": true,
+      "aggregate_median_net_excess_positive": false,
+      "aggregate_mean_beats_matched_breadth_baseline": false,
+      "severe_drawdown_reduction_vs_matched_breadth_at_least_15pct": false,
+      "high_confidence_density_adequate": true,
+      "non_overlap_bootstrap_lower_bound_positive": false,
+      "cohort_boundary_drawdown_not_more_than_25pct_worse_than_nepse": true
+    }
+  }
+}
