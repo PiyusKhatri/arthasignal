@@ -195,17 +195,13 @@ class QuantV41ShadowSignal(Base):
 
 
 class QuantV41ShadowRun(Base):
-    """Immutable daily heartbeat proving the frozen V4.1 shadow cycle ran."""
+    """Append-only heartbeat proving each frozen V4.1 shadow attempt ran."""
 
     __tablename__ = "quant_v41_shadow_runs"
     __table_args__ = (
-        UniqueConstraint(
-            "model_snapshot_id",
-            "as_of_date",
-            name="uq_quant_v41_shadow_run_snapshot_date",
-        ),
         Index("ix_quant_v41_shadow_run_date", "as_of_date"),
         Index("ix_quant_v41_shadow_run_status", "run_status"),
+        Index("ix_quant_v41_shadow_run_snapshot_date", "model_snapshot_id", "as_of_date"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
