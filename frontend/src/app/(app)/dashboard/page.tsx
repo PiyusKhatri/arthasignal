@@ -24,10 +24,21 @@ export default async function DashboardPage() {
 
   const sortedSectors = sectors ?? [];
   const topSector = sortedSectors.find((sector) => sector.market_cap_weighted_percent_change !== null) ?? null;
+  const unavailableSources = [
+    pulse === null ? "market pulse" : null,
+    activeSignals === null ? "signals" : null,
+    sectors === null ? "sector performance" : null,
+  ].filter((value): value is string => value !== null);
 
   return (
     <div className="flex flex-col gap-8">
       <PaperTradeBanner />
+
+      {unavailableSources.length > 0 ? (
+        <div className="rounded-lg border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-text-secondary">
+          Some market data is temporarily unavailable: {unavailableSources.join(", ")}. Empty placeholders below should not be interpreted as a market signal.
+        </div>
+      ) : null}
 
       <section>
         <h1 className="text-lg font-semibold text-text-primary">Market pulse</h1>
@@ -39,7 +50,11 @@ export default async function DashboardPage() {
       <section>
         <h2 className="text-lg font-semibold text-text-primary">Today&apos;s signals</h2>
         <div className="mt-4">
-          <TodaysSignalsRow signals={activeSignals?.signals ?? []} />
+          <TodaysSignalsRow
+            signals={activeSignals?.signals ?? []}
+            unavailable={activeSignals === null}
+            asOfDate={activeSignals?.as_of_date ?? null}
+          />
         </div>
       </section>
 
