@@ -4,13 +4,15 @@ import argparse
 import json
 import logging
 from collections import defaultdict
+from datetime import datetime, timezone
 from statistics import mean
 from typing import Any
 
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from src.database.connection import get_session
-from src.database.quant_models import QuantModelSnapshot
+from src.database.quant_models import QuantModelSnapshot, QuantRobustnessRun
 from src.pipeline.train_quant_models import DEFAULT_SYMBOL_LIMIT, _build_pooled_rows, _rank_scores
 from src.services.nepse_quant_research import _load_stock_series
 from src.services.quant_features import FEATURE_NAMES, FEATURE_SCALES
@@ -140,9 +142,10 @@ def _robustness_gate(report: dict[str, Any], baselines: dict[str, Any]) -> dict[
     }
 
 
-def _persist_report(trained_through, report: dict[str, Any]) -> dict[str, Any]:
+def _persist_report(trained_through, audit: dict[str, Any]) -> dict[str, Any]:
+    """Persist a separate immutable audit; never mutate the trained model snapshot."""
     with get_session() as session:
-        row = session.execute(
+        snapshot = session.execute(
             select(QuantModelSnapshot)
             .where(
                 QuantModelSnapshot.model_version == ARTHA_XGB_MODEL_VERSION,
@@ -151,16 +154,65 @@ def _persist_report(trained_through, report: dict[str, Any]) -> dict[str, Any]:
             .order_by(QuantModelSnapshot.id.desc())
             .limit(1)
         ).scalar_one_or_none()
-        if row is None:
+        if snapshot is None:
             return {"persisted": False, "reason": "matching_model_snapshot_not_found"}
-        try:
-            metrics = json.loads(row.metrics_json)
-        except (TypeError, ValueError):
-            metrics = {}
-        metrics["robustness"] = report
-        row.metrics_json = json.dumps(metrics, default=str, sort_keys=True)
-        snapshot_id = row.id
-    return {"persisted": True, "snapshot_id": snapshot_id}
+
+        values = {
+            "model_snapshot_id": snapshot.id,
+            "policy_version": ROBUSTNESS_POLICY_VERSION,
+            "gate_status": str(audit.get("gate", {}).get("status") or "review"),
+            "report_json": json.dumps(audit, default=str, sort_keys=True),
+            "created_at": datetime.now(timezone.utc).replace(tzinfo=None),
+        }
+        stmt = pg_insert(QuantRobustnessRun).values(values)
+        stmt = stmt.on_conflict_do_nothing(
+            index_elements=["model_snapshot_id", "policy_version"]
+        ).returning(QuantRobustnessRun.id)
+        inserted_id = session.execute(stmt).scalar_one_or_none()
+        if inserted_id is not None:
+            return {"persisted": True, "robustness_run_id": inserted_id, "model_snapshot_id": snapshot.id}
+
+        existing_id = session.execute(
+            select(QuantRobustnessRun.id).where(
+                QuantRobustnessRun.model_snapshot_id == snapshot.id,
+                QuantRobustnessRun.policy_version == ROBUSTNESS_POLICY_VERSION,
+            )
+        ).scalar_one_or_none()
+        return {
+            "persisted": False,
+            "reason": "immutable_audit_already_exists",
+            "robustness_run_id": existing_id,
+            "model_snapshot_id": snapshot.id,
+        }
+
+
+def _summary(report: dict[str, Any], gate: dict[str, Any]) -> dict[str, Any]:
+    high = report.get("high_confidence", {})
+    top_k = report.get("top_k_sweep", {})
+    stress = report.get("cost_stress", {}).get("cost_1.00pct", {})
+    portfolio = report.get("non_overlapping_top10_portfolio", {})
+    return {
+        "robustness_status": gate.get("status"),
+        "high_confidence_calls": high.get("calls"),
+        "high_confidence_independent_dates": high.get("independent_entry_dates"),
+        "high_confidence_precision": high.get("precision"),
+        "high_confidence_cluster_bootstrap_95": high.get("precision_date_cluster_bootstrap_95"),
+        "high_confidence_mean_excess_percent": high.get("mean_excess_return_percent"),
+        "p_at_5": top_k.get("p_at_5"),
+        "p_at_10": top_k.get("p_at_10"),
+        "p_at_20": top_k.get("p_at_20"),
+        "top10_at_1pct_cost": stress,
+        "non_overlapping_portfolio": {
+            "cohorts": portfolio.get("cohorts"),
+            "mean_net_excess_return_percent": portfolio.get("mean_net_excess_return_percent"),
+            "mean_net_excess_bootstrap_95": portfolio.get("mean_net_excess_bootstrap_95"),
+            "portfolio_approx_cagr_percent": portfolio.get("portfolio_approx_cagr_percent"),
+            "nepse_approx_cagr_percent": portfolio.get("nepse_approx_cagr_percent"),
+            "portfolio_max_drawdown_percent": portfolio.get("portfolio_max_drawdown_percent"),
+        },
+        "best_stronger_baseline_p10": gate.get("best_baseline_p10"),
+        "model_p10": gate.get("model_p10"),
+    }
 
 
 def validate_quant_robustness(*, limit: int = DEFAULT_SYMBOL_LIMIT, persist: bool = False) -> dict[str, Any]:
@@ -200,6 +252,12 @@ def validate_quant_robustness(*, limit: int = DEFAULT_SYMBOL_LIMIT, persist: boo
     baselines = _stronger_baselines(test_rows)
     gate = _robustness_gate(report, baselines)
     trained_through = max(row["date"] for row in pooled)
+    audit = {
+        "policy_version": ROBUSTNESS_POLICY_VERSION,
+        "gate": gate,
+        "report": report,
+        "stronger_baselines": baselines,
+    }
 
     result = {
         "status": "ready",
@@ -209,21 +267,18 @@ def validate_quant_robustness(*, limit: int = DEFAULT_SYMBOL_LIMIT, persist: boo
         "split_sizes": {name: len(rows) for name, rows in split.items()},
         "universe": universe,
         "robustness_gate": gate,
+        "summary": _summary(report, gate),
         "report": report,
         "stronger_baselines": baselines,
         "feature_scope": {
             "model_features": list(FEATURE_NAMES),
             "point_in_time_liquidity_used_for_diagnostics_only": True,
             "no_retraining_or_threshold_tuning_on_test_results": True,
+            "model_snapshot_remains_immutable": True,
         },
     }
     if persist:
-        result["persistence"] = _persist_report(trained_through, {
-            "policy_version": ROBUSTNESS_POLICY_VERSION,
-            "gate": gate,
-            "report": report,
-            "stronger_baselines": baselines,
-        })
+        result["persistence"] = _persist_report(trained_through, audit)
     return result
 
 
@@ -233,7 +288,7 @@ def main() -> None:
     parser.add_argument(
         "--persist",
         action="store_true",
-        help="Attach the robustness report to the matching immutable model snapshot metrics JSON",
+        help="Create one immutable robustness audit linked to the matching trained model snapshot",
     )
     args = parser.parse_args()
     print(json.dumps(validate_quant_robustness(limit=args.limit, persist=args.persist), indent=2, default=str))
