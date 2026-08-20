@@ -106,18 +106,21 @@ def build_v41_forward_validation_status(session: Session) -> dict[str, Any]:
     resolved_v41 = [row for row in resolved if row.selected_v41]
     resolved_baseline = [row for row in resolved if row.selected_baseline]
     comparisons = _date_comparisons(rows)
+    matched_dates = {row["date"] for row in comparisons}
+    matched_v41 = [row for row in resolved_v41 if row.as_of_date in matched_dates]
+    matched_baseline = [row for row in resolved_baseline if row.as_of_date in matched_dates]
     increments = [float(row["incremental_alpha_percent"]) for row in comparisons]
     non_overlap = _non_overlapping(comparisons)
     non_overlap_increments = [float(row["incremental_alpha_percent"]) for row in non_overlap]
 
     v41_adverse = [
         abs(min(0.0, float(row.realized_mae_percent)))
-        for row in resolved_v41
+        for row in matched_v41
         if row.realized_mae_percent is not None
     ]
     baseline_adverse = [
         abs(min(0.0, float(row.realized_mae_percent)))
-        for row in resolved_baseline
+        for row in matched_baseline
         if row.realized_mae_percent is not None
     ]
     v41_severe = mean(1.0 if value >= 5.0 else 0.0 for value in v41_adverse) if v41_adverse else None
@@ -131,7 +134,7 @@ def build_v41_forward_validation_status(session: Session) -> dict[str, Any]:
     date_bootstrap = _bootstrap_mean(increments, seed=V41_FORWARD_BOOTSTRAP_SEED)
     non_overlap_bootstrap = _bootstrap_mean(non_overlap_increments, seed=V41_FORWARD_BOOTSTRAP_SEED + 17)
     checks = {
-        "enough_resolved_v41_calls": len(resolved_v41) >= MIN_RESOLVED_V41_CALLS,
+        "enough_resolved_v41_calls": len(matched_v41) >= MIN_RESOLVED_V41_CALLS,
         "enough_matched_dates": len(comparisons) >= MIN_MATCHED_DATES,
         "mean_incremental_alpha_positive": bool(increments) and mean(increments) > 0.0,
         "median_incremental_alpha_non_negative": bool(increments) and median(increments) >= 0.0,
@@ -157,6 +160,8 @@ def build_v41_forward_validation_status(session: Session) -> dict[str, Any]:
             "voided": voided,
             "resolved_v41_calls": len(resolved_v41),
             "resolved_baseline_calls": len(resolved_baseline),
+            "matched_resolved_v41_calls": len(matched_v41),
+            "matched_resolved_baseline_calls": len(matched_baseline),
             "matched_dates": len(comparisons),
             "non_overlap_cohorts": len(non_overlap),
         },
@@ -169,6 +174,7 @@ def build_v41_forward_validation_status(session: Session) -> dict[str, Any]:
             "non_overlap_bootstrap_95": non_overlap_bootstrap,
         },
         "risk": {
+            "sample_scope": "only fully resolved equal-breadth matched dates",
             "v41_severe_drawdown_rate": v41_severe,
             "baseline_severe_drawdown_rate": baseline_severe,
             "relative_risk_reduction": risk_reduction,
