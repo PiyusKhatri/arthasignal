@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 
 INDEX_HISTORY_URL = "https://www.sharesansar.com/index-history-data"
 INDEX_HISTORY_PAGE_SIZE = 50
+# Renew CSRF session every N pages to avoid long-session timeouts
+INDEX_HISTORY_CHUNK_PAGES = 50
 
 TOKEN_PATTERN = re.compile(r'name="_token" content="([^"]+)"')
 
@@ -57,35 +59,92 @@ def _get_csrf_session() -> tuple[requests.Session, str]:
     return session, token_match.group(1)
 
 
-def get_index_history(index_name: str, years: int = 5) -> list[dict[str, Any]]:
-    index_id = INDEX_NAME_TO_ID.get(index_name)
-    if index_id is None:
-        raise ValueError(f"Unknown index name: {index_name}")
-
-    session, token = _get_csrf_session()
-    end_date = date.today()
-    start_date = end_date - timedelta(days=years * 365)
-
+def _fetch_page(
+    session: requests.Session,
+    token: str,
+    index_id: int,
+    start_date: date,
+    end_date: date,
+    offset: int,
+) -> dict[str, Any]:
+    """Fetch a single page of index history. Raises on network error."""
     headers = {
         "X-CSRF-Token": token,
         "X-Requested-With": "XMLHttpRequest",
         "Referer": INDEX_HISTORY_URL,
     }
+    params = {
+        "index_id": index_id,
+        "from": start_date.isoformat(),
+        "to": end_date.isoformat(),
+        "draw": 1,
+        "start": offset,
+        "length": INDEX_HISTORY_PAGE_SIZE,
+    }
+    response = fetch(INDEX_HISTORY_URL, session=session, params=params, headers=headers)
+    return response.json()
+
+
+def get_index_history(index_name: str, years: int = 5) -> list[dict[str, Any]]:
+    index_id = INDEX_NAME_TO_ID.get(index_name)
+    if index_id is None:
+        raise ValueError(f"Unknown index name: {index_name}")
+
+    end_date = date.today()
+    start_date = end_date - timedelta(days=years * 365)
 
     rows: list[dict[str, Any]] = []
     offset = 0
+    records_total: int | None = None
+    pages_in_chunk = 0
+    session, token = _get_csrf_session()
 
     while True:
-        params = {
-            "index_id": index_id,
-            "from": start_date.isoformat(),
-            "to": end_date.isoformat(),
-            "draw": 1,
-            "start": offset,
-            "length": INDEX_HISTORY_PAGE_SIZE,
-        }
-        response = fetch(INDEX_HISTORY_URL, session=session, params=params, headers=headers)
-        body = response.json()
+        # Renew session+token every CHUNK_PAGES pages to avoid server-side timeouts
+        if pages_in_chunk >= INDEX_HISTORY_CHUNK_PAGES:
+            logger.info(
+                "index_scraper: renewing CSRF session at offset %d for %s", offset, index_name
+            )
+            try:
+                session, token = _get_csrf_session()
+                pages_in_chunk = 0
+            except Exception:
+                logger.warning(
+                    "index_scraper: failed to renew session at offset %d for %s — retrying once",
+                    offset,
+                    index_name,
+                )
+                try:
+                    session, token = _get_csrf_session()
+                    pages_in_chunk = 0
+                except Exception:
+                    logger.error(
+                        "index_scraper: session renewal failed twice at offset %d for %s, stopping",
+                        offset,
+                        index_name,
+                    )
+                    break
+
+        try:
+            body = _fetch_page(session, token, index_id, start_date, end_date, offset)
+        except Exception:
+            logger.warning(
+                "index_scraper: page fetch failed at offset %d for %s — attempting session renewal",
+                offset,
+                index_name,
+            )
+            try:
+                session, token = _get_csrf_session()
+                pages_in_chunk = 0
+                body = _fetch_page(session, token, index_id, start_date, end_date, offset)
+            except Exception:
+                logger.error(
+                    "index_scraper: giving up at offset %d for %s after retry",
+                    offset,
+                    index_name,
+                )
+                break
+
         page_rows = body.get("data", [])
         if not page_rows:
             break
@@ -94,7 +153,9 @@ def get_index_history(index_name: str, years: int = 5) -> list[dict[str, Any]]:
             try:
                 row_date = datetime.strptime(raw_row["published_date"], "%Y-%m-%d").date()
             except (KeyError, ValueError):
-                logger.warning("index_scraper: skipping malformed row for %s: %r", index_name, raw_row)
+                logger.warning(
+                    "index_scraper: skipping malformed row for %s: %r", index_name, raw_row
+                )
                 continue
 
             rows.append(
@@ -110,9 +171,13 @@ def get_index_history(index_name: str, years: int = 5) -> list[dict[str, Any]]:
                 }
             )
 
-        records_total = body.get("recordsTotal", 0)
+        if records_total is None:
+            records_total = body.get("recordsTotal", 0)
+
+        pages_in_chunk += 1
         offset += INDEX_HISTORY_PAGE_SIZE
-        if offset >= records_total or len(page_rows) < INDEX_HISTORY_PAGE_SIZE:
+
+        if offset >= (records_total or 0) or len(page_rows) < INDEX_HISTORY_PAGE_SIZE:
             break
 
     logger.info("index_scraper: fetched %d historical rows for %s", len(rows), index_name)
