@@ -13,6 +13,23 @@ export type QuantResearchPayload = {
     round_trip_cost_assumption_percent?: number;
     reasons?: string[];
   };
+  probability_model?: {
+    model_type?: string | null;
+    calibration_status?: string | null;
+    components?: {
+      model_disagreement?: number | null;
+      cross_sectional_xgboost_probability?: number | null;
+    };
+  };
+  cross_sectional_ml?: {
+    available?: boolean;
+    candidate_available?: boolean;
+    promotable?: boolean;
+    model_version?: string | null;
+    trained_through?: string | null;
+    calibrated_probability?: number | null;
+    reason?: string;
+  };
   market_regime?: { state?: string; risk_level?: string };
   sector_regime?: { state?: string; relative_strength_vs_nepse_20d?: number | null };
   relative_strength?: {
@@ -62,6 +79,13 @@ function tone(value: string | undefined): string {
   return "text-warning-text";
 }
 
+function agreementLabel(disagreement: number | null | undefined): string {
+  if (disagreement === null || disagreement === undefined || Number.isNaN(disagreement)) return "Not available";
+  if (disagreement <= 0.08) return "Strong";
+  if (disagreement <= 0.18) return "Moderate";
+  return "Low";
+}
+
 export function QuantResearchSummary({ research }: { research: QuantResearchPayload }) {
   const decision = research.decision;
   if (!decision || research.status === "insufficient_price_history") return null;
@@ -70,6 +94,13 @@ export function QuantResearchSummary({ research }: { research: QuantResearchPayl
   const validation = research.forward_validation;
   const gateOpen = Boolean(validation?.public_high_confidence_enabled);
   const analogCount = Math.round(research.historical_analogs?.effective_sample_size ?? 0);
+  const cross = research.cross_sectional_ml;
+  const mlStatus = cross?.available
+    ? "Promoted pooled ML"
+    : cross?.candidate_available
+      ? "ML challenger — not promoted"
+      : "Baseline ensemble";
+  const disagreement = research.probability_model?.components?.model_disagreement;
 
   return (
     <section className="rounded-xl border border-border bg-card p-5 sm:p-6" aria-labelledby="quant-outlook-title">
@@ -141,6 +172,9 @@ export function QuantResearchSummary({ research }: { research: QuantResearchPayl
               {(decision.reasons ?? []).map((reason) => <li key={reason}>• {reason}</li>)}
               <li>• Historical analogue effective sample: {analogCount || "insufficient"}</li>
               <li>• 25th-percentile analogue excess return: {percentagePoints(research.historical_analogs?.downside_25th_percent)}</li>
+              <li>• ML status: {mlStatus}</li>
+              <li>• Model agreement: {agreementLabel(disagreement)}</li>
+              {cross?.available && cross.trained_through ? <li>• Pooled model trained through: {cross.trained_through}</li> : null}
             </ul>
           </div>
           <div>
