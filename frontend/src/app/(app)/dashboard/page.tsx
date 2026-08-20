@@ -181,7 +181,9 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div className="mt-4 rounded-xl border border-border bg-background p-5 text-sm text-text-secondary">
-              Market intelligence opportunities are temporarily unavailable.
+              {intelligence === null
+                ? "Market intelligence is temporarily unavailable."
+                : "No stock currently clears the evidence, confidence and active-signal gates for a qualified setup."}
             </div>
           )}
         </article>
