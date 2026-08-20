@@ -31,8 +31,8 @@ try {
   // failed requests mean that there are zero market signals.
   await page.goto(`${baseUrl}/dashboard`, { waitUntil: "domcontentloaded" });
   await requireVisible(page, '[data-testid="global-stock-search"] input', "global stock search");
-  await requireVisible(page, '[data-testid="app-shell-header"]', "app shell header");
-  await requireVisible(page, '[data-testid="app-shell-sidebar"]', "app shell sidebar");
+  await requireVisible(page, '[data-testid="app-topbar"]', "app shell top bar");
+  await requireVisible(page, '[data-testid="desktop-sidebar"]', "app shell sidebar");
   await requireVisible(page, '#app-content', "app shell content frame");
   await page.getByText("Some market data is temporarily unavailable:").waitFor({ state: "visible", timeout: 10_000 });
   await page.getByText("Signal data is temporarily unavailable.").waitFor({ state: "visible", timeout: 10_000 });
@@ -45,10 +45,14 @@ try {
   await page.getByRole("heading", { name: "Artha stock screener" }).waitFor({ state: "visible", timeout: 10_000 });
 
   // Sector navigation must remain useful even when the backend is unavailable:
-  // the page shell and explicit data-service state should still render cleanly.
+  // both the board and a direct sector-detail URL render explicit outage states.
   await page.goto(`${baseUrl}/sectors`, { waitUntil: "domcontentloaded" });
   await page.getByRole("heading", { name: "Sector intelligence" }).waitFor({ state: "visible", timeout: 10_000 });
   await page.getByText("Sector data is temporarily unavailable").waitFor({ state: "visible", timeout: 10_000 });
+
+  await page.goto(`${baseUrl}/sectors/Banking`, { waitUntil: "domcontentloaded" });
+  await page.getByRole("heading", { name: "Sector data is temporarily unavailable" }).waitFor({ state: "visible", timeout: 10_000 });
+  await page.getByRole("link", { name: /Back to sectors/i }).waitFor({ state: "visible", timeout: 10_000 });
 
   // User-specific pages must remain protected without an access/refresh cookie.
   await page.goto(`${baseUrl}/portfolio`, { waitUntil: "domcontentloaded" });
