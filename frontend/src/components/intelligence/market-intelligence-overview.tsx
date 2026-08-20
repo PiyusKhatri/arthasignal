@@ -47,34 +47,43 @@ export function MarketIntelligenceOverview({ intelligence }: { intelligence: Mar
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-xs font-medium uppercase tracking-[0.16em] text-text-secondary">Opportunity ranking</p>
-              <h2 className="mt-1 text-lg font-semibold text-text-primary">Top Artha setups</h2>
+              <h2 className="mt-1 text-lg font-semibold text-text-primary">Qualified Artha setups</h2>
             </div>
             <p className="text-xs text-text-secondary">{intelligence.market.stocks_analyzed} stocks analyzed</p>
           </div>
 
-          <div className="mt-4 divide-y divide-border">
-            {intelligence.top_opportunities.map((stock, index) => (
-              <Link
-                key={stock.symbol}
-                href={`/stock/${stock.symbol}`}
-                className="grid grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-3 py-3 transition-opacity hover:opacity-80"
-              >
-                <span className="text-xs font-medium text-text-secondary">{String(index + 1).padStart(2, "0")}</span>
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-baseline gap-2">
-                    <span className="font-semibold text-text-primary">{stock.symbol}</span>
-                    <span className="truncate text-xs text-text-secondary">{stock.company_name}</span>
+          {intelligence.top_opportunities.length > 0 ? (
+            <div className="mt-4 divide-y divide-border">
+              {intelligence.top_opportunities.map((stock, index) => (
+                <Link
+                  key={stock.symbol}
+                  href={`/stock/${stock.symbol}`}
+                  className="grid grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-3 py-3 transition-opacity hover:opacity-80"
+                >
+                  <span className="text-xs font-medium text-text-secondary">{String(index + 1).padStart(2, "0")}</span>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-baseline gap-2">
+                      <span className="font-semibold text-text-primary">{stock.symbol}</span>
+                      <span className="truncate text-xs text-text-secondary">{stock.company_name}</span>
+                    </div>
+                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-text-secondary">
+                      <span>{stock.sector ?? "Other"}</span>
+                      <span>{prettyLabel(stock.trend_strength)} trend</span>
+                      <span>{prettyLabel(stock.confidence_level)} confidence</span>
+                    </div>
                   </div>
-                  <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-text-secondary">
-                    <span>{stock.sector ?? "Other"}</span>
-                    <span>{prettyLabel(stock.trend_strength)} trend</span>
-                    <span>{prettyLabel(stock.confidence_level)} confidence</span>
-                  </div>
-                </div>
-                <ScoreBadge score={stock.artha_score} />
-              </Link>
-            ))}
-          </div>
+                  <ScoreBadge score={stock.artha_score} />
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-4 rounded-lg border border-border bg-background p-4">
+              <p className="text-sm font-medium text-text-primary">No setup currently clears the evidence gate.</p>
+              <p className="mt-1 text-xs leading-relaxed text-text-secondary">
+                The ranking now requires a signal that is active in the latest technical snapshot plus sufficient score and evidence confidence. An empty list is a valid result.
+              </p>
+            </div>
+          )}
         </article>
 
         <article className="rounded-xl border border-border bg-card p-5">
