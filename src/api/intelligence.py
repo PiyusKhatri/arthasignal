@@ -9,6 +9,7 @@ from src.api.db_readonly import get_readonly_session
 from src.api.rate_limit import PUBLIC_RATE_LIMIT, limiter
 from src.pipeline.quant_validation import build_quant_validation_status
 from src.services.nepse_quant_research import build_market_regime, build_quant_research
+from src.services.quant_cross_sectional import enhance_quant_research_with_cross_sectional
 from src.services.stock_intelligence import build_market_intelligence, build_stock_intelligence
 
 router = APIRouter(tags=["intelligence"])
@@ -27,6 +28,8 @@ def get_stock_intelligence(symbol: str, request: Request) -> dict[str, Any]:
     with get_readonly_session() as session:
         result = build_stock_intelligence(session, normalized)
         quant_research = build_quant_research(session, normalized) if result is not None else None
+        if quant_research is not None:
+            quant_research = enhance_quant_research_with_cross_sectional(session, normalized, quant_research)
 
     if result is None:
         raise HTTPException(
@@ -49,6 +52,8 @@ def get_stock_quant_research(symbol: str, request: Request) -> dict[str, Any]:
     normalized = symbol.strip().upper()
     with get_readonly_session() as session:
         result = build_quant_research(session, normalized)
+        if result is not None:
+            result = enhance_quant_research_with_cross_sectional(session, normalized, result)
     if result is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
