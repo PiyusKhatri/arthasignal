@@ -109,6 +109,113 @@ export type StockSignals = {
   signals: StockSignal[];
 };
 
+export type StockIntelligenceConfidence = {
+  signal_name: string;
+  tier: string;
+  edge_vs_baseline: number | null;
+  min_sample_size: number;
+  recommended_holding_period: string | null;
+  cost_viability_note: string | null;
+};
+
+export type StockIntelligenceBacktest = {
+  signal_name: string;
+  forward_days: number;
+  win_rate: number | null;
+  sample_size: number;
+  average_return: number | null;
+};
+
+export type StockIntelligence = {
+  symbol: string;
+  company_name: string;
+  sector: string | null;
+  as_of_date: string | null;
+  artha_score: number;
+  rating: string;
+  confidence_level: "high" | "medium" | "low";
+  signal_quality: "high" | "medium" | "low";
+  trend_strength: "strong" | "moderate" | "weak";
+  scores: {
+    trend: number;
+    momentum: number;
+    liquidity: number;
+    reliability: number;
+    risk_adjustment: number;
+  };
+  technical: {
+    rsi: number | null;
+    rsi_state: string;
+    macd: string;
+    latest_price: number | null;
+    sma_50: number | null;
+    sma_200: number | null;
+    price_vs_sma_200: string;
+    sma_50_vs_sma_200: string;
+  };
+  liquidity: {
+    tier: string | null;
+    score: number;
+  };
+  confidence: StockIntelligenceConfidence[];
+  backtest_summary: StockIntelligenceBacktest[];
+  signals: {
+    signal_name: string;
+    status: string;
+    entry_date: string | null;
+    forward_days_horizon: number;
+  }[];
+  risk: {
+    level: "low" | "medium" | "high";
+    warnings: string[];
+  };
+  strengths: string[];
+  explanation: string[];
+};
+
+export type MarketIntelligenceStock = {
+  symbol: string;
+  company_name: string;
+  sector: string | null;
+  artha_score: number;
+  rating: string;
+  confidence_level: "high" | "medium" | "low";
+  liquidity_tier: string | null;
+  trend_strength: "strong" | "moderate" | "weak";
+  signal_quality: "high" | "medium" | "low";
+  risk_level: "low" | "medium" | "high";
+  trend_score: number;
+  momentum_score: number;
+  reliability_score: number;
+  active_signals: string[];
+  strengths: string[];
+};
+
+export type MarketIntelligence = {
+  as_of_date: string | null;
+  market: {
+    condition: string;
+    trend: string;
+    risk_level: string;
+    average_artha_score: number;
+    positive_setup_share: number;
+    high_confidence_share: number;
+    stocks_analyzed: number;
+  };
+  top_opportunities: MarketIntelligenceStock[];
+  high_confidence_signals: MarketIntelligenceStock[];
+  sector_insights: {
+    sector: string;
+    average_artha_score: number;
+    trend: string;
+    high_confidence_count: number;
+    stock_count: number;
+    top_symbol: string;
+    top_score: number;
+  }[];
+  stocks: MarketIntelligenceStock[];
+};
+
 export type MarketPulse = {
   date: string;
   advance_decline: {
@@ -241,6 +348,10 @@ export async function getMarketPulseData(): Promise<MarketPulse | null> {
   return fetchJson<MarketPulse>("/market/pulse");
 }
 
+export async function getMarketIntelligence(limit = 300): Promise<MarketIntelligence | null> {
+  return fetchJson<MarketIntelligence>(`/market/intelligence?limit=${limit}`);
+}
+
 export async function getActiveSignals(): Promise<ActiveSignalsResponse | null> {
   return fetchJson<ActiveSignalsResponse>("/market/active-signals");
 }
@@ -263,6 +374,10 @@ export async function getStockSignals(symbol: string): Promise<StockSignals | nu
 
 export async function getStockFundamental(symbol: string): Promise<StockFundamental | null> {
   return fetchJson<StockFundamental>(`/stocks/${symbol}/fundamental`);
+}
+
+export async function getStockIntelligence(symbol: string): Promise<StockIntelligence | null> {
+  return fetchJson<StockIntelligence>(`/stocks/${symbol}/intelligence`);
 }
 
 export async function getWatchlistData(symbols: string[]): Promise<StockSummary[]> {

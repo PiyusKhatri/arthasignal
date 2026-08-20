@@ -33,6 +33,13 @@ try {
   await page.getByText("Some market data is temporarily unavailable:").waitFor({ state: "visible", timeout: 10_000 });
   await page.getByText("Signal data is temporarily unavailable.").waitFor({ state: "visible", timeout: 10_000 });
 
+  // The intelligence dashboard follows the same production rule: an API outage
+  // is shown explicitly and must never be interpreted as a bearish/neutral state.
+  await page.goto(`${baseUrl}/market-pulse`, { waitUntil: "domcontentloaded" });
+  await page.getByText("Market intelligence is temporarily unavailable.").waitFor({ state: "visible", timeout: 10_000 });
+  await page.getByRole("heading", { name: "Live market context" }).waitFor({ state: "visible", timeout: 10_000 });
+  await page.getByRole("heading", { name: "Artha stock screener" }).waitFor({ state: "visible", timeout: 10_000 });
+
   // User-specific pages must remain protected without an access/refresh cookie.
   await page.goto(`${baseUrl}/portfolio`, { waitUntil: "domcontentloaded" });
   await page.waitForURL(/\/login\?next=%2Fportfolio|\/login\?next=\/portfolio/, { timeout: 10_000 });
