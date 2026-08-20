@@ -18,7 +18,10 @@ from src.scrapers.symbols import get_all_listed_symbols
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-BACKFILL_YEARS = 5
+# ArthaSignal's historical analytics are designed around long-cycle NEPSE data.
+# Keep the default aligned with the full-history backfill rather than silently
+# falling back to the old five-year window when --years is omitted.
+BACKFILL_YEARS = 20
 RESUME_TOLERANCE_DAYS = 10
 PROGRESS_LOG_INTERVAL = 20
 # Max safe parallel workers for ShareSansar — more than 4 risks rate-limiting
@@ -172,4 +175,3 @@ if __name__ == "__main__":
     parser.add_argument("--workers", type=int, default=1, help="Parallel workers (max 4)")
     args = parser.parse_args()
     run_backfill(years=args.years, workers=args.workers)
-
