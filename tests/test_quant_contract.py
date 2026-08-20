@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from src.api.main import app
+from src.database.e1_models import QuantE1ForwardDecision, QuantE1ForwardRun
 from src.database.models import Base
 from src.database.quant_models import (
     QuantModelSnapshot,
@@ -148,6 +149,54 @@ def test_v41_shadow_run_heartbeat_table_is_registered() -> None:
         "failure_code",
         "details_json",
         "run_fingerprint",
+        "created_at",
+    }
+    assert expected.issubset(table.columns.keys())
+
+
+def test_e1_forward_run_table_is_registered() -> None:
+    assert QuantE1ForwardRun.__tablename__ == "quant_e1_forward_runs"
+    table = Base.metadata.tables["quant_e1_forward_runs"]
+    expected = {
+        "model_snapshot_id",
+        "as_of_date",
+        "model_version",
+        "predictive_policy_version",
+        "execution_policy_version",
+        "artifact_fingerprint",
+        "source_v41_run_fingerprint",
+        "run_status",
+        "candidate_rows",
+        "decision_rows",
+        "failure_code",
+        "details_json",
+        "run_fingerprint",
+        "created_at",
+    }
+    assert expected.issubset(table.columns.keys())
+
+
+def test_e1_forward_decision_table_is_registered() -> None:
+    assert QuantE1ForwardDecision.__tablename__ == "quant_e1_forward_decisions"
+    table = Base.metadata.tables["quant_e1_forward_decisions"]
+    expected = {
+        "run_id",
+        "symbol",
+        "as_of_date",
+        "source_prediction_fingerprint",
+        "baseline_rank",
+        "baseline_percentile",
+        "baseline_score",
+        "final_score",
+        "override_action",
+        "expected_excess_return_percent",
+        "market_regime",
+        "sector_regime",
+        "liquidity_bucket",
+        "entry_eligible_v41",
+        "hold_eligible_v41",
+        "entry_eligible_baseline",
+        "decision_fingerprint",
         "created_at",
     }
     assert expected.issubset(table.columns.keys())
