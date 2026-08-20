@@ -10,18 +10,43 @@ on:
 jobs:
   run-intraday-pipeline:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_URL_READONLY: ${{ secrets.DATABASE_URL_READONLY || secrets.DATABASE_URL }}
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
 
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
+      - name: Verify scheduled database is reachable
+        run: |
+          python - <<'PY'
+          import os
+          from urllib.parse import urlparse
+          from sqlalchemy import text
+          from src.database.connection import engine
+
+          url = os.environ.get("DATABASE_URL", "")
+          host = urlparse(url).hostname
+          if not url:
+              raise SystemExit("DATABASE_URL secret is not configured")
+          if host in {"localhost", "127.0.0.1", "db"}:
+              raise SystemExit(
+                  "Scheduled GitHub-hosted jobs cannot use the local Docker database. "
+                  "Use a network-reachable Postgres instance or a self-hosted runner."
+              )
+          with engine.connect() as connection:
+              connection.execute(text("SELECT 1"))
+          print("Database connectivity check passed")
+          PY
+
       - name: Run intraday pipeline
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: python -m src.pipeline.run_intraday
