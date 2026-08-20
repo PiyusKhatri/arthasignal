@@ -1,5 +1,7 @@
 import type { StockIntelligence } from "@/lib/market-data";
 
+type IntelligenceWithEvidenceScore = StockIntelligence & { confidence_score?: number };
+
 function prettyLabel(value: string): string {
   return value.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
@@ -16,7 +18,9 @@ function riskTone(level: StockIntelligence["risk"]["level"]): string {
   return "text-danger-text";
 }
 
-export function ArthaScoreCard({ intelligence }: { intelligence: StockIntelligence }) {
+export function ArthaScoreCard({ intelligence }: { intelligence: IntelligenceWithEvidenceScore }) {
+  const evidenceConfidence = intelligence.confidence_score;
+
   return (
     <article className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-start justify-between gap-4">
@@ -48,7 +52,10 @@ export function ArthaScoreCard({ intelligence }: { intelligence: StockIntelligen
       <dl className="mt-5 grid grid-cols-3 gap-3 border-t border-border pt-4 text-sm">
         <div>
           <dt className="text-xs text-text-secondary">Evidence confidence</dt>
-          <dd className="mt-1 font-medium text-text-primary">{prettyLabel(intelligence.confidence_level)}</dd>
+          <dd className="mt-1 font-medium text-text-primary">
+            {prettyLabel(intelligence.confidence_level)}
+            {typeof evidenceConfidence === "number" ? ` · ${evidenceConfidence}/100` : ""}
+          </dd>
         </div>
         <div>
           <dt className="text-xs text-text-secondary">Trend</dt>
