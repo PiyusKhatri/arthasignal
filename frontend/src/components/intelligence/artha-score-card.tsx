@@ -28,6 +28,9 @@ export function ArthaScoreCard({ intelligence }: { intelligence: StockIntelligen
             </span>
             <span className="pb-1 text-sm text-text-secondary">/ 100</span>
           </div>
+          <p className="mt-2 max-w-sm text-xs leading-relaxed text-text-secondary">
+            Evidence-weighted setup quality. This score is not a probability of profit.
+          </p>
         </div>
         <div className="rounded-lg border border-border bg-background px-3 py-2 text-right">
           <p className="text-xs text-text-secondary">Rating</p>
@@ -44,7 +47,7 @@ export function ArthaScoreCard({ intelligence }: { intelligence: StockIntelligen
 
       <dl className="mt-5 grid grid-cols-3 gap-3 border-t border-border pt-4 text-sm">
         <div>
-          <dt className="text-xs text-text-secondary">Confidence</dt>
+          <dt className="text-xs text-text-secondary">Evidence confidence</dt>
           <dd className="mt-1 font-medium text-text-primary">{prettyLabel(intelligence.confidence_level)}</dd>
         </div>
         <div>
