@@ -31,7 +31,7 @@ from src.api.security import (
     verify_password,
 )
 from src.config import settings
-from src.database.auth_models import RefreshSession
+from src.database.auth_models import RefreshSession, UserAuthState
 from src.database.connection import get_session
 from src.database.models import PasswordResetToken, User
 
@@ -209,7 +209,6 @@ def refresh(request: Request, payload: RefreshRequest) -> TokenResponse:
         if user is None or not user.is_active:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found or inactive")
 
-        # One-time refresh semantics: rotate and revoke the old bearer token.
         refresh_session.revoked = True
         return _issue_token_pair(session, user.id)
 
@@ -251,7 +250,6 @@ def forgot_password(request: Request, payload: ForgotPasswordRequest) -> ForgotP
         if user is None or not user.is_active:
             return generic_response
 
-        # Invalidate any older links before issuing a new one.
         session.execute(
             update(PasswordResetToken)
             .where(PasswordResetToken.user_id == user.id)
@@ -262,7 +260,6 @@ def forgot_password(request: Request, payload: ForgotPasswordRequest) -> ForgotP
         raw_token = secrets.token_urlsafe(32)
         reset_token = PasswordResetToken(
             user_id=user.id,
-            # Never persist the bearer token itself.
             token=_token_hash(raw_token),
             expires_at=_utcnow_naive() + timedelta(minutes=RESET_TOKEN_EXPIRE_MINUTES),
             used=False,
@@ -272,7 +269,6 @@ def forgot_password(request: Request, payload: ForgotPasswordRequest) -> ForgotP
 
         reset_url = f"{settings.frontend_base_url}/reset-password?token={quote(raw_token, safe='')}"
         if not send_password_reset_email(user.email, reset_url):
-            # Do not leave a usable token behind when delivery did not occur.
             session.rollback()
             return generic_response
 
@@ -298,6 +294,7 @@ def reset_password(request: Request, payload: ResetPasswordRequest) -> UserRespo
         if user is None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or already-used token")
 
+        now = _utcnow_naive()
         user.hashed_password = hash_password(payload.new_password)
         reset_token.used = True
         session.execute(
@@ -306,10 +303,15 @@ def reset_password(request: Request, payload: ResetPasswordRequest) -> UserRespo
             .where(PasswordResetToken.used.is_(False))
             .values(used=True)
         )
-        # Password reset immediately invalidates every long-lived session.
         session.execute(
             update(RefreshSession).where(RefreshSession.user_id == user.id).values(revoked=True)
         )
+
+        auth_state = session.get(UserAuthState, user.id)
+        if auth_state is None:
+            session.add(UserAuthState(user_id=user.id, valid_after=now))
+        else:
+            auth_state.valid_after = now
 
         session.flush()
         user_id, email, created_at, is_active = user.id, user.email, user.created_at, user.is_active
