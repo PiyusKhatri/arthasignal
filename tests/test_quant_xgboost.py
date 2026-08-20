@@ -139,7 +139,7 @@ def test_unpromoted_xgboost_challenger_cannot_change_live_research(monkeypatch: 
     assert enhanced is research
     assert enhanced["cross_sectional_ml"]["candidate_available"] is True
     assert enhanced["decision"]["probability_outperform_nepse_after_cost"] == original_probability
-    assert enhanced["probability_model"]["model_type"] if "model_type" in enhanced["probability_model"] else True
+    assert "model_type" not in enhanced["probability_model"]
 
 
 def test_promoted_model_can_enhance_research_but_not_bypass_forward_gate(monkeypatch: pytest.MonkeyPatch) -> None:
