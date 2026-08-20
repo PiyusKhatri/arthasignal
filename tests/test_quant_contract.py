@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from src.api.main import app
 from src.database.models import Base
-from src.database.quant_models import QuantModelSnapshot, QuantShadowSignal
+from src.database.quant_models import QuantModelSnapshot, QuantRobustnessRun, QuantShadowSignal
 
 
 def _collect_paths(obj) -> set[str]:
@@ -59,5 +59,19 @@ def test_quant_model_snapshot_table_is_registered_in_metadata() -> None:
         "calibration_intercept",
         "calibration_slope",
         "metrics_json",
+    }
+    assert expected.issubset(table.columns.keys())
+
+
+def test_quant_robustness_audit_table_is_registered_in_metadata() -> None:
+    assert QuantRobustnessRun.__tablename__ == "quant_robustness_runs"
+    assert "quant_robustness_runs" in Base.metadata.tables
+    table = Base.metadata.tables["quant_robustness_runs"]
+    expected = {
+        "model_snapshot_id",
+        "policy_version",
+        "gate_status",
+        "report_json",
+        "created_at",
     }
     assert expected.issubset(table.columns.keys())
