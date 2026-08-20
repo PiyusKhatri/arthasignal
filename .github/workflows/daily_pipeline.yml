@@ -75,3 +75,6 @@ jobs:
 
       - name: Grade and capture frozen V4.1 challenger shadow
         run: python -m src.pipeline.v41_shadow
+
+      - name: Capture frozen E1 forward execution decisions
+        run: python -m src.pipeline.e1_forward_shadow
