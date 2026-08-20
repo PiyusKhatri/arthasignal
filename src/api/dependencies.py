@@ -59,7 +59,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_
     if user is None or not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found or inactive")
 
-    if auth_state is not None and issued_at < auth_state.valid_after:
+    if auth_state is not None and issued_at <= auth_state.valid_after:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has been revoked")
 
     return user
