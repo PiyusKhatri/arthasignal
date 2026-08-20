@@ -47,33 +47,38 @@ def _merge_signals(target: dict[Any, list[str]], source: dict[Any, list[str]]) -
 def _benchmark_metrics(dates: list[Any], closes: list[float]) -> dict[str, Any]:
     if len(dates) < 2 or len(closes) != len(dates):
         return {"sessions": len(dates), "status": "insufficient"}
-    returns = [
+    raw_returns = [
         float(current) / float(previous) - 1.0
         for previous, current in zip(closes[:-1], closes[1:])
         if float(previous) > 0
     ]
+    # Strategy accounting contains an explicit first decision-session observation
+    # (which can include entry costs). Align the benchmark to those same dates with
+    # a zero first-session return rather than silently dropping the strategy's
+    # initial execution cost from paired block-bootstrap comparisons.
+    aligned_returns = [0.0, *raw_returns]
     wealth = [1.0]
-    for value in returns:
+    for value in raw_returns:
         wealth.append(wealth[-1] * (1.0 + value))
     peak = wealth[0]
     worst = 0.0
     for value in wealth:
         peak = max(peak, value)
         worst = min(worst, value / peak - 1.0)
-    years = max(1.0 / 252.0, len(returns) / 252.0)
+    years = max(1.0 / 252.0, len(dates) / 252.0)
     ending = wealth[-1]
-    daily_std = pstdev(returns) if len(returns) >= 2 else 0.0
+    daily_std = pstdev(aligned_returns) if len(aligned_returns) >= 2 else 0.0
     return {
         "status": "simulated",
-        "sessions": len(returns),
+        "sessions": len(dates),
         "total_return_percent": (ending - 1.0) * 100.0,
         "approx_cagr_percent": (ending ** (1.0 / years) - 1.0) * 100.0,
         "annualized_volatility_percent": daily_std * math.sqrt(252.0) * 100.0 if daily_std > 0 else None,
-        "sharpe_like": mean(returns) / daily_std * math.sqrt(252.0) if daily_std > 0 else None,
+        "sharpe_like": mean(aligned_returns) / daily_std * math.sqrt(252.0) if daily_std > 0 else None,
         "max_drawdown_percent": worst * 100.0,
         "daily_returns": [
             {"date": trading_date, "return": value}
-            for trading_date, value in zip(dates[1:], returns)
+            for trading_date, value in zip(dates, aligned_returns)
         ],
     }
 
