@@ -8,6 +8,7 @@ from statistics import mean, stdev
 from typing import Any
 
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from src.database.connection import get_session
 from src.database.models import SignalCall, SignalCallStatus
@@ -33,20 +34,28 @@ def _mean_ci_95(values: list[float]) -> tuple[float | None, float | None, float 
     return center, center - margin, center + margin
 
 
-def _load_calls() -> list[SignalCall]:
-    with get_session() as session:
-        rows = session.execute(
-            select(SignalCall)
-            .where(SignalCall.entry_date >= VALIDATION_PROTOCOL_START_DATE)
-            .where(SignalCall.signal_name.in_(list(VALIDATION_SIGNAL_SPECS)))
-            .order_by(SignalCall.entry_date, SignalCall.symbol)
-        ).scalars().all()
-        session.expunge_all()
+def _calls_query():
+    return (
+        select(SignalCall)
+        .where(SignalCall.entry_date >= VALIDATION_PROTOCOL_START_DATE)
+        .where(SignalCall.signal_name.in_(list(VALIDATION_SIGNAL_SPECS)))
+        .order_by(SignalCall.entry_date, SignalCall.symbol)
+    )
+
+
+def _load_calls(session: Session | None = None) -> list[SignalCall]:
+    """Load validation calls, reusing an API read-only session when one is supplied."""
+    if session is not None:
+        return list(session.execute(_calls_query()).scalars().all())
+
+    with get_session() as owned_session:
+        rows = owned_session.execute(_calls_query()).scalars().all()
+        owned_session.expunge_all()
     return rows
 
 
-def build_validation_status() -> dict[str, Any]:
-    calls = _load_calls()
+def build_validation_status(session: Session | None = None) -> dict[str, Any]:
+    calls = _load_calls(session=session)
     by_signal: dict[str, list[SignalCall]] = defaultdict(list)
     for call in calls:
         by_signal[call.signal_name].append(call)
