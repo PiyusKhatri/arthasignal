@@ -1,0 +1,112 @@
+from __future__ import annotations
+
+from decimal import Decimal
+from typing import Any
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from src.database.models import (
+    Company,
+    DailyPrice,
+    SignalCall,
+    SignalConfidence,
+    SignalTimeframe,
+    SymbolLiquidityTier,
+    TechnicalSignal,
+)
+
+
+def _number(value: Any) -> float | None:
+    return float(value) if value is not None else None
+
+
+def build_stock_intelligence(session: Session, symbol: str) -> dict[str, Any] | None:
+    company = session.execute(select(Company).where(Company.symbol == symbol)).scalar_one_or_none()
+    if company is None:
+        return None
+
+    technical = session.execute(
+        select(TechnicalSignal)
+        .where(TechnicalSignal.symbol == symbol)
+        .where(TechnicalSignal.timeframe == SignalTimeframe.DAILY)
+        .order_by(TechnicalSignal.date.desc())
+        .limit(1)
+    ).scalar_one_or_none()
+
+    price = session.execute(
+        select(DailyPrice.close)
+        .where(DailyPrice.symbol == symbol)
+        .order_by(DailyPrice.date.desc())
+        .limit(1)
+    ).scalar_one_or_none()
+
+    liquidity = session.execute(
+        select(SymbolLiquidityTier.liquidity_tier)
+        .where(SymbolLiquidityTier.symbol == symbol)
+    ).scalar_one_or_none()
+
+    active_calls = session.execute(
+        select(SignalCall)
+        .where(SignalCall.symbol == symbol)
+        .order_by(SignalCall.created_at.desc())
+        .limit(5)
+    ).scalars().all()
+
+    trend_score = 0
+    momentum_score = 0
+    explanations: list[str] = []
+
+    if technical:
+        if technical.sma_50 and technical.sma_200 and technical.sma_50 > technical.sma_200:
+            trend_score += 20
+            explanations.append("Medium-term trend is above long-term trend")
+        if price and technical.sma_200 and Decimal(str(price)) > Decimal(str(technical.sma_200)):
+            trend_score += 20
+            explanations.append("Price is above SMA 200")
+
+        if technical.rsi_14:
+            rsi = float(technical.rsi_14)
+            if 40 <= rsi <= 70:
+                momentum_score += 15
+                explanations.append("RSI is in a healthy momentum zone")
+            elif rsi < 30:
+                momentum_score += 20
+                explanations.append("RSI indicates oversold conditions")
+
+        if technical.macd_line and technical.macd_signal and technical.macd_line > technical.macd_signal:
+            momentum_score += 10
+            explanations.append("MACD shows positive momentum")
+
+    liquidity_score = 0
+    if liquidity:
+        tier = str(liquidity).lower()
+        if tier in {"a", "high", "tier_a"}:
+            liquidity_score = 15
+        elif tier in {"b", "medium"}:
+            liquidity_score = 10
+        else:
+            liquidity_score = 5
+
+    score = min(100, trend_score + momentum_score + liquidity_score)
+
+    return {
+        "symbol": symbol,
+        "company_name": company.company_name,
+        "sector": company.sector,
+        "artha_score": score,
+        "technical": {
+            "rsi": _number(technical.rsi_14) if technical else None,
+            "macd": "bullish" if technical and technical.macd_line and technical.macd_signal and technical.macd_line > technical.macd_signal else "neutral",
+            "trend_score": trend_score,
+        },
+        "liquidity": {
+            "tier": liquidity,
+            "score": liquidity_score,
+        },
+        "signals": [
+            {"status": call.status.value if hasattr(call.status, "value") else call.status}
+            for call in active_calls
+        ],
+        "explanation": explanations,
+    }
