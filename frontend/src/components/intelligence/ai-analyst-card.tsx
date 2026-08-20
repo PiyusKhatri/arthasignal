@@ -17,15 +17,15 @@ export function AiAnalystCard({ intelligence }: { intelligence: StockIntelligenc
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-semibold text-text-primary">Artha AI Analyst</h3>
               <span className="rounded-full bg-accent-primary/20 px-2 py-0.5 text-[10px] font-semibold text-accent-text uppercase tracking-wider">
-                {analysis.provider === "mistral_ai" ? "Mistral AI" : "Quantitative Engine"}
+                {analysis.provider === "mistral_ai" ? "Mistral AI" : "Deterministic Engine"}
               </span>
             </div>
-            <p className="text-[11px] text-text-secondary">Executive synthesis for {intelligence.symbol}</p>
+            <p className="text-[11px] text-text-secondary">Explanation of the quantitative evidence for {intelligence.symbol}</p>
           </div>
         </div>
         <div className="text-right text-[11px] text-text-secondary">
-          <span>Target Horizon: </span>
-          <strong className="text-text-primary font-medium">Swing / Multi-week</strong>
+          <span>Evidence horizon: </span>
+          <strong className="text-text-primary font-medium">Multi-week</strong>
         </div>
       </div>
 
@@ -37,11 +37,11 @@ export function AiAnalystCard({ intelligence }: { intelligence: StockIntelligenc
 
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="rounded-lg border border-border/70 bg-background/60 p-3">
-          <p className="text-[10px] uppercase tracking-wider text-text-secondary font-semibold">Institutional Takeaway</p>
+          <p className="text-[10px] uppercase tracking-wider text-text-secondary font-semibold">Evidence Takeaway</p>
           <p className="mt-1 text-xs font-medium text-text-primary">{analysis.key_takeaway}</p>
         </div>
         <div className="rounded-lg border border-border/70 bg-background/60 p-3">
-          <p className="text-[10px] uppercase tracking-wider text-text-secondary font-semibold">Data Foundation</p>
+          <p className="text-[10px] uppercase tracking-wider text-text-secondary font-semibold">Confidence Basis</p>
           <p className="mt-1 text-xs text-text-secondary">{analysis.confidence_reason}</p>
         </div>
       </div>
