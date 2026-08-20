@@ -9,7 +9,7 @@ from typing import Any, Sequence
 from src.services.quant_decision_policy import consensus_market_regime, consensus_sector_regime
 from src.services.quant_features import FEATURE_NAMES, FEATURE_SCALES, feature_vector
 
-V4_POLICY_VERSION = "2026-08-21-residual-alpha-v1"
+V4_POLICY_VERSION = "2026-08-21-residual-alpha-v2"
 V4_EXECUTION_HURDLE_PERCENT = 1.00
 V4_CANDIDATE_POOL_FRACTION = 0.25
 V4_CANDIDATE_POOL_MIN = 8
@@ -41,7 +41,6 @@ V4_META_FEATURE_NAMES = tuple(FEATURE_NAMES) + (
     "sector_relative_strength_20d",
     "sector_leading",
     "high_liquidity",
-    "horizon_slippage_sessions",
 )
 
 
@@ -231,7 +230,6 @@ def v4_feature_vector(row: dict[str, Any]) -> list[float]:
         _clamp(float(context.get("sector_relative_strength_20d_percent") or 0.0) / 10.0, -5.0, 5.0),
         1.0 if row.get("v4_sector_regime") == "leading" else 0.0,
         1.0 if row.get("liquidity_bucket") == "high" else 0.0,
-        _clamp(float(row.get("horizon_slippage_sessions") or 0.0) / 3.0, 0.0, 2.0),
     ]
 
 
@@ -588,7 +586,11 @@ def non_overlapping_incremental_portfolio(
         baseline_rows = baseline[trading_date]
         if not v4_rows or len(v4_rows) != len(baseline_rows):
             continue
-        end_dates = [row.get("label_end_date") for row in v4_rows if row.get("label_end_date") is not None]
+        end_dates = [
+            row.get("label_end_date")
+            for row in [*v4_rows, *baseline_rows]
+            if row.get("label_end_date") is not None
+        ]
         if not end_dates:
             continue
         active_until = max(end_dates)
@@ -628,6 +630,7 @@ def non_overlapping_incremental_portfolio(
         market_wealth *= max(0.001, 1.0 + float(cohort["market_return_percent"]) / 100.0)
 
     years = len(cohorts) * 20.0 / 252.0
+
     def cagr(wealth: float) -> float | None:
         return (wealth ** (1.0 / years) - 1.0) * 100.0 if years > 0 and wealth > 0 else None
 
