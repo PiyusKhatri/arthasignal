@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -42,6 +43,7 @@ def _create_token(subject: str, expires_delta: timedelta, token_type: str) -> st
     payload = {
         "sub": subject,
         "type": token_type,
+        "jti": secrets.token_urlsafe(16),
         "iat": now,
         # Millisecond precision lets security events invalidate access tokens
         # issued earlier in the same second without rejecting a fresh login.
