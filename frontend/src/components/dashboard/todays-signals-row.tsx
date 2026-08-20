@@ -49,20 +49,40 @@ function SignalCard({ signal }: { signal: ActiveSignal }) {
   );
 }
 
-export function TodaysSignalsRow({ signals }: { signals: ActiveSignal[] }) {
+export function TodaysSignalsRow({
+  signals,
+  unavailable = false,
+  asOfDate = null,
+}: {
+  signals: ActiveSignal[];
+  unavailable?: boolean;
+  asOfDate?: string | null;
+}) {
+  if (unavailable) {
+    return (
+      <div className="rounded-lg border border-warning/30 bg-warning/10 p-6 text-sm text-text-secondary">
+        Signal data is temporarily unavailable. This is a data-service error, not a “no signals” market result.
+      </div>
+    );
+  }
+
   if (signals.length === 0) {
     return (
       <div className="rounded-lg border border-border bg-card p-6 text-sm text-text-secondary">
         No tracked signal is active across any symbol right now.
+        {asOfDate ? <span className="ml-1">Data as of {asOfDate}.</span> : null}
       </div>
     );
   }
 
   return (
-    <div className="flex snap-x gap-4 overflow-x-auto pb-2">
-      {signals.map((signal) => (
-        <SignalCard key={`${signal.symbol}-${signal.signal_name}`} signal={signal} />
-      ))}
+    <div>
+      {asOfDate ? <p className="mb-2 text-xs text-text-secondary">Data as of {asOfDate}</p> : null}
+      <div className="flex snap-x gap-4 overflow-x-auto pb-2">
+        {signals.map((signal) => (
+          <SignalCard key={`${signal.symbol}-${signal.signal_name}`} signal={signal} />
+        ))}
+      </div>
     </div>
   );
 }
