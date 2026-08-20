@@ -10,6 +10,7 @@ from src.database.quant_models import (  # noqa: F401 - registers quant tables
     QuantRobustnessRun,
     QuantShadowSignal,
     QuantV41ModelSnapshot,
+    QuantV41ShadowRun,
     QuantV41ShadowSignal,
 )
 
