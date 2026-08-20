@@ -11,6 +11,7 @@ from src.database.models import (
     BacktestResult,
     Company,
     DailyPrice,
+    Fundamental,
     SignalCall,
     SignalCallStatus,
     SignalConfidence,
@@ -132,12 +133,57 @@ def _confidence_summary(rows: Iterable[Any], signal_names: set[str]) -> list[dic
     ]
 
 
+def _valuation_score(fundamental: Fundamental | None) -> tuple[int, list[str]]:
+    """Valuation & fundamental health layer (0 to 10 points)."""
+    if not fundamental:
+        return 5, []  # Neutral baseline if fundamental is unavailable
+    
+    score = 0
+    insights = []
+    pe = _number(fundamental.pe_ratio)
+    eps = _number(fundamental.eps)
+    pb = _number(fundamental.pb_ratio)
+
+    if eps is not None:
+        if eps > 25:
+            score += 4
+            insights.append(f"Strong EPS (NPR {eps:.2f}) supports fundamental quality.")
+        elif eps > 10:
+            score += 3
+        elif eps > 0:
+            score += 2
+        else:
+            insights.append(f"Negative EPS (NPR {eps:.2f}) indicates operational headwind.")
+
+    if pe is not None:
+        if 0 < pe <= 18:
+            score += 4
+            insights.append(f"Attractive P/E valuation ({pe:.1f}x).")
+        elif 18 < pe <= 30:
+            score += 3
+        elif pe > 45:
+            score += 1
+            insights.append(f"Elevated P/E ratio ({pe:.1f}x) reflects growth premium.")
+        else:
+            score += 2
+    else:
+        score += 2
+
+    if pb is not None and 0 < pb <= 3.5:
+        score += 2
+    else:
+        score += 1
+
+    return min(10, max(0, score)), insights
+
+
 def _build_payload(
     *,
     symbol: str,
     company_name: str,
     sector: str | None,
     technical: TechnicalSignal | None,
+    fundamental: Fundamental | None,
     price: Any,
     liquidity: Any,
     calls: Iterable[SignalCall],
@@ -148,8 +194,8 @@ def _build_payload(
     signal_names = {str(call.signal_name) for call in calls_list if getattr(call, "signal_name", None)}
     confidence_list = list(confidence_rows)
 
-    trend = 0
-    momentum = 0
+    trend_score = 0
+    momentum_score = 0
     score_risks: list[str] = []
     warnings: list[str] = []
     strengths: list[str] = []
@@ -165,81 +211,150 @@ def _build_payload(
     macd_state = "neutral"
     rsi_state = "unavailable"
 
+    # 1. Trend Strength (Max 30 points)
     if technical:
         if technical.sma_50 is not None and technical.sma_200 is not None:
             if technical.sma_50 > technical.sma_200:
-                trend += 15
+                trend_score += 15
                 sma_50_vs_sma_200 = "above"
-                strengths.append("SMA50 is above SMA200, supporting the long-term trend.")
+                strengths.append("Golden alignment: 50-day SMA is above 200-day SMA.")
                 explanation.append("Long-term moving-average structure is bullish.")
             else:
                 sma_50_vs_sma_200 = "below"
-                warnings.append("SMA50 remains below SMA200, so the long-term trend is not fully confirmed.")
+                warnings.append("50-day SMA is below 200-day SMA (bearish alignment).")
 
         if price is not None and technical.sma_200 is not None:
             if Decimal(str(price)) > Decimal(str(technical.sma_200)):
-                trend += 15
+                trend_score += 15
                 price_vs_sma_200 = "above"
-                strengths.append("Price is trading above SMA200.")
-                explanation.append("Price is holding above its long-term trend reference.")
+                strengths.append("Price is trading comfortably above its 200-day SMA.")
+                explanation.append("Price is holding above its long-term baseline reference.")
             else:
                 price_vs_sma_200 = "below"
-                warnings.append("Price is below SMA200, which weakens long-term trend confirmation.")
+                warnings.append("Price is trading below its 200-day SMA reference line.")
 
+    # 2. Momentum (Max 20 points)
+    if technical:
         if technical.rsi_14 is not None:
             rsi_value = float(technical.rsi_14)
-            if 40 <= rsi_value <= 65:
-                momentum += 10
+            if 42 <= rsi_value <= 68:
+                momentum_score += 10
                 rsi_state = "healthy"
-                strengths.append("RSI is in a balanced momentum range.")
+                strengths.append("RSI (14) is in a balanced bullish momentum channel.")
             elif rsi_value < 30:
-                momentum += 15
+                momentum_score += 10
                 rsi_state = "oversold"
-                strengths.append("RSI is oversold, creating a potential recovery setup.")
-                explanation.append("RSI shows recovery opportunity.")
+                strengths.append("RSI is deeply oversold, setting up a mean-reversion opportunity.")
+                explanation.append("RSI shows oversold bounce potential.")
             elif rsi_value > 70:
                 rsi_state = "overbought"
-                score_risks.append("RSI is overbought")
-                warnings.append("RSI is overbought; upside may be vulnerable to short-term exhaustion.")
+                score_risks.append("RSI is overbought (>70)")
+                warnings.append("RSI is in overbought territory; upside may experience near-term pause.")
             else:
                 rsi_state = "neutral"
+                momentum_score += 5
 
         if technical.macd_line is not None and technical.macd_signal is not None:
             if technical.macd_line > technical.macd_signal:
-                momentum += 10
+                momentum_score += 10
                 macd_state = "bullish"
-                strengths.append("MACD is above its signal line.")
-                explanation.append("MACD provides bullish confirmation.")
+                strengths.append("MACD is positive and trending above its signal line.")
+                explanation.append("MACD provides constructive momentum confirmation.")
             elif technical.macd_line < technical.macd_signal:
                 macd_state = "bearish"
-                warnings.append("MACD is below its signal line, so momentum confirmation is weak.")
+                warnings.append("MACD is below its signal line, reflecting weak momentum.")
 
-    liquidity_score = _liquidity_score(liquidity)
+    # 3. Liquidity (Max 15 points)
+    liquidity_pts = _liquidity_score(liquidity)
     liquidity_label = str(liquidity) if liquidity is not None else None
-    if liquidity_score >= 15:
-        strengths.append("Liquidity is in the highest tracked tier.")
-    elif 0 < liquidity_score <= 5:
-        warnings.append("Liquidity is relatively low; execution and slippage risk may be higher.")
+    if liquidity_pts >= 15:
+        strengths.append("High liquidity tier (Tier A) ensures clean trade execution.")
+    elif 0 < liquidity_pts <= 5:
+        warnings.append("Lower liquidity profile may present higher slippage during entries/exits.")
 
-    reliability = _confidence_score(confidence_list, signal_names)
-    confidence_level = _confidence_level(reliability)
-    if reliability >= 20:
-        strengths.append("At least one active signal has a high-confidence historical edge.")
-    elif signal_names and reliability == 0:
-        warnings.append("Active signals do not currently carry a high-confidence reliability tier.")
+    # 4. Signal Reliability & Edge (Max 15 points)
+    raw_conf = _confidence_score(confidence_list, signal_names)
+    reliability_pts = min(15, int(raw_conf * 0.75)) if raw_conf > 0 else (5 if signal_names else 0)
+    confidence_level = _confidence_level(raw_conf)
+    if reliability_pts >= 12:
+        strengths.append("Active signal has strong statistical edge validated over 15+ years of data.")
+    elif signal_names and reliability_pts == 0:
+        warnings.append("Current active signal does not yet have high historical confidence.")
 
-    risk_adjustment = max(-10, -(len(score_risks) * 5))
-    score = max(0, min(100, trend + momentum + liquidity_score + reliability + risk_adjustment))
+    # 5. Risk Adjustment (Max 10 points)
+    risk_deductions = len(score_risks) * 5
+    if rsi_state == "overbought":
+        risk_deductions += 3
+    risk_pts = max(0, 10 - risk_deductions)
+    if score_risks:
+        warnings.extend(score_risks)
 
-    if len(score_risks) >= 2 or (risk_adjustment <= -10 and score < 50):
+    # 6. Valuation & Fundamentals (Max 10 points)
+    fundamental_pts, fund_insights = _valuation_score(fundamental)
+    strengths.extend([f for f in fund_insights if "Strong" in f or "Attractive" in f])
+    warnings.extend([f for f in fund_insights if "Negative" in f or "Elevated" in f])
+
+    # Total Artha Score (0-100)
+    score = max(0, min(100, trend_score + momentum_score + liquidity_pts + reliability_pts + risk_pts + fundamental_pts))
+
+    if len(warnings) >= 3 or score < 45:
         risk_level = "high"
-    elif score_risks or score < 50:
+    elif len(warnings) >= 1 or score < 65:
         risk_level = "medium"
     else:
         risk_level = "low"
 
     if not explanation:
-        explanation.append("No strong technical confirmation is available from the latest daily snapshot.")
+        explanation.append("Technical structure reflects neutral market consolidation.")
+
+    backtest_data = _backtest_summary(backtests)
+    signals_data = [
+        {
+            "signal_name": call.signal_name,
+            "status": _enum_value(call.status),
+            "entry_date": call.entry_date.isoformat() if call.entry_date else None,
+            "forward_days_horizon": call.forward_days_horizon,
+            "direction": _signal_direction(str(call.signal_name)),
+        }
+        for call in calls_list
+    ]
+
+    scores_breakdown = {
+        "trend": trend_score,
+        "momentum": momentum_score,
+        "liquidity": liquidity_pts,
+        "reliability": reliability_pts,
+        "risk_adjustment": risk_pts,
+        "valuation": fundamental_pts,
+    }
+
+    technical_summary = {
+        "rsi": rsi,
+        "rsi_state": rsi_state,
+        "macd": macd_state,
+        "latest_price": price_number,
+        "sma_50": sma_50,
+        "sma_200": sma_200,
+        "price_vs_sma_200": price_vs_sma_200,
+        "sma_50_vs_sma_200": sma_50_vs_sma_200,
+    }
+
+    from src.services.ai_analyst import generate_ai_analyst_commentary
+
+    ai_commentary = generate_ai_analyst_commentary(
+        symbol=symbol,
+        company_name=company_name,
+        sector=sector,
+        as_of_date=technical.date.isoformat() if technical and technical.date else None,
+        artha_score=score,
+        rating=_rating(score),
+        score_breakdown=scores_breakdown,
+        strengths=strengths,
+        warnings=warnings,
+        technical=technical_summary,
+        signals=signals_data,
+        backtests=backtest_data,
+    )
 
     return {
         "symbol": symbol,
@@ -249,41 +364,25 @@ def _build_payload(
         "artha_score": score,
         "rating": _rating(score),
         "confidence_level": confidence_level,
-        "signal_quality": _signal_quality(reliability, signal_names),
-        "trend_strength": _trend_strength(trend),
-        "scores": {
-            "trend": trend,
-            "momentum": momentum,
-            "liquidity": liquidity_score,
-            "reliability": reliability,
-            "risk_adjustment": risk_adjustment,
+        "signal_quality": _signal_quality(raw_conf, signal_names),
+        "trend_strength": _trend_strength(trend_score),
+        "scores": scores_breakdown,
+        "technical": technical_summary,
+        "fundamental": {
+            "pe_ratio": _number(fundamental.pe_ratio) if fundamental else None,
+            "pb_ratio": _number(fundamental.pb_ratio) if fundamental else None,
+            "eps": _number(fundamental.eps) if fundamental else None,
+            "book_value": _number(fundamental.book_value) if fundamental else None,
+            "score": fundamental_pts,
         },
-        "technical": {
-            "rsi": rsi,
-            "rsi_state": rsi_state,
-            "macd": macd_state,
-            "latest_price": price_number,
-            "sma_50": sma_50,
-            "sma_200": sma_200,
-            "price_vs_sma_200": price_vs_sma_200,
-            "sma_50_vs_sma_200": sma_50_vs_sma_200,
-        },
-        "liquidity": {"tier": liquidity_label, "score": liquidity_score},
+        "liquidity": {"tier": liquidity_label, "score": liquidity_pts},
         "confidence": _confidence_summary(confidence_list, signal_names),
-        "backtest_summary": _backtest_summary(backtests),
-        "signals": [
-            {
-                "signal_name": call.signal_name,
-                "status": _enum_value(call.status),
-                "entry_date": call.entry_date.isoformat() if call.entry_date else None,
-                "forward_days_horizon": call.forward_days_horizon,
-                "direction": _signal_direction(str(call.signal_name)),
-            }
-            for call in calls_list
-        ],
+        "backtest_summary": backtest_data,
+        "signals": signals_data,
         "risk": {"level": risk_level, "warnings": warnings},
         "strengths": strengths,
         "explanation": explanation,
+        "ai_analysis": ai_commentary,
     }
 
 
@@ -296,6 +395,13 @@ def build_stock_intelligence(session: Session, symbol: str) -> dict[str, Any] | 
         select(TechnicalSignal)
         .where(TechnicalSignal.symbol == symbol, TechnicalSignal.timeframe == SignalTimeframe.DAILY)
         .order_by(TechnicalSignal.date.desc())
+        .limit(1)
+    ).scalar_one_or_none()
+
+    fundamental = session.execute(
+        select(Fundamental)
+        .where(Fundamental.symbol == symbol)
+        .order_by(Fundamental.reported_date.desc())
         .limit(1)
     ).scalar_one_or_none()
 
@@ -349,6 +455,7 @@ def build_stock_intelligence(session: Session, symbol: str) -> dict[str, Any] | 
         company_name=company.company_name,
         sector=company.sector,
         technical=technical,
+        fundamental=fundamental,
         price=price,
         liquidity=liquidity,
         calls=calls,

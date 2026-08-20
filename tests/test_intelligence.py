@@ -99,3 +99,59 @@ def test_chart_signal_direction_is_explicit_and_stable() -> None:
     assert _signal_direction("rsi_14 > 70 (overbought)") == "bearish"
     assert _signal_direction("doji") == "neutral"
     assert _signal_direction("unknown signal") == "neutral"
+
+
+def test_valuation_scoring() -> None:
+    from src.services.stock_intelligence import _valuation_score
+
+    score_none, _ = _valuation_score(None)
+    assert score_none == 5
+
+    good_fund = SimpleNamespace(pe_ratio=15.0, eps=30.0, pb_ratio=2.0)
+    score_good, insights = _valuation_score(good_fund)
+    assert score_good == 10
+    assert any("Strong EPS" in i for i in insights)
+    assert any("Attractive P/E" in i for i in insights)
+
+
+def test_ai_analyst_commentary() -> None:
+    from src.services.ai_analyst import _rule_based_fallback, generate_ai_analyst_commentary
+
+    # 1. Test offline rule-based fallback specifically
+    fallback = _rule_based_fallback(
+        symbol="TEST",
+        company_name="Test Corp",
+        artha_score=85,
+        rating="strong_setup",
+        strengths=["Long-term golden alignment", "High liquidity"],
+        warnings=[],
+        backtests=[{"signal_name": "rsi_oversold", "forward_days": 10, "win_rate": 0.72}],
+        technical={"latest_price": 500, "sma_50": 480, "sma_200": 450},
+    )
+    assert "summary" in fallback
+    assert "Test Corp (TEST)" in fallback["summary"]
+    assert "72.0%" in fallback["summary"]
+    assert "key_takeaway" in fallback
+    assert "confidence_reason" in fallback
+
+    # 2. Test general commentary generator
+    res = generate_ai_analyst_commentary(
+        symbol="TEST",
+        company_name="Test Corp",
+        sector="Commercial Banks",
+        as_of_date="2026-08-20",
+        artha_score=85,
+        rating="strong_setup",
+        score_breakdown={"trend": 30, "momentum": 20, "liquidity": 15, "reliability": 10, "risk_adjustment": 5, "valuation": 5},
+        strengths=["Long-term golden alignment", "High liquidity"],
+        warnings=[],
+        technical={"latest_price": 500, "sma_50": 480, "sma_200": 450},
+        signals=[],
+        backtests=[{"signal_name": "rsi_oversold", "forward_days": 10, "win_rate": 0.72}],
+    )
+    assert "summary" in res
+    assert len(res["summary"]) > 10
+    assert "key_takeaway" in res
+    assert "confidence_reason" in res
+
+

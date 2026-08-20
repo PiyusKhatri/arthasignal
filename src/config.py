@@ -30,6 +30,7 @@ class Settings:
     smtp_from_email: str | None
     smtp_use_tls: bool
     frontend_base_url: str
+    mistral_api_key: str | None
 
 
 def _require_env(name: str) -> str:
@@ -66,6 +67,7 @@ def get_settings() -> Settings:
         smtp_from_email=os.getenv("SMTP_FROM_EMAIL"),
         smtp_use_tls=_env_bool("SMTP_USE_TLS", True),
         frontend_base_url=os.getenv("FRONTEND_BASE_URL", "http://localhost:3000").rstrip("/"),
+        mistral_api_key=os.getenv("MISTRAL_API_KEY"),
     )
 
 

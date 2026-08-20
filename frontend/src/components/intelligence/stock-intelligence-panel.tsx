@@ -1,3 +1,4 @@
+import { AiAnalystCard } from "@/components/intelligence/ai-analyst-card";
 import { ArthaScoreCard } from "@/components/intelligence/artha-score-card";
 import { IntelligenceBreakdown } from "@/components/intelligence/intelligence-breakdown";
 import type { StockIntelligence } from "@/lib/market-data";
@@ -48,9 +49,9 @@ export function StockIntelligencePanel({ intelligence }: { intelligence: StockIn
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-accent-text">Decision layer</p>
-          <h2 id="artha-intelligence-title" className="mt-1 text-xl font-semibold text-text-primary">Artha Intelligence</h2>
+          <h2 id="artha-intelligence-title" className="mt-1 text-xl font-semibold text-text-primary">Artha Intelligence v2</h2>
           <p className="mt-1 max-w-2xl text-sm text-text-secondary">
-            A combined view of trend, momentum, liquidity, signal reliability and historical evidence for {intelligence.company_name}.
+            6-pillar quantitative scoring model, 15+ year backtest evidence, and AI analyst synthesis for {intelligence.company_name}.
           </p>
         </div>
         <div className="text-xs text-text-secondary">
@@ -62,6 +63,10 @@ export function StockIntelligencePanel({ intelligence }: { intelligence: StockIn
         <ArthaScoreCard intelligence={intelligence} />
         <IntelligenceBreakdown scores={intelligence.scores} />
       </div>
+
+      {intelligence.ai_analysis && (
+        <AiAnalystCard intelligence={intelligence} />
+      )}
 
       <article className="rounded-xl border border-border bg-card p-5">
         <div>

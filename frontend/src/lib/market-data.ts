@@ -142,6 +142,7 @@ export type StockIntelligence = {
     liquidity: number;
     reliability: number;
     risk_adjustment: number;
+    valuation: number;
   };
   technical: {
     rsi: number | null;
@@ -152,6 +153,13 @@ export type StockIntelligence = {
     sma_200: number | null;
     price_vs_sma_200: string;
     sma_50_vs_sma_200: string;
+  };
+  fundamental: {
+    pe_ratio: number | null;
+    pb_ratio: number | null;
+    eps: number | null;
+    book_value: number | null;
+    score: number;
   };
   liquidity: {
     tier: string | null;
@@ -172,6 +180,12 @@ export type StockIntelligence = {
   };
   strengths: string[];
   explanation: string[];
+  ai_analysis?: {
+    summary: string;
+    confidence_reason: string;
+    key_takeaway: string;
+    provider: string;
+  };
 };
 
 export type MarketIntelligenceStock = {

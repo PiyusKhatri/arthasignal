@@ -15,7 +15,10 @@ BULK_UPDATE_ADJUSTED_CLOSE_SQL = text(
     """
     UPDATE daily_prices AS dp
     SET adjusted_close = v.adjusted_close
-    FROM (SELECT unnest(:ids) AS id, unnest(:adjusted_closes) AS adjusted_close) AS v
+    FROM (
+        SELECT unnest(CAST(:ids AS integer[])) AS id,
+               unnest(CAST(:adjusted_closes AS numeric[])) AS adjusted_close
+    ) AS v
     WHERE dp.id = v.id
     """
 )
