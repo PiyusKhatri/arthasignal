@@ -31,6 +31,20 @@ try {
   // failed requests mean that there are zero market signals.
   await page.goto(`${baseUrl}/dashboard`, { waitUntil: "domcontentloaded" });
   await requireVisible(page, '[data-testid="global-stock-search"] input', "global stock search");
+  await requireVisible(page, '[data-testid="desktop-sidebar"]', "desktop application sidebar");
+  await requireVisible(page, '[data-testid="app-topbar"]', "application top bar");
+  await requireVisible(page, 'main#app-content', "application content frame");
+  await requireVisible(page, 'a[href="/dashboard"]', "dashboard navigation link");
+  await requireVisible(page, 'a[href="/market-pulse"]', "market intelligence navigation link");
+  await requireVisible(page, 'a[href="/sectors"]', "sectors navigation link");
+  await requireVisible(page, 'a[href="/watchlist"]', "watchlist navigation link");
+  await requireVisible(page, 'a[href="/portfolio"]', "portfolio navigation link");
+
+  const deadNavigationLinks = await page.locator('a[href="/search"], a[href="/alerts"], a[href="/settings"]').count();
+  if (deadNavigationLinks !== 0) {
+    throw new Error("App shell contains navigation links to routes that are not implemented");
+  }
+
   await page.getByText("Some market data is temporarily unavailable:").waitFor({ state: "visible", timeout: 10_000 });
   await page.getByText("Signal data is temporarily unavailable.").waitFor({ state: "visible", timeout: 10_000 });
 
