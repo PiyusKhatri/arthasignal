@@ -155,10 +155,7 @@ def _calibrated_predictions(
     test_rows: list[dict[str, Any]],
 ) -> list[float]:
     calibration_raw = predict_xgb_rows(model, calibration_rows)
-    calibrator = fit_platt_calibrator(
-        calibration_raw,
-        [bool(row["success"]) for row in calibration_rows],
-    )
+    calibrator = fit_platt_calibrator(calibration_raw, [bool(row["success"]) for row in calibration_rows])
     if calibrator is None:
         return []
     test_raw = predict_xgb_rows(model, test_rows)
@@ -258,12 +255,7 @@ def _fit_fold(fold: dict[str, Any]) -> dict[str, Any] | None:
     if len(rank_scores) != len(test):
         return None
 
-    candidates = build_v3_candidate_scores(
-        test,
-        execution_probabilities,
-        risk_probability_sets,
-        rank_scores,
-    )
+    candidates = build_v3_candidate_scores(test, execution_probabilities, risk_probability_sets, rank_scores)
     if len(candidates) != len(test):
         return None
 
@@ -322,6 +314,12 @@ def _high_confidence_summary(rows: list[dict[str, Any]], probabilities: list[flo
     }
 
 
+def _relative_risk_reduction(selected: float | None, reference: float | None) -> float | None:
+    if selected is None or reference in (None, 0.0):
+        return None
+    return 1.0 - float(selected) / float(reference)
+
+
 def validate_v3_decision_policy(
     *,
     limit: int = DEFAULT_SYMBOL_LIMIT,
@@ -377,10 +375,7 @@ def validate_v3_decision_policy(
     aggregate_portfolio = non_overlapping_dynamic_portfolio(aggregate_selection, cost_percent=V3_EXECUTION_HURDLE_PERCENT)
 
     capacity_baseline_selection = _regime_matched_baseline(all_rows)
-    matched_breadth_selection = _regime_matched_baseline(
-        all_rows,
-        selected_counts=_selected_counts(aggregate_selection),
-    )
+    matched_breadth_selection = _regime_matched_baseline(all_rows, selected_counts=_selected_counts(aggregate_selection))
     capacity_baseline_metrics = evaluate_dynamic_selection(
         capacity_baseline_selection,
         cost_percent=V3_EXECUTION_HURDLE_PERCENT,
@@ -389,16 +384,18 @@ def validate_v3_decision_policy(
         matched_breadth_selection,
         cost_percent=V3_EXECUTION_HURDLE_PERCENT,
     )
+    matched_breadth_portfolio = non_overlapping_dynamic_portfolio(
+        matched_breadth_selection,
+        cost_percent=V3_EXECUTION_HURDLE_PERCENT,
+    )
 
     calibration = calibration_buckets(all_rows, all_execution_probabilities)
     high_confidence = _high_confidence_summary(all_rows, all_execution_probabilities)
     universe_risk = universe_severe_drawdown_rate(all_rows)
     selected_risk = aggregate_metrics.get("severe_drawdown_rate")
-    relative_risk_reduction = (
-        1.0 - float(selected_risk) / float(universe_risk)
-        if selected_risk is not None and universe_risk not in (None, 0.0)
-        else None
-    )
+    matched_risk = matched_breadth_metrics.get("severe_drawdown_rate")
+    risk_reduction_vs_universe = _relative_risk_reduction(selected_risk, universe_risk)
+    risk_reduction_vs_matched = _relative_risk_reduction(selected_risk, matched_risk)
 
     positive_folds = sum(
         1
@@ -435,8 +432,8 @@ def validate_v3_decision_policy(
             and float(aggregate_metrics["mean_net_excess_return_percent"])
             > float(matched_breadth_metrics["mean_net_excess_return_percent"])
         ),
-        "severe_drawdown_relative_reduction_at_least_15pct": (
-            relative_risk_reduction is not None and float(relative_risk_reduction) >= MIN_RELATIVE_RISK_REDUCTION
+        "severe_drawdown_reduction_vs_matched_breadth_at_least_15pct": (
+            risk_reduction_vs_matched is not None and float(risk_reduction_vs_matched) >= MIN_RELATIVE_RISK_REDUCTION
         ),
         "high_confidence_density_adequate": (
             int(high_confidence.get("calls") or 0) >= MIN_HIGH_CONFIDENCE_CALLS
@@ -451,11 +448,38 @@ def validate_v3_decision_policy(
     }
     passed = all(checks.values())
 
+    summary = {
+        "development_verdict": "candidate_for_forward_shadow" if passed else "continue_research",
+        "valid_outer_folds": len(fold_summaries),
+        "positive_after_1pct_folds": positive_folds,
+        "beats_matched_breadth_baseline_folds": baseline_beating_folds,
+        "selected_rows": aggregate_metrics.get("selected_rows"),
+        "active_dates": aggregate_metrics.get("active_dates"),
+        "abstention_rate_on_eligible_dates": aggregate_metrics.get("abstention_rate_on_eligible_dates"),
+        "precision_after_1pct": aggregate_metrics.get("precision_after_cost"),
+        "mean_net_excess_percent": aggregate_metrics.get("mean_net_excess_return_percent"),
+        "median_net_excess_percent": aggregate_metrics.get("median_net_excess_return_percent"),
+        "matched_breadth_mean_net_excess_percent": matched_breadth_metrics.get("mean_net_excess_return_percent"),
+        "selected_severe_drawdown_rate": selected_risk,
+        "matched_breadth_severe_drawdown_rate": matched_risk,
+        "risk_reduction_vs_matched_breadth": risk_reduction_vs_matched,
+        "high_confidence_calls": high_confidence.get("calls"),
+        "high_confidence_dates": high_confidence.get("independent_dates"),
+        "non_overlap_cohorts": aggregate_portfolio.get("cohorts"),
+        "non_overlap_mean_net_excess_percent": aggregate_portfolio.get("mean_net_excess_return_percent"),
+        "non_overlap_bootstrap_95": aggregate_portfolio.get("mean_net_excess_bootstrap_95"),
+        "portfolio_approx_cagr_percent": aggregate_portfolio.get("portfolio_approx_cagr_percent"),
+        "nepse_approx_cagr_percent": aggregate_portfolio.get("nepse_approx_cagr_percent"),
+        "portfolio_cohort_boundary_max_drawdown_percent": portfolio_dd,
+        "nepse_cohort_boundary_max_drawdown_percent": market_dd,
+    }
+
     return {
         "status": "ready",
         "model_version": V3_MODEL_VERSION,
         "policy_version": V3_POLICY_VERSION,
-        "development_verdict": "candidate_for_forward_shadow" if passed else "continue_research",
+        "development_verdict": summary["development_verdict"],
+        "summary": summary,
         "policy": {
             "execution_hurdle_percent": V3_EXECUTION_HURDLE_PERCENT,
             "risk_thresholds_percent": list(V3_RISK_THRESHOLDS),
@@ -472,10 +496,13 @@ def validate_v3_decision_policy(
         "non_overlapping_portfolio": aggregate_portfolio,
         "regime_capacity_baseline": capacity_baseline_metrics,
         "matched_breadth_baseline": matched_breadth_metrics,
+        "matched_breadth_baseline_portfolio": matched_breadth_portfolio,
         "risk": {
             "universe_severe_drawdown_rate": universe_risk,
+            "matched_breadth_severe_drawdown_rate": matched_risk,
             "selected_severe_drawdown_rate": selected_risk,
-            "relative_risk_reduction": relative_risk_reduction,
+            "relative_risk_reduction_vs_universe": risk_reduction_vs_universe,
+            "relative_risk_reduction_vs_matched_breadth": risk_reduction_vs_matched,
         },
         "high_confidence": high_confidence,
         "calibration_buckets": calibration,
