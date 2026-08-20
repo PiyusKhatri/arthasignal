@@ -28,6 +28,7 @@ from src.services.quant_decision_policy import (
 )
 from src.services.quant_execution_aware import expanding_nested_folds, relabel_downside_rows, relabel_execution_rows
 from src.services.quant_features import FEATURE_SCALES
+from src.services.quant_investability import prepare_investable_research_rows
 from src.services.quant_xgboost import (
     calibrate_probability,
     fit_platt_calibrator,
@@ -328,14 +329,17 @@ def validate_v3_decision_policy(
     if not xgboost_available():
         return {"status": "xgboost_unavailable", "model_version": V3_MODEL_VERSION}
 
-    pooled, universe = _build_pooled_rows(limit=limit)
-    _attach_exact_regime_context(pooled)
-    fold_specs = expanding_nested_folds(pooled, folds=folds)
+    raw_pooled, universe = _build_pooled_rows(limit=limit)
+    investable_rows, investability = prepare_investable_research_rows(raw_pooled)
+    _attach_exact_regime_context(investable_rows)
+    fold_specs = expanding_nested_folds(investable_rows, folds=folds)
     if not fold_specs:
         return {
             "status": "insufficient_nested_history",
             "model_version": V3_MODEL_VERSION,
-            "pooled_rows": len(pooled),
+            "raw_pooled_rows": len(raw_pooled),
+            "pooled_rows": len(investable_rows),
+            "investability": investability,
             "universe": universe,
         }
 
@@ -357,6 +361,7 @@ def validate_v3_decision_policy(
             "status": "no_valid_folds",
             "model_version": V3_MODEL_VERSION,
             "requested_folds": len(fold_specs),
+            "investability": investability,
         }
 
     all_rows: list[dict[str, Any]] = []
@@ -453,6 +458,8 @@ def validate_v3_decision_policy(
         "valid_outer_folds": len(fold_summaries),
         "positive_after_1pct_folds": positive_folds,
         "beats_matched_breadth_baseline_folds": baseline_beating_folds,
+        "raw_pooled_rows": len(raw_pooled),
+        "investable_pooled_rows": len(investable_rows),
         "selected_rows": aggregate_metrics.get("selected_rows"),
         "active_dates": aggregate_metrics.get("active_dates"),
         "abstention_rate_on_eligible_dates": aggregate_metrics.get("abstention_rate_on_eligible_dates"),
@@ -487,8 +494,10 @@ def validate_v3_decision_policy(
             "abstention": "distribution/bear/high-stress markets, lagging sectors, excessive risk, or insufficient probability",
             "score": "55% execution probability + 20% rank percentile + 25% downside safety",
             "historical_regime": "exact point-in-time NEPSE SMA50/SMA200, 20D/60D return, 60D volatility and 252D drawdown",
+            "investability": investability,
         },
-        "pooled_rows": len(pooled),
+        "raw_pooled_rows": len(raw_pooled),
+        "pooled_rows": len(investable_rows),
         "valid_outer_folds": len(fold_summaries),
         "total_nested_test_rows": len(all_rows),
         "total_nested_test_dates": len({row["date"] for row in all_rows}),
@@ -516,6 +525,7 @@ def validate_v3_decision_policy(
         "interpretation": {
             "fresh_untouched_historical_holdout": False,
             "development_evidence_only": True,
+            "investability_filter_applied": True,
             "reason": (
                 "V1 and V2 historical results have already been inspected. V3 is a predeclared decision-policy challenger "
                 "tested through expanding folds; only future shadow observations can provide fresh confirmation."
