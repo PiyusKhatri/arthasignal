@@ -5,7 +5,7 @@ from collections import defaultdict
 from datetime import date
 from typing import Any, Iterable
 
-from sqlalchemy import select
+from sqlalchemy import inspect, select
 from sqlalchemy.orm import Session
 
 from src.database.connection import get_session
@@ -113,6 +113,7 @@ def evaluate_quant_validation_rows(rows: Iterable[Any]) -> dict[str, Any]:
         "protocol_start_date": QUANT_VALIDATION_START_DATE.isoformat(),
         "gate_status": gate_status,
         "public_high_confidence_enabled": gate_status == "pass",
+        "storage_ready": True,
         "resolved_calls": len(resolved),
         "pending_calls": len(pending),
         "void_calls": len(voided),
@@ -139,10 +140,36 @@ def evaluate_quant_validation_rows(rows: Iterable[Any]) -> dict[str, Any]:
     }
 
 
+def _uninitialized_storage_status() -> dict[str, Any]:
+    status = evaluate_quant_validation_rows([])
+    status.update(
+        {
+            "gate_status": "unavailable",
+            "public_high_confidence_enabled": False,
+            "storage_ready": False,
+            "note": (
+                "Quant shadow-validation storage is not initialized on this database. "
+                "Core market intelligence remains available; run `python -m src.database.init_db` "
+                "before collecting forward shadow signals."
+            ),
+        }
+    )
+    return status
+
+
+def _storage_ready(session: Session) -> bool:
+    bind = session.get_bind()
+    return bool(inspect(bind).has_table(QuantShadowSignal.__tablename__))
+
+
 def build_quant_validation_status(session: Session | None = None) -> dict[str, Any]:
     if session is not None:
+        if not _storage_ready(session):
+            return _uninitialized_storage_status()
         return evaluate_quant_validation_rows(_load_rows(session))
 
     with get_session() as owned_session:
+        if not _storage_ready(owned_session):
+            return _uninitialized_storage_status()
         rows = _load_rows(owned_session)
     return evaluate_quant_validation_rows(rows)
