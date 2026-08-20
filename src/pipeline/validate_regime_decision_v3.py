@@ -14,8 +14,8 @@ from src.services.quant_decision_policy import (
     V3_RISK_THRESHOLDS,
     build_v3_candidate_scores,
     calibration_buckets,
-    classify_market_regime,
-    classify_sector_regime,
+    consensus_market_regime,
+    consensus_sector_regime,
     evaluate_dynamic_selection,
     non_overlapping_dynamic_portfolio,
     select_dynamic_setups,
@@ -79,11 +79,7 @@ def _calibrated_predictions(
 
 
 def _regime_matched_baseline(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    """Use the same ex-ante regime capacity but rank with a fixed non-ML multifactor score.
-
-    This makes the comparison fairer: any improvement must come from ML/risk
-    discrimination rather than merely avoiding bad market regimes.
-    """
+    """Give the fixed multifactor baseline the same market/sector opportunity set as v3."""
     capacities = {
         "strong_positive": 10,
         "positive": 5,
@@ -99,11 +95,20 @@ def _regime_matched_baseline(rows: list[dict[str, Any]]) -> dict[str, Any]:
     day_summaries: list[dict[str, Any]] = []
     for trading_date in sorted(grouped):
         date_rows = grouped[trading_date]
-        market = classify_market_regime(date_rows[0]) if date_rows else "stress"
+        market = consensus_market_regime(date_rows)
         capacity = capacities[market]
+
+        sector_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
+        for row in date_rows:
+            sector_groups[str(row.get("sector") or "unknown")].append(row)
+        sector_labels = {
+            sector: consensus_sector_regime(sector_rows)
+            for sector, sector_rows in sector_groups.items()
+        }
+
         eligible = []
         for row in date_rows:
-            sector = classify_sector_regime(row)
+            sector = sector_labels[str(row.get("sector") or "unknown")]
             if sector == "lagging":
                 continue
             if market == "sideways" and sector != "leading":
@@ -217,7 +222,10 @@ def _high_confidence_summary(rows: list[dict[str, Any]], probabilities: list[flo
         "calls": len(pairs),
         "independent_dates": len({row["date"] for row, _ in pairs}),
         "precision_after_1pct": (
-            mean(1.0 if float(row["excess_return_percent"]) > V3_EXECUTION_HURDLE_PERCENT else 0.0 for row, _ in pairs)
+            mean(
+                1.0 if float(row["excess_return_percent"]) > V3_EXECUTION_HURDLE_PERCENT else 0.0
+                for row, _ in pairs
+            )
             if pairs
             else None
         ),
@@ -378,6 +386,7 @@ def validate_v3_decision_policy(
             },
             "abstention": "negative/stress markets, lagging sectors, excessive risk, or insufficient probability",
             "score": "55% execution probability + 20% rank percentile + 25% downside safety",
+            "regime_consensus": "same-date market median and same-date/sector median",
         },
         "pooled_rows": len(pooled),
         "valid_outer_folds": len(fold_summaries),
