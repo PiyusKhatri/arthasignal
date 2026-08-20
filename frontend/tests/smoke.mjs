@@ -30,6 +30,7 @@ try {
   // must therefore render an explicit outage state rather than pretending the
   // failed requests mean that there are zero market signals.
   await page.goto(`${baseUrl}/dashboard`, { waitUntil: "domcontentloaded" });
+  await requireVisible(page, '[data-testid="global-stock-search"] input', "global stock search");
   await page.getByText("Some market data is temporarily unavailable:").waitFor({ state: "visible", timeout: 10_000 });
   await page.getByText("Signal data is temporarily unavailable.").waitFor({ state: "visible", timeout: 10_000 });
 
