@@ -179,6 +179,7 @@ def _compact(result: dict[str, Any]) -> dict[str, Any]:
         "replacements",
         "blocked_buy_attempts",
         "blocked_sell_attempts",
+        "sampled_absence_holds",
         "mean_positions",
         "mean_completed_holding_sessions",
         "median_completed_holding_sessions",
@@ -196,6 +197,7 @@ def validate_execution_policy_e1(*, limit: int = DEFAULT_SYMBOL_LIMIT, folds: in
     all_predictions: list[dict[str, Any]] = []
     reactive_v41_signals: dict[Any, list[str]] = {}
     reactive_baseline_signals: dict[Any, list[str]] = {}
+    observed_symbols_by_date: dict[Any, set[str]] = defaultdict(set)
     valid_folds = 0
     all_rows: list[dict[str, Any]] = []
     for fold in fold_specs:
@@ -206,6 +208,8 @@ def validate_execution_policy_e1(*, limit: int = DEFAULT_SYMBOL_LIMIT, folds: in
         predictions = result["predictions"]
         all_predictions.extend(predictions)
         all_rows.extend(candidate["row"] for candidate in predictions)
+        for row in fold["test"]:
+            observed_symbols_by_date[row["date"]].add(str(row["symbol"]))
         reactive_v41_signals.update(_signals(result["selection"], score_key="final_score"))
         reactive_baseline_signals.update(_signals(result["matched_baseline"], score_key="baseline_score"))
 
@@ -219,9 +223,9 @@ def validate_execution_policy_e1(*, limit: int = DEFAULT_SYMBOL_LIMIT, folds: in
         }
 
     predictions_by_date = group_predictions_by_date(all_predictions)
-    start_date = min(predictions_by_date)
+    start_date = min(set(predictions_by_date) | set(observed_symbols_by_date))
     end_date = max((row.get("label_end_date") or row["date"]) for row in all_rows)
-    symbols = sorted({_candidate["row"]["symbol"] for _candidate in all_predictions})
+    symbols = sorted({candidate["row"]["symbol"] for candidate in all_predictions})
 
     with get_session() as session:
         market_rows = session.execute(
@@ -254,12 +258,14 @@ def validate_execution_policy_e1(*, limit: int = DEFAULT_SYMBOL_LIMIT, folds: in
     e1_v41 = simulate_execution_policy_e1(
         market_dates=market_dates,
         predictions_by_date=predictions_by_date,
+        observed_symbols_by_date=dict(observed_symbols_by_date),
         price_history=dict(price_history),
         mode="v41",
     )
     e1_baseline = simulate_execution_policy_e1(
         market_dates=market_dates,
         predictions_by_date=predictions_by_date,
+        observed_symbols_by_date=dict(observed_symbols_by_date),
         price_history=dict(price_history),
         mode="baseline",
     )
@@ -361,9 +367,10 @@ def validate_execution_policy_e1(*, limit: int = DEFAULT_SYMBOL_LIMIT, folds: in
             "replacement_score_margin": E1_REPLACEMENT_SCORE_MARGIN,
             "routine_rebalance_surviving_positions": False,
             "held_name_survives_ordinary_rank_drift": True,
-            "v41_exit_triggers": ["leaves_candidate_set", "reject", "20_session_expiry", "material_replacement"],
+            "v41_exit_triggers": ["fresh_ineligibility", "reject", "20_session_expiry", "material_replacement"],
             "baseline_uses_same_execution_mechanics": True,
             "baseline_same_breadth_guaranteed": False,
+            "historical_unsampled_absence_causes_exit": False,
         },
         "summary": {
             "e1_v41": _compact(e1_v41),
@@ -404,10 +411,12 @@ def validate_execution_policy_e1(*, limit: int = DEFAULT_SYMBOL_LIMIT, folds: in
             "feature_step": HISTORICAL_STEP,
             "daily_mark_to_market": True,
             "daily_historical_signal_claim": False,
+            "sampled_absence_is_not_treated_as_ineligibility": True,
             "note": (
-                "E1 is evaluated on the frozen V4.1 OOS decision cadence sampled every five stock observations. "
-                "Hold/expiry mechanics run every NEPSE session, but fresh historical candidate decisions only exist "
-                "on those sampled OOS dates. The forward V4.1 ledger continues independently on every eligible future session."
+                "E1 is evaluated on the frozen V4.1 OOS matrix sampled every five stock observations. Holdings are "
+                "marked and expiry-tested every NEPSE session. A held stock exits for ineligibility only when that stock "
+                "has a fresh OOS observation and fails the candidate filter; an unsampled absence carries the last valid "
+                "score. The forward V4.1 ledger will eventually provide complete daily observations without this approximation."
             ),
         },
         "investability": investability,
