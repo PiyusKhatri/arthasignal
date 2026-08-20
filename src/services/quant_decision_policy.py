@@ -6,8 +6,6 @@ from collections import defaultdict
 from statistics import mean, median
 from typing import Any, Sequence
 
-from src.services.quant_features import ROUND_TRIP_COST_PERCENT
-
 V3_EXECUTION_HURDLE_PERCENT = 1.00
 V3_RISK_THRESHOLDS = (-3.0, -5.0, -8.0)
 V3_POLICY_VERSION = "2026-08-21-regime-risk-v1"
@@ -55,8 +53,7 @@ def infer_market_return_20d(row: dict[str, Any]) -> float:
     return stock_return - relative_strength
 
 
-def classify_market_regime(row: dict[str, Any]) -> str:
-    market_return = infer_market_return_20d(row)
+def _classify_market_return(market_return: float) -> str:
     if market_return >= 6.0:
         return "strong_positive"
     if market_return >= 2.0:
@@ -68,6 +65,17 @@ def classify_market_regime(row: dict[str, Any]) -> str:
     return "stress"
 
 
+def classify_market_regime(row: dict[str, Any]) -> str:
+    return _classify_market_return(infer_market_return_20d(row))
+
+
+def consensus_market_regime(rows: Sequence[dict[str, Any]]) -> str:
+    """Use the same-date median to damp stock-specific missing-session noise."""
+    if not rows:
+        return "stress"
+    return _classify_market_return(median(infer_market_return_20d(row) for row in rows))
+
+
 def sector_relative_strength_20d(row: dict[str, Any]) -> float:
     features = row.get("features", {})
     stock_vs_market = float(features.get("relative_strength_market_20d", 0.0))
@@ -75,13 +83,22 @@ def sector_relative_strength_20d(row: dict[str, Any]) -> float:
     return stock_vs_market - stock_vs_sector
 
 
-def classify_sector_regime(row: dict[str, Any]) -> str:
-    relative = sector_relative_strength_20d(row)
+def _classify_sector_relative(relative: float) -> str:
     if relative >= 2.0:
         return "leading"
     if relative > -2.0:
         return "neutral"
     return "lagging"
+
+
+def classify_sector_regime(row: dict[str, Any]) -> str:
+    return _classify_sector_relative(sector_relative_strength_20d(row))
+
+
+def consensus_sector_regime(rows: Sequence[dict[str, Any]]) -> str:
+    if not rows:
+        return "neutral"
+    return _classify_sector_relative(median(sector_relative_strength_20d(row) for row in rows))
 
 
 def classify_volatility_regime(row: dict[str, Any]) -> str:
@@ -126,6 +143,30 @@ def _date_rank_percentiles(rows: Sequence[dict[str, Any]], scores: Sequence[floa
     return percentiles
 
 
+def stabilize_regime_labels(candidates: Sequence[dict[str, Any]]) -> None:
+    """Apply same-date market consensus and same-date/sector consensus in place."""
+    by_date: dict[Any, list[dict[str, Any]]] = defaultdict(list)
+    by_date_sector: dict[tuple[Any, str], list[dict[str, Any]]] = defaultdict(list)
+    for candidate in candidates:
+        row = candidate["row"]
+        by_date[row["date"]].append(candidate)
+        by_date_sector[(row["date"], str(row.get("sector") or "unknown"))].append(candidate)
+
+    market_labels = {
+        trading_date: consensus_market_regime([candidate["row"] for candidate in date_candidates])
+        for trading_date, date_candidates in by_date.items()
+    }
+    sector_labels = {
+        key: consensus_sector_regime([candidate["row"] for candidate in sector_candidates])
+        for key, sector_candidates in by_date_sector.items()
+    }
+
+    for candidate in candidates:
+        row = candidate["row"]
+        candidate["market_regime"] = market_labels[row["date"]]
+        candidate["sector_regime"] = sector_labels[(row["date"], str(row.get("sector") or "unknown"))]
+
+
 def build_v3_candidate_scores(
     rows: Sequence[dict[str, Any]],
     execution_probabilities: Sequence[float],
@@ -154,7 +195,6 @@ def build_v3_candidate_scores(
         )
         execution_probability = _clamp(execution_probabilities[index])
         rank_percentile = _clamp(rank_percentiles[index])
-        # v3 intentionally gives downside safety more influence than v2.
         score = (
             0.55 * execution_probability
             + 0.20 * rank_percentile
@@ -172,6 +212,7 @@ def build_v3_candidate_scores(
                 **risk,
             }
         )
+    stabilize_regime_labels(candidates)
     return candidates
 
 
@@ -187,7 +228,6 @@ def _candidate_is_qualified(candidate: dict[str, Any]) -> bool:
         return False
     if candidate["volatility_regime"] == "high" and float(candidate["execution_probability"]) < 0.60:
         return False
-    # Sideways markets require genuine sector leadership rather than neutral participation.
     if market == "sideways" and candidate["sector_regime"] != "leading":
         return False
     return True
@@ -202,7 +242,7 @@ def select_dynamic_setups(candidates: Sequence[dict[str, Any]]) -> dict[str, Any
     day_summaries: list[dict[str, Any]] = []
     for trading_date in sorted(grouped):
         date_candidates = grouped[trading_date]
-        market = date_candidates[0]["market_regime"] if date_candidates else "stress"
+        market = consensus_market_regime([candidate["row"] for candidate in date_candidates])
         capacity = MARKET_CAPACITY.get(market, 0)
         qualified = [candidate for candidate in date_candidates if _candidate_is_qualified(candidate)]
         chosen = sorted(qualified, key=lambda candidate: candidate["score"], reverse=True)[:capacity]
@@ -262,7 +302,7 @@ def evaluate_dynamic_selection(
         "median_net_excess_return_percent": median(net_excess) if net_excess else None,
         "severe_drawdown_rate": mean(1.0 if flag else 0.0 for flag in severe) if severe else None,
         "market_regime_distribution": {
-            regime: sum(candidate["market_regime"] == regime for candidate in selected)
+            regime: sum(candidate.get("market_regime") == regime for candidate in selected)
             for regime in MARKET_CAPACITY
         },
     }
@@ -370,7 +410,10 @@ def calibration_buckets(
             "calls": len(pairs),
             "independent_dates": len({row["date"] for row, _ in pairs}),
             "mean_predicted_probability": mean(probability for _, probability in pairs) if pairs else None,
-            "actual_success_rate": mean(1.0 if float(row["excess_return_percent"]) > V3_EXECUTION_HURDLE_PERCENT else 0.0 for row, _ in pairs) if pairs else None,
+            "actual_success_rate": mean(
+                1.0 if float(row["excess_return_percent"]) > V3_EXECUTION_HURDLE_PERCENT else 0.0
+                for row, _ in pairs
+            ) if pairs else None,
             "mean_excess_return_percent": mean(excess) if excess else None,
             "median_excess_return_percent": median(excess) if excess else None,
             "severe_drawdown_rate": mean(1.0 if flag else 0.0 for flag in severe) if severe else None,
