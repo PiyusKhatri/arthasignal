@@ -26,6 +26,17 @@ try {
   await page.goto(`${baseUrl}/reset-password`, { waitUntil: "domcontentloaded" });
   await requireVisible(page, 'a[href="/forgot-password"]', "missing-token recovery link");
 
+  // CI deliberately does not start FastAPI for the frontend job. The dashboard
+  // must therefore render an explicit outage state rather than pretending the
+  // failed requests mean that there are zero market signals.
+  await page.goto(`${baseUrl}/dashboard`, { waitUntil: "domcontentloaded" });
+  await page.getByText("Some market data is temporarily unavailable:").waitFor({ state: "visible", timeout: 10_000 });
+  await page.getByText("Signal data is temporarily unavailable.").waitFor({ state: "visible", timeout: 10_000 });
+
+  // User-specific pages must remain protected without an access/refresh cookie.
+  await page.goto(`${baseUrl}/portfolio`, { waitUntil: "domcontentloaded" });
+  await page.waitForURL(/\/login\?next=%2Fportfolio|\/login\?next=\/portfolio/, { timeout: 10_000 });
+
   console.log("Frontend smoke checks passed");
 } finally {
   await browser.close();
