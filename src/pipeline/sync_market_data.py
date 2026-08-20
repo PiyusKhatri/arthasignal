@@ -82,7 +82,7 @@ def _history_years_for_window(start_date: date, end_date: date) -> float:
 def _default_repair_start(latest: date | None, end_date: date) -> date:
     if latest is None:
         return end_date - timedelta(days=DEFAULT_INITIAL_LOOKBACK_DAYS)
-    return min(latest + timedelta(days=1), end_date)
+    return latest + timedelta(days=1)
 
 
 def _should_refresh_eod(now_npt: datetime | None = None) -> bool:
