@@ -44,7 +44,7 @@ app.include_router(watchlist.router)
 
 
 @app.get("/health")
-def health() -> dict | JSONResponse:
+def health() -> JSONResponse:
     try:
         with get_session() as session:
             session.execute(text("SELECT 1"))
@@ -55,4 +55,4 @@ def health() -> dict | JSONResponse:
             content={"status": "degraded", "database": "unreachable"},
         )
 
-    return {"status": "ok", "database": "ok"}
+    return JSONResponse(status_code=200, content={"status": "ok", "database": "ok"})
