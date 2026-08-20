@@ -80,6 +80,30 @@ def test_portfolio_holding_cap_closes_without_new_signal() -> None:
     assert result["total_transaction_cost_percent_of_initial_capital"] > 0.0
 
 
+def test_holding_cap_does_not_sell_at_stale_price() -> None:
+    dates = [date(2026, 1, 1) + timedelta(days=index) for index in range(6)]
+    prices = {
+        "AAA": {
+            dates[0]: 100.0,
+            dates[1]: 101.0,
+            # No exact trade on the nominal expiry session dates[2].
+            dates[3]: 102.0,
+            dates[4]: 103.0,
+            dates[5]: 104.0,
+        }
+    }
+    result = simulate_rebalance_portfolio(
+        market_dates=dates,
+        signals_by_date={dates[0]: ["AAA"]},
+        price_history=prices,
+        max_positions=1,
+        max_holding_sessions=2,
+        round_trip_cost_percent=1.0,
+    )
+    assert result["blocked_trade_attempts_no_exact_price"] >= 1
+    assert result["mean_completed_holding_sessions"] == pytest.approx(3.0)
+
+
 def test_equal_price_round_trip_loses_only_transaction_costs() -> None:
     dates = [date(2026, 1, 1) + timedelta(days=index) for index in range(4)]
     prices = {"AAA": {trading_date: 100.0 for trading_date in dates}}
