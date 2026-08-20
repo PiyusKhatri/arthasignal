@@ -192,3 +192,42 @@ class QuantV41ShadowSignal(Base):
     success_after_cost: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     void_reason: Mapped[str | None] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class QuantV41ShadowRun(Base):
+    """Immutable daily heartbeat proving the frozen V4.1 shadow cycle ran."""
+
+    __tablename__ = "quant_v41_shadow_runs"
+    __table_args__ = (
+        UniqueConstraint(
+            "model_snapshot_id",
+            "as_of_date",
+            name="uq_quant_v41_shadow_run_snapshot_date",
+        ),
+        Index("ix_quant_v41_shadow_run_date", "as_of_date"),
+        Index("ix_quant_v41_shadow_run_status", "run_status"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    model_snapshot_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("quant_v41_model_snapshots.id"),
+        nullable=False,
+    )
+    as_of_date: Mapped[date] = mapped_column(Date, nullable=False)
+    model_version: Mapped[str] = mapped_column(String(80), nullable=False)
+    policy_version: Mapped[str] = mapped_column(String(80), nullable=False)
+    artifact_fingerprint: Mapped[str] = mapped_column(String(64), nullable=False)
+    run_status: Mapped[str] = mapped_column(String(20), nullable=False)
+    symbols_considered: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    eligible_rows: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    candidate_rows: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    v41_selected: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    baseline_selected: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    rows_inserted: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    skipped_stale_or_untraded: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    skipped_features: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    failure_code: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    details_json: Mapped[str] = mapped_column(Text, nullable=False)
+    run_fingerprint: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
