@@ -8,7 +8,7 @@ from typing import Any
 from src.pipeline.train_quant_models import DEFAULT_SYMBOL_LIMIT, _build_pooled_rows
 from src.services.quant_execution_aware import OUTER_FOLDS, expanding_nested_folds
 from src.services.quant_historical_context import attach_exact_regime_context
-from src.services.quant_investability import prepare_investable_research_rows
+from src.services.quant_predictable_investability import prepare_predictable_investable_rows
 from src.services.quant_residual_alpha import (
     V4_EXECUTION_HURDLE_PERCENT,
     V4_POLICY_VERSION,
@@ -232,7 +232,7 @@ def validate_residual_alpha_v4(
 
     pooled, universe = _build_pooled_rows(limit=limit)
     attach_exact_regime_context(pooled)
-    investable, investability = prepare_investable_research_rows(pooled)
+    investable, investability = prepare_predictable_investable_rows(pooled)
     fold_specs = expanding_nested_folds(investable, folds=folds)
     if not fold_specs:
         return {
@@ -406,6 +406,7 @@ def validate_residual_alpha_v4(
             "candidate_first_training": True,
             "training_only_baseline_expectation": True,
             "matched_dates_and_breadth_baseline": True,
+            "uses_future_horizon_slippage_for_filtering_or_features": False,
             "final_confirmation_required": "separate future V4 shadow ledger before any live-model promotion",
         },
     }
