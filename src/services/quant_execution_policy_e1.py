@@ -88,6 +88,7 @@ def simulate_execution_policy_e1(
     market_dates: Sequence[Any],
     predictions_by_date: dict[Any, Sequence[dict[str, Any]]],
     price_history: dict[str, dict[Any, float]],
+    observed_symbols_by_date: dict[Any, set[str]] | None = None,
     mode: str = "v41",
     max_positions: int = E1_MAX_POSITIONS,
     max_holding_sessions: int = E1_MAX_HOLDING_SESSIONS,
@@ -100,6 +101,12 @@ def simulate_execution_policy_e1(
     normal rank drift while they remain in the current candidate set and are not
     rejected. Replacement requires a fixed score advantage, and surviving
     positions are never routinely rebalanced back to equal weight.
+
+    Historical V4.1 rows were sampled every five stock observations. When
+    `observed_symbols_by_date` is supplied, a missing candidate is treated as an
+    ineligibility signal only if that stock actually had a fresh OOS observation
+    on the date. Otherwise E1 carries the last valid candidate score rather than
+    manufacturing turnover from the historical sampling scheme.
     """
     dates = sorted(market_dates)
     if not dates:
@@ -107,11 +114,13 @@ def simulate_execution_policy_e1(
     if mode not in {"v41", "baseline"}:
         raise ValueError("mode must be 'v41' or 'baseline'")
 
+    observed_symbols_by_date = observed_symbols_by_date or {}
     side_cost = max(0.0, float(round_trip_cost_percent)) / 200.0
     cash = 1.0
     shares: dict[str, float] = {}
     entry_index: dict[str, int] = {}
     last_prices: dict[str, float] = {}
+    last_scores: dict[str, float] = {}
     curve: list[float] = []
     daily_returns: list[float] = []
     dated_returns: list[dict[str, Any]] = []
@@ -129,6 +138,7 @@ def simulate_execution_policy_e1(
     exits_expired = 0
     exits_ineligible = 0
     exits_reject = 0
+    sampled_absence_holds = 0
     previous_wealth = 1.0
 
     def mark_value(symbol: str, trading_date: Any) -> float:
@@ -158,6 +168,7 @@ def simulate_execution_policy_e1(
         started = entry_index.pop(symbol, date_index)
         holding_sessions.append(max(0, date_index - started))
         shares.pop(symbol, None)
+        last_scores.pop(symbol, None)
         if reason == "expired":
             exits_expired += 1
         elif reason == "reject":
@@ -177,7 +188,15 @@ def simulate_execution_policy_e1(
         )
         return notional - fee
 
-    def buy(symbol: str, trading_date: Any, *, date_index: int, desired_notional: float, reason: str) -> bool:
+    def buy(
+        symbol: str,
+        trading_date: Any,
+        *,
+        date_index: int,
+        desired_notional: float,
+        reason: str,
+        score: float,
+    ) -> bool:
         nonlocal cash, total_notional, total_cost, buys, blocked_buys
         price = _exact_price(price_history, symbol, trading_date)
         if price is None:
@@ -190,6 +209,7 @@ def simulate_execution_policy_e1(
         fee = amount * side_cost
         shares[symbol] = amount / price
         entry_index[symbol] = date_index
+        last_scores[symbol] = score
         cash -= amount + fee
         total_notional += amount
         total_cost += fee
@@ -202,6 +222,7 @@ def simulate_execution_policy_e1(
                 "reason": reason,
                 "notional": amount,
                 "fee": fee,
+                "score": score,
             }
         )
         return True
@@ -219,22 +240,31 @@ def simulate_execution_policy_e1(
         for symbol in expired:
             sell(symbol, trading_date, date_index=date_index, reason="expired")
 
-        if trading_date in predictions_by_date:
-            date_candidates = list(predictions_by_date[trading_date])
+        has_prediction_date = trading_date in predictions_by_date
+        has_observation_date = trading_date in observed_symbols_by_date
+        if has_prediction_date or has_observation_date:
+            date_candidates = list(predictions_by_date.get(trading_date, []))
             candidate_map = {_candidate_symbol(candidate): candidate for candidate in date_candidates}
+            observed_today = observed_symbols_by_date.get(trading_date, set())
 
-            # Ordinary rank drift is not an exit. A holding leaves only if it is no
-            # longer in the candidate universe or V4.1 explicitly rejects it.
+            # Refresh scores only when a fresh candidate observation exists.
             for symbol in list(shares):
                 candidate = candidate_map.get(symbol)
-                if candidate is None:
+                if candidate is not None:
+                    last_scores[symbol] = _candidate_score(candidate, mode)
+                    if mode == "v41" and candidate.get("override_action") == "reject":
+                        sell(symbol, trading_date, date_index=date_index, reason="reject")
+                        continue
+                    if not _hold_eligible(candidate, mode):
+                        sell(symbol, trading_date, date_index=date_index, reason="ineligible")
+                        continue
+                elif symbol in observed_today:
+                    # A fresh row existed but the symbol failed the candidate filter.
                     sell(symbol, trading_date, date_index=date_index, reason="ineligible")
-                    continue
-                if mode == "v41" and candidate.get("override_action") == "reject":
-                    sell(symbol, trading_date, date_index=date_index, reason="reject")
-                    continue
-                if not _hold_eligible(candidate, mode):
-                    sell(symbol, trading_date, date_index=date_index, reason="ineligible")
+                else:
+                    # No new row for this symbol: do not confuse sparse research
+                    # sampling with a genuine loss of eligibility.
+                    sampled_absence_holds += 1
 
             ranked_entries = sorted(
                 (
@@ -252,24 +282,30 @@ def simulate_execution_policy_e1(
                 if len(shares) >= max_positions:
                     break
                 symbol = _candidate_symbol(candidate)
+                score = _candidate_score(candidate, mode)
                 wealth = portfolio_value(trading_date)
                 target_slot = wealth / max_positions
-                if buy(symbol, trading_date, date_index=date_index, desired_notional=target_slot, reason="entry"):
+                if buy(
+                    symbol,
+                    trading_date,
+                    date_index=date_index,
+                    desired_notional=target_slot,
+                    reason="entry",
+                    score=score,
+                ):
                     ranked_entries.remove(candidate)
 
             # When full, replacement requires a material predeclared score gap.
-            # No small rank change is allowed to churn the book.
+            # Last valid scores are used for holdings without a fresh sampled row.
             while len(shares) >= max_positions and ranked_entries:
-                held_candidates = [
-                    candidate_map[symbol]
+                scored_holdings = [
+                    (float(last_scores[symbol]), symbol)
                     for symbol in shares
-                    if symbol in candidate_map and _hold_eligible(candidate_map[symbol], mode)
+                    if symbol in last_scores
                 ]
-                if not held_candidates:
+                if not scored_holdings:
                     break
-                weakest = min(held_candidates, key=lambda candidate: _candidate_score(candidate, mode))
-                weakest_symbol = _candidate_symbol(weakest)
-                weakest_score = _candidate_score(weakest, mode)
+                weakest_score, weakest_symbol = min(scored_holdings)
 
                 challenger = ranked_entries[0]
                 challenger_symbol = _candidate_symbol(challenger)
@@ -299,6 +335,7 @@ def simulate_execution_policy_e1(
                     date_index=date_index,
                     desired_notional=min(proceeds, portfolio_value(trading_date) / max_positions),
                     reason="replacement",
+                    score=challenger_score,
                 )
                 if bought:
                     replacements += 1
@@ -344,7 +381,7 @@ def simulate_execution_policy_e1(
         "policy_version": E1_POLICY_VERSION,
         "mode": mode,
         "sessions": len(dates),
-        "decision_dates": sum(trading_date in predictions_by_date for trading_date in dates),
+        "decision_dates": len(set(predictions_by_date) | set(observed_symbols_by_date)),
         "max_positions": max_positions,
         "max_holding_sessions": max_holding_sessions,
         "round_trip_cost_percent": round_trip_cost_percent,
@@ -363,6 +400,7 @@ def simulate_execution_policy_e1(
         "replacements": replacements,
         "blocked_buy_attempts": blocked_buys,
         "blocked_sell_attempts": blocked_sells,
+        "sampled_absence_holds": sampled_absence_holds,
         "terminal_stale_liquidations": terminal_stale_liquidations,
         "exit_reasons": {
             "expired": exits_expired,
