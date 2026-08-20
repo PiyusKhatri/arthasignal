@@ -94,6 +94,8 @@ def simulate_execution_policy_e1(
     max_holding_sessions: int = E1_MAX_HOLDING_SESSIONS,
     round_trip_cost_percent: float = E1_ROUND_TRIP_COST_PERCENT,
     replacement_score_margin: float = E1_REPLACEMENT_SCORE_MARGIN,
+    execution_price_history: dict[str, dict[Any, float]] | None = None,
+    terminal_liquidation: bool = True,
 ) -> dict[str, Any]:
     """Sticky execution layer for frozen V4.1 or its transparent baseline.
 
@@ -107,6 +109,11 @@ def simulate_execution_policy_e1(
     ineligibility signal only if that stock actually had a fresh OOS observation
     on the date. With complete forward data, omit this argument and ordinary
     candidate absence is treated as a real loss of eligibility.
+
+    `price_history` is the mark-to-market series. By default it is also the
+    execution series, preserving the frozen E1 historical study. Forward replay
+    can supply `execution_price_history` (for example next-session opens) without
+    changing the E1 ranking, hold, exit, sizing, or replacement rules.
     """
     dates = sorted(market_dates)
     if not dates:
@@ -116,6 +123,7 @@ def simulate_execution_policy_e1(
 
     sampling_aware = observed_symbols_by_date is not None
     observed_symbols_by_date = observed_symbols_by_date or {}
+    execution_prices = execution_price_history or price_history
     side_cost = max(0.0, float(round_trip_cost_percent)) / 200.0
     cash = 1.0
     shares: dict[str, float] = {}
@@ -152,7 +160,7 @@ def simulate_execution_policy_e1(
     def sell(symbol: str, trading_date: Any, *, date_index: int, reason: str, allow_stale: bool = False) -> float:
         nonlocal cash, total_notional, total_cost, sells, blocked_sells
         nonlocal exits_expired, exits_ineligible, exits_reject
-        price = _exact_price(price_history, symbol, trading_date)
+        price = _exact_price(execution_prices, symbol, trading_date)
         stale = False
         if price is None and allow_stale:
             price = _asof_price(price_history, symbol, trading_date, last_prices)
@@ -184,6 +192,7 @@ def simulate_execution_policy_e1(
                 "reason": reason,
                 "notional": notional,
                 "fee": fee,
+                "execution_price": price,
                 "stale_terminal_price": stale,
             }
         )
@@ -199,11 +208,13 @@ def simulate_execution_policy_e1(
         score: float,
     ) -> bool:
         nonlocal cash, total_notional, total_cost, buys, blocked_buys
-        price = _exact_price(price_history, symbol, trading_date)
+        price = _exact_price(execution_prices, symbol, trading_date)
         if price is None:
             blocked_buys += 1
             return False
-        last_prices[symbol] = price
+        mark = _exact_price(price_history, symbol, trading_date)
+        if mark is not None:
+            last_prices[symbol] = mark
         amount = min(max(0.0, desired_notional), cash / max(1e-12, 1.0 + side_cost))
         if amount <= 1e-12:
             return False
@@ -223,6 +234,7 @@ def simulate_execution_policy_e1(
                 "reason": reason,
                 "notional": amount,
                 "fee": fee,
+                "execution_price": price,
                 "score": score,
             }
         )
@@ -313,10 +325,10 @@ def simulate_execution_policy_e1(
                 if challenger_score < weakest_score + replacement_score_margin:
                     break
 
-                if _exact_price(price_history, weakest_symbol, trading_date) is None:
+                if _exact_price(execution_prices, weakest_symbol, trading_date) is None:
                     blocked_sells += 1
                     break
-                if _exact_price(price_history, challenger_symbol, trading_date) is None:
+                if _exact_price(execution_prices, challenger_symbol, trading_date) is None:
                     blocked_buys += 1
                     ranked_entries.pop(0)
                     continue
@@ -349,15 +361,15 @@ def simulate_execution_policy_e1(
         active_position_counts.append(len(shares))
         previous_wealth = end_wealth
 
-    # Terminal wealth includes a final liquidation cost. Stale marks are allowed
-    # only for this final accounting approximation and are explicitly flagged.
+    # Historical validation closes inventory for comparable terminal wealth.
+    # Forward shadow replay disables this so open positions remain open evidence.
     terminal_stale_liquidations = 0
-    if dates and shares:
+    if terminal_liquidation and dates and shares:
         final_date = dates[-1]
         final_index = len(dates) - 1
         before = portfolio_value(final_date)
         for symbol in list(shares):
-            exact = _exact_price(price_history, symbol, final_date)
+            exact = _exact_price(execution_prices, symbol, final_date)
             if exact is None:
                 terminal_stale_liquidations += 1
             sell(symbol, final_date, date_index=final_index, reason="terminal", allow_stale=True)
@@ -386,6 +398,8 @@ def simulate_execution_policy_e1(
         "max_holding_sessions": max_holding_sessions,
         "round_trip_cost_percent": round_trip_cost_percent,
         "replacement_score_margin": replacement_score_margin,
+        "execution_price_basis": "separate" if execution_price_history is not None else "mark_price_series",
+        "terminal_liquidation": terminal_liquidation,
         "ending_wealth": previous_wealth,
         "total_return_percent": total_return,
         "approx_cagr_percent": cagr,
