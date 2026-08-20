@@ -1,20 +1,17 @@
 from __future__ import annotations
 
+from statistics import mean
 from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from src.database.models import Company, SymbolLiquidityTier
+from src.database.models import Company
 from src.services.nepse_quant_research import NEPSE_INDEX_NAME, _load_index_series, _load_stock_series, _sector_index_name
 from src.services.quant_features import build_feature_row
 from src.services.quant_historical_context import index_context_as_of
 from src.services.quant_residual_alpha import build_baseline_candidate_pool
-
-CURRENT_LIQUIDITY_MAP = {
-    "high_liquidity": "high",
-    "medium_liquidity": "medium",
-}
+from src.services.quant_robustness import annotate_liquidity_buckets
 
 
 def _regime_context(
@@ -43,8 +40,9 @@ def _regime_context(
 def build_current_v41_rows(session: Session, *, limit: int = 300) -> dict[str, Any]:
     """Build today's V4.1 feature-only universe using observable information only.
 
-    A stock must have traded on the latest NEPSE index date. This deliberately
-    avoids inventing an executable entry for a stale/suspended name.
+    Live liquidity intentionally reproduces the historical rule: compute each
+    stock's trailing 20-observation average turnover, assign same-date terciles,
+    then keep medium/high. A stock must also have traded on the latest NEPSE date.
     """
     market = _load_index_series(session, NEPSE_INDEX_NAME)
     if not market.get("dates") or not market.get("closes"):
@@ -56,17 +54,12 @@ def build_current_v41_rows(session: Session, *, limit: int = 300) -> dict[str, A
     if market_close is None:
         return {"as_of_date": as_of_date, "rows": [], "candidates": [], "reason": "missing_market_close"}
 
-    records = session.execute(
-        select(Company, SymbolLiquidityTier.liquidity_tier)
-        .join(SymbolLiquidityTier, SymbolLiquidityTier.symbol == Company.symbol)
-        .where(
-            Company.instrument_type == "Equity",
-            Company.status == "A",
-            SymbolLiquidityTier.liquidity_tier.in_(tuple(CURRENT_LIQUIDITY_MAP)),
-        )
-        .order_by(SymbolLiquidityTier.avg_daily_turnover.desc(), Company.symbol)
+    companies = session.execute(
+        select(Company)
+        .where(Company.instrument_type == "Equity", Company.status == "A")
+        .order_by(Company.symbol)
         .limit(limit)
-    ).all()
+    ).scalars().all()
 
     sector_series: dict[str, dict[str, list[Any]]] = {}
     sector_context: dict[str, dict[str, float | None]] = {}
@@ -74,7 +67,7 @@ def build_current_v41_rows(session: Session, *, limit: int = 300) -> dict[str, A
     skipped_stale = 0
     skipped_features = 0
 
-    for company, tier in records:
+    for company in companies:
         stock = _load_stock_series(session, company.symbol)
         if not stock.get("dates") or stock["dates"][-1] != as_of_date:
             skipped_stale += 1
@@ -104,32 +97,39 @@ def build_current_v41_rows(session: Session, *, limit: int = 300) -> dict[str, A
             skipped_features += 1
             continue
 
-        tier_value = str(getattr(tier, "value", tier))
-        bucket = CURRENT_LIQUIDITY_MAP.get(tier_value)
-        if bucket is None:
-            continue
+        trailing_turnover = [
+            float(value or 0.0)
+            for value in stock.get("turnovers", [])[-20:]
+        ]
+        positive_turnover = [value for value in trailing_turnover if value > 0.0]
         rows.append(
             {
                 "date": as_of_date,
                 "symbol": company.symbol,
                 "sector": company.sector,
                 "features": features,
-                "liquidity_bucket": bucket,
+                "trailing_turnover_20d": mean(positive_turnover) if positive_turnover else 0.0,
                 "regime_context": _regime_context(market_context, sector_context[sector_key]),
                 "entry_price": float(stock["raw_closes"][-1]),
                 "market_entry": float(market_close),
             }
         )
 
-    candidates = build_baseline_candidate_pool(rows)
+    annotate_liquidity_buckets(rows)
+    investable = [row for row in rows if row.get("liquidity_bucket") in {"medium", "high"}]
+    candidates = build_baseline_candidate_pool(investable)
     return {
         "as_of_date": as_of_date,
         "market_entry": float(market_close),
-        "rows": rows,
+        "rows": investable,
         "candidates": candidates,
-        "symbols_considered": len(records),
-        "eligible_rows": len(rows),
+        "symbols_considered": len(companies),
+        "rows_before_liquidity_filter": len(rows),
+        "eligible_rows": len(investable),
         "candidate_rows": len(candidates),
+        "excluded_low_liquidity": sum(row.get("liquidity_bucket") == "low" for row in rows),
+        "excluded_unclassified_liquidity": sum(row.get("liquidity_bucket") == "unclassified" for row in rows),
         "skipped_stale_or_untraded": skipped_stale,
         "skipped_features": skipped_features,
+        "liquidity_rule": "same-date terciles of trailing 20-observation average turnover; keep medium/high",
     }
