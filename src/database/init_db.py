@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import logging
 
+from src.database.auth_models import RefreshSession  # noqa: F401 - registers table metadata
 from src.database.connection import engine
-from src.database.models import Base, Company, CorporateAction, DailyPrice, Fundamental
+from src.database.models import Base
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
