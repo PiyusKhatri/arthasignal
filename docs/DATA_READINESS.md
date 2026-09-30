@@ -7,11 +7,12 @@ Audited 2026-09-30 against the local PostgreSQL 17 database `arthasignal`, using
 - Floorsheet pruning is removed (section 1).
 - The first pass misread the Sunday and Friday pattern as a dating error. NEPSE moved to a Monday to Friday week in April 2026; the Friday sessions are real (section 2).
 - The trading calendar now counts only days with real prices, and 1,046 signal calls were re-graded (sections 2 and 3).
+- The index table is repaired and the daily refresh now stamps rows with the source session date (section 2).
 
 **Verdict.** The data is still not ready for modelling. Open problems:
 
 1. Floorsheet history is 18 days; nothing older survives locally.
-2. The index table is unreliable since 2026-07-23: rows are stamped with the scrape date, not the session date, and the headline NEPSE Index is missing on 20 sessions.
+2. One real session, 2026-07-27, has no price rows at all.
 3. Local price history starts on 2021-07-25, not 2014.
 4. Delisted companies are almost entirely missing: 32 of 184 have any price.
 
@@ -167,8 +168,7 @@ There were 30. Each was classified from the price and index tables. The test for
 | Calendar bug (Sunday after the move to Monday to Friday) | 25 | Every Sunday from 2026-04-12 to 2026-09-27 | No prices on any Sunday after 2026-04-05 |
 | Genuine holiday | 2 | 2026-04-14 (Tue), 2026-05-28 (Thu) | All 17 index series continuous across the gap |
 | Genuine holiday | 2 | 2026-09-08 (Tue), 2026-09-21 (Mon) | The 13 sector rows stored that day are unchanged copies of the previous session, and the next session continues from them |
-| Undetermined | 1 | 2026-07-27 (Mon) | No index rows exist from 2026-07-23 to 2026-07-28, so continuity cannot be tested |
-| Missing price scrape | 0 | none | No day has evidence of a session without prices |
+| Missing price scrape | 1 | 2026-07-27 (Mon) | The public index history shows a session that day: NEPSE closed at 2,701.32, down 33.28 points. The local database had neither prices nor index rows for it |
 
 Five Fridays without prices (2026-05-01, 05-29, 08-28, 09-04, 09-25) were labelled "Weekend". By the same continuity test they are genuine holidays.
 
@@ -192,18 +192,44 @@ The calendar now marks a day as trading only if `daily_prices` has rows for it. 
 | Price days not marked trading | 0 | 0 |
 | Known holidays (`is_known_holiday`) | column did not exist | 167 |
 | Weekend | 507 | 526 |
-| Unexplained non-trading | 0 | 1 (2026-07-27) |
+| Unexplained non-trading | 0 | 1 (2026-07-27, a real session with no local prices) |
 
 Session arithmetic for signal calls no longer reads the calendar at all. It counts distinct dates in `daily_prices`.
 
-### The index table is still unreliable
+### The index table (fixed)
 
-This was not fixed; it is a separate scraper problem.
+What was wrong:
 
-- `src/pipeline/backfill_daily_index.py` writes `date = today`. Seven Sundays since 2026-08-02 have sector-index rows: three hold the previous Friday's values (08-02, 09-13, 09-20) and four are unchanged copies (08-23, 08-30, 09-06, 09-27).
-- Fridays 2026-09-11 and 2026-09-18 have prices but no index rows at all; their sector values were stored under the following Sunday.
-- The headline NEPSE Index is missing on 20 sessions, all since 2026-07-23. Before that date every session has one.
-- Symbols per day rose from about 280 to about 345 on 2026-08-21, which suggests price rows started coming from a different source.
+- `src/pipeline/backfill_daily_index.py` wrote `date = today`, the run date. Nine non-session days acquired sector-index rows: seven Sundays and two holidays.
+- Three of those days held a real session's values under the wrong date. Fridays 2026-07-31, 2026-09-11 and 2026-09-18 were stored under the following Sunday.
+- The four broad indices (NEPSE, Sensitive, Float, Sensitive Float) were missing on 20 price sessions, all since 2026-07-23.
+- Rows written by the daily refresh had `open = high = low = close`.
+
+The refresh fix: both sources state the session date (`generatedTime` from the NEPSE API, "As of" on the sub-indices block), and rows are now stamped with that. A row with no source date is refused and counted as a failure; it is never given the run date.
+
+The repair used the public index history (`sharesansar.com/index-history-data`, already wired in as `get_index_history`), which carries session dates and full open, high, low and close. `python -m src.pipeline.repair_index_dates --from 2026-07-01` prints the plan; `--apply` executes it.
+
+| Action | Rows | Detail |
+| --- | ---: | --- |
+| Moved to the correct session | 39 | 13 series each: 08-02 to 07-31, 09-13 to 09-11, 09-20 to 09-18 |
+| Deleted as exact duplicates of an existing session row | 78 | 13 series each on 08-23, 08-30, 09-06, 09-08, 09-21, 09-27 |
+| Unexplained rows | 0 | Every mis-dated row matched a real session's close |
+| Inserted from the public history | 136 | 21 sessions for each of the 4 broad indices, 4 sessions for each of the 13 sector series |
+| Open, high and low corrected | 342 | Closes already matched the source on every one |
+
+| Measure | Before | After |
+| --- | ---: | ---: |
+| `market_index` rows | 20,376 | 20,434 |
+| Rows on dates without prices | 117 | 17 (all on 2026-07-27, a real session) |
+| Price sessions lacking the NEPSE Index | 20 | 0 |
+| Price sessions lacking sector rows | 6 | 0 |
+| Rows with `open = high = low = close` | 420 | 0 |
+| Rows per series | 1,181 or 1,204 | 1,202 for all 17 |
+| NEPSE Index continuity breaks since 2026-07-01 | 7 | 0 |
+
+A second dry run after applying plans no changes. The NEPSE Index values were fetched from the public source, not estimated.
+
+Still true: since 2026-08-21 `daily_prices` also carries about 45 mutual funds and 33 debentures a day, which is why the daily symbol count rose from about 280 to about 345.
 
 ## 3. Signal calls and quant ledgers
 
@@ -356,7 +382,9 @@ Two checks to run on arrival: closes for a sample of symbols in the overlap peri
 2. ~~Resolve the Sunday and Friday question.~~ Done: Friday sessions are real, Sundays are no longer sessions.
 3. ~~Rebuild the trading calendar from actual sessions and mark holidays.~~ Done.
 4. ~~Re-grade signal calls.~~ Done: 1,046 calls.
-5. Fix the index refresh so rows carry the session date, and backfill the NEPSE Index for the 20 sessions since 2026-07-23 that lack it.
+5. ~~Fix the index refresh and backfill the NEPSE Index.~~ Done.
 6. Load price, index and floorsheet history from the second machine (section 6).
 7. Backfill prices for delisted and suspended symbols so the universe is not survivor-only.
-8. Settle 2026-07-27: confirm against an external source whether a session took place.
+8. Backfill prices for 2026-07-27. The public index confirms a session took place; the local database has no price rows for it.
+
+The full list of open problems with severity is in `docs/OPEN_ISSUES.md`.

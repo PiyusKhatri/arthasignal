@@ -165,7 +165,7 @@ The two ledger tables are registered in `src/database/init_db.py`. Run `python -
 
 The framework cannot give trustworthy results until the problems in `docs/DATA_READINESS.md` are fixed:
 
-1. The index table is unreliable since 2026-07-23: rows carry the scrape date, and the NEPSE Index is missing on 20 sessions. Benchmark returns cannot be computed for those days.
+1. The session of 2026-07-27 has no price rows, so every symbol's series is one row short across that date. (The index table was repaired on 2026-09-30 and now has every session.)
 2. Sessions must be taken from dates with real prices, as the fixed calendar and signal-call grading now do. The session dates themselves are sound: NEPSE has traded Monday to Friday since 2026-04-06.
 3. Price history starts in mid-2021; after removing the 12-month holdout about four years remain for development.
 4. Delisted symbols have almost no prices.

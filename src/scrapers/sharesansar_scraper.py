@@ -19,6 +19,7 @@ PRICE_HISTORY_URL = "https://www.sharesansar.com/company-price-history"
 PRICE_HISTORY_PAGE_SIZE = 50
 
 TOKEN_PATTERN = re.compile(r'name="_token" content="([^"]+)"')
+AS_OF_DATE_PATTERN = re.compile(r"As of\s*(\d{4}-\d{2}-\d{2})", re.IGNORECASE)
 COMPANY_ID_PATTERN = re.compile(r'id="companyid" style="display: none;">(\d+)</div>')
 
 
@@ -83,6 +84,16 @@ def get_symbols() -> list[str]:
     return sorted({row["symbol"] for row in rows if row.get("symbol")})
 
 
+def parse_as_of_date(text: str) -> date | None:
+    match = AS_OF_DATE_PATTERN.search(text)
+    if match is None:
+        return None
+    try:
+        return date.fromisoformat(match.group(1))
+    except ValueError:
+        return None
+
+
 def scrape_sub_indices() -> list[dict[str, Any]]:
     response = fetch(HOMEPAGE_URL)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -101,6 +112,10 @@ def scrape_sub_indices() -> list[dict[str, Any]]:
         logger.error("sharesansar: could not locate sub-indices table on homepage")
         return []
 
+    as_of_date = parse_as_of_date(block.get_text(" ", strip=True))
+    if as_of_date is None:
+        logger.error("sharesansar: sub-indices block has no 'As of' session date")
+
     results: list[dict[str, Any]] = []
     for row in table.find_all("tr")[1:]:
         cells = [c.get_text(strip=True) for c in row.find_all("td")]
@@ -110,6 +125,10 @@ def scrape_sub_indices() -> list[dict[str, Any]]:
         results.append(
             {
                 "indexName": cells[0],
+                "asOfDate": as_of_date,
+                "open": _parse_number(cells[1]),
+                "high": _parse_number(cells[2]),
+                "low": _parse_number(cells[3]),
                 "close": _parse_number(cells[4]),
                 "pointChange": _parse_number(cells[6]),
                 "percentChange": _parse_number(cells[7]),
