@@ -1,0 +1,1722 @@
+{
+  "development_verdict": "continue_research",
+  "summary": {
+    "positive_after_1pct_folds": 3,
+    "beats_exact_same_breadth_baseline_folds": 4,
+    "selected_rows": 712,
+    "active_dates": 312,
+    "precision_after_1pct": 0.48735955056179775,
+    "mean_net_excess_percent": 2.7535964766057597,
+    "median_net_excess_percent": -0.30577454264172843,
+    "baseline_mean_net_excess_percent": 1.4431933096475287,
+    "baseline_median_net_excess_percent": -0.9702753840095997,
+    "mean_incremental_alpha_percent": 1.5252495697467894,
+    "median_incremental_alpha_percent": 0.0,
+    "incremental_bootstrap_95": {
+      "low": 0.2272458884336366,
+      "high": 2.9725594832717768
+    },
+    "selected_severe_drawdown_rate": 0.4887640449438202,
+    "baseline_severe_drawdown_rate": 0.5379213483146067,
+    "relative_risk_reduction_vs_baseline": 0.09138381201044388,
+    "selected_mean_mae_percent": 6.032679506111866,
+    "baseline_mean_mae_percent": 6.871052657913907,
+    "mean_mae_reduction_vs_baseline": 0.12201524184746626,
+    "selected_mean_mfe_percent": 14.341209910119137,
+    "baseline_mean_mfe_percent": 13.840067412549818,
+    "non_overlap_cohorts": 32,
+    "non_overlap_mean_incremental_alpha_percent": -0.5757695990063525,
+    "non_overlap_incremental_bootstrap_95": {
+      "low": -3.3301487678362993,
+      "high": 2.128275292437244
+    },
+    "v41_approx_cagr_percent": 2.408429749774399,
+    "baseline_approx_cagr_percent": 11.790388599565649,
+    "nepse_approx_cagr_percent": 40.82720755716307
+  },
+  "override_diagnostics": {
+    "selected_rows": 712,
+    "actions": {
+      "promote": 133,
+      "hold": 579,
+      "reject": 0
+    },
+    "mean_override_correction": 0.03212964432540722,
+    "median_override_correction": 0.03055330516208993,
+    "mean_baseline_rank_selected": 3.7851123595505616
+  },
+  "residual_calibration_buckets": {
+    "negative": {
+      "calls": 3182,
+      "independent_dates": 615,
+      "mean_calibrated_residual_percent": -0.583221406416026,
+      "mean_probability_positive_residual": 0.4685764410442107,
+      "actual_positive_residual_rate": 0.41326209930861096,
+      "mean_actual_residual_percent": 0.01826789136332003,
+      "median_actual_residual_percent": -1.2784895522166773
+    },
+    "0_1": {
+      "calls": 1742,
+      "independent_dates": 389,
+      "mean_calibrated_residual_percent": 0.08698300971670077,
+      "mean_probability_positive_residual": 0.5370829589443633,
+      "actual_positive_residual_rate": 0.5223880597014925,
+      "mean_actual_residual_percent": 3.2912334380479416,
+      "median_actual_residual_percent": 0.3785731283566136
+    },
+    "1_2": {
+      "calls": 0,
+      "independent_dates": 0,
+      "mean_calibrated_residual_percent": null,
+      "mean_probability_positive_residual": null,
+      "actual_positive_residual_rate": null,
+      "mean_actual_residual_percent": null,
+      "median_actual_residual_percent": null
+    },
+    "2_4": {
+      "calls": 614,
+      "independent_dates": 271,
+      "mean_calibrated_residual_percent": 2.107970083974051,
+      "mean_probability_positive_residual": 0.5639309104666204,
+      "actual_positive_residual_rate": 0.506514657980456,
+      "mean_actual_residual_percent": 3.5838230777270232,
+      "median_actual_residual_percent": 0.1699217244959188
+    },
+    "4_plus": {
+      "calls": 0,
+      "independent_dates": 0,
+      "mean_calibrated_residual_percent": null,
+      "mean_probability_positive_residual": null,
+      "actual_positive_residual_rate": null,
+      "mean_actual_residual_percent": null,
+      "median_actual_residual_percent": null
+    }
+  },
+  "research_gate": {
+    "status": "review",
+    "checks": {
+      "enough_valid_outer_folds": true,
+      "positive_after_1pct_in_at_least_3_folds": true,
+      "beats_exact_same_breadth_baseline_in_at_least_3_folds": true,
+      "aggregate_mean_incremental_alpha_positive": true,
+      "aggregate_median_incremental_alpha_positive": false,
+      "aggregate_selected_median_net_excess_positive": false,
+      "risk_reduction_vs_same_breadth_baseline_at_least_10pct": false,
+      "enough_selected_rows": true,
+      "enough_active_dates": true,
+      "same_breadth_incremental_bootstrap_lower_bound_positive": true,
+      "non_overlap_incremental_bootstrap_lower_bound_positive": false
+    }
+  },
+  "fold_consistency": {
+    "positive_after_1pct_folds": 3,
+    "beats_exact_same_breadth_baseline_folds": 4,
+    "folds": [
+      {
+        "fold": 1,
+        "period": {
+          "calibration_start": "2018-12-17",
+          "test_start": "2020-08-16",
+          "test_end": "2022-01-20"
+        },
+        "rows": {
+          "train_all": 9526,
+          "calibration_all": 3809,
+          "test_all": 5174,
+          "train_candidates": 3532,
+          "calibration_candidates": 1108,
+          "test_candidates": 1760
+        },
+        "v41": {
+          "selected_rows": 309,
+          "active_dates": 165,
+          "precision_after_1pct": 0.5145631067961165,
+          "mean_net_excess_percent": 5.442914058943918,
+          "median_net_excess_percent": 0.5073082493146872,
+          "severe_drawdown_rate": 0.4110032362459547,
+          "mean_mae_percent": 5.52468848362191,
+          "mean_mfe_percent": 19.20952464833142,
+          "mean_realized_payoff_ratio": 13.642407998241163
+        },
+        "matched_baseline": {
+          "selected_rows": 309,
+          "active_dates": 165,
+          "precision_after_1pct": 0.5307443365695793,
+          "mean_net_excess_percent": 3.544950388436807,
+          "median_net_excess_percent": 0.700533392919068,
+          "severe_drawdown_rate": 0.4919093851132686,
+          "mean_mae_percent": 6.877087857832997,
+          "mean_mfe_percent": 18.510615200757773,
+          "mean_realized_payoff_ratio": 12.386695382649718
+        },
+        "incremental": {
+          "matched_dates": 165,
+          "mean_incremental_net_excess_percent": 2.171532375768645,
+          "median_incremental_net_excess_percent": 0.0,
+          "positive_incremental_date_rate": 0.47878787878787876,
+          "incremental_bootstrap_95": {
+            "low": -0.2720306620363358,
+            "high": 4.728771553028646
+          },
+          "recent_dates": [
+            {
+              "date": "2022-01-06",
+              "breadth": 1,
+              "v4_net_excess_percent": -5.569858258151127,
+              "baseline_net_excess_percent": -15.311629113125335,
+              "incremental_net_excess_percent": 9.741770854974208
+            },
+            {
+              "date": "2022-01-09",
+              "breadth": 3,
+              "v4_net_excess_percent": 25.37480703515474,
+              "baseline_net_excess_percent": 9.861847559702044,
+              "incremental_net_excess_percent": 15.512959475452694
+            },
+            {
+              "date": "2022-01-10",
+              "breadth": 4,
+              "v4_net_excess_percent": -0.07510101225384924,
+              "baseline_net_excess_percent": -0.7029867290411289,
+              "incremental_net_excess_percent": 0.6278857167872797
+            },
+            {
+              "date": "2022-01-11",
+              "breadth": 2,
+              "v4_net_excess_percent": -3.57407667828295,
+              "baseline_net_excess_percent": -3.57407667828295,
+              "incremental_net_excess_percent": 0.0
+            },
+            {
+              "date": "2022-01-12",
+              "breadth": 1,
+              "v4_net_excess_percent": -5.836726081619169,
+              "baseline_net_excess_percent": -5.836726081619169,
+              "incremental_net_excess_percent": 0.0
+            },
+            {
+              "date": "2022-01-16",
+              "breadth": 1,
+              "v4_net_excess_percent": -5.901572485694729,
+              "baseline_net_excess_percent": -11.589326170107427,
+              "incremental_net_excess_percent": 5.687753684412698
+            },
+            {
+              "date": "2022-01-17",
+              "breadth": 4,
+              "v4_net_excess_percent": 1.754790607361984,
+              "baseline_net_excess_percent": 1.9324820327020769,
+              "incremental_net_excess_percent": -0.17769142534009297
+            },
+            {
+              "date": "2022-01-18",
+              "breadth": 1,
+              "v4_net_excess_percent": -6.097975914063824,
+              "baseline_net_excess_percent": 5.171768212617668,
+              "incremental_net_excess_percent": -11.269744126681491
+            },
+            {
+              "date": "2022-01-19",
+              "breadth": 1,
+              "v4_net_excess_percent": -4.411864004527876,
+              "baseline_net_excess_percent": -4.411864004527876,
+              "incremental_net_excess_percent": 0.0
+            },
+            {
+              "date": "2022-01-20",
+              "breadth": 1,
+              "v4_net_excess_percent": 3.0648410795063104,
+              "baseline_net_excess_percent": -2.705992253827027,
+              "incremental_net_excess_percent": 5.7708333333333375
+            }
+          ]
+        },
+        "non_overlapping_incremental": {
+          "cohorts": 13,
+          "mean_incremental_net_excess_percent": 0.04450096955087794,
+          "median_incremental_net_excess_percent": -2.9424653334671698,
+          "incremental_bootstrap_95": {
+            "low": -4.6734315690653085,
+            "high": 5.435311996002682
+          },
+          "v4_compounded_return_percent": 79.20750205613093,
+          "baseline_compounded_return_percent": 80.64504984428224,
+          "nepse_compounded_return_percent": 109.51059137999266,
+          "v4_approx_cagr_percent": 76.0194304299439,
+          "baseline_approx_cagr_percent": 77.3877906993662,
+          "nepse_approx_cagr_percent": 104.7965903064549
+        },
+        "override_diagnostics": {
+          "selected_rows": 309,
+          "actions": {
+            "promote": 57,
+            "hold": 252,
+            "reject": 0
+          },
+          "mean_override_correction": 0.029636472701999848,
+          "median_override_correction": 0.021188779869798183,
+          "mean_baseline_rank_selected": 4.26537216828479
+        },
+        "stability_breakdowns": {
+          "market_regime": {
+            "bull": {
+              "rows": 72,
+              "dates": 40,
+              "mean_net_excess_percent": 10.090224539941904,
+              "median_net_excess_percent": 0.7007705400262196,
+              "precision_after_1pct": 0.5694444444444444,
+              "severe_drawdown_rate": 0.4444444444444444,
+              "mean_mae_percent": 6.518783464904289
+            },
+            "recovery": {
+              "rows": 3,
+              "dates": 3,
+              "mean_net_excess_percent": -5.3767726321096605,
+              "median_net_excess_percent": -5.569858258151127,
+              "precision_after_1pct": 0.3333333333333333,
+              "severe_drawdown_rate": 0.3333333333333333,
+              "mean_mae_percent": 2.8810941210627994
+            },
+            "sideways": {
+              "rows": 3,
+              "dates": 3,
+              "mean_net_excess_percent": -10.367081076748695,
+              "median_net_excess_percent": -9.95716583960646,
+              "precision_after_1pct": 0.0,
+              "severe_drawdown_rate": 1.0,
+              "mean_mae_percent": 24.58563960859709
+            },
+            "strong_bull": {
+              "rows": 231,
+              "dates": 119,
+              "mean_net_excess_percent": 4.340241724954237,
+              "median_net_excess_percent": 0.05538634101001172,
+              "precision_after_1pct": 0.5064935064935064,
+              "severe_drawdown_rate": 0.3939393939393939,
+              "mean_mae_percent": 5.001628271762257
+            }
+          },
+          "sector": {
+            "Commercial Banks": {
+              "rows": 36,
+              "dates": 31,
+              "mean_net_excess_percent": -5.900491976696785,
+              "median_net_excess_percent": -4.232734532512511,
+              "precision_after_1pct": 0.2222222222222222,
+              "severe_drawdown_rate": 0.25,
+              "mean_mae_percent": 3.570656785404965
+            },
+            "Development Banks": {
+              "rows": 37,
+              "dates": 29,
+              "mean_net_excess_percent": 7.056030263702207,
+              "median_net_excess_percent": -0.5899536572649513,
+              "precision_after_1pct": 0.4864864864864865,
+              "severe_drawdown_rate": 0.5405405405405406,
+              "mean_mae_percent": 8.111902056274761
+            },
+            "Finance": {
+              "rows": 33,
+              "dates": 24,
+              "mean_net_excess_percent": 5.897279379764486,
+              "median_net_excess_percent": 1.3861744849098532,
+              "precision_after_1pct": 0.5757575757575758,
+              "severe_drawdown_rate": 0.5757575757575758,
+              "mean_mae_percent": 6.981877503142522
+            },
+            "Hotels And Tourism": {
+              "rows": 6,
+              "dates": 6,
+              "mean_net_excess_percent": -8.029340641938143,
+              "median_net_excess_percent": -8.358868855690037,
+              "precision_after_1pct": 0.16666666666666666,
+              "severe_drawdown_rate": 0.6666666666666666,
+              "mean_mae_percent": 11.098157649589629
+            },
+            "Hydro Power": {
+              "rows": 74,
+              "dates": 56,
+              "mean_net_excess_percent": 13.379246338397472,
+              "median_net_excess_percent": 6.281194916564992,
+              "precision_after_1pct": 0.6621621621621622,
+              "severe_drawdown_rate": 0.4189189189189189,
+              "mean_mae_percent": 5.434083262323531
+            },
+            "Investment": {
+              "rows": 17,
+              "dates": 15,
+              "mean_net_excess_percent": 9.998485349521468,
+              "median_net_excess_percent": 11.991234563822895,
+              "precision_after_1pct": 0.7647058823529411,
+              "severe_drawdown_rate": 0.29411764705882354,
+              "mean_mae_percent": 4.5313061518508
+            },
+            "Life Insurance": {
+              "rows": 6,
+              "dates": 6,
+              "mean_net_excess_percent": 0.6146978573931676,
+              "median_net_excess_percent": 1.7054526284321918,
+              "precision_after_1pct": 0.6666666666666666,
+              "severe_drawdown_rate": 0.16666666666666666,
+              "mean_mae_percent": 2.072805117221638
+            },
+            "Manufacturing And Processing": {
+              "rows": 3,
+              "dates": 3,
+              "mean_net_excess_percent": 2.2455560700311787,
+              "median_net_excess_percent": 3.0648410795063104,
+              "precision_after_1pct": 0.6666666666666666,
+              "severe_drawdown_rate": 0.6666666666666666,
+              "mean_mae_percent": 5.019084107675606
+            },
+            "Microfinance": {
+              "rows": 73,
+              "dates": 59,
+              "mean_net_excess_percent": 4.660273872794134,
+              "median_net_excess_percent": -0.48498504649867513,
+              "precision_after_1pct": 0.4794520547945205,
+              "severe_drawdown_rate": 0.410958904109589,
+              "mean_mae_percent": 5.242925053079776
+            },
+            "Non Life Insurance": {
+              "rows": 21,
+              "dates": 21,
+              "mean_net_excess_percent": -2.4531449509613914,
+              "median_net_excess_percent": -4.559281911936929,
+              "precision_after_1pct": 0.42857142857142855,
+              "severe_drawdown_rate": 0.23809523809523808,
+              "mean_mae_percent": 3.5305759599520963
+            },
+            "Others": {
+              "rows": 3,
+              "dates": 3,
+              "mean_net_excess_percent": 9.207858618553706,
+              "median_net_excess_percent": -1.400189525121485,
+              "precision_after_1pct": 0.3333333333333333,
+              "severe_drawdown_rate": 0.3333333333333333,
+              "mean_mae_percent": 5.976581509201647
+            }
+          },
+          "baseline_rank_bucket": {
+            "rank_6_10": {
+              "rows": 114,
+              "dates": 88,
+              "mean_net_excess_percent": 4.118270515186824,
+              "median_net_excess_percent": -0.4005275509539823,
+              "precision_after_1pct": 0.4824561403508772,
+              "severe_drawdown_rate": 0.35964912280701755,
+              "mean_mae_percent": 4.840469600605962
+            },
+            "top_5": {
+              "rows": 195,
+              "dates": 131,
+              "mean_net_excess_percent": 6.217321053755758,
+              "median_net_excess_percent": 0.700533392919068,
+              "precision_after_1pct": 0.5333333333333333,
+              "severe_drawdown_rate": 0.441025641025641,
+              "mean_mae_percent": 5.924693369077387
+            }
+          },
+          "liquidity": {
+            "high": {
+              "rows": 81,
+              "dates": 69,
+              "mean_net_excess_percent": 2.5863563527828406,
+              "median_net_excess_percent": -0.2966957442562803,
+              "precision_after_1pct": 0.48148148148148145,
+              "severe_drawdown_rate": 0.3950617283950617,
+              "mean_mae_percent": 5.954062465839772
+            },
+            "medium": {
+              "rows": 228,
+              "dates": 138,
+              "mean_net_excess_percent": 6.4577437703432485,
+              "median_net_excess_percent": 0.7005214156775694,
+              "precision_after_1pct": 0.5263157894736842,
+              "severe_drawdown_rate": 0.4166666666666667,
+              "mean_mae_percent": 5.372147726781353
+            }
+          },
+          "override_action": {
+            "hold": {
+              "rows": 252,
+              "dates": 143,
+              "mean_net_excess_percent": 4.667809059497946,
+              "median_net_excess_percent": -0.3908403953774777,
+              "precision_after_1pct": 0.4880952380952381,
+              "severe_drawdown_rate": 0.4166666666666667,
+              "mean_mae_percent": 5.652848581748169
+            },
+            "promote": {
+              "rows": 57,
+              "dates": 41,
+              "mean_net_excess_percent": 8.869694056494533,
+              "median_net_excess_percent": 2.936057795700254,
+              "precision_after_1pct": 0.631578947368421,
+              "severe_drawdown_rate": 0.38596491228070173,
+              "mean_mae_percent": 4.958085944537391
+            }
+          }
+        },
+        "calibration": {
+          "residual_monotonic": {
+            "samples": 1108,
+            "bins": 5,
+            "cutoffs": [
+              -0.07196108996868134,
+              0.6419748067855835,
+              1.4897942543029785,
+              2.78696608543396,
+              9.50136661529541
+            ],
+            "raw_centers": [
+              -0.6037697196006775,
+              0.2791813760995865,
+              1.0761746764183044,
+              1.9877793788909912,
+              4.313479661941528
+            ],
+            "levels": [
+              -0.5685689257999254,
+              -0.5685689257999254,
+              -0.5685689257999254,
+              0.3143438731833488,
+              2.021725004861893
+            ],
+            "raw_realized_medians": [
+              -0.5664935445194144,
+              -0.07688736383692729,
+              -1.0623258690434345,
+              0.3143438731833488,
+              2.021725004861893
+            ],
+            "method": "calibration-only equal-frequency bins + weighted PAVA"
+          },
+          "residual_probability": {
+            "intercept": 4.2731886930410966e-05,
+            "slope": 0.8967614579742385,
+            "samples": 1108.0
+          },
+          "mae": {
+            "intercept": 0.5796671957517852,
+            "slope": 1.0093722057000682,
+            "samples": 1108.0
+          },
+          "mfe": {
+            "intercept": 5.001887279756716,
+            "slope": 0.6075340621714507,
+            "samples": 1108.0
+          }
+        },
+        "residual_calibration_buckets": {
+          "negative": {
+            "calls": 995,
+            "independent_dates": 242,
+            "mean_calibrated_residual_percent": -0.5685689257999254,
+            "mean_probability_positive_residual": 0.4568332743606219,
+            "actual_positive_residual_rate": 0.4301507537688442,
+            "mean_actual_residual_percent": 0.9680271089995247,
+            "median_actual_residual_percent": -1.5626829376829021
+          },
+          "0_1": {
+            "calls": 469,
+            "independent_dates": 200,
+            "mean_calibrated_residual_percent": 0.3143438731833488,
+            "mean_probability_positive_residual": 0.5161374486554698,
+            "actual_positive_residual_rate": 0.5415778251599147,
+            "mean_actual_residual_percent": 4.227856528943636,
+            "median_actual_residual_percent": 1.2908439729753427
+          },
+          "1_2": {
+            "calls": 0,
+            "independent_dates": 0,
+            "mean_calibrated_residual_percent": null,
+            "mean_probability_positive_residual": null,
+            "actual_positive_residual_rate": null,
+            "mean_actual_residual_percent": null,
+            "median_actual_residual_percent": null
+          },
+          "2_4": {
+            "calls": 296,
+            "independent_dates": 155,
+            "mean_calibrated_residual_percent": 2.021725004861893,
+            "mean_probability_positive_residual": 0.555843139723753,
+            "actual_positive_residual_rate": 0.5709459459459459,
+            "mean_actual_residual_percent": 7.274411143901225,
+            "median_actual_residual_percent": 2.3034470702983247
+          },
+          "4_plus": {
+            "calls": 0,
+            "independent_dates": 0,
+            "mean_calibrated_residual_percent": null,
+            "mean_probability_positive_residual": null,
+            "actual_positive_residual_rate": null,
+            "mean_actual_residual_percent": null,
+            "median_actual_residual_percent": null
+          }
+        },
+        "baseline_expectation": {
+          "training_candidates": 3532,
+          "min_cell_rows": 20,
+          "overall_expected_excess_percent": 0.20893782787021453
+        }
+      },
+      {
+        "fold": 2,
+        "period": {
+          "calibration_start": "2020-08-16",
+          "test_start": "2022-01-23",
+          "test_end": "2023-07-05"
+        },
+        "rows": {
+          "train_all": 13548,
+          "calibration_all": 4805,
+          "test_all": 6653,
+          "train_candidates": 4640,
+          "calibration_candidates": 1658,
+          "test_candidates": 824
+        },
+        "v41": {
+          "selected_rows": 294,
+          "active_dates": 95,
+          "precision_after_1pct": 0.5204081632653061,
+          "mean_net_excess_percent": 1.7857215921950023,
+          "median_net_excess_percent": 0.22461514585301456,
+          "severe_drawdown_rate": 0.5204081632653061,
+          "mean_mae_percent": 6.381151876591157,
+          "mean_mfe_percent": 11.025296026595644,
+          "mean_realized_payoff_ratio": 6.298907659800746
+        },
+        "matched_baseline": {
+          "selected_rows": 294,
+          "active_dates": 95,
+          "precision_after_1pct": 0.46258503401360546,
+          "mean_net_excess_percent": 0.8806946770992095,
+          "median_net_excess_percent": -0.8987267884093697,
+          "severe_drawdown_rate": 0.5510204081632653,
+          "mean_mae_percent": 6.65091699529386,
+          "mean_mfe_percent": 10.328772406491138,
+          "mean_realized_payoff_ratio": 6.054319446653286
+        },
+        "incremental": {
+          "matched_dates": 95,
+          "mean_incremental_net_excess_percent": 1.0579607804615654,
+          "median_incremental_net_excess_percent": 0.0,
+          "positive_incremental_date_rate": 0.4105263157894737,
+          "incremental_bootstrap_95": {
+            "low": -0.08191495004470549,
+            "high": 2.1249480404372
+          },
+          "recent_dates": [
+            {
+              "date": "2023-06-21",
+              "breadth": 2,
+              "v4_net_excess_percent": 2.9245005742716836,
+              "baseline_net_excess_percent": -7.7490816343114535,
+              "incremental_net_excess_percent": 10.673582208583138
+            },
+            {
+              "date": "2023-06-22",
+              "breadth": 1,
+              "v4_net_excess_percent": -3.3603928098361084,
+              "baseline_net_excess_percent": -8.71273017716507,
+              "incremental_net_excess_percent": 5.352337367328962
+            },
+            {
+              "date": "2023-06-25",
+              "breadth": 2,
+              "v4_net_excess_percent": 0.6771558900890216,
+              "baseline_net_excess_percent": 0.6771558900890216,
+              "incremental_net_excess_percent": 0.0
+            },
+            {
+              "date": "2023-06-26",
+              "breadth": 5,
+              "v4_net_excess_percent": -0.6359048689671799,
+              "baseline_net_excess_percent": -1.932312999990792,
+              "incremental_net_excess_percent": 1.296408131023612
+            },
+            {
+              "date": "2023-06-27",
+              "breadth": 5,
+              "v4_net_excess_percent": -0.5840092095176808,
+              "baseline_net_excess_percent": -0.05712592887260008,
+              "incremental_net_excess_percent": -0.5268832806450807
+            },
+            {
+              "date": "2023-06-28",
+              "breadth": 4,
+              "v4_net_excess_percent": -4.047849307514158,
+              "baseline_net_excess_percent": -5.399879433109402,
+              "incremental_net_excess_percent": 1.3520301255952436
+            },
+            {
+              "date": "2023-07-02",
+              "breadth": 1,
+              "v4_net_excess_percent": -1.5239064341751365,
+              "baseline_net_excess_percent": -1.5239064341751365,
+              "incremental_net_excess_percent": 0.0
+            },
+            {
+              "date": "2023-07-03",
+              "breadth": 2,
+              "v4_net_excess_percent": -4.229306598741571,
+              "baseline_net_excess_percent": -4.229306598741571,
+              "incremental_net_excess_percent": 0.0
+            },
+            {
+              "date": "2023-07-04",
+              "breadth": 3,
+              "v4_net_excess_percent": -7.038539569236072,
+              "baseline_net_excess_percent": -7.038539569236072,
+              "incremental_net_excess_percent": 0.0
+            },
+            {
+              "date": "2023-07-05",
+              "breadth": 4,
+              "v4_net_excess_percent": -2.3001801033652,
+              "baseline_net_excess_percent": -7.494717976601017,
+              "incremental_net_excess_percent": 5.1945378732358165
+            }
+          ]
+        },
+        "non_overlapping_incremental": {
+          "cohorts": 10,
+          "mean_incremental_net_excess_percent": -0.8943242958855092,
+          "median_incremental_net_excess_percent": 0.0,
+          "incremental_bootstrap_95": {
+            "low": -3.3614049713589234,
+            "high": 1.419071323764228
+          },
+          "v4_compounded_return_percent": -18.50098225992747,
+          "baseline_compounded_return_percent": -10.29370779925084,
+          "nepse_compounded_return_percent": -5.313572580025405,
+          "v4_approx_cagr_percent": -22.72269074234505,
+          "baseline_approx_cagr_percent": -12.791892457874631,
+          "nepse_approx_cagr_percent": -6.648233482671728
+        },
+        "override_diagnostics": {
+          "selected_rows": 294,
+          "actions": {
+            "promote": 37,
+            "hold": 257,
+            "reject": 0
+          },
+          "mean_override_correction": 0.026534616995302622,
+          "median_override_correction": 0.03540764985183416,
+          "mean_baseline_rank_selected": 3.336734693877551
+        },
+        "stability_breakdowns": {
+          "market_regime": {
+            "bull": {
+              "rows": 116,
+              "dates": 44,
+              "mean_net_excess_percent": 0.13932878264208068,
+              "median_net_excess_percent": -1.1788532842120336,
+              "precision_after_1pct": 0.4482758620689655,
+              "severe_drawdown_rate": 0.5775862068965517,
+              "mean_mae_percent": 7.189806473026504
+            },
+            "recovery": {
+              "rows": 143,
+              "dates": 38,
+              "mean_net_excess_percent": 1.8569776487114207,
+              "median_net_excess_percent": 0.2961828997544611,
+              "precision_after_1pct": 0.5244755244755245,
+              "severe_drawdown_rate": 0.4755244755244755,
+              "mean_mae_percent": 5.9877691152382875
+            },
+            "sideways": {
+              "rows": 33,
+              "dates": 12,
+              "mean_net_excess_percent": 6.890333275509522,
+              "median_net_excess_percent": 6.242102023410201,
+              "precision_after_1pct": 0.7272727272727273,
+              "severe_drawdown_rate": 0.5454545454545454,
+              "mean_mae_percent": 5.512334649897138
+            },
+            "strong_bull": {
+              "rows": 2,
+              "dates": 1,
+              "mean_net_excess_percent": 7.955603730650947,
+              "median_net_excess_percent": 7.955603730650947,
+              "precision_after_1pct": 1.0,
+              "severe_drawdown_rate": 0.0,
+              "mean_mae_percent": 1.9415369605225385
+            }
+          },
+          "sector": {
+            "Commercial Banks": {
+              "rows": 3,
+              "dates": 2,
+              "mean_net_excess_percent": -5.369686341172744,
+              "median_net_excess_percent": -6.350355889529757,
+              "precision_after_1pct": 0.0,
+              "severe_drawdown_rate": 0.6666666666666666,
+              "mean_mae_percent": 5.43291273884375
+            },
+            "Development Banks": {
+              "rows": 14,
+              "dates": 13,
+              "mean_net_excess_percent": -1.3740148855896193,
+              "median_net_excess_percent": -1.280524208252359,
+              "precision_after_1pct": 0.42857142857142855,
+              "severe_drawdown_rate": 0.7142857142857143,
+              "mean_mae_percent": 8.20473537847001
+            },
+            "Finance": {
+              "rows": 57,
+              "dates": 36,
+              "mean_net_excess_percent": 1.5173516680808317,
+              "median_net_excess_percent": -0.7823408705210357,
+              "precision_after_1pct": 0.49122807017543857,
+              "severe_drawdown_rate": 0.6842105263157895,
+              "mean_mae_percent": 8.286667590948179
+            },
+            "Hotels And Tourism": {
+              "rows": 4,
+              "dates": 4,
+              "mean_net_excess_percent": -5.472079392527253,
+              "median_net_excess_percent": -5.486198097661947,
+              "precision_after_1pct": 0.0,
+              "severe_drawdown_rate": 0.75,
+              "mean_mae_percent": 11.455679957653997
+            },
+            "Hydro Power": {
+              "rows": 66,
+              "dates": 36,
+              "mean_net_excess_percent": 2.858473492780224,
+              "median_net_excess_percent": 0.6071420799001699,
+              "precision_after_1pct": 0.5606060606060606,
+              "severe_drawdown_rate": 0.3939393939393939,
+              "mean_mae_percent": 5.657286457057332
+            },
+            "Investment": {
+              "rows": 20,
+              "dates": 20,
+              "mean_net_excess_percent": 1.6143724591840818,
+              "median_net_excess_percent": 1.4554454418202587,
+              "precision_after_1pct": 0.6,
+              "severe_drawdown_rate": 0.45,
+              "mean_mae_percent": 5.228789570122106
+            },
+            "Life Insurance": {
+              "rows": 10,
+              "dates": 7,
+              "mean_net_excess_percent": 1.3272129792589593,
+              "median_net_excess_percent": 1.5012511498278989,
+              "precision_after_1pct": 0.7,
+              "severe_drawdown_rate": 0.3,
+              "mean_mae_percent": 4.48553889428776
+            },
+            "Manufacturing And Processing": {
+              "rows": 6,
+              "dates": 6,
+              "mean_net_excess_percent": -0.479025254778284,
+              "median_net_excess_percent": -0.26569601624731787,
+              "precision_after_1pct": 0.3333333333333333,
+              "severe_drawdown_rate": 0.5,
+              "mean_mae_percent": 7.831302422987475
+            },
+            "Microfinance": {
+              "rows": 60,
+              "dates": 39,
+              "mean_net_excess_percent": 1.2876385443286698,
+              "median_net_excess_percent": 0.5168651557341206,
+              "precision_after_1pct": 0.5333333333333333,
+              "severe_drawdown_rate": 0.5666666666666667,
+              "mean_mae_percent": 6.344552698570311
+            },
+            "Non Life Insurance": {
+              "rows": 47,
+              "dates": 38,
+              "mean_net_excess_percent": 3.9171408077271916,
+              "median_net_excess_percent": 0.22753380271556356,
+              "precision_after_1pct": 0.5319148936170213,
+              "severe_drawdown_rate": 0.46808510638297873,
+              "mean_mae_percent": 5.264871189317384
+            },
+            "Others": {
+              "rows": 7,
+              "dates": 7,
+              "mean_net_excess_percent": 0.4340113460872365,
+              "median_net_excess_percent": 1.089952714391452,
+              "precision_after_1pct": 0.5714285714285714,
+              "severe_drawdown_rate": 0.2857142857142857,
+              "mean_mae_percent": 4.1155481181231925
+            }
+          },
+          "baseline_rank_bucket": {
+            "rank_6_10": {
+              "rows": 48,
+              "dates": 38,
+              "mean_net_excess_percent": 1.041082115065221,
+              "median_net_excess_percent": 0.46275068137080577,
+              "precision_after_1pct": 0.5833333333333334,
+              "severe_drawdown_rate": 0.5833333333333334,
+              "mean_mae_percent": 6.28932988058842
+            },
+            "top_5": {
+              "rows": 246,
+              "dates": 94,
+              "mean_net_excess_percent": 1.9310170999276424,
+              "median_net_excess_percent": 0.17422911586226353,
+              "precision_after_1pct": 0.508130081300813,
+              "severe_drawdown_rate": 0.508130081300813,
+              "mean_mae_percent": 6.399068363616081
+            }
+          },
+          "liquidity": {
+            "high": {
+              "rows": 97,
+              "dates": 60,
+              "mean_net_excess_percent": 1.691799871720554,
+              "median_net_excess_percent": 0.1267617427340615,
+              "precision_after_1pct": 0.5051546391752577,
+              "severe_drawdown_rate": 0.4329896907216495,
+              "mean_mae_percent": 5.80505360901958
+            },
+            "medium": {
+              "rows": 197,
+              "dates": 80,
+              "mean_net_excess_percent": 1.8319673124286138,
+              "median_net_excess_percent": 0.22753380271556356,
+              "precision_after_1pct": 0.5279187817258884,
+              "severe_drawdown_rate": 0.5634517766497462,
+              "mean_mae_percent": 6.6648144753446745
+            }
+          },
+          "override_action": {
+            "hold": {
+              "rows": 257,
+              "dates": 92,
+              "mean_net_excess_percent": 1.7550519142153043,
+              "median_net_excess_percent": 0.2961828997544611,
+              "precision_after_1pct": 0.5291828793774319,
+              "severe_drawdown_rate": 0.5058365758754864,
+              "mean_mae_percent": 6.324839235749888
+            },
+            "promote": {
+              "rows": 37,
+              "dates": 27,
+              "mean_net_excess_percent": 1.9987515176215522,
+              "median_net_excess_percent": -1.4601500854907625,
+              "precision_after_1pct": 0.4594594594594595,
+              "severe_drawdown_rate": 0.6216216216216216,
+              "mean_mae_percent": 6.772296435948083
+            }
+          }
+        },
+        "calibration": {
+          "residual_monotonic": {
+            "samples": 1658,
+            "bins": 5,
+            "cutoffs": [
+              -1.4198875427246094,
+              0.4727412164211273,
+              1.3662829399108887,
+              2.3274312019348145,
+              7.531687259674072
+            ],
+            "raw_centers": [
+              -3.7143266201019287,
+              -0.1566644012928009,
+              0.9435569941997528,
+              1.7949117422103882,
+              3.0514278411865234
+            ],
+            "levels": [
+              -0.7354254660985743,
+              -0.7354254660985743,
+              -0.7354254660985743,
+              -0.1665695984083615,
+              2.0151606777511737
+            ],
+            "raw_realized_medians": [
+              0.08988020532608143,
+              -0.8220391351264146,
+              -1.4741174684953895,
+              -0.1665695984083615,
+              2.0151606777511737
+            ],
+            "method": "calibration-only equal-frequency bins + weighted PAVA"
+          },
+          "residual_probability": {
+            "intercept": 0.13617715741926897,
+            "slope": 0.7297018898610935,
+            "samples": 1658.0
+          },
+          "mae": {
+            "intercept": 3.7452078262568755,
+            "slope": 0.37903255843382644,
+            "samples": 1658.0
+          },
+          "mfe": {
+            "intercept": 8.962893491151753,
+            "slope": 0.6438780099834593,
+            "samples": 1658.0
+          }
+        },
+        "residual_calibration_buckets": {
+          "negative": {
+            "calls": 586,
+            "independent_dates": 110,
+            "mean_calibrated_residual_percent": -0.5538963752144962,
+            "mean_probability_positive_residual": 0.4958714718705532,
+            "actual_positive_residual_rate": 0.44880546075085326,
+            "mean_actual_residual_percent": 0.4009233877064816,
+            "median_actual_residual_percent": -0.6908720152642986
+          },
+          "0_1": {
+            "calls": 0,
+            "independent_dates": 0,
+            "mean_calibrated_residual_percent": null,
+            "mean_probability_positive_residual": null,
+            "actual_positive_residual_rate": null,
+            "mean_actual_residual_percent": null,
+            "median_actual_residual_percent": null
+          },
+          "1_2": {
+            "calls": 0,
+            "independent_dates": 0,
+            "mean_calibrated_residual_percent": null,
+            "mean_probability_positive_residual": null,
+            "actual_positive_residual_rate": null,
+            "mean_actual_residual_percent": null,
+            "median_actual_residual_percent": null
+          },
+          "2_4": {
+            "calls": 238,
+            "independent_dates": 77,
+            "mean_calibrated_residual_percent": 2.0151606777511737,
+            "mean_probability_positive_residual": 0.5564111233882635,
+            "actual_positive_residual_rate": 0.49159663865546216,
+            "mean_actual_residual_percent": 1.4414452568652596,
+            "median_actual_residual_percent": -0.19504519122445174
+          },
+          "4_plus": {
+            "calls": 0,
+            "independent_dates": 0,
+            "mean_calibrated_residual_percent": null,
+            "mean_probability_positive_residual": null,
+            "actual_positive_residual_rate": null,
+            "mean_actual_residual_percent": null,
+            "median_actual_residual_percent": null
+          }
+        },
+        "baseline_expectation": {
+          "training_candidates": 4640,
+          "min_cell_rows": 20,
+          "overall_expected_excess_percent": 0.15663282581661608
+        }
+      },
+      {
+        "fold": 3,
+        "period": {
+          "calibration_start": "2022-01-23",
+          "test_start": "2023-07-06",
+          "test_end": "2025-01-12"
+        },
+        "rows": {
+          "train_all": 18622,
+          "calibration_all": 6247,
+          "test_all": 8214,
+          "train_candidates": 6449,
+          "calibration_candidates": 671,
+          "test_candidates": 1512
+        },
+        "v41": {
+          "selected_rows": 10,
+          "active_dates": 2,
+          "precision_after_1pct": 0.7,
+          "mean_net_excess_percent": 11.134247714618189,
+          "median_net_excess_percent": 6.537375045671923,
+          "severe_drawdown_rate": 0.1,
+          "mean_mae_percent": 1.8484671732748315,
+          "mean_mfe_percent": 22.6631601013379,
+          "mean_realized_payoff_ratio": 17.56571027988527
+        },
+        "matched_baseline": {
+          "selected_rows": 10,
+          "active_dates": 2,
+          "precision_after_1pct": 0.7,
+          "mean_net_excess_percent": 10.87356309933916,
+          "median_net_excess_percent": 6.537375045671923,
+          "severe_drawdown_rate": 0.1,
+          "mean_mae_percent": 1.9710792112491449,
+          "mean_mfe_percent": 22.14652191477737,
+          "mean_realized_payoff_ratio": 16.914695853518875
+        },
+        "incremental": {
+          "matched_dates": 2,
+          "mean_incremental_net_excess_percent": 0.26068461527902986,
+          "median_incremental_net_excess_percent": 0.26068461527902986,
+          "positive_incremental_date_rate": 0.5,
+          "incremental_bootstrap_95": {
+            "low": 0.0,
+            "high": 0.5213692305580597
+          },
+          "recent_dates": [
+            {
+              "date": "2023-12-10",
+              "breadth": 5,
+              "v4_net_excess_percent": 17.703614832702105,
+              "baseline_net_excess_percent": 17.703614832702105,
+              "incremental_net_excess_percent": 0.0
+            },
+            {
+              "date": "2023-12-11",
+              "breadth": 5,
+              "v4_net_excess_percent": 4.564880596534274,
+              "baseline_net_excess_percent": 4.043511365976214,
+              "incremental_net_excess_percent": 0.5213692305580597
+            }
+          ]
+        },
+        "non_overlapping_incremental": {
+          "cohorts": 1,
+          "mean_incremental_net_excess_percent": 0.0,
+          "median_incremental_net_excess_percent": 0.0,
+          "incremental_bootstrap_95": {
+            "low": 0.0,
+            "high": 0.0
+          },
+          "v4_compounded_return_percent": 24.10082865361678,
+          "baseline_compounded_return_percent": 24.10082865361678,
+          "nepse_compounded_return_percent": 6.397213820914671,
+          "v4_approx_cagr_percent": 1419.0112339036802,
+          "baseline_approx_cagr_percent": 1419.0112339036802,
+          "nepse_approx_cagr_percent": 118.43449269661184
+        },
+        "override_diagnostics": {
+          "selected_rows": 10,
+          "actions": {
+            "promote": 0,
+            "hold": 10,
+            "reject": 0
+          },
+          "mean_override_correction": -0.07789726346863483,
+          "median_override_correction": -0.08294659165711574,
+          "mean_baseline_rank_selected": 3.2
+        },
+        "stability_breakdowns": {
+          "market_regime": {
+            "recovery": {
+              "rows": 10,
+              "dates": 2,
+              "mean_net_excess_percent": 11.134247714618189,
+              "median_net_excess_percent": 6.537375045671923,
+              "precision_after_1pct": 0.7,
+              "severe_drawdown_rate": 0.1,
+              "mean_mae_percent": 1.8484671732748315
+            }
+          },
+          "sector": {
+            "Hotels And Tourism": {
+              "rows": 1,
+              "dates": 1,
+              "mean_net_excess_percent": -6.514485579317752,
+              "median_net_excess_percent": -6.514485579317752,
+              "precision_after_1pct": 0.0,
+              "severe_drawdown_rate": 0.0,
+              "mean_mae_percent": 3.5308997255302677
+            },
+            "Hydro Power": {
+              "rows": 7,
+              "dates": 2,
+              "mean_net_excess_percent": 16.797267887591545,
+              "median_net_excess_percent": 8.135520453796484,
+              "precision_after_1pct": 0.8571428571428571,
+              "severe_drawdown_rate": 0.14285714285714285,
+              "mean_mae_percent": 1.7989515565867047
+            },
+            "Non Life Insurance": {
+              "rows": 2,
+              "dates": 1,
+              "mean_net_excess_percent": 0.13804375617941833,
+              "median_net_excess_percent": 0.13804375617941833,
+              "precision_after_1pct": 0.5,
+              "severe_drawdown_rate": 0.0,
+              "mean_mae_percent": 1.180555555555557
+            }
+          },
+          "baseline_rank_bucket": {
+            "rank_6_10": {
+              "rows": 1,
+              "dates": 1,
+              "mean_net_excess_percent": -2.357253664782321,
+              "median_net_excess_percent": -2.357253664782321,
+              "precision_after_1pct": 0.0,
+              "severe_drawdown_rate": 0.0,
+              "mean_mae_percent": 0.0
+            },
+            "top_5": {
+              "rows": 9,
+              "dates": 2,
+              "mean_net_excess_percent": 12.633303423440468,
+              "median_net_excess_percent": 8.135520453796484,
+              "precision_after_1pct": 0.7777777777777778,
+              "severe_drawdown_rate": 0.1111111111111111,
+              "mean_mae_percent": 2.0538524147498127
+            }
+          },
+          "liquidity": {
+            "high": {
+              "rows": 3,
+              "dates": 2,
+              "mean_net_excess_percent": 22.67425286117683,
+              "median_net_excess_percent": 8.62128666980364,
+              "precision_after_1pct": 0.6666666666666666,
+              "severe_drawdown_rate": 0.0,
+              "mean_mae_percent": 0.787037037037038
+            },
+            "medium": {
+              "rows": 7,
+              "dates": 2,
+              "mean_net_excess_percent": 6.188531223235915,
+              "median_net_excess_percent": 4.939229637547362,
+              "precision_after_1pct": 0.7142857142857143,
+              "severe_drawdown_rate": 0.14285714285714285,
+              "mean_mae_percent": 2.3033658030910287
+            }
+          },
+          "override_action": {
+            "hold": {
+              "rows": 10,
+              "dates": 2,
+              "mean_net_excess_percent": 11.134247714618189,
+              "median_net_excess_percent": 6.537375045671923,
+              "precision_after_1pct": 0.7,
+              "severe_drawdown_rate": 0.1,
+              "mean_mae_percent": 1.8484671732748315
+            }
+          }
+        },
+        "calibration": {
+          "residual_monotonic": {
+            "samples": 671,
+            "bins": 5,
+            "cutoffs": [
+              0.1193084865808487,
+              1.2315356731414795,
+              2.365239381790161,
+              3.5462005138397217,
+              6.939347743988037
+            ],
+            "raw_centers": [
+              -0.6553130149841309,
+              0.6375293731689453,
+              1.8305827379226685,
+              2.928391695022583,
+              4.391814231872559
+            ],
+            "levels": [
+              -0.5123903235104921,
+              0.0032184810710936106,
+              0.0032184810710936106,
+              0.0032184810710936106,
+              0.0032184810710936106
+            ],
+            "raw_realized_medians": [
+              -0.5123903235104921,
+              0.8334340781277039,
+              -0.27903476005631855,
+              -0.303083429515993,
+              -0.2458209091669601
+            ],
+            "method": "calibration-only equal-frequency bins + weighted PAVA"
+          },
+          "residual_probability": {
+            "intercept": -0.021283830632079687,
+            "slope": 0.8075343358272193,
+            "samples": 671.0
+          },
+          "mae": {
+            "intercept": 7.97754618476951,
+            "slope": -0.15667216309097196,
+            "samples": 671.0
+          },
+          "mfe": {
+            "intercept": 7.201575157630879,
+            "slope": 0.11680644490466305,
+            "samples": 671.0
+          }
+        },
+        "residual_calibration_buckets": {
+          "negative": {
+            "calls": 239,
+            "independent_dates": 80,
+            "mean_calibrated_residual_percent": -0.5123903235104921,
+            "mean_probability_positive_residual": 0.417755477281892,
+            "actual_positive_residual_rate": 0.4351464435146444,
+            "mean_actual_residual_percent": -0.24310942319905257,
+            "median_actual_residual_percent": -1.540047876243994
+          },
+          "0_1": {
+            "calls": 1273,
+            "independent_dates": 189,
+            "mean_calibrated_residual_percent": 0.0032184810710936106,
+            "mean_probability_positive_residual": 0.544799725892903,
+            "actual_positive_residual_rate": 0.5153181461115475,
+            "mean_actual_residual_percent": 2.946161772981107,
+            "median_actual_residual_percent": 0.22379985486776732
+          },
+          "1_2": {
+            "calls": 0,
+            "independent_dates": 0,
+            "mean_calibrated_residual_percent": null,
+            "mean_probability_positive_residual": null,
+            "actual_positive_residual_rate": null,
+            "mean_actual_residual_percent": null,
+            "median_actual_residual_percent": null
+          },
+          "2_4": {
+            "calls": 0,
+            "independent_dates": 0,
+            "mean_calibrated_residual_percent": null,
+            "mean_probability_positive_residual": null,
+            "actual_positive_residual_rate": null,
+            "mean_actual_residual_percent": null,
+            "median_actual_residual_percent": null
+          },
+          "4_plus": {
+            "calls": 0,
+            "independent_dates": 0,
+            "mean_calibrated_residual_percent": null,
+            "mean_probability_positive_residual": null,
+            "actual_positive_residual_rate": null,
+            "mean_actual_residual_percent": null,
+            "median_actual_residual_percent": null
+          }
+        },
+        "baseline_expectation": {
+          "training_candidates": 6449,
+          "min_cell_rows": 20,
+          "overall_expected_excess_percent": -0.012863423105914151
+        }
+      },
+      {
+        "fold": 4,
+        "period": {
+          "calibration_start": "2023-07-06",
+          "test_start": "2025-01-13",
+          "test_end": "2026-07-23"
+        },
+        "rows": {
+          "train_all": 25238,
+          "calibration_all": 7721,
+          "test_all": 8857,
+          "train_candidates": 7222,
+          "calibration_candidates": 1512,
+          "test_candidates": 1442
+        },
+        "v41": {
+          "selected_rows": 99,
+          "active_dates": 50,
+          "precision_after_1pct": 0.2828282828282828,
+          "mean_net_excess_percent": -3.6125694759786087,
+          "median_net_excess_percent": -4.587629518388235,
+          "severe_drawdown_rate": 0.6767676767676768,
+          "mean_mae_percent": 7.006017610726566,
+          "mean_mfe_percent": 8.152825321595133,
+          "mean_realized_payoff_ratio": 2.8080237963325496
+        },
+        "matched_baseline": {
+          "selected_rows": 99,
+          "active_dates": 50,
+          "precision_after_1pct": 0.25252525252525254,
+          "mean_net_excess_percent": -4.39894848099487,
+          "median_net_excess_percent": -5.058925229881517,
+          "severe_drawdown_rate": 0.6868686868686869,
+          "mean_mae_percent": 8.000898541771916,
+          "mean_mfe_percent": 8.850743374193438,
+          "mean_realized_payoff_ratio": 3.1688745233796975
+        },
+        "incremental": {
+          "matched_dates": 50,
+          "mean_incremental_net_excess_percent": 0.3309476076953018,
+          "median_incremental_net_excess_percent": 0.04478530619841958,
+          "positive_incremental_date_rate": 0.5,
+          "incremental_bootstrap_95": {
+            "low": -2.4277607898820897,
+            "high": 2.8642177981209236
+          },
+          "recent_dates": [
+            {
+              "date": "2026-03-12",
+              "breadth": 1,
+              "v4_net_excess_percent": -5.4932347388972556,
+              "baseline_net_excess_percent": -2.864797691140385,
+              "incremental_net_excess_percent": -2.6284370477568704
+            },
+            {
+              "date": "2026-03-22",
+              "breadth": 1,
+              "v4_net_excess_percent": -8.990270922687404,
+              "baseline_net_excess_percent": -5.226868067144284,
+              "incremental_net_excess_percent": -3.76340285554312
+            },
+            {
+              "date": "2026-03-30",
+              "breadth": 2,
+              "v4_net_excess_percent": -5.743283324767295,
+              "baseline_net_excess_percent": -2.829193950759178,
+              "incremental_net_excess_percent": -2.9140893740081166
+            },
+            {
+              "date": "2026-04-01",
+              "breadth": 1,
+              "v4_net_excess_percent": 9.179261377359948,
+              "baseline_net_excess_percent": 9.179261377359948,
+              "incremental_net_excess_percent": 0.0
+            },
+            {
+              "date": "2026-04-06",
+              "breadth": 1,
+              "v4_net_excess_percent": -7.394626529105186,
+              "baseline_net_excess_percent": -2.5786170845026204,
+              "incremental_net_excess_percent": -4.816009444602566
+            },
+            {
+              "date": "2026-04-09",
+              "breadth": 1,
+              "v4_net_excess_percent": -3.0450690912371168,
+              "baseline_net_excess_percent": -3.0450690912371168,
+              "incremental_net_excess_percent": 0.0
+            },
+            {
+              "date": "2026-04-13",
+              "breadth": 2,
+              "v4_net_excess_percent": -6.6229748965627655,
+              "baseline_net_excess_percent": -6.6229748965627655,
+              "incremental_net_excess_percent": 0.0
+            },
+            {
+              "date": "2026-04-16",
+              "breadth": 2,
+              "v4_net_excess_percent": -8.458783057548484,
+              "baseline_net_excess_percent": -8.458783057548484,
+              "incremental_net_excess_percent": 0.0
+            },
+            {
+              "date": "2026-06-02",
+              "breadth": 1,
+              "v4_net_excess_percent": 1.6902535879636198,
+              "baseline_net_excess_percent": -0.0315883145606044,
+              "incremental_net_excess_percent": 1.7218419025242242
+            },
+            {
+              "date": "2026-06-03",
+              "breadth": 1,
+              "v4_net_excess_percent": -0.31485334102717655,
+              "baseline_net_excess_percent": -9.584018128382331,
+              "incremental_net_excess_percent": 9.269164787355155
+            }
+          ]
+        },
+        "non_overlapping_incremental": {
+          "cohorts": 8,
+          "mean_incremental_net_excess_percent": -1.2574871016887,
+          "median_incremental_net_excess_percent": 0.4370690685660339,
+          "incremental_bootstrap_95": {
+            "low": -8.354888743964398,
+            "high": 4.09654383318965
+          },
+          "v4_compounded_return_percent": -30.569226931695948,
+          "baseline_compounded_return_percent": -21.82027258452034,
+          "nepse_compounded_return_percent": 18.92906729083861,
+          "v4_approx_cagr_percent": -43.70829521604192,
+          "baseline_approx_cagr_percent": -32.13852590682477,
+          "nepse_approx_cagr_percent": 31.39493377043374
+        },
+        "override_diagnostics": {
+          "selected_rows": 99,
+          "actions": {
+            "promote": 39,
+            "hold": 60,
+            "reject": 0
+          },
+          "mean_override_correction": 0.06764072659433702,
+          "median_override_correction": 0.06330715598613657,
+          "mean_baseline_rank_selected": 3.676767676767677
+        },
+        "stability_breakdowns": {
+          "market_regime": {
+            "bull": {
+              "rows": 48,
+              "dates": 31,
+              "mean_net_excess_percent": -5.026069714287876,
+              "median_net_excess_percent": -4.695159882530103,
+              "precision_after_1pct": 0.20833333333333334,
+              "severe_drawdown_rate": 0.6666666666666666,
+              "mean_mae_percent": 7.549996749353727
+            },
+            "recovery": {
+              "rows": 50,
+              "dates": 18,
+              "mean_net_excess_percent": -2.1480552182675368,
+              "median_net_excess_percent": -4.150077568872428,
+              "precision_after_1pct": 0.36,
+              "severe_drawdown_rate": 0.68,
+              "mean_mae_percent": 6.3260456494334925
+            },
+            "strong_bull": {
+              "rows": 1,
+              "dates": 1,
+              "mean_net_excess_percent": -8.990270922687404,
+              "median_net_excess_percent": -8.990270922687404,
+              "precision_after_1pct": 0.0,
+              "severe_drawdown_rate": 1.0,
+              "mean_mae_percent": 14.893617021276595
+            }
+          },
+          "sector": {
+            "Commercial Banks": {
+              "rows": 11,
+              "dates": 6,
+              "mean_net_excess_percent": -5.325290565037714,
+              "median_net_excess_percent": -4.587629518388235,
+              "precision_after_1pct": 0.0,
+              "severe_drawdown_rate": 0.2727272727272727,
+              "mean_mae_percent": 4.719795609407224
+            },
+            "Development Banks": {
+              "rows": 5,
+              "dates": 5,
+              "mean_net_excess_percent": 1.4525994663730977,
+              "median_net_excess_percent": -2.4173247770606356,
+              "precision_after_1pct": 0.4,
+              "severe_drawdown_rate": 0.6,
+              "mean_mae_percent": 6.143007827326217
+            },
+            "Finance": {
+              "rows": 13,
+              "dates": 11,
+              "mean_net_excess_percent": -2.9785165388304855,
+              "median_net_excess_percent": -3.921629617473087,
+              "precision_after_1pct": 0.23076923076923078,
+              "severe_drawdown_rate": 0.6153846153846154,
+              "mean_mae_percent": 6.259484739642132
+            },
+            "Hotels And Tourism": {
+              "rows": 1,
+              "dates": 1,
+              "mean_net_excess_percent": -19.206442540682932,
+              "median_net_excess_percent": -19.206442540682932,
+              "precision_after_1pct": 0.0,
+              "severe_drawdown_rate": 1.0,
+              "mean_mae_percent": 13.199397287795078
+            },
+            "Hydro Power": {
+              "rows": 49,
+              "dates": 21,
+              "mean_net_excess_percent": -4.16103313297889,
+              "median_net_excess_percent": -5.734427703084544,
+              "precision_after_1pct": 0.3469387755102041,
+              "severe_drawdown_rate": 0.8367346938775511,
+              "mean_mae_percent": 8.537427770451206
+            },
+            "Life Insurance": {
+              "rows": 6,
+              "dates": 2,
+              "mean_net_excess_percent": -5.23547586830707,
+              "median_net_excess_percent": -5.253410369179306,
+              "precision_after_1pct": 0.0,
+              "severe_drawdown_rate": 1.0,
+              "mean_mae_percent": 7.185200609672339
+            },
+            "Manufacturing And Processing": {
+              "rows": 10,
+              "dates": 8,
+              "mean_net_excess_percent": -0.3042219607263088,
+              "median_net_excess_percent": 0.0652482931515106,
+              "precision_after_1pct": 0.5,
+              "severe_drawdown_rate": 0.3,
+              "mean_mae_percent": 3.985499122974141
+            },
+            "Microfinance": {
+              "rows": 3,
+              "dates": 3,
+              "mean_net_excess_percent": -3.2471566729184524,
+              "median_net_excess_percent": -4.709511877094506,
+              "precision_after_1pct": 0.3333333333333333,
+              "severe_drawdown_rate": 0.3333333333333333,
+              "mean_mae_percent": 3.208057727701241
+            },
+            "Non Life Insurance": {
+              "rows": 1,
+              "dates": 1,
+              "mean_net_excess_percent": -0.31485334102717655,
+              "median_net_excess_percent": -0.31485334102717655,
+              "precision_after_1pct": 0.0,
+              "severe_drawdown_rate": 1.0,
+              "mean_mae_percent": 5.465924895688445
+            }
+          },
+          "baseline_rank_bucket": {
+            "rank_6_10": {
+              "rows": 23,
+              "dates": 21,
+              "mean_net_excess_percent": -3.8822837138207764,
+              "median_net_excess_percent": -1.9272267739324,
+              "precision_after_1pct": 0.2608695652173913,
+              "severe_drawdown_rate": 0.5652173913043478,
+              "mean_mae_percent": 6.305408284924618
+            },
+            "top_5": {
+              "rows": 76,
+              "dates": 40,
+              "mean_net_excess_percent": -3.530945430315848,
+              "median_net_excess_percent": -4.952150652236369,
+              "precision_after_1pct": 0.2894736842105263,
+              "severe_drawdown_rate": 0.7105263157894737,
+              "mean_mae_percent": 7.218044117219261
+            }
+          },
+          "liquidity": {
+            "high": {
+              "rows": 63,
+              "dates": 35,
+              "mean_net_excess_percent": -2.462033601139662,
+              "median_net_excess_percent": -3.936759957324741,
+              "precision_after_1pct": 0.31746031746031744,
+              "severe_drawdown_rate": 0.7142857142857143,
+              "mean_mae_percent": 7.004991483124913
+            },
+            "medium": {
+              "rows": 36,
+              "dates": 28,
+              "mean_net_excess_percent": -5.6260072569467665,
+              "median_net_excess_percent": -4.895836114566653,
+              "precision_after_1pct": 0.2222222222222222,
+              "severe_drawdown_rate": 0.6111111111111112,
+              "mean_mae_percent": 7.007813334029461
+            }
+          },
+          "override_action": {
+            "hold": {
+              "rows": 60,
+              "dates": 42,
+              "mean_net_excess_percent": -4.73648491241334,
+              "median_net_excess_percent": -4.963768213315011,
+              "precision_after_1pct": 0.26666666666666666,
+              "severe_drawdown_rate": 0.7166666666666667,
+              "mean_mae_percent": 7.7033121154389885
+            },
+            "promote": {
+              "rows": 39,
+              "dates": 16,
+              "mean_net_excess_percent": -1.883468804540561,
+              "median_net_excess_percent": -3.6443793716905084,
+              "precision_after_1pct": 0.3076923076923077,
+              "severe_drawdown_rate": 0.6153846153846154,
+              "mean_mae_percent": 5.933256834245917
+            }
+          }
+        },
+        "calibration": {
+          "residual_monotonic": {
+            "samples": 1512,
+            "bins": 5,
+            "cutoffs": [
+              0.5769121646881104,
+              1.7895921468734741,
+              2.8228707313537598,
+              4.025441646575928,
+              8.992533683776855
+            ],
+            "raw_centers": [
+              -0.29785043001174927,
+              1.240466594696045,
+              2.3302197456359863,
+              3.3621437549591064,
+              4.928420543670654
+            ],
+            "levels": [
+              -1.070634228224499,
+              -0.36597907588589557,
+              -0.36597907588589557,
+              -0.36597907588589557,
+              2.7031848602020956
+            ],
+            "raw_realized_medians": [
+              -1.070634228224499,
+              -0.3131064173525937,
+              -0.28334571050502344,
+              -0.5014850998000697,
+              2.7031848602020956
+            ],
+            "method": "calibration-only equal-frequency bins + weighted PAVA"
+          },
+          "residual_probability": {
+            "intercept": -0.11187197562701827,
+            "slope": 0.8664316779169812,
+            "samples": 1512.0
+          },
+          "mae": {
+            "intercept": 2.485506342718125,
+            "slope": 0.7870987091548675,
+            "samples": 1512.0
+          },
+          "mfe": {
+            "intercept": 8.22277909423591,
+            "slope": 0.3474114852246078,
+            "samples": 1512.0
+          }
+        },
+        "residual_calibration_buckets": {
+          "negative": {
+            "calls": 1362,
+            "independent_dates": 183,
+            "mean_calibrated_residual_percent": -0.618972005029491,
+            "mean_probability_positive_residual": 0.47432957843417284,
+            "actual_positive_residual_rate": 0.38179148311306904,
+            "mean_actual_residual_percent": -0.7943439766430744,
+            "median_actual_residual_percent": -1.4142954120528861
+          },
+          "0_1": {
+            "calls": 0,
+            "independent_dates": 0,
+            "mean_calibrated_residual_percent": null,
+            "mean_probability_positive_residual": null,
+            "actual_positive_residual_rate": null,
+            "mean_actual_residual_percent": null,
+            "median_actual_residual_percent": null
+          },
+          "1_2": {
+            "calls": 0,
+            "independent_dates": 0,
+            "mean_calibrated_residual_percent": null,
+            "mean_probability_positive_residual": null,
+            "actual_positive_residual_rate": null,
+            "mean_actual_residual_percent": null,
+            "median_actual_residual_percent": null
+          },
+          "2_4": {
+            "calls": 80,
+            "independent_dates": 39,
+            "mean_calibrated_residual_percent": 2.7031848602020956,
+            "mean_probability_positive_residual": 0.6162270287733412,
+            "actual_positive_residual_rate": 0.3125,
+            "mean_actual_residual_percent": -3.6977787500537764,
+            "median_actual_residual_percent": -3.8151228774250923
+          },
+          "4_plus": {
+            "calls": 0,
+            "independent_dates": 0,
+            "mean_calibrated_residual_percent": null,
+            "mean_probability_positive_residual": null,
+            "actual_positive_residual_rate": null,
+            "mean_actual_residual_percent": null,
+            "median_actual_residual_percent": null
+          }
+        },
+        "baseline_expectation": {
+          "training_candidates": 7222,
+          "min_cell_rows": 20,
+          "overall_expected_excess_percent": -0.01659126887484419
+        }
+      }
+    ]
+  }
+}

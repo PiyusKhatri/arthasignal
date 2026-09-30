@@ -1,0 +1,73 @@
+{
+  "capture": {
+    "status": "no_current_candidates",
+    "model_version": "artha-residual-alpha-v4.1-shadow-v1",
+    "artifact_fingerprint": "721b471ca9940e25bf74cf323dcd844d9aea4b3627cf11da4a6012d82ba6da96",
+    "current": {
+      "as_of_date": "2026-08-20",
+      "market_entry": 2629.4,
+      "symbols_considered": 293,
+      "rows_before_liquidity_filter": 267,
+      "eligible_rows": 178,
+      "candidate_rows": 0,
+      "excluded_low_liquidity": 89,
+      "excluded_unclassified_liquidity": 0,
+      "skipped_stale_or_untraded": 13,
+      "skipped_features": 13,
+      "liquidity_rule": "same-date terciles of trailing 20-observation average turnover; keep medium/high"
+    }
+  },
+  "validation": {
+    "policy_version": "2026-08-21-v41-forward-v1",
+    "model_version": "artha-residual-alpha-v4.1-shadow-v1",
+    "status": "collecting",
+    "public_promotion_automatic": false,
+    "ledger": {
+      "rows": 0,
+      "pending": 0,
+      "resolved": 0,
+      "voided": 0,
+      "resolved_v41_calls": 0,
+      "resolved_baseline_calls": 0,
+      "matched_resolved_v41_calls": 0,
+      "matched_resolved_baseline_calls": 0,
+      "matched_dates": 0,
+      "non_overlap_cohorts": 0
+    },
+    "incremental_alpha": {
+      "mean_percent": null,
+      "median_percent": null,
+      "positive_date_rate": null,
+      "date_bootstrap_95": {
+        "iterations": 0,
+        "low": null,
+        "high": null
+      },
+      "non_overlap_mean_percent": null,
+      "non_overlap_bootstrap_95": {
+        "iterations": 0,
+        "low": null,
+        "high": null
+      }
+    },
+    "risk": {
+      "sample_scope": "only fully resolved equal-breadth matched dates",
+      "v41_severe_drawdown_rate": null,
+      "baseline_severe_drawdown_rate": null,
+      "relative_risk_reduction": null,
+      "v41_mean_mae_percent": null,
+      "baseline_mean_mae_percent": null
+    },
+    "checks": {
+      "enough_resolved_v41_calls": false,
+      "enough_matched_dates": false,
+      "mean_incremental_alpha_positive": false,
+      "median_incremental_alpha_non_negative": false,
+      "date_bootstrap_lower_bound_positive": false,
+      "enough_non_overlap_cohorts": false,
+      "non_overlap_bootstrap_lower_bound_positive": false,
+      "risk_reduction_at_least_10pct": false
+    },
+    "note": "This forward gate never promotes V4.1 automatically. A pass only means the frozen challenger has earned manual review as a possible successor to the current live champion."
+  }
+}

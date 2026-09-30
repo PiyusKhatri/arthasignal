@@ -17,9 +17,14 @@ export type HoldingSummary = {
 
 export type PortfolioSummary = {
   total_invested: string;
-  total_current_value: string;
-  total_unrealized_pl: string;
+  total_current_value: string | null;
+  total_unrealized_pl: string | null;
   total_unrealized_pl_percent: string | null;
+  priced_invested_amount: string;
+  priced_current_value: string;
+  unpriced_invested_amount: string;
+  unpriced_holdings_count: number;
+  valuation_complete: boolean;
   holdings: HoldingSummary[];
 };
 

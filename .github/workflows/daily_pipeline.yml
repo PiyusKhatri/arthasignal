@@ -8,12 +8,20 @@ on:
 jobs:
   run-daily-pipeline:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_URL_READONLY: ${{ secrets.DATABASE_URL_READONLY || secrets.DATABASE_URL }}
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+      GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
 
       - name: Install system dependencies
         run: |
@@ -24,19 +32,49 @@ jobs:
 
       - name: Verify pg_dump 17 is installed
         run: |
-          echo "Default pg_dump resolved via PATH/pg_wrapper:"
-          pg_dump --version || true
-          echo "Explicit versioned binary:"
           /usr/lib/postgresql/17/bin/pg_dump --version
           /usr/lib/postgresql/17/bin/pg_dump --version | grep -q "17\." || (echo "postgresql-client-17 install verification failed" && exit 1)
 
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
-      - name: Run daily pipeline
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-          GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
+      - name: Verify scheduled database is reachable
+        run: |
+          python - <<'PY'
+          import os
+          from urllib.parse import urlparse
+          from sqlalchemy import text
+          from src.database.connection import engine
+
+          url = os.environ.get("DATABASE_URL", "")
+          host = urlparse(url).hostname
+          if not url:
+              raise SystemExit("DATABASE_URL secret is not configured")
+          if host in {"localhost", "127.0.0.1", "db"}:
+              raise SystemExit(
+                  "Scheduled GitHub-hosted jobs cannot use the local Docker database. "
+                  "Point DATABASE_URL at a network-reachable production Postgres instance "
+                  "or move this workflow to a self-hosted runner beside the database."
+              )
+          with engine.connect() as connection:
+              connection.execute(text("SELECT 1"))
+          print("Database connectivity check passed")
+          PY
+
+      - name: Ensure schema extensions exist
+        run: python -m src.database.init_db
+
+      - name: Run daily market pipeline
         run: python -m src.pipeline.run_all_daily
+
+      - name: Retrain pooled quant model when weekly interval is due
+        run: python -m src.pipeline.train_quant_models --limit 400 --if-due
+
+      - name: Grade and capture probabilistic shadow signals
+        run: python -m src.pipeline.quant_shadow
+
+      - name: Grade and capture frozen V4.1 challenger shadow
+        run: python -m src.pipeline.v41_shadow
+
+      - name: Capture frozen E1 forward execution decisions
+        run: python -m src.pipeline.e1_forward_shadow

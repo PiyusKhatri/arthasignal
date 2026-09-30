@@ -1,0 +1,153 @@
+{
+  "development_verdict": "continue_execution_research",
+  "summary": {
+    "e1_v41": {
+      "sessions": 1409,
+      "decision_dates": 1389,
+      "total_return_percent": 68.57900856028016,
+      "approx_cagr_percent": 9.790272115500231,
+      "annualized_volatility_percent": 19.952138747349988,
+      "sharpe_like": 0.5673173338397288,
+      "max_drawdown_percent": -37.361735528282395,
+      "total_transaction_cost_percent_of_initial_capital": 95.74090275706295,
+      "cumulative_turnover_x_initial_capital": 191.48180551412582,
+      "annualized_turnover_x": 34.24656848087985,
+      "buy_transactions": 272,
+      "sell_transactions": 272,
+      "replacements": 97,
+      "blocked_buy_attempts": 0,
+      "blocked_sell_attempts": 507,
+      "sampled_absence_holds": 2257,
+      "mean_positions": 1.8736692689850958,
+      "mean_completed_holding_sessions": 9.705882352941176,
+      "median_completed_holding_sessions": 5.0,
+      "exit_reasons": {
+        "expired": 35,
+        "ineligible": 114,
+        "reject": 26
+      }
+    },
+    "e1_momentum_baseline": {
+      "sessions": 1409,
+      "decision_dates": 1389,
+      "total_return_percent": -38.147743177020985,
+      "approx_cagr_percent": -8.233559064498387,
+      "annualized_volatility_percent": 29.09418850015124,
+      "sharpe_like": -0.15034102195936397,
+      "max_drawdown_percent": -85.18062150018402,
+      "total_transaction_cost_percent_of_initial_capital": 213.62000197644363,
+      "cumulative_turnover_x_initial_capital": 427.2400039528873,
+      "annualized_turnover_x": 76.41198083472506,
+      "buy_transactions": 579,
+      "sell_transactions": 579,
+      "replacements": 269,
+      "blocked_buy_attempts": 0,
+      "blocked_sell_attempts": 0,
+      "sampled_absence_holds": 3405,
+      "mean_positions": 3.0241305890702628,
+      "mean_completed_holding_sessions": 7.3592400690846285,
+      "median_completed_holding_sessions": 5,
+      "exit_reasons": {
+        "expired": 50,
+        "ineligible": 260,
+        "reject": 0
+      }
+    },
+    "reactive_v41": {
+      "sessions": 1409,
+      "decision_dates": 312,
+      "total_return_percent": -67.82511308512717,
+      "approx_cagr_percent": -18.35693538879183,
+      "annualized_volatility_percent": 36.02337515859106,
+      "sharpe_like": -0.3842534490951268,
+      "max_drawdown_percent": -86.52193311637312,
+      "total_transaction_cost_percent_of_initial_capital": 340.285291644791,
+      "cumulative_turnover_x_initial_capital": 680.5705832895819,
+      "annualized_turnover_x": 121.7202178771999,
+      "buy_transactions": 709,
+      "sell_transactions": 706,
+      "mean_positions": 1.1973030518097942,
+      "mean_completed_holding_sessions": 2.3929078014184397,
+      "median_completed_holding_sessions": 1
+    },
+    "reactive_matched_baseline": {
+      "sessions": 1409,
+      "decision_dates": 312,
+      "total_return_percent": -87.88207682190028,
+      "approx_cagr_percent": -31.43998483357724,
+      "annualized_volatility_percent": 39.471140826871725,
+      "sharpe_like": -0.7592461462388487,
+      "max_drawdown_percent": -93.67260614120467,
+      "total_transaction_cost_percent_of_initial_capital": 260.9528383442133,
+      "cumulative_turnover_x_initial_capital": 521.9056766884278,
+      "annualized_turnover_x": 93.3429599187252,
+      "buy_transactions": 709,
+      "sell_transactions": 706,
+      "mean_positions": 1.1958836053938964,
+      "mean_completed_holding_sessions": 2.3866855524079322,
+      "median_completed_holding_sessions": 1.0
+    },
+    "nepse": {
+      "sessions": 1409,
+      "total_return_percent": 88.96698431862976,
+      "approx_cagr_percent": 12.05511680822311,
+      "annualized_volatility_percent": 21.932941219439737,
+      "sharpe_like": 0.6282470492374908,
+      "max_drawdown_percent": -43.252360407678246
+    },
+    "turnover_reduction_vs_reactive_v41": 0.7186451924081318,
+    "transaction_cost_reduction_vs_reactive_v41": 0.7186451924081317,
+    "e1_minus_reactive_v41_cagr_percent": 28.147207504292062,
+    "e1_minus_e1_baseline_cagr_percent": 18.023831179998616
+  },
+  "block_bootstrap": {
+    "e1_v41_vs_e1_momentum_baseline": {
+      "sessions": 1409,
+      "block_length": 20,
+      "iterations": 2000,
+      "mean_daily_incremental_percent": 0.0622747785346748,
+      "annualized_incremental_return_percent": 15.693244190738051,
+      "annualized_incremental_return_95": {
+        "low": -5.735122782268139,
+        "high": 36.25315249207137
+      }
+    },
+    "e1_v41_vs_reactive_v41": {
+      "sessions": 1409,
+      "block_length": 20,
+      "iterations": 2000,
+      "mean_daily_incremental_percent": 0.09984642980667963,
+      "annualized_incremental_return_percent": 25.161300311283263,
+      "annualized_incremental_return_95": {
+        "low": 3.923743118750071,
+        "high": 48.16311548851724
+      }
+    },
+    "e1_v41_vs_nepse": {
+      "sessions": 1409,
+      "block_length": 20,
+      "iterations": 2000,
+      "mean_daily_incremental_percent": -0.009762346998672244,
+      "annualized_incremental_return_percent": -2.4601114436654052,
+      "annualized_incremental_return_95": {
+        "low": -26.012455929786658,
+        "high": 21.276458441862367
+      }
+    }
+  },
+  "research_gate": {
+    "status": "review",
+    "checks": {
+      "enough_valid_outer_folds": true,
+      "e1_v41_cagr_positive": true,
+      "e1_v41_cagr_better_than_reactive_v41": true,
+      "annualized_turnover_at_most_30x": false,
+      "turnover_reduction_vs_reactive_at_least_60pct": true,
+      "transaction_cost_lower_than_reactive": true,
+      "mean_holding_at_least_5_sessions": true,
+      "e1_v41_cagr_better_than_e1_baseline": true,
+      "e1_vs_baseline_block_bootstrap_lower_bound_positive": false,
+      "max_drawdown_not_worse_than_reactive_v41": true
+    }
+  }
+}

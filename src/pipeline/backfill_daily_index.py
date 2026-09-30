@@ -4,7 +4,7 @@ import logging
 from datetime import date
 from typing import Any
 
-from src.pipeline.backfill_calendar import is_market_open_today
+from src.pipeline.backfill_calendar import is_trading_day
 from src.pipeline.db_writers import upsert_recent_market_index_rows
 from src.scrapers import nepse_api, sharesansar_scraper
 
@@ -52,7 +52,7 @@ def _fetch_raw_index_rows() -> list[dict[str, Any]]:
 
 def run_daily_index_refresh(today: date | None = None) -> dict[str, Any]:
     if today is None:
-        if not is_market_open_today():
+        if not is_trading_day():
             logger.info("Not a trading day, skipping daily index refresh")
             return {"skipped": True, "reason": "not a trading day"}
         today = date.today()

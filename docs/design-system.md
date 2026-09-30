@@ -1,7 +1,7 @@
 # ArthaSignal Design System
 
-Status: FINALIZED (supersedes any earlier draft)
-Scope: documentation only - no frontend code exists yet. This defines the design tokens and access-control principles the future Next.js frontend will implement against.
+Status: IMPLEMENTED AND MAINTAINED
+Scope: design tokens and access-control principles for the current Next.js frontend. The implementation lives primarily in `frontend/src/app/globals.css`, `frontend/src/app/layout.tsx`, and the page/component tree.
 
 ## Design Principle: Accent Coverage Constraint
 
@@ -11,7 +11,7 @@ This is a hard constraint, not a suggestion. An interface where sage shows up on
 
 ## Access Control
 
-Two tiers. This is a real product constraint, not just a UX preference - the public tier exists both for SEO (indexable, crawlable pages) and because it satisfies TradingView's free Advanced Charts license terms, which require the charts to be publicly accessible without a login/paywall.
+Two tiers. Public market-data views support discoverability and broad access; user-specific state remains authenticated.
 
 **Public (no login required):**
 - Landing page
@@ -24,11 +24,10 @@ Two tiers. This is a real product constraint, not just a UX preference - the pub
 **Login required:**
 - Portfolio
 - Watchlist
-- Alerts
-- AI chatbot
-- Bot linking
+- Alerts when implemented
+- User-specific assistant/bot integrations when implemented
 
-Any new page must be explicitly classified into one of these two tiers before it ships. Charts and market-data views default to public unless there's a specific reason to gate them - gating a chart page requires checking it doesn't violate the TradingView license terms above.
+Any new page must be explicitly classified into one of these two tiers before it ships. Market-data views default to public unless there is a concrete security, privacy, licensing, or product reason to gate them.
 
 ## Typography
 
@@ -37,7 +36,7 @@ Any new page must be explicitly classified into one of these two tiers before it
 | English, numbers, technical terms | IBM Plex Sans |
 | Nepali text | Noto Sans Devanagari |
 
-English is the default; Nepali is a user toggle. Numeric/technical content (prices, tickers, indicator values, code) always renders in IBM Plex Sans regardless of the active language toggle, since Noto Sans Devanagari is not designed for dense numeric/tabular display.
+English is the default. Numeric/technical content (prices, tickers, indicator values, code) uses IBM Plex Sans for dense numeric/tabular display.
 
 ```css
 :root {
@@ -63,9 +62,9 @@ Dark is the default theme. Light is a toggle. Both are defined as complete token
 |---|---|---|
 | `--color-success` | `#7DD3A8` | Price up / gains |
 | `--color-danger` | `#EF4444` | Price down / losses |
-| `--color-warning` | `#F59E0B` | Warnings, caution states |
+| `--color-warning` | `#F59E0B` | Warnings, caution states, unavailable/incomplete data |
 
-Semantic colors are theme-independent - they carry the same meaning and roughly the same hex value in both dark and light mode, since "green means up, red means down" must stay consistent regardless of theme.
+Semantic colors carry consistent meaning across themes. Warning states are also used for reliability conditions such as incomplete portfolio valuation or temporarily unavailable market data.
 
 ### Neutral - Dark Theme (default)
 
@@ -89,7 +88,7 @@ Semantic colors are theme-independent - they carry the same meaning and roughly 
 
 ## CSS Custom Properties
 
-Ready for the future Next.js frontend. The root declares font tokens and theme-independent semantic colors; `[data-theme="dark"]` and `[data-theme="light"]` each declare their own complete neutral + accent set.
+The current frontend implements the token model in `frontend/src/app/globals.css`. The root declares theme-independent semantic colors; `[data-theme="dark"]` and `[data-theme="light"]` each declare their own neutral + accent set.
 
 ```css
 :root {
@@ -123,3 +122,14 @@ Ready for the future Next.js frontend. The root declares font tokens and theme-i
   --color-text-secondary: #6B6659;
 }
 ```
+
+## Reliability UI rule
+
+A missing upstream response must never be silently rendered as a valid zero/empty market state. Components should distinguish at least:
+
+- successful data with values;
+- successful data with a genuinely empty result;
+- incomplete valuation / partially priced data; and
+- unavailable upstream data.
+
+This rule is especially important for signals, portfolio values, and any future alerting surface.

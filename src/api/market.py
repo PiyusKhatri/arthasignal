@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
 from typing import Any
 
@@ -14,7 +14,9 @@ from src.api.rate_limit import PUBLIC_RATE_LIMIT, limiter
 from src.api.stocks import evaluate_target_signal_conditions
 from src.database.models import (
     Company,
+    DailyPrice,
     IntradayIndexSnapshot,
+    IntradaySnapshot,
     MarketIndex,
     SignalConfidence,
     SignalTimeframe,
@@ -27,20 +29,72 @@ from src.pipeline.market_pulse import compute_active_signals, compute_overall_ma
 router = APIRouter(prefix="/market", tags=["market"])
 
 NEPSE_INDEX_NAME = "NEPSE Index"
+NEPT_OFFSET = timezone(timedelta(hours=5, minutes=45))
+
+
+def _latest_usable_market_snapshot_time() -> datetime | None:
+    """Resolve the session the dashboard should describe.
+
+    Before trading starts, on holidays, or on weekends, using the calendar date
+    produces an empty breadth/turnover/sector snapshot. Prefer today only when
+    today's equity data actually exists; otherwise fall back to the latest
+    completed daily equity session.
+    """
+    today_npt = datetime.now(timezone.utc).astimezone(NEPT_OFFSET).date()
+
+    with get_readonly_session() as session:
+        intraday_exists = session.execute(
+            select(IntradaySnapshot.id)
+            .where(func.date(IntradaySnapshot.snapshot_time) == today_npt)
+            .limit(1)
+        ).scalar_one_or_none()
+        if intraday_exists is not None:
+            return datetime.combine(today_npt, time.min, tzinfo=NEPT_OFFSET)
+
+        daily_exists = session.execute(
+            select(DailyPrice.date)
+            .join(Company, Company.symbol == DailyPrice.symbol)
+            .where(
+                DailyPrice.date == today_npt,
+                Company.instrument_type == "Equity",
+                Company.status == "A",
+            )
+            .limit(1)
+        ).scalar_one_or_none()
+        if daily_exists is not None:
+            return datetime.combine(today_npt, time.min, tzinfo=NEPT_OFFSET)
+
+        latest_daily_date = session.execute(
+            select(func.max(DailyPrice.date))
+            .join(Company, Company.symbol == DailyPrice.symbol)
+            .where(
+                DailyPrice.date <= today_npt,
+                Company.instrument_type == "Equity",
+                Company.status == "A",
+            )
+        ).scalar_one_or_none()
+
+    if latest_daily_date is None:
+        return None
+    return datetime.combine(latest_daily_date, time.min, tzinfo=NEPT_OFFSET)
 
 
 @router.get("/pulse")
 @limiter.limit(PUBLIC_RATE_LIMIT)
 @cached(market_pulse_cache, key_fn=lambda **kwargs: "pulse")
 def get_market_pulse(request: Request) -> dict[str, Any]:
-    return compute_overall_market_pulse()
+    del request
+    snapshot_time = _latest_usable_market_snapshot_time()
+    return compute_overall_market_pulse(snapshot_time=snapshot_time)
 
 
 @router.get("/sectors")
 @limiter.limit(PUBLIC_RATE_LIMIT)
 @cached(market_pulse_cache, key_fn=lambda **kwargs: "sectors")
 def get_sector_performance(request: Request) -> list[dict[str, Any]]:
-    return compute_sector_wise_pulse()
+    del request
+    snapshot_time = _latest_usable_market_snapshot_time()
+    return compute_sector_wise_pulse(snapshot_time=snapshot_time)
 
 
 def build_price_and_signal_rows(symbols: list[str], company_names: dict[str, str]) -> list[dict[str, Any]]:

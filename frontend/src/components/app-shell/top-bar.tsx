@@ -1,51 +1,80 @@
 "use client";
 
-import { Bell, Menu, Search, UserCircle } from "lucide-react";
+import { Menu } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { ShellBrand } from "@/components/app-shell/shell-brand";
+import { StockSearch } from "@/components/app-shell/stock-search";
 import { ThemeToggle } from "@/components/app-shell/theme-toggle";
 import { useShell } from "@/components/app-shell/shell-context";
 
+type PageContext = { eyebrow: string; title: string };
+
+function decodePathSegment(value: string, fallback: string): string {
+  try {
+    return decodeURIComponent(value) || fallback;
+  } catch {
+    return value || fallback;
+  }
+}
+
+function getPageContext(pathname: string): PageContext {
+  if (pathname === "/dashboard") return { eyebrow: "Overview", title: "Dashboard" };
+  if (pathname.startsWith("/market-pulse")) return { eyebrow: "Market", title: "Market Intelligence" };
+  if (pathname.startsWith("/sectors/")) {
+    const encoded = pathname.split("/")[2] ?? "Sector";
+    return { eyebrow: "Sector analysis", title: decodePathSegment(encoded, "Sector") };
+  }
+  if (pathname.startsWith("/sectors")) return { eyebrow: "Market", title: "Sectors" };
+  if (pathname.startsWith("/watchlist")) return { eyebrow: "Workspace", title: "Watchlist" };
+  if (pathname.startsWith("/portfolio")) return { eyebrow: "Workspace", title: "Portfolio" };
+  if (pathname.startsWith("/stock/")) {
+    const encoded = pathname.split("/")[2] ?? "Stock";
+    return { eyebrow: "Stock analysis", title: decodePathSegment(encoded, "Stock").toUpperCase() };
+  }
+  return { eyebrow: "ArthaSignal", title: "Research workspace" };
+}
+
 export function TopBar() {
   const { openMobileNav } = useShell();
+  const pathname = usePathname();
+  const context = getPageContext(pathname);
 
   return (
-    <header className="flex h-14 items-center gap-3 border-b border-border bg-background px-3 sm:px-4">
-      <button
-        type="button"
-        onClick={openMobileNav}
-        aria-label="Open navigation"
-        className="flex size-9 shrink-0 items-center justify-center rounded-md text-text-secondary hover:bg-card hover:text-text-primary md:hidden"
-      >
-        <Menu className="size-5" aria-hidden="true" />
-      </button>
+    <header data-testid="app-topbar" className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
+      <div className="mx-auto w-full max-w-[1760px] px-3 sm:px-5 lg:px-7">
+        <div className="flex h-16 items-center gap-3 md:gap-5">
+          <button
+            type="button"
+            onClick={openMobileNav}
+            aria-label="Open navigation"
+            className="flex size-9 shrink-0 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-card hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary md:hidden"
+          >
+            <Menu className="size-5" aria-hidden="true" />
+          </button>
 
-      <div className="relative flex-1 max-w-md">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" aria-hidden="true" />
-        <input
-          type="search"
-          placeholder="Search stocks..."
-          aria-label="Search stocks"
-          className="w-full rounded-md border border-border bg-card py-2 pl-9 pr-3 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-primary"
-        />
-      </div>
+          <div className="min-w-0 flex-1 md:hidden">
+            <ShellBrand />
+          </div>
 
-      <div className="ml-auto flex items-center gap-1 sm:gap-2">
-        <ThemeToggle />
+          <div className="hidden min-w-[190px] md:block">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-text-secondary">{context.eyebrow}</p>
+            <p className="mt-0.5 truncate text-sm font-semibold text-text-primary">{context.title}</p>
+          </div>
 
-        <button
-          type="button"
-          aria-label="Notifications"
-          className="flex size-9 items-center justify-center rounded-md text-text-secondary transition-colors hover:bg-card hover:text-text-primary"
-        >
-          <Bell className="size-5" aria-hidden="true" />
-        </button>
+          <div className="hidden min-w-0 flex-1 justify-center md:flex">
+            <div className="w-full max-w-xl">
+              <StockSearch />
+            </div>
+          </div>
 
-        <button
-          type="button"
-          aria-label="Account"
-          className="flex size-9 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-card hover:text-text-primary"
-        >
-          <UserCircle className="size-6" aria-hidden="true" />
-        </button>
+          <div className="ml-auto shrink-0">
+            <ThemeToggle />
+          </div>
+        </div>
+
+        <div className="pb-3 md:hidden">
+          <StockSearch shortcutEnabled={false} />
+        </div>
       </div>
     </header>
   );

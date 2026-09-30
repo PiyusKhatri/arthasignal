@@ -8,42 +8,89 @@ on:
 jobs:
   run-fundamentals-pipeline:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_URL_READONLY: ${{ secrets.DATABASE_URL_READONLY || secrets.DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
 
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
+      - name: Verify scheduled database is reachable
+        run: |
+          python - <<'PY'
+          import os
+          from urllib.parse import urlparse
+          from sqlalchemy import text
+          from src.database.connection import engine
+
+          url = os.environ.get("DATABASE_URL", "")
+          host = urlparse(url).hostname
+          if not url:
+              raise SystemExit("DATABASE_URL secret is not configured")
+          if host in {"localhost", "127.0.0.1", "db"}:
+              raise SystemExit(
+                  "Scheduled GitHub-hosted jobs cannot use the local Docker database. "
+                  "Use a network-reachable Postgres instance or a self-hosted runner."
+              )
+          with engine.connect() as connection:
+              connection.execute(text("SELECT 1"))
+          print("Database connectivity check passed")
+          PY
+
       - name: Run fundamentals backfill
+        id: fundamentals
         continue-on-error: true
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: python -m src.pipeline.backfill_fundamentals
 
       - name: Run promoter holding backfill
+        id: promoter
         continue-on-error: true
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: python -m src.pipeline.backfill_promoter_holding
 
       - name: Compute sector fundamental baselines
+        id: sector_baselines
         continue-on-error: true
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: python -m src.pipeline.sector_fundamental_baseline
 
       - name: Run macro data backfill
+        id: macro
         continue-on-error: true
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: python -m src.pipeline.backfill_macro_data
 
       - name: Run IPO calendar backfill
+        id: ipo
         continue-on-error: true
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: python -m src.pipeline.backfill_ipo_calendar
+
+      - name: Report partial pipeline failures
+        if: always()
+        env:
+          FUNDAMENTALS_OUTCOME: ${{ steps.fundamentals.outcome }}
+          PROMOTER_OUTCOME: ${{ steps.promoter.outcome }}
+          SECTOR_BASELINES_OUTCOME: ${{ steps.sector_baselines.outcome }}
+          MACRO_OUTCOME: ${{ steps.macro.outcome }}
+          IPO_OUTCOME: ${{ steps.ipo.outcome }}
+        run: |
+          failed=0
+          for item in \
+            "fundamentals:$FUNDAMENTALS_OUTCOME" \
+            "promoter:$PROMOTER_OUTCOME" \
+            "sector_baselines:$SECTOR_BASELINES_OUTCOME" \
+            "macro:$MACRO_OUTCOME" \
+            "ipo:$IPO_OUTCOME"; do
+            name="${item%%:*}"
+            outcome="${item#*:}"
+            if [ "$outcome" != "success" ]; then
+              echo "::error::$name step finished with outcome=$outcome"
+              failed=1
+            fi
+          done
+          exit "$failed"

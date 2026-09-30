@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import os
 import time
 from datetime import date, timedelta
 from typing import Any
@@ -11,7 +10,6 @@ from sqlalchemy import select
 from src.database.connection import get_session
 from src.database.models import DailyPrice, MarketIndex, TradingCalendar
 from src.pipeline.db_writers import upsert_trading_calendar_rows
-from src.scrapers import nepse_api
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -31,7 +29,34 @@ def _confirmed_trading_dates(start_date: date, end_date: date) -> set[date]:
     return {row.date for row in price_dates} | {row.date for row in index_dates}
 
 
-def _derive_structural_weekend_weekdays(start_date: date, end_date: date, trading_dates: set[date]) -> set[int]:
+def _confirmed_market_data_exists(day: date) -> bool:
+    with get_session() as session:
+        price_exists = session.execute(
+            select(DailyPrice.id).where(DailyPrice.date == day).limit(1)
+        ).scalar_one_or_none()
+        if price_exists is not None:
+            return True
+        index_exists = session.execute(
+            select(MarketIndex.id).where(MarketIndex.date == day).limit(1)
+        ).scalar_one_or_none()
+    return index_exists is not None
+
+
+def _calendar_status(day: date) -> tuple[bool, str | None] | None:
+    with get_session() as session:
+        row = session.execute(
+            select(TradingCalendar.is_trading_day, TradingCalendar.holiday_name).where(TradingCalendar.date == day)
+        ).one_or_none()
+    if row is None:
+        return None
+    return bool(row.is_trading_day), row.holiday_name
+
+
+def _derive_structural_weekend_weekdays(
+    start_date: date,
+    end_date: date,
+    trading_dates: set[date],
+) -> set[int]:
     calendar_days_by_weekday: dict[int, int] = {i: 0 for i in range(7)}
     trading_days_by_weekday: dict[int, int] = {i: 0 for i in range(7)}
 
@@ -51,13 +76,28 @@ def _derive_structural_weekend_weekdays(start_date: date, end_date: date, tradin
     return weekend_weekdays
 
 
-def run_calendar_backfill(years: int = BACKFILL_YEARS, attempt_confirmed_for_today: bool = False) -> dict[str, Any]:
+def _existing_calendar_rows(start_date: date, end_date: date) -> dict[date, tuple[bool, str | None]]:
+    with get_session() as session:
+        rows = session.execute(
+            select(TradingCalendar.date, TradingCalendar.is_trading_day, TradingCalendar.holiday_name)
+            .where(TradingCalendar.date >= start_date)
+            .where(TradingCalendar.date <= end_date)
+        ).all()
+    return {row.date: (bool(row.is_trading_day), row.holiday_name) for row in rows}
+
+
+def run_calendar_backfill(
+    years: int = BACKFILL_YEARS,
+    attempt_confirmed_for_today: bool = False,
+) -> dict[str, Any]:
     start_time = time.perf_counter()
 
     end_date = date.today()
     start_date = end_date - timedelta(days=years * 365)
 
     confirmed_trading_dates = _confirmed_trading_dates(start_date, end_date)
+    existing_rows = _existing_calendar_rows(start_date, end_date)
+
     logger.info(
         "Found %d confirmed trading days (daily_prices or market_index has real rows) between %s and %s",
         len(confirmed_trading_dates),
@@ -68,25 +108,35 @@ def run_calendar_backfill(years: int = BACKFILL_YEARS, attempt_confirmed_for_tod
     weekend_weekdays = _derive_structural_weekend_weekdays(start_date, end_date, confirmed_trading_dates)
     logger.info("Derived structural weekend weekdays (0=Monday): %s", sorted(weekend_weekdays))
 
-    rows = []
+    rows: list[dict[str, Any]] = []
     today_row_written = False
+    repaired_unexplained_false_rows = 0
+
     current = start_date
     while current <= end_date:
-        confirmed_trading = current in confirmed_trading_dates
+        existing = existing_rows.get(current)
 
-        if current == end_date and not confirmed_trading and not attempt_confirmed_for_today:
+        if current in confirmed_trading_dates:
+            is_trading_day = True
+            holiday_name = None
+        elif current.weekday() in weekend_weekdays:
+            is_trading_day = False
+            holiday_name = "Weekend"
+        elif existing is not None and existing[0] is False and existing[1]:
+            is_trading_day = False
+            holiday_name = existing[1]
+        elif current == end_date and not attempt_confirmed_for_today:
             logger.info(
-                "Skipping calendar row for %s: no confirmed EOD data yet and no genuine ingestion attempt "
-                "was confirmed for today - refusing to preemptively mark it non-trading",
+                "Skipping calendar row for %s: no confirmed EOD data yet and no ingestion attempt was requested",
                 current,
             )
             current += timedelta(days=1)
             continue
-
-        is_trading_day = confirmed_trading
-        holiday_name = None
-        if not is_trading_day:
-            holiday_name = "Weekend" if current.weekday() in weekend_weekdays else None
+        else:
+            is_trading_day = True
+            holiday_name = None
+            if existing is not None and existing[0] is False and existing[1] is None:
+                repaired_unexplained_false_rows += 1
 
         rows.append(
             {
@@ -98,13 +148,6 @@ def run_calendar_backfill(years: int = BACKFILL_YEARS, attempt_confirmed_for_tod
         if current == end_date:
             today_row_written = True
         current += timedelta(days=1)
-
-    # Hard invariant, enforced independently of the loop above: a date with confirmed real
-    # ingested rows must never be written as non-trading, no matter what the derived logic decided.
-    for row in rows:
-        if row["date"] in confirmed_trading_dates and not row["is_trading_day"]:
-            row["is_trading_day"] = True
-            row["holiday_name"] = None
 
     rows_written = upsert_trading_calendar_rows(rows)
 
@@ -121,18 +164,21 @@ def run_calendar_backfill(years: int = BACKFILL_YEARS, attempt_confirmed_for_tod
         "trading_days": trading_day_count,
         "non_trading_days": non_trading_day_count,
         "unexplained_non_trading_days": unexplained_non_trading_days,
+        "repaired_unexplained_false_rows": repaired_unexplained_false_rows,
         "today_row_written": today_row_written,
         "execution_time_seconds": round(elapsed_seconds, 2),
     }
 
     logger.info(
         "Calendar backfill summary: total_days_processed=%d rows_written=%d trading_days=%d "
-        "non_trading_days=%d unexplained_non_trading_days=%d today_row_written=%s execution_time_seconds=%.2f",
+        "non_trading_days=%d unexplained_non_trading_days=%d repaired_unexplained_false_rows=%d "
+        "today_row_written=%s execution_time_seconds=%.2f",
         summary["total_days_processed"],
         summary["rows_written"],
         summary["trading_days"],
         summary["non_trading_days"],
         summary["unexplained_non_trading_days"],
+        summary["repaired_unexplained_false_rows"],
         summary["today_row_written"],
         summary["execution_time_seconds"],
     )
@@ -162,50 +208,43 @@ def _known_non_trading_weekdays() -> set[int]:
     return non_trading_weekdays
 
 
-def _in_ci() -> bool:
-    return os.environ.get("GITHUB_ACTIONS", "").lower() == "true"
+def is_trading_day(day: date | None = None) -> bool:
+    """Return whether *day* is a trading day, not whether NEPSE is open right now."""
+
+    day = day or date.today()
+
+    if _confirmed_market_data_exists(day):
+        return True
+
+    status = _calendar_status(day)
+    if status is not None:
+        is_trading, holiday_name = status
+        if is_trading:
+            return True
+        if holiday_name:
+            return False
+        logger.warning(
+            "Trading calendar has an unexplained non-trading row for %s; treating it as untrusted and falling back "
+            "to the structural weekday pattern",
+            day,
+        )
+
+    non_trading_weekdays = _known_non_trading_weekdays()
+    result = day.weekday() not in non_trading_weekdays
+    logger.warning(
+        "Trading-day fallback for %s: weekday=%d known_non_trading_weekdays=%s -> is_trading_day=%s",
+        day,
+        day.weekday(),
+        sorted(non_trading_weekdays),
+        result,
+    )
+    return result
 
 
 def is_market_open_today() -> bool:
-    today = date.today()
+    """Backward-compatible alias for callers that really mean 'is today a trading day?'."""
 
-    with get_session() as session:
-        row = session.execute(
-            select(TradingCalendar.is_trading_day).where(TradingCalendar.date == today)
-        ).scalar_one_or_none()
-
-    if row is not None:
-        return row
-
-    logger.warning("No trading calendar entry for %s, falling back to historical weekday pattern", today)
-    non_trading_weekdays = _known_non_trading_weekdays()
-    weekday_pattern_result = today.weekday() not in non_trading_weekdays
-    logger.warning(
-        "Historical weekday pattern (0=Monday): weekday=%d known_non_trading_weekdays=%s -> is_trading_day=%s",
-        today.weekday(),
-        sorted(non_trading_weekdays),
-        weekday_pattern_result,
-    )
-
-    if _in_ci():
-        logger.warning(
-            "Running in CI (GITHUB_ACTIONS=true) - nepalstock.com blocks non-Nepal IPs so the live "
-            "market-status check is known to be unreliable here; using the weekday-pattern result "
-            "without attempting it, rather than risking a live-check exception silently resolving to closed"
-        )
-        return weekday_pattern_result
-
-    logger.info("Not in CI, attempting live market status check as a last-resort refinement for %s", today)
-    try:
-        return nepse_api.is_market_open()
-    except Exception:
-        logger.exception(
-            "Live market status check failed for %s - falling back to the weekday-pattern result (%s) "
-            "instead of defaulting to closed",
-            today,
-            weekday_pattern_result,
-        )
-        return weekday_pattern_result
+    return is_trading_day(date.today())
 
 
 if __name__ == "__main__":

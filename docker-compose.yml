@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:17
+    container_name: artha-local-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: artha
+      POSTGRES_PASSWORD: artha_local_password
+      POSTGRES_DB: artha
+    ports:
+      - "5432:5432"
+    volumes:
+      - artha_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U artha -d artha" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  artha_pgdata:

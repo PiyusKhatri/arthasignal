@@ -9,3 +9,6 @@ env/
 .pytest_cache/
 .mypy_cache/
 .gstack/
+
+# Local DB backup dump (contains user data)
+backups/

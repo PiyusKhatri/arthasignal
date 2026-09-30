@@ -4,8 +4,8 @@ from datetime import date, datetime, timezone
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
-from sqlalchemy import select
+from pydantic import BaseModel, Field, field_validator
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -16,17 +16,47 @@ from src.database.models import Company, DailyPrice, Holding, User
 router = APIRouter(prefix="/portfolio", tags=["portfolio"])
 
 
+def _normalize_symbol(value: str) -> str:
+    symbol = value.strip().upper()
+    if not symbol:
+        raise ValueError("symbol is required")
+    if len(symbol) > 20:
+        raise ValueError("symbol must not exceed 20 characters")
+    return symbol
+
+
+def _validate_purchase_date(value: date | None) -> date | None:
+    if value is not None and value > date.today():
+        raise ValueError("purchase_date cannot be in the future")
+    return value
+
+
 class HoldingCreate(BaseModel):
     symbol: str
-    quantity: Decimal
-    purchase_price: Decimal
+    quantity: Decimal = Field(gt=0)
+    purchase_price: Decimal = Field(gt=0)
     purchase_date: date
+
+    @field_validator("symbol")
+    @classmethod
+    def normalize_symbol(cls, value: str) -> str:
+        return _normalize_symbol(value)
+
+    @field_validator("purchase_date")
+    @classmethod
+    def validate_purchase_date(cls, value: date) -> date:
+        return _validate_purchase_date(value)  # type: ignore[return-value]
 
 
 class HoldingUpdate(BaseModel):
-    quantity: Decimal | None = None
-    purchase_price: Decimal | None = None
+    quantity: Decimal | None = Field(default=None, gt=0)
+    purchase_price: Decimal | None = Field(default=None, gt=0)
     purchase_date: date | None = None
+
+    @field_validator("purchase_date")
+    @classmethod
+    def validate_purchase_date(cls, value: date | None) -> date | None:
+        return _validate_purchase_date(value)
 
 
 class HoldingResponse(BaseModel):
@@ -53,9 +83,14 @@ class HoldingSummary(BaseModel):
 
 class PortfolioSummary(BaseModel):
     total_invested: Decimal
-    total_current_value: Decimal
-    total_unrealized_pl: Decimal
+    total_current_value: Decimal | None
+    total_unrealized_pl: Decimal | None
     total_unrealized_pl_percent: Decimal | None
+    priced_invested_amount: Decimal
+    priced_current_value: Decimal
+    unpriced_invested_amount: Decimal
+    unpriced_holdings_count: int
+    valuation_complete: bool
     holdings: list[HoldingSummary]
 
 
@@ -77,6 +112,27 @@ def _load_owned_holding(session: Session, holding_id: int, user_id: int) -> Hold
     if holding is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Holding not found")
     return holding
+
+
+def _load_latest_prices(session: Session, symbols: set[str]) -> dict[str, Decimal]:
+    if not symbols:
+        return {}
+
+    ranked_prices = (
+        select(
+            DailyPrice.symbol.label("symbol"),
+            DailyPrice.close.label("close"),
+            func.row_number()
+            .over(partition_by=DailyPrice.symbol, order_by=DailyPrice.date.desc())
+            .label("row_num"),
+        )
+        .where(DailyPrice.symbol.in_(symbols))
+        .subquery()
+    )
+    rows = session.execute(
+        select(ranked_prices.c.symbol, ranked_prices.c.close).where(ranked_prices.c.row_num == 1)
+    ).all()
+    return {row.symbol: Decimal(str(row.close)) for row in rows}
 
 
 @router.post("/holdings", response_model=HoldingResponse, status_code=status.HTTP_201_CREATED)
@@ -154,26 +210,17 @@ def delete_holding(holding_id: int, current_user: User = Depends(get_current_use
 @router.get("/summary", response_model=PortfolioSummary)
 def get_portfolio_summary(current_user: User = Depends(get_current_user)) -> PortfolioSummary:
     with get_session() as session:
-        holdings = session.execute(
-            select(Holding).where(Holding.user_id == current_user.id)
-        ).scalars().all()
-        session.expunge_all()
-
+        holdings = session.execute(select(Holding).where(Holding.user_id == current_user.id)).scalars().all()
         symbols = {h.symbol for h in holdings}
-        latest_prices: dict[str, Decimal] = {}
-        for symbol in symbols:
-            price = session.execute(
-                select(DailyPrice.close)
-                .where(DailyPrice.symbol == symbol)
-                .order_by(DailyPrice.date.desc())
-                .limit(1)
-            ).scalar_one_or_none()
-            if price is not None:
-                latest_prices[symbol] = Decimal(str(price))
+        latest_prices = _load_latest_prices(session, symbols)
+        session.expunge_all()
 
     holding_summaries: list[HoldingSummary] = []
     total_invested = Decimal("0")
-    total_current_value = Decimal("0")
+    priced_invested_amount = Decimal("0")
+    priced_current_value = Decimal("0")
+    unpriced_invested_amount = Decimal("0")
+    unpriced_holdings_count = 0
 
     for h in holdings:
         quantity = Decimal(str(h.quantity))
@@ -188,8 +235,12 @@ def get_portfolio_summary(current_user: User = Depends(get_current_user)) -> Por
         if current_price is not None:
             current_value = quantity * current_price
             unrealized_pl = current_value - invested_amount
-            unrealized_pl_percent = (unrealized_pl / invested_amount * 100) if invested_amount != 0 else None
-            total_current_value += current_value
+            unrealized_pl_percent = unrealized_pl / invested_amount * 100
+            priced_invested_amount += invested_amount
+            priced_current_value += current_value
+        else:
+            unpriced_invested_amount += invested_amount
+            unpriced_holdings_count += 1
 
         holding_summaries.append(
             HoldingSummary(
@@ -206,13 +257,24 @@ def get_portfolio_summary(current_user: User = Depends(get_current_user)) -> Por
             )
         )
 
-    total_unrealized_pl = total_current_value - total_invested
-    total_unrealized_pl_percent = (total_unrealized_pl / total_invested * 100) if total_invested != 0 else None
+    valuation_complete = unpriced_holdings_count == 0
+    total_current_value = priced_current_value if valuation_complete else None
+    total_unrealized_pl = (priced_current_value - total_invested) if valuation_complete else None
+    total_unrealized_pl_percent = (
+        total_unrealized_pl / total_invested * 100
+        if valuation_complete and total_unrealized_pl is not None and total_invested != 0
+        else None
+    )
 
     return PortfolioSummary(
         total_invested=total_invested,
         total_current_value=total_current_value,
         total_unrealized_pl=total_unrealized_pl,
         total_unrealized_pl_percent=total_unrealized_pl_percent,
+        priced_invested_amount=priced_invested_amount,
+        priced_current_value=priced_current_value,
+        unpriced_invested_amount=unpriced_invested_amount,
+        unpriced_holdings_count=unpriced_holdings_count,
+        valuation_complete=valuation_complete,
         holdings=holding_summaries,
     )

@@ -6,7 +6,7 @@ from datetime import date, datetime
 from typing import Any
 
 from src.pipeline.adjustment_ops import reapply_adjustment_for_symbol, symbols_with_corporate_actions
-from src.pipeline.backfill_calendar import is_market_open_today
+from src.pipeline.backfill_calendar import is_trading_day
 from src.pipeline.data_quality import check_daily_pipeline_health
 from src.pipeline.db_writers import build_company_records, insert_new_daily_prices, upsert_companies
 from src.scrapers.market_data import get_today_price_with_fallback
@@ -94,7 +94,7 @@ def _skipped_summary(elapsed_seconds: float) -> dict[str, Any]:
 def run_daily_pipeline() -> dict[str, Any]:
     start_time = time.perf_counter()
 
-    if not is_market_open_today():
+    if not is_trading_day():
         logger.info("run_daily_pipeline skipped: not a trading day")
         return _skipped_summary(time.perf_counter() - start_time)
 

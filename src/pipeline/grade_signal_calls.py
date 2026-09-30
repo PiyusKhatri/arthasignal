@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import bisect
 import logging
-from datetime import date, datetime
+from datetime import date
 from decimal import Decimal
+from statistics import mean
 from typing import Any
 
 from sqlalchemy import select, update
@@ -18,6 +19,7 @@ from src.database.models import (
     SignalCallStatus,
     TradingCalendar,
 )
+from src.pipeline.signal_validation_policy import VALIDATION_POLICY_VERSION
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -60,8 +62,10 @@ def _load_pending_calls() -> list[SignalCall]:
     return rows
 
 
-def _load_close_price_index(symbols: set[str], start_date: date, end_date: date) -> dict[str, tuple[list[date], list[Decimal]]]:
-    if not symbols:
+def _load_close_price_index(
+    symbols: set[str], start_date: date, end_date: date
+) -> dict[str, tuple[list[date], list[Decimal]]]:
+    if not symbols or end_date < start_date:
         return {}
     with get_session() as session:
         rows = session.execute(
@@ -93,7 +97,7 @@ def _find_resolution_price(
     close_index: dict[str, tuple[list[date], list[Decimal]]],
     symbol: str,
     target_date: date,
-    cutoff_date: date | None,
+    effective_cutoff: date,
 ) -> tuple[date, Decimal] | None:
     series = close_index.get(symbol)
     if series is None:
@@ -103,41 +107,54 @@ def _find_resolution_price(
     if pos >= len(dates):
         return None
     found_date = dates[pos]
-    if cutoff_date is not None and found_date > cutoff_date:
+    if found_date > effective_cutoff:
         return None
     return found_date, closes[pos]
 
 
-def _load_corporate_action_symbols(symbols: set[str], start_date: date, end_date: date) -> set[str]:
+def _load_corporate_action_dates(
+    symbols: set[str], start_date: date, end_date: date
+) -> dict[str, list[date]]:
     if not symbols:
-        return set()
+        return {}
     with get_session() as session:
         rows = session.execute(
-            select(CorporateAction.symbol)
+            select(CorporateAction.symbol, CorporateAction.action_date)
             .where(CorporateAction.symbol.in_(symbols))
             .where(CorporateAction.action_date > start_date)
             .where(CorporateAction.action_date <= end_date)
-        ).scalars().all()
-    return set(rows)
+            .order_by(CorporateAction.symbol, CorporateAction.action_date)
+        ).all()
+
+    index: dict[str, list[date]] = {}
+    for symbol, action_date in rows:
+        index.setdefault(symbol, []).append(action_date)
+    return index
+
+
+def _has_corporate_action(
+    action_dates: dict[str, list[date]], symbol: str, entry_date: date, resolution_date: date
+) -> bool:
+    dates = action_dates.get(symbol, [])
+    pos = bisect.bisect_right(dates, entry_date)
+    return pos < len(dates) and dates[pos] <= resolution_date
 
 
 def _load_company_status(symbols: set[str]) -> dict[str, str]:
     if not symbols:
         return {}
     with get_session() as session:
-        rows = session.execute(
-            select(Company.symbol, Company.status).where(Company.symbol.in_(symbols))
-        ).all()
+        rows = session.execute(select(Company.symbol, Company.status).where(Company.symbol.in_(symbols))).all()
     return {r.symbol: r.status for r in rows}
 
 
 def _apply_updates(resolved: list[dict[str, Any]], voided: list[dict[str, Any]]) -> int:
     updated = 0
     with get_session() as session:
-        for group, status in ((resolved, SignalCallStatus.RESOLVED), (voided, SignalCallStatus.VOID)):
+        for group, status_value in ((resolved, SignalCallStatus.RESOLVED), (voided, SignalCallStatus.VOID)):
             for entry in group:
                 values = {
-                    "status": status,
+                    "status": status_value,
                     "outcome": entry["outcome"],
                     "resolution_date": entry.get("resolution_date"),
                     "resolution_price": entry.get("resolution_price"),
@@ -165,39 +182,48 @@ def grade_signal_calls(as_of: date | None = None) -> dict[str, Any]:
 
     if not ready:
         summary = {
+            "policy_version": VALIDATION_POLICY_VERSION,
             "total_pending": len(pending_calls),
             "not_ready": not_ready_count,
             "resolved": 0,
             "voided": 0,
             "win": 0,
             "loss": 0,
+            "mean_gross_return_percent": None,
         }
         logger.info("Signal call grading summary: %s", summary)
         return summary
 
     symbols = {entry["call"].symbol for entry in ready}
     min_target = min(entry["target_date"] for entry in ready)
-    max_cutoff = max((entry["cutoff_date"] or entry["target_date"]) for entry in ready)
-    close_index = _load_close_price_index(symbols, min_target, max_cutoff)
+    close_index = _load_close_price_index(symbols, min_target, as_of)
 
-    entry_dates = {entry["call"].entry_date for entry in ready}
-    min_entry_date = min(entry_dates)
-    corporate_action_symbols = _load_corporate_action_symbols(symbols, min_entry_date, max_cutoff)
+    min_entry_date = min(entry["call"].entry_date for entry in ready)
+    corporate_action_dates = _load_corporate_action_dates(symbols, min_entry_date, as_of)
     company_status = _load_company_status(symbols)
 
     resolved_rows: list[dict[str, Any]] = []
     voided_rows: list[dict[str, Any]] = []
     win_count = 0
     loss_count = 0
-    void_notes: list[str] = []
+    data_quality_notes: list[str] = []
+    gross_returns: list[float] = []
 
     for entry in ready:
         call = entry["call"]
-        found = _find_resolution_price(close_index, call.symbol, entry["target_date"], entry["cutoff_date"])
+        cutoff_date = entry["cutoff_date"]
+        effective_cutoff = min(cutoff_date, as_of) if cutoff_date is not None else as_of
+        found = _find_resolution_price(close_index, call.symbol, entry["target_date"], effective_cutoff)
 
         if found is None:
+            # The +3-trading-day search window has not elapsed yet. Keep the
+            # call pending rather than prematurely declaring it VOID.
+            if cutoff_date is None or cutoff_date > as_of:
+                not_ready_count += 1
+                continue
+
             status_note = company_status.get(call.symbol, "unknown")
-            void_notes.append(
+            data_quality_notes.append(
                 f"{call.symbol}/{call.signal_name}/{call.entry_date}: no trade within "
                 f"{VOID_SEARCH_CAP_TRADING_DAYS} trading days of resolution target {entry['target_date']} "
                 f"(company status={status_note})"
@@ -205,15 +231,19 @@ def grade_signal_calls(as_of: date | None = None) -> dict[str, Any]:
             voided_rows.append({"id": call.id, "outcome": SignalCallOutcome.VOID})
             continue
 
-        resolution_date, resolution_price = found
-        entry_price = Decimal(str(call.entry_price))
-        resolution_price = Decimal(str(resolution_price))
-
-        if call.symbol in corporate_action_symbols:
-            void_notes.append(
+        resolution_date, resolution_price_raw = found
+        if _has_corporate_action(corporate_action_dates, call.symbol, call.entry_date, resolution_date):
+            data_quality_notes.append(
                 f"{call.symbol}/{call.signal_name}/{call.entry_date}: corporate action occurred between "
-                f"entry and resolution - raw price comparison may be distorted, resolved anyway per raw-basis policy"
+                "entry and resolution; call voided to avoid grading a distorted raw-price move"
             )
+            voided_rows.append({"id": call.id, "outcome": SignalCallOutcome.VOID})
+            continue
+
+        entry_price = Decimal(str(call.entry_price))
+        resolution_price = Decimal(str(resolution_price_raw))
+        gross_return_percent = float((resolution_price / entry_price - Decimal("1")) * Decimal("100"))
+        gross_returns.append(gross_return_percent)
 
         outcome = SignalCallOutcome.WIN if resolution_price > entry_price else SignalCallOutcome.LOSS
         if outcome == SignalCallOutcome.WIN:
@@ -227,21 +257,24 @@ def grade_signal_calls(as_of: date | None = None) -> dict[str, Any]:
                 "outcome": outcome,
                 "resolution_date": resolution_date,
                 "resolution_price": resolution_price,
+                "gross_return_percent": gross_return_percent,
             }
         )
 
     updated = _apply_updates(resolved_rows, voided_rows)
 
-    for note in void_notes:
+    for note in data_quality_notes:
         logger.warning("Signal call data-quality note: %s", note)
 
     summary = {
+        "policy_version": VALIDATION_POLICY_VERSION,
         "total_pending": len(pending_calls),
         "not_ready": not_ready_count,
         "resolved": len(resolved_rows),
         "voided": len(voided_rows),
         "win": win_count,
         "loss": loss_count,
+        "mean_gross_return_percent": round(mean(gross_returns), 6) if gross_returns else None,
         "rows_updated": updated,
     }
     logger.info("Signal call grading summary: %s", summary)

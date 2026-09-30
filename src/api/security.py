@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import bcrypt
 import jwt
 
-from src.config import settings
+from src.config import ConfigError, settings
 
 JWT_ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
@@ -14,14 +15,27 @@ REFRESH_TOKEN_EXPIRE_DAYS = 7
 BCRYPT_MAX_PASSWORD_BYTES = 72
 
 
+def _jwt_secret_key() -> str:
+    if not settings.jwt_secret_key:
+        raise ConfigError("JWT_SECRET_KEY is required for authentication operations")
+    return settings.jwt_secret_key
+
+
 def hash_password(password: str) -> str:
-    password_bytes = password.encode("utf-8")[:BCRYPT_MAX_PASSWORD_BYTES]
+    password_bytes = password.encode("utf-8")
+    if len(password_bytes) > BCRYPT_MAX_PASSWORD_BYTES:
+        raise ValueError(f"password must not exceed {BCRYPT_MAX_PASSWORD_BYTES} bytes")
     return bcrypt.hashpw(password_bytes, bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(password: str, hashed_password: str) -> bool:
-    password_bytes = password.encode("utf-8")[:BCRYPT_MAX_PASSWORD_BYTES]
-    return bcrypt.checkpw(password_bytes, hashed_password.encode("utf-8"))
+    password_bytes = password.encode("utf-8")
+    if len(password_bytes) > BCRYPT_MAX_PASSWORD_BYTES:
+        return False
+    try:
+        return bcrypt.checkpw(password_bytes, hashed_password.encode("utf-8"))
+    except (ValueError, TypeError):
+        return False
 
 
 def _create_token(subject: str, expires_delta: timedelta, token_type: str) -> str:
@@ -29,10 +43,14 @@ def _create_token(subject: str, expires_delta: timedelta, token_type: str) -> st
     payload = {
         "sub": subject,
         "type": token_type,
+        "jti": secrets.token_urlsafe(16),
         "iat": now,
+        # Millisecond precision lets security events invalidate access tokens
+        # issued earlier in the same second without rejecting a fresh login.
+        "iat_ms": int(now.timestamp() * 1000),
         "exp": now + expires_delta,
     }
-    return jwt.encode(payload, settings.jwt_secret_key, algorithm=JWT_ALGORITHM)
+    return jwt.encode(payload, _jwt_secret_key(), algorithm=JWT_ALGORITHM)
 
 
 def create_access_token(user_id: int) -> str:
@@ -44,4 +62,4 @@ def create_refresh_token(user_id: int) -> str:
 
 
 def decode_token(token: str) -> dict[str, Any]:
-    return jwt.decode(token, settings.jwt_secret_key, algorithms=[JWT_ALGORITHM])
+    return jwt.decode(token, _jwt_secret_key(), algorithms=[JWT_ALGORITHM])

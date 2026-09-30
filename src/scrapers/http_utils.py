@@ -10,8 +10,8 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_ex
 logger = logging.getLogger(__name__)
 
 DEFAULT_TIMEOUT_SECONDS = 15
-MIN_REQUEST_INTERVAL_SECONDS = 1.0
-MAX_REQUEST_INTERVAL_SECONDS = 2.0
+MIN_REQUEST_INTERVAL_SECONDS = 0.25
+MAX_REQUEST_INTERVAL_SECONDS = 0.5
 
 DEFAULT_HEADERS = {
     "User-Agent": (

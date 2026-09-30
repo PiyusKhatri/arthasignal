@@ -3,10 +3,11 @@ beautifulsoup4==4.12.3
 psycopg2-binary==2.9.9
 python-dotenv==1.0.1
 pandas==2.2.3
-SQLAlchemy==2.0.35
+SQLAlchemy==2.0.52
 tenacity==9.0.0
 nepse-scraper==1.0.0
 pytest==9.1.1
+httpx==0.28.1
 google-api-python-client==2.198.0
 google-auth==2.56.2
 fastapi==0.141.1
@@ -16,3 +17,4 @@ PyJWT==2.13.0
 email-validator==2.3.0
 cachetools==7.1.7
 slowapi==0.1.10
+xgboost==3.4.0

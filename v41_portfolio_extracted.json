@@ -1,0 +1,85 @@
+{
+  "summary": {
+    "v41": {
+      "sessions": 1365,
+      "decision_dates": 312,
+      "total_return_percent": -67.82511308512717,
+      "approx_cagr_percent": -18.888941885117493,
+      "annualized_volatility_percent": 36.599021183515255,
+      "sharpe_like": -0.3904011124738545,
+      "max_drawdown_percent": -86.52193311637312,
+      "total_transaction_cost_percent_of_initial_capital": 340.285291644791,
+      "cumulative_turnover_x_initial_capital": 680.5705832895819,
+      "annualized_turnover_x": 125.6437999919228,
+      "mean_positions": 1.235897435897436,
+      "mean_completed_holding_sessions": 2.3929078014184397,
+      "median_completed_holding_sessions": 1
+    },
+    "matched_momentum_baseline": {
+      "sessions": 1365,
+      "decision_dates": 312,
+      "total_return_percent": -87.88207682190028,
+      "approx_cagr_percent": -32.26911603456164,
+      "annualized_volatility_percent": 40.10078159418822,
+      "sharpe_like": -0.7714144672210658,
+      "max_drawdown_percent": -93.67260614120467,
+      "total_transaction_cost_percent_of_initial_capital": 260.9528383442133,
+      "cumulative_turnover_x_initial_capital": 521.9056766884278,
+      "annualized_turnover_x": 96.35181723478667,
+      "mean_positions": 1.2344322344322345,
+      "mean_completed_holding_sessions": 2.3866855524079322,
+      "median_completed_holding_sessions": 1.0
+    },
+    "nepse": {
+      "sessions": 1365,
+      "total_return_percent": 81.45523689664343,
+      "approx_cagr_percent": 11.627919882017412,
+      "annualized_volatility_percent": 22.158833246549037,
+      "sharpe_like": 0.6068359206880076,
+      "max_drawdown_percent": -43.25236040767836
+    },
+    "v41_minus_baseline_cagr_percent": 13.380174149444148,
+    "v41_minus_nepse_cagr_percent": -30.516861767134905
+  },
+  "block_bootstrap": {
+    "v41_vs_matched_baseline": {
+      "sessions": 1365,
+      "block_length": 20,
+      "iterations": 2000,
+      "mean_daily_incremental_percent": 0.06605565271083531,
+      "annualized_incremental_return_percent": 16.6460244831305,
+      "annualized_incremental_return_95": {
+        "low": -9.881123333492926,
+        "high": 41.7811587933921
+      }
+    },
+    "v41_vs_nepse": {
+      "sessions": 1365,
+      "block_length": 20,
+      "iterations": 2000,
+      "mean_daily_incremental_percent": -0.11005981968269896,
+      "annualized_incremental_return_percent": -27.735074560040136,
+      "annualized_incremental_return_95": {
+        "low": -60.855580363207096,
+        "high": 3.3663347852648156
+      }
+    }
+  },
+  "execution_policy": {
+    "max_positions": 5,
+    "weighting": "equal weight",
+    "rebalance": "every available frozen OOS V4.1 decision date",
+    "maximum_holding_sessions": 20,
+    "round_trip_cost_percent": 1.0,
+    "price_basis": "adjusted close when available, otherwise close",
+    "leverage": false,
+    "shorting": false,
+    "terminal_liquidation_cost_charged": true
+  },
+  "historical_cadence_limitation": {
+    "feature_step": 5,
+    "daily_mark_to_market": true,
+    "daily_historical_signal_claim": false,
+    "note": "The frozen historical V4.1 OOS matrix was sampled every five stock observations. The simulator marks capital every NEPSE session and enforces daily holding limits, but only rebalances when a genuine historical OOS V4.1 decision exists. The new forward ledger captures every future eligible session."
+  }
+}
