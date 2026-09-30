@@ -2,6 +2,8 @@
 
 Written 2026-09-30 from the repository contents only. No code was changed and no model was re-run.
 
+Path note: after this report was written, the V2 to V5 and E1 code, tests and result files were moved to `archive/quant_research_v1/`. Citations below use the original paths; see the README there for the mapping.
+
 **Bottom line.** No model version has passed its own historical gate. Every recorded gate status is `review` and every verdict is `continue_research`. No challenger has been promoted. The only forward snapshot in the repository shows zero forward observations. V5 has no recorded result at all.
 
 ## How to read this document
