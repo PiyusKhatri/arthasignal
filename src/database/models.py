@@ -14,6 +14,7 @@ from sqlalchemy import (
     Numeric,
     String,
     UniqueConstraint,
+    false,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -170,6 +171,7 @@ class TradingCalendar(Base):
     date: Mapped[date] = mapped_column(Date, unique=True, nullable=False)
     is_trading_day: Mapped[bool] = mapped_column(nullable=False)
     holiday_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    is_known_holiday: Mapped[bool] = mapped_column(nullable=False, default=False, server_default=false())
 
 
 class SymbolHistory(Base):

@@ -337,12 +337,14 @@ def upsert_brokers(records: list[dict[str, Any]]) -> int:
 def upsert_trading_calendar_rows(rows: list[dict[str, Any]]) -> int:
     if not rows:
         return 0
+    rows = [{**row, "is_known_holiday": bool(row.get("is_known_holiday", False))} for row in rows]
     stmt = pg_insert(TradingCalendar).values(rows)
     stmt = stmt.on_conflict_do_update(
         index_elements=["date"],
         set_={
             "is_trading_day": stmt.excluded.is_trading_day,
             "holiday_name": stmt.excluded.holiday_name,
+            "is_known_holiday": stmt.excluded.is_known_holiday,
         },
     )
     with get_session() as session:

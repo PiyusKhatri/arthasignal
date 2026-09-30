@@ -7,7 +7,7 @@ from typing import Any
 from sqlalchemy import delete
 
 from src.database.connection import get_session
-from src.database.models import IntradayFloorsheet, IntradayIndexSnapshot, IntradaySnapshot
+from src.database.models import IntradayIndexSnapshot, IntradaySnapshot
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -17,7 +17,6 @@ RETENTION_DAYS = 30
 RETENTION_TABLES = {
     "intraday_snapshots": IntradaySnapshot,
     "intraday_index_snapshots": IntradayIndexSnapshot,
-    "intraday_floorsheet": IntradayFloorsheet,
 }
 
 

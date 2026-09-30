@@ -1,11 +1,17 @@
 # Data Readiness Audit
 
-Audited 2026-09-30 against the local PostgreSQL 17 database `arthasignal` (49 tables), using read-only queries through the `api_readonly` role. Nothing was written.
+Audited 2026-09-30 against the local PostgreSQL 17 database `arthasignal`, using read-only queries through the `api_readonly` role.
 
-**Verdict.** The data is not ready for modelling. Four problems need fixing first:
+**Update, same day.** Three findings from the first pass have since been acted on; the affected sections are marked "Fixed" or "Corrected" and show before and after:
 
-1. The daily pipeline deletes floorsheet rows older than 30 days, so broker history is being destroyed as it is collected.
-2. Since 2026-08-21 no stock prices exist for any Sunday, and prices exist on three Fridays. Session dates after that point cannot be trusted.
+- Floorsheet pruning is removed (section 1).
+- The first pass misread the Sunday and Friday pattern as a dating error. NEPSE moved to a Monday to Friday week in April 2026; the Friday sessions are real (section 2).
+- The trading calendar now counts only days with real prices, and 1,046 signal calls were re-graded (sections 2 and 3).
+
+**Verdict.** The data is still not ready for modelling. Open problems:
+
+1. Floorsheet history is 18 days; nothing older survives locally.
+2. The index table is unreliable since 2026-07-23: rows are stamped with the scrape date, not the session date, and the headline NEPSE Index is missing on 20 sessions.
 3. Local price history starts on 2021-07-25, not 2014.
 4. Delisted companies are almost entirely missing: 32 of 184 have any price.
 
@@ -52,16 +58,18 @@ On every captured day the floorsheet covers exactly the symbols in `daily_prices
 
 ### Trading days with zero floorsheet rows
 
-| Scope | Trading days | With floorsheet | With zero rows |
+| Scope | Sessions | With floorsheet | With zero rows |
 | --- | ---: | ---: | ---: |
-| Whole `trading_calendar` (2021-07-23 to 2026-09-29) | 1,388 | 18 | 1,370 |
-| Inside the captured window (2026-08-31 to 2026-09-29) | 24 | 18 | 6 |
+| All sessions with prices (2021-07-25 to 2026-09-29) | 1,201 | 18 | 1,183 |
+| Inside the captured window (2026-08-31 to 2026-09-29) | 18 | 18 | 0 |
 
-The six missing days inside the window are 2026-09-06, 09-08, 09-13, 09-20, 09-21 and 09-27. None of them has `daily_prices` rows either, so this is a whole-day capture gap, not a floorsheet-only gap (see section 2).
+Corrected: the first pass counted 24 trading days in the window and reported six missing. Those six (2026-09-06, 09-08, 09-13, 09-20, 09-21, 09-27) were four Sundays and two holidays, not sessions. Every real session in the window has a complete floorsheet.
 
-### Why the history is only 30 days
+### Why the history is only 30 days (fixed)
 
-`src/pipeline/cleanup_intraday_tables.py:15-20` sets `RETENTION_DAYS = 30` and lists `intraday_floorsheet` among the tables to prune. `run_all_daily` calls it every day. The earliest floorsheet date, 2026-08-31, is exactly 30 days before this audit. Until that rule changes, the table can never hold more than about 20 trading days.
+`src/pipeline/cleanup_intraday_tables.py` listed `intraday_floorsheet` among the tables pruned after 30 days, and `run_all_daily` calls it every day. The earliest floorsheet date, 2026-08-31, is exactly 30 days before this audit.
+
+Fixed: the floorsheet is no longer in the retention list; only `intraday_snapshots` and `intraday_index_snapshots` are pruned. `tests/test_intraday_cleanup_retention.py` fails if it is ever added back. The local table still holds all 981,397 rows. Rows already deleted are not recoverable from this machine.
 
 ### Gap against a full history from 2014
 
@@ -132,41 +140,70 @@ The rule-based signal tiers shown to users rest on backtests last computed in Ju
 | `password_reset_tokens` | 3 | expires 2026-09-30 |
 | `watchlists`, `price_alerts`, `signal_alerts`, `refresh_sessions`, `user_auth_state` | 0 | none |
 
-### Date problems after 2026-08-20
+### Session dates (corrected)
 
-Distinct price dates by weekday, before and after 2026-08-21:
+The first pass read "no Sundays, three Fridays since 2026-08-21" as a dating error. It is not. Price days by weekday in 2026:
 
-| Weekday | Price days before 2026-08-21 | Price days from 2026-08-21 |
+| Month | Sun | Mon | Tue | Wed | Thu | Fri |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 2026-03 | 4 | 4 | 5 | 2 | 3 | 0 |
+| 2026-04 | 1 | 4 | 3 | 5 | 5 | 3 |
+| 2026-05 | 0 | 4 | 4 | 4 | 3 | 3 |
+| 2026-06 | 0 | 5 | 5 | 4 | 4 | 4 |
+| 2026-07 | 0 | 3 | 4 | 5 | 5 | 5 |
+| 2026-08 | 0 | 5 | 4 | 4 | 4 | 3 |
+| 2026-09 | 0 | 3 | 4 | 4 | 4 | 2 |
+
+- The last Sunday session is 2026-04-05 and the first Friday session is 2026-04-10. The week has been Monday to Friday since 2026-04-06.
+- **The Friday sessions are real.** There are 20 of them since the switch. Floorsheet contract numbers embed the session date (for example `2026091101000001` on Friday 2026-09-11 and `20260918...` on 2026-09-18), and the NEPSE Index moves continuously through every Friday from 2026-04-10 to 2026-07-17.
+- A further 15 Friday sessions exist between 2022-05-20 and 2022-09-16.
+
+### Calendar days marked trading with no prices, since 2026-04-01
+
+There were 30. Each was classified from the price and index tables. The test for a weekday is index continuity: if the first index row after the gap satisfies `close − points_change = last stored close before the gap`, no session happened in between.
+
+| Verdict | Days | Dates | Evidence |
+| --- | ---: | --- | --- |
+| Calendar bug (Sunday after the move to Monday to Friday) | 25 | Every Sunday from 2026-04-12 to 2026-09-27 | No prices on any Sunday after 2026-04-05 |
+| Genuine holiday | 2 | 2026-04-14 (Tue), 2026-05-28 (Thu) | All 17 index series continuous across the gap |
+| Genuine holiday | 2 | 2026-09-08 (Tue), 2026-09-21 (Mon) | The 13 sector rows stored that day are unchanged copies of the previous session, and the next session continues from them |
+| Undetermined | 1 | 2026-07-27 (Mon) | No index rows exist from 2026-07-23 to 2026-07-28, so continuity cannot be tested |
+| Missing price scrape | 0 | none | No day has evidence of a session without prices |
+
+Five Fridays without prices (2026-05-01, 05-29, 08-28, 09-04, 09-25) were labelled "Weekend". By the same continuity test they are genuine holidays.
+
+Across the whole history, 155 of the 187 no-price "trading days" are holidays by NEPSE Index continuity, 25 are the post-switch Sundays, and 7 fail a strict 0.05-point test. Five of those seven are rounding in `points_change` (under half an index point), 2026-09-21 is confirmed by the sector indices, and the seventh is 2026-07-27.
+
+### Why the calendar was wrong
+
+1. A day counted as a trading day if either `daily_prices` or `market_index` had a row. Since 2026-08 the daily index refresh stamps rows with the run date, so Sundays and holidays acquired index rows and looked like sessions.
+2. Weekend weekdays were derived from a five-year average. Sunday traded for most of those five years and Friday did not, so the calendar kept treating Sunday as a trading day and Friday as a weekend after the April 2026 switch.
+3. Any other weekday without data defaulted to "trading", so holidays were never recorded.
+
+### Calendar fix, before and after
+
+The calendar now marks a day as trading only if `daily_prices` has rows for it. A new column, `is_known_holiday`, is set when a weekday has no prices and the index confirms no session. Weekends are inferred from the four surrounding weeks, so a change of trading week is picked up. Days after the latest session still default to "expected trading" so ingestion is not skipped.
+
+| Measure | Before | After |
 | --- | ---: | ---: |
-| Sunday | 209 | **0** |
-| Monday | 226 | 5 |
-| Tuesday | 242 | 5 |
-| Wednesday | 241 | 5 |
-| Thursday | 228 | 5 |
-| Friday | 32 | **3** |
+| Calendar rows | 1,895 | 1,895 |
+| Marked trading | 1,388 | 1,201 |
+| Marked trading with no prices | 187 | 0 |
+| Price days not marked trading | 0 | 0 |
+| Known holidays (`is_known_holiday`) | column did not exist | 167 |
+| Weekend | 507 | 526 |
+| Unexplained non-trading | 0 | 1 (2026-07-27) |
 
-- **No Sunday has stock prices since 2026-08-21.** Six Sundays in the period (08-23, 08-30, 09-06, 09-13, 09-20, 09-27) are marked as trading days and have sector-index rows, but no price rows.
-- **Three Fridays have prices** (08-21, 09-11, 09-18). Two of them (09-11, 09-18) have no index rows at all.
-- **Two weekdays are missing** (Tue 09-08 and Mon 09-21) although the calendar marks them as trading days and sector indices exist.
-- **Symbols per day jumped** from about 280 to about 345 on 2026-08-21, which suggests the price rows started coming from a different source on that date.
-- **The headline NEPSE Index is incomplete.** It has 1,181 rows against 1,204 for each sector index, and ends on 2026-09-28. On many recent days only the 13 sector indices were stored.
+Session arithmetic for signal calls no longer reads the calendar at all. It counts distinct dates in `daily_prices`.
 
-Whether the Friday rows are real sessions or Sunday sessions stamped with the wrong date cannot be determined from the database alone. It needs a check against an external source for one known day.
+### The index table is still unreliable
 
-### Calendar reliability
+This was not fixed; it is a separate scraper problem.
 
-`trading_calendar` marks 1,388 trading days; only 1,201 have prices. That leaves 187 "trading days" with no price rows:
-
-| Year | Calendar trading days | With prices |
-| --- | ---: | ---: |
-| 2021 | 115 | 102 |
-| 2022 | 275 | 242 |
-| 2023 | 261 | 227 |
-| 2024 | 262 | 232 |
-| 2025 | 261 | 225 |
-| 2026 | 214 | 173 |
-
-The calendar marks almost every Sunday to Thursday as a trading day (271 of each weekday), so public holidays are largely unmarked. Anything that counts "20 trading sessions" from this calendar is counting sessions that did not happen.
+- `src/pipeline/backfill_daily_index.py` writes `date = today`. Seven Sundays since 2026-08-02 have sector-index rows: three hold the previous Friday's values (08-02, 09-13, 09-20) and four are unchanged copies (08-23, 08-30, 09-06, 09-27).
+- Fridays 2026-09-11 and 2026-09-18 have prices but no index rows at all; their sector values were stored under the following Sunday.
+- The headline NEPSE Index is missing on 20 sessions, all since 2026-07-23. Before that date every session has one.
+- Symbols per day rose from about 280 to about 345 on 2026-08-21, which suggests price rows started coming from a different source.
 
 ## 3. Signal calls and quant ledgers
 
@@ -193,7 +230,51 @@ Output of `python -m src.pipeline.validation_status` (protocol `2026-08-20-v1`, 
 
 Overall status: `collecting`. Three signals have enough calls but only 10 of the 20 required independent entry days.
 
-**These numbers are provisional.** Calls entered on 2026-08-20 resolved on 2026-09-15, which is 16 sessions with prices, not 20. The horizon is counted on the calendar, which includes the missing Sundays. The date problems in section 2 must be fixed before this evidence is trusted.
+**The tables above are the state before the fix and are wrong.** Calls signalled on 2026-08-20 resolved on 2026-09-15, which is 16 sessions with prices, not 20, because the horizon was counted on a calendar that included Sundays and holidays.
+
+### Re-grade after the calendar fix
+
+`python -m src.pipeline.regrade_signal_calls` checks every graded call against a horizon counted in real sessions, resets the miscounted ones and grades them again.
+
+| Measure | Value |
+| --- | ---: |
+| Graded calls checked | 1,343 |
+| Miscounted (resolved before their true target, or void) | 1,046 |
+| Re-resolved now | 703 |
+| Back to pending (true target not reached yet) | 343 |
+| Miscounted after the re-grade | 0 |
+
+| Status | Before | After |
+| --- | ---: | ---: |
+| RESOLVED / WIN | 781 | 405 |
+| RESOLVED / LOSS | 560 | 595 |
+| PENDING | 169 | 512 |
+| VOID | 2 | 0 |
+
+What happened to the 1,046 miscounted calls:
+
+| Was | Now | Calls |
+| --- | --- | ---: |
+| WIN | WIN | 363 |
+| WIN | LOSS | 114 |
+| WIN | pending | 278 |
+| LOSS | LOSS | 210 |
+| LOSS | WIN | 16 |
+| LOSS | pending | 63 |
+| VOID | pending | 2 |
+
+Calls signalled on 2026-08-20 now resolve on 2026-09-23, exactly 20 sessions later.
+
+`validation_status` after the re-grade (protocol `2026-08-20-v1`, 50 bps cost):
+
+| Signal | Graded / needed | Entry days / needed | Net return | After-fee win rate | Pending | Gate |
+| --- | --- | --- | ---: | ---: | ---: | --- |
+| `rsi_14 < 30 (oversold)` | 42 / 60 | 4 / 20 | −3.987% | 29.6% | 151 | collecting |
+| `close < bollinger_lower` | 100 / 100 | 4 / 20 | −6.707% | 23.0% | 221 | collecting |
+| `rsi_14 > 70 (overbought)` | 5 / 60 | 3 / 20 | +0.913% | 83.3% | 46 | collecting |
+| `doji` | 34 / 60 | 4 / 20 | +1.889% | 65.7% | 94 | collecting |
+
+Only four entry days have resolved, so these figures are early. The earlier, favourable numbers for the two oversold signals came from grading too soon.
 
 ### Quant ledgers
 
@@ -237,15 +318,45 @@ Floorsheet data is used in exactly one place: `src/pipeline/market_pulse.py`, fo
 | Listing dates | `companies.listed_date` empty for all 644 rows | Needed to know when a symbol entered the universe |
 | Adjusted prices | `adjusted_close` missing on 63,896 of 271,863 price rows (23.5%) | Consistent corporate-action adjustment |
 | Intraday | Both intraday snapshot tables are empty | Any intraday price path |
-| Trading calendar | Holidays largely unmarked; starts 2021-07-23 | An accurate session calendar back to 2014 |
+| Trading calendar | Rebuilt from real sessions with 167 known holidays; starts 2021-07-23 | A session calendar back to 2014, which follows from the price history |
 
 Available and usable today: corporate actions from 2011 (958 bonus, 154 rights, 1,077 dividend), promoter holdings from 2014 (285 symbols, 20 report dates), symbol change history from 2012, and the IPO calendar.
 
+## 6. What to request from the second machine
+
+A teammate's database holds a longer history (prices back to somewhere between 2005 and 2018). To be usable here, the export needs the following.
+
+| Item | What to provide | Why |
+| --- | --- | --- |
+| `daily_prices` | Every row, all symbols, full date range, including the overlap from 2021-07-25 | Overlap lets us reconcile the two sources before merging |
+| Price basis | Whether `open`/`high`/`low`/`close` are raw or adjusted, and how `adjusted_close` was computed | 23.5% of local rows have no adjusted close |
+| `market_index` | All 17 series, with `date` equal to the session date | Local index rows are unreliable after 2026-07-23 |
+| `companies` | Every symbol including delisted, suspended and merged, with status, sector, listing date and delisting date | 152 delisted equities have no local prices; every local `listed_date` is empty |
+| `symbol_history`, `corporate_actions` | Full tables, with ex-dates | Needed to follow symbols through mergers and to void or adjust labels |
+| Floorsheet | The Parquet backfill: contract number, symbol, buyer and seller broker, quantity, rate, amount, session date | Local history is 18 days |
+| `brokers` | Broker ids and names as of each period, if they changed | To interpret floorsheet broker ids |
+| Quant tables | `quant_model_snapshots`, `quant_shadow_signals` and the V4.1 and E1 ledgers | All are empty locally; this is the only forward evidence that may exist |
+| Fundamentals | Any history before 2026-07-23, with the date each figure was published | Local fundamentals are ten weekly snapshots |
+
+Ask for a manifest alongside the data:
+
+- first date, last date and row count per table, and sessions per year for prices;
+- the source of each table (NEPSE API, Sharesansar, Merolagani, other) and when it was scraped;
+- the git commit of the schema the export came from;
+- whether dates are Nepal-time session dates;
+- file checksums.
+
+A `pg_dump` in custom format of those tables is the simplest form. Parquet or CSV with the manifest also works.
+
+Two checks to run on arrival: closes for a sample of symbols in the overlap period must match the local values, and price dates must respect the trading week (Sunday to Thursday before 2026-04-06, Monday to Friday after, with the 2022 Friday sessions as the known exception).
+
 ## What to fix first
 
-1. Stop pruning `intraday_floorsheet`, or move it to its own daily table with no retention limit, before more history is lost.
-2. Resolve the Sunday and Friday dating problem since 2026-08-21 and repair the affected days.
-3. Rebuild the trading calendar from actual sessions and mark holidays.
-4. Load price, index and floorsheet history back to 2014 from the other machine.
-5. Backfill prices for delisted and suspended symbols so the universe is not survivor-only.
-6. Re-grade signal calls once dates and the calendar are correct.
+1. ~~Stop pruning `intraday_floorsheet`.~~ Done.
+2. ~~Resolve the Sunday and Friday question.~~ Done: Friday sessions are real, Sundays are no longer sessions.
+3. ~~Rebuild the trading calendar from actual sessions and mark holidays.~~ Done.
+4. ~~Re-grade signal calls.~~ Done: 1,046 calls.
+5. Fix the index refresh so rows carry the session date, and backfill the NEPSE Index for the 20 sessions since 2026-07-23 that lack it.
+6. Load price, index and floorsheet history from the second machine (section 6).
+7. Backfill prices for delisted and suspended symbols so the universe is not survivor-only.
+8. Settle 2026-07-27: confirm against an external source whether a session took place.

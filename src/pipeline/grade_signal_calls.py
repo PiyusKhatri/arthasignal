@@ -17,7 +17,6 @@ from src.database.models import (
     SignalCall,
     SignalCallOutcome,
     SignalCallStatus,
-    TradingCalendar,
 )
 from src.pipeline.signal_validation_policy import VALIDATION_POLICY_VERSION
 
@@ -29,11 +28,7 @@ VOID_SEARCH_CAP_TRADING_DAYS = 3
 
 def _load_trading_days() -> list[date]:
     with get_session() as session:
-        rows = session.execute(
-            select(TradingCalendar.date)
-            .where(TradingCalendar.is_trading_day.is_(True))
-            .order_by(TradingCalendar.date)
-        ).scalars().all()
+        rows = session.execute(select(DailyPrice.date).distinct().order_by(DailyPrice.date)).scalars().all()
     return list(rows)
 
 

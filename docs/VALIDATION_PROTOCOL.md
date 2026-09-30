@@ -96,6 +96,12 @@ python -m src.pipeline.validation_status --json
 
 The report includes graded calls, independent entry days, pending/void counts, signal-logic fingerprints, clustered net return, clustered after-fee win rate, confidence bounds, and gate status.
 
+## Correction log
+
+**2026-09-30: session counting.** The rule "the 20-day horizon is counted in trading sessions" was implemented against `trading_calendar`, which counted Sundays after NEPSE moved to a Monday to Friday week (2026-04-06) and unmarked holidays as sessions. Calls were therefore graded early; calls signalled on 2026-08-20 resolved after 16 real sessions.
+
+The rule is unchanged. The implementation now counts only dates that have rows in `daily_prices`. 1,046 graded calls were reset and graded again with `python -m src.pipeline.regrade_signal_calls`; 703 resolved and 343 returned to pending. Before and after figures are in `docs/DATA_READINESS.md`. No threshold, signal, horizon or cost assumption was changed, so the protocol version stays `2026-08-20-v1`.
+
 ## Change control
 
 The following changes require a new protocol version and a new forward evidence start date:
