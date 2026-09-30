@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 
+from src.backtest.models import BacktestHoldoutEvaluation, BacktestVariantTrial
 from src.database.auth_models import RefreshSession  # noqa: F401 - registers table metadata
 from src.database.connection import engine
 from src.database.e1_models import QuantE1ForwardDecision, QuantE1ForwardRun  # noqa: F401 - registers E1 tables

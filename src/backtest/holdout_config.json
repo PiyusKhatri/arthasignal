@@ -1,0 +1,11 @@
+{
+  "version": "2026-09-30-holdout-v1",
+  "locked_on": "2026-09-30",
+  "holdout_start": "2025-09-30",
+  "holdout_end": null,
+  "horizon_sessions": 20,
+  "grace_sessions": 3,
+  "embargo_sessions": 5,
+  "cost_levels_round_trip": [0.005, 0.01, 0.015],
+  "base_alpha": 0.05
+}
