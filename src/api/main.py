@@ -8,7 +8,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from sqlalchemy import text
 
-from src.api import auth, market, portfolio, stocks, watchlist
+from src.api import alerts, auth, market, portfolio, stocks, watchlist
 from src.api.rate_limit import limiter
 from src.database.connection import get_session
 
@@ -40,6 +40,7 @@ app.include_router(stocks.router)
 app.include_router(market.router)
 app.include_router(portfolio.router)
 app.include_router(watchlist.router)
+app.include_router(alerts.router)
 
 
 @app.get("/health")

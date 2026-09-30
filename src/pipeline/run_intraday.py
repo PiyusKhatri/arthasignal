@@ -7,6 +7,7 @@ from src.database.models import IntradayIndexSnapshot, IntradaySnapshot
 from src.notifications.discord_alert import send_discord_alert
 from src.pipeline.backfill_intraday_index_snapshots import run_intraday_index_snapshot_backfill
 from src.pipeline.backfill_intraday_snapshots import run_intraday_snapshot_backfill
+from src.pipeline.check_alerts import check_price_alerts
 from src.pipeline.intraday_data_quality import check_intraday_data_quality, detect_intraday_gap
 from src.pipeline.market_hours_guard import _current_npt_time, is_within_intraday_window
 
@@ -63,6 +64,12 @@ def run_intraday_pipeline() -> dict[str, Any]:
         logger.exception("check_intraday_data_quality failed")
         quality_summary = {"run_checks": {}, "daily_coverage": {}, "should_alert": False}
 
+    try:
+        price_alert_summary = check_price_alerts()
+    except Exception:
+        logger.exception("check_price_alerts failed")
+        price_alert_summary = {"alerts_checked": 0, "alerts_triggered": 0}
+
     if quality_summary["should_alert"]:
         coverage = quality_summary["daily_coverage"]
         zero_coverage = any(v["realized_snapshots"] == 0 for v in coverage.values())
@@ -99,6 +106,7 @@ def run_intraday_pipeline() -> dict[str, Any]:
         "index_summary": index_summary,
         "quality_summary": quality_summary,
         "gap_summary": gap_summary,
+        "price_alert_summary": price_alert_summary,
     }
 
 

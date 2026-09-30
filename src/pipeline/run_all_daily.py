@@ -11,6 +11,7 @@ from src.pipeline.backfill_daily_floorsheet import run_daily_floorsheet_backfill
 from src.pipeline.backfill_daily_index import run_daily_index_refresh
 from src.pipeline.backfill_signals import run_signals_backfill
 from src.pipeline.backup_to_drive import run_backup
+from src.pipeline.check_alerts import check_signal_alerts
 from src.pipeline.cleanup_intraday_tables import run_intraday_table_cleanup
 from src.pipeline.data_quality import check_daily_pipeline_health
 from src.pipeline.extract_signal_calls import extract_signal_calls
@@ -79,6 +80,12 @@ def run_all_daily() -> dict[str, Any]:
     except Exception:
         logger.exception("compute_signals.py backfill failed")
         signals_summary = {"symbols_processed": 0, "rows_upserted": 0, "failures": 0}
+
+    try:
+        signal_alert_summary = check_signal_alerts()
+    except Exception:
+        logger.exception("check_signal_alerts failed")
+        signal_alert_summary = {"alerts_checked": 0, "alerts_triggered": 0}
 
     try:
         extraction_summary = extract_signal_calls(
@@ -212,6 +219,8 @@ def run_all_daily() -> dict[str, Any]:
         f"Data quality flags: {quality_summary['checks_flagged']}/{quality_summary['checks_run']}\n"
         f"Signals computed: {signals_summary['symbols_processed']} symbols, "
         f"{signals_summary['rows_upserted']} rows, {signals_summary['failures']} failures\n"
+        f"Signal alerts checked: {signal_alert_summary['alerts_checked']}, "
+        f"{signal_alert_summary['alerts_triggered']} triggered\n"
         f"Signal call extraction: {extraction_status}\n"
         f"Signal call grading: {grading_status}\n"
         f"Floorsheet: {floorsheet_status}\n"
@@ -247,6 +256,7 @@ def run_all_daily() -> dict[str, Any]:
         "calendar_summary": calendar_summary,
         "quality_summary": quality_summary,
         "signals_summary": signals_summary,
+        "signal_alert_summary": signal_alert_summary,
         "extraction_summary": extraction_summary,
         "grading_summary": grading_summary,
         "floorsheet_summary": floorsheet_summary,

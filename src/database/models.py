@@ -68,6 +68,11 @@ class ConfluenceConfidenceTier(str, enum.Enum):
     INCONSISTENT = "inconsistent"
 
 
+class PriceAlertCondition(str, enum.Enum):
+    ABOVE = "above"
+    BELOW = "below"
+
+
 class Company(Base):
     __tablename__ = "companies"
 
@@ -696,3 +701,33 @@ class PasswordResetToken(Base):
     token: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     used: Mapped[bool] = mapped_column(nullable=False, default=False)
+
+
+class PriceAlert(Base):
+    __tablename__ = "price_alerts"
+    __table_args__ = (Index("ix_price_alerts_user_id", "user_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    symbol: Mapped[str] = mapped_column(String(20), ForeignKey("companies.symbol"), nullable=False)
+    condition: Mapped[PriceAlertCondition] = mapped_column(
+        Enum(PriceAlertCondition, name="price_alert_condition_enum"), nullable=False
+    )
+    target_price: Mapped[float] = mapped_column(Numeric(14, 4), nullable=False)
+    is_active: Mapped[bool] = mapped_column(nullable=False, default=True)
+    triggered_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class SignalAlert(Base):
+    __tablename__ = "signal_alerts"
+    __table_args__ = (Index("ix_signal_alerts_user_id", "user_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    symbol: Mapped[str | None] = mapped_column(String(20), ForeignKey("companies.symbol"), nullable=True)
+    signal_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    is_active: Mapped[bool] = mapped_column(nullable=False, default=True)
+    triggered_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    triggered_symbol: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
