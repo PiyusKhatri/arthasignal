@@ -9,7 +9,7 @@ Severity: **Critical** blocks trust in anything shown to users. **High** blocks 
 | # | Severity | Issue | Detail |
 | --- | --- | --- | --- |
 | D2 | High | No real opening price before 2018-02-18 | Prices now start 2014-06-01, but the public source's `open` equals the previous close until 2018-02-15. Next-open entry can only be tested from 2018-02-18 |
-| D3 | High | Floorsheet history is 18 days | Pruning is stopped, but rows before 2026-08-31 were already deleted here. About 2,930 sessions since 2014 are missing |
+| D3 | Medium | Floorsheet history lives in Parquet, not Postgres | 2,411 Parquet files cover 2014-06-02 to 2025-01-19; a VM backfill is still adding 2025-01-20 onward. Postgres holds only the recent days |
 | D4 | Medium | Survivorship gap narrowed | 211 of 259 delisted and 6 of 25 suspended equities now have prices. 48 delisted still have none |
 | D5 | High | Two databases have diverged | Local Postgres is the only allowed database; config and workflows refuse Supabase hosts. Supabase rejects this machine's login, so data that may exist only there (users, watchlists, alerts, scheduled signal calls) has not been exported or compared |
 | D7 | Medium | Index `open` is a placeholder for new broad-index rows | The NEPSE API gives high and low but no open, so the refresh writes `open = close` for the four broad indices. `repair_index_dates` corrects it from the public history when run |
@@ -33,6 +33,7 @@ Severity: **Critical** blocks trust in anything shown to users. **High** blocks 
 | # | Severity | Issue | Detail |
 | --- | --- | --- | --- |
 | M1 | High | No signal has an edge to show users | The UI now says "under validation" with live evidence. The 2026-10-01 rerun (`docs/BACKTEST_RERUN.md`) found no former high-confidence signal that beats the equal-weight universe reliably; the two oversold signals are negative in every fold |
+| M8 | High | Broker-flow features have no edge | All five pre-registered broker-flow hypotheses failed on 2014-2025-01 (`docs/BROKER_FLOW_RESULTS.md`); none beats the equal-weight universe after a 1% cost |
 | M2 | High | No model has passed its own gate | V2 to V4.1 and E1 all failed; V5 was never run. All are archived |
 | M3 | High | V1 is served and retrained weekly with no recorded validation | No V1 result exists, and this database has no model snapshot or shadow signal at all |
 | M6 | Low | Own-row horizon drifts for thin stocks | For 97.8% of price rows the 20th later row is exactly 20 market sessions away; for 0.6% it is more than 23 sessions, up to 595 |
