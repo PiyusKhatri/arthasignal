@@ -1,0 +1,331 @@
+{
+  "status": "post-hoc diagnostic written after the registered results were seen; not evidence and not a gate",
+  "benchmark_bias_20": {
+    "horizon_sessions": 20,
+    "start_dates": 483,
+    "mean_daily_rebalanced_pct": 3.393,
+    "mean_buy_and_hold_pct": 2.736,
+    "mean_bias_pct": 0.657
+  },
+  "benchmark_bias_60": {
+    "horizon_sessions": 60,
+    "start_dates": 475,
+    "mean_daily_rebalanced_pct": 10.332,
+    "mean_buy_and_hold_pct": 7.288,
+    "mean_bias_pct": 3.043
+  },
+  "hypotheses": {
+    "E1": {
+      "trades": 709,
+      "mean_gross_pct": 2.754,
+      "mean_registered_universe_pct": 1.135,
+      "mean_buy_hold_universe_pct": 0.769,
+      "mean_nepse_pct": -0.07,
+      "share_gross_negative_pct": 47.4,
+      "primary_vs_buy_hold_universe": {
+        "by_date": {
+          "mean_pct": 1.133,
+          "low_pct": -0.011,
+          "high_pct": 2.277,
+          "clusters": 474,
+          "observations": 709,
+          "alpha": 0.00625
+        },
+        "by_20_session_block": {
+          "mean_pct": 1.59,
+          "low_pct": -0.153,
+          "high_pct": 3.334,
+          "clusters": 103,
+          "observations": 709,
+          "alpha": 0.00625
+        },
+        "conservative_low_pct": -0.153
+      },
+      "gross_vs_nepse": {
+        "by_date": {
+          "mean_pct": 3.051,
+          "low_pct": 1.843,
+          "high_pct": 4.259,
+          "clusters": 474,
+          "observations": 709,
+          "alpha": 0.00625
+        },
+        "by_20_session_block": {
+          "mean_pct": 3.714,
+          "low_pct": 1.793,
+          "high_pct": 5.635,
+          "clusters": 103,
+          "observations": 709,
+          "alpha": 0.00625
+        },
+        "conservative_low_pct": 1.793
+      },
+      "fold_mean_vs_buy_hold_pct": {
+        "1": 1.063,
+        "2": 1.857,
+        "3": 1.544,
+        "4": -0.316
+      }
+    },
+    "E2": {
+      "trades": 683,
+      "mean_gross_pct": 2.136,
+      "mean_registered_universe_pct": 6.071,
+      "mean_buy_hold_universe_pct": 5.448,
+      "mean_nepse_pct": 2.908,
+      "share_gross_negative_pct": 50.2,
+      "primary_vs_buy_hold_universe": {
+        "by_date": {
+          "mean_pct": -3.053,
+          "low_pct": -4.123,
+          "high_pct": -1.984,
+          "clusters": 463,
+          "observations": 683,
+          "alpha": 0.00625
+        },
+        "by_20_session_block": {
+          "mean_pct": -3.561,
+          "low_pct": -4.941,
+          "high_pct": -2.181,
+          "clusters": 106,
+          "observations": 683,
+          "alpha": 0.00625
+        },
+        "conservative_low_pct": -4.941
+      },
+      "gross_vs_nepse": {
+        "by_date": {
+          "mean_pct": -1.135,
+          "low_pct": -2.198,
+          "high_pct": -0.071,
+          "clusters": 463,
+          "observations": 683,
+          "alpha": 0.00625
+        },
+        "by_20_session_block": {
+          "mean_pct": -1.842,
+          "low_pct": -3.127,
+          "high_pct": -0.557,
+          "clusters": 106,
+          "observations": 683,
+          "alpha": 0.00625
+        },
+        "conservative_low_pct": -3.127
+      },
+      "fold_mean_vs_buy_hold_pct": {
+        "1": -0.697,
+        "2": -1.471,
+        "3": -4.667,
+        "4": -4.656
+      }
+    },
+    "E4": {
+      "trades": 171,
+      "mean_gross_pct": -3.734,
+      "mean_registered_universe_pct": 3.14,
+      "mean_buy_hold_universe_pct": 2.229,
+      "mean_nepse_pct": 0.039,
+      "share_gross_negative_pct": 63.7,
+      "primary_vs_buy_hold_universe": {
+        "by_date": {
+          "mean_pct": -5.701,
+          "low_pct": -8.887,
+          "high_pct": -2.514,
+          "clusters": 152,
+          "observations": 171,
+          "alpha": 0.00625
+        },
+        "by_20_session_block": {
+          "mean_pct": -5.642,
+          "low_pct": -9.509,
+          "high_pct": -1.776,
+          "clusters": 69,
+          "observations": 171,
+          "alpha": 0.00625
+        },
+        "conservative_low_pct": -9.509
+      },
+      "gross_vs_nepse": {
+        "by_date": {
+          "mean_pct": -3.483,
+          "low_pct": -6.801,
+          "high_pct": -0.165,
+          "clusters": 152,
+          "observations": 171,
+          "alpha": 0.00625
+        },
+        "by_20_session_block": {
+          "mean_pct": -3.713,
+          "low_pct": -7.729,
+          "high_pct": 0.302,
+          "clusters": 69,
+          "observations": 171,
+          "alpha": 0.00625
+        },
+        "conservative_low_pct": -7.729
+      },
+      "fold_mean_vs_buy_hold_pct": {
+        "1": -6.59,
+        "2": -4.012,
+        "3": -6.796,
+        "4": -5.146
+      }
+    },
+    "E5": {
+      "trades": 4627,
+      "mean_gross_pct": 4.199,
+      "mean_registered_universe_pct": 4.835,
+      "mean_buy_hold_universe_pct": 4.26,
+      "mean_nepse_pct": 2.273,
+      "share_gross_negative_pct": 48.3,
+      "primary_vs_buy_hold_universe": {
+        "by_date": {
+          "mean_pct": -1.772,
+          "low_pct": -2.465,
+          "high_pct": -1.08,
+          "clusters": 1487,
+          "observations": 4627,
+          "alpha": 0.00625
+        },
+        "by_20_session_block": {
+          "mean_pct": -1.73,
+          "low_pct": -2.59,
+          "high_pct": -0.869,
+          "clusters": 118,
+          "observations": 4627,
+          "alpha": 0.00625
+        },
+        "conservative_low_pct": -2.59
+      },
+      "gross_vs_nepse": {
+        "by_date": {
+          "mean_pct": 0.975,
+          "low_pct": 0.201,
+          "high_pct": 1.75,
+          "clusters": 1487,
+          "observations": 4627,
+          "alpha": 0.00625
+        },
+        "by_20_session_block": {
+          "mean_pct": 0.621,
+          "low_pct": -0.719,
+          "high_pct": 1.961,
+          "clusters": 118,
+          "observations": 4627,
+          "alpha": 0.00625
+        },
+        "conservative_low_pct": -0.719
+      },
+      "fold_mean_vs_buy_hold_pct": {
+        "1": -1.827,
+        "2": -0.929,
+        "3": -0.463,
+        "4": -1.211
+      }
+    },
+    "E7": {
+      "trades": 4410,
+      "mean_gross_pct": 9.074,
+      "mean_registered_universe_pct": 10.877,
+      "mean_buy_hold_universe_pct": 8.688,
+      "mean_nepse_pct": 5.009,
+      "share_gross_negative_pct": 47.0,
+      "primary_vs_buy_hold_universe": {
+        "by_date": {
+          "mean_pct": -1.131,
+          "low_pct": -2.423,
+          "high_pct": 0.16,
+          "clusters": 1428,
+          "observations": 4410,
+          "alpha": 0.00625
+        },
+        "by_20_session_block": {
+          "mean_pct": -1.081,
+          "low_pct": -2.809,
+          "high_pct": 0.646,
+          "clusters": 116,
+          "observations": 4410,
+          "alpha": 0.00625
+        },
+        "conservative_low_pct": -2.809
+      },
+      "gross_vs_nepse": {
+        "by_date": {
+          "mean_pct": 3.669,
+          "low_pct": 2.182,
+          "high_pct": 5.156,
+          "clusters": 1428,
+          "observations": 4410,
+          "alpha": 0.00625
+        },
+        "by_20_session_block": {
+          "mean_pct": 3.427,
+          "low_pct": 0.523,
+          "high_pct": 6.332,
+          "clusters": 116,
+          "observations": 4410,
+          "alpha": 0.00625
+        },
+        "conservative_low_pct": 0.523
+      },
+      "fold_mean_vs_buy_hold_pct": {
+        "1": -1.913,
+        "2": -1.345,
+        "3": 1.919,
+        "4": -1.443
+      }
+    },
+    "E8": {
+      "trades": 4063,
+      "mean_gross_pct": 19.831,
+      "mean_registered_universe_pct": 24.409,
+      "mean_buy_hold_universe_pct": 18.141,
+      "mean_nepse_pct": 10.34,
+      "share_gross_negative_pct": 39.5,
+      "primary_vs_buy_hold_universe": {
+        "by_date": {
+          "mean_pct": 0.829,
+          "low_pct": -1.432,
+          "high_pct": 3.09,
+          "clusters": 1367,
+          "observations": 4063,
+          "alpha": 0.00625
+        },
+        "by_20_session_block": {
+          "mean_pct": -0.11,
+          "low_pct": -2.616,
+          "high_pct": 2.395,
+          "clusters": 113,
+          "observations": 4063,
+          "alpha": 0.00625
+        },
+        "conservative_low_pct": -2.616
+      },
+      "gross_vs_nepse": {
+        "by_date": {
+          "mean_pct": 8.91,
+          "low_pct": 6.352,
+          "high_pct": 11.468,
+          "clusters": 1367,
+          "observations": 4063,
+          "alpha": 0.00625
+        },
+        "by_20_session_block": {
+          "mean_pct": 7.172,
+          "low_pct": 2.474,
+          "high_pct": 11.871,
+          "clusters": 113,
+          "observations": 4063,
+          "alpha": 0.00625
+        },
+        "conservative_low_pct": 2.474
+      },
+      "fold_mean_vs_buy_hold_pct": {
+        "1": -0.232,
+        "2": -1.432,
+        "3": 4.624,
+        "4": -0.744
+      }
+    }
+  }
+}
