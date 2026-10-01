@@ -163,3 +163,15 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 
 - `docs/DATA_PLAN.md`: for Merolagani news, Sharesansar news and company tabs, NEPSE notices, SEBON, NRB and quarterly reports, it records what each offers, the depth checked, structure, scraping difficulty, robots and terms, the legal constraints, a proposed point-in-time schema (`source_documents`, `document_symbols`, `corporate_event_announcements`, `quarterly_financials`, `policy_events`) and a collection order. Plan only: about 30 single requests (robots.txt and spot pages, 3-4 s apart); nothing bulk fetched or stored.
 - Checked facts: Merolagani news has sequential IDs (ID 30,000 = 2017-02-10, latest about 131,421) and no robots.txt. Sharesansar and SEBON robots.txt allow everything; NRB disallows only `/wp-admin/` and its WordPress REST API is off. The NEPSE notices API returns HTTP 401 and must not be bypassed. Sharesansar company pages expose Announcement, AGM, Quarterly Reports and Financial Reports tabs, which fit the existing scraper pattern.
+
+## Phase S1 - Accuracy protocol
+
+- `docs/ACCURACY_PROTOCOL.md` (protocol `accuracy-v1`) was written before any scorecard result was computed. It covers:
+  - horizons 5/10/20 (short), 40/80/120 (mid) and 160/240 (long) sessions;
+  - next-open entry and the open after the horizon for exit, with close-to-close before 2018-02-18;
+  - costs of 0.5/1.0/1.5%; unfilled and blocked or stranded calls graded incorrect, never voided;
+  - correctness per horizon class against the same-date universe median, sector median and universe mean;
+  - baselines: same-date random stock, equal-weight universe and NEPSE;
+  - metrics including Brier, reliability buckets and ECE, with clusters as non-overlapping horizon windows;
+  - a 13-situation × 8-horizon matrix labelled only from data at the close of *t*, the PASS / NO EVIDENCE / INSUFFICIENT SAMPLE gates, the look-ahead audit, rolling monitoring and kill criteria, and failure-cause tags.
+- Power table (arithmetic on the 2,435 sessions of 2014-06-01 to 2025-01-19, no outcome data): independent windows 405/221/115/59/30/20/15/10 for horizons 5…240. A 60% claim can be supported against 50% only at 5-40 sessions, and with the gate's 55% lower bound only at 5-20 sessions. At 80 or more sessions no history this long can prove it. With the 104-cell penalty, no horizon has enough windows (463 needed).
