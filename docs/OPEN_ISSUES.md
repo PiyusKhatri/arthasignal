@@ -32,11 +32,10 @@ Severity: **Critical** blocks trust in anything shown to users. **High** blocks 
 
 | # | Severity | Issue | Detail |
 | --- | --- | --- | --- |
-| M1 | Critical | Forward results contradict the tiers shown to users | After the re-grade the two oversold signals are negative after cost: `rsi_14 < 30` −3.99% on 42 calls, `close < bollinger_lower` −6.71% on 100 calls. Only 4 of 20 required entry days have resolved, so this is early, but the user-facing tiers still rest on July backtests |
+| M1 | High | No signal has an edge to show users | The UI now says "under validation" with live evidence. The 2026-10-01 rerun (`docs/BACKTEST_RERUN.md`) found no former high-confidence signal that beats the equal-weight universe reliably; the two oversold signals are negative in every fold |
 | M2 | High | No model has passed its own gate | V2 to V4.1 and E1 all failed; V5 was never run. All are archived |
 | M3 | High | V1 is served and retrained weekly with no recorded validation | No V1 result exists, and this database has no model snapshot or shadow signal at all |
-| M4 | Medium | Rule-based signal backtests use an untradable entry | `backtest_signals.py` enters at the signal-day close and exits at the symbol's own n-th later price row. They do not use the trading calendar, so the calendar bug did not affect them |
-| M5 | Medium | Those backtests are stale and survivor-biased | Computed 2026-07-23 to 2026-08-01 on the survivor-only universe (D4), mixing adjusted and raw closes (D8). Not rerun |
+| M5 | Medium | `signal_confidence` tiers are still the July values | The API no longer shows them, but the table and the scoring in `stock_intelligence` still use them |
 | M6 | Low | Own-row horizon drifts for thin stocks | For 97.8% of price rows the 20th later row is exactly 20 market sessions away; for 0.6% it is more than 23 sessions, up to 595 |
 | M7 | Medium | Forward capture for V4.1 and E1 is switched off | Removed from the daily workflow when the code was archived. Their ledgers are empty here |
 
@@ -69,6 +68,7 @@ Severity: **Critical** blocks trust in anything shown to users. **High** blocks 
 ## Fixed on 2026-10-01
 
 - D2/D14: prices, index history and the calendar now start 2014-06-01 (596,256 price rows, 2,822 sessions), validated against the floorsheet (0.32% volume mismatch) and existing rows (0 mismatches).
+- M4: the rule signals were rerun with next-open entry, raw prices, costs, clustered intervals and the holdout guard.
 - P1: scheduled workflows now run only on manual dispatch; CI only on pull requests.
 - D6: the index refresh falls back to the public index history, and a data-quality check fails when any price session lacks a NEPSE Index row.
 - D1: 2026-07-27 prices backfilled (358 rows), calendar rebuilt, 494 signal calls re-graded.
