@@ -175,3 +175,13 @@ The backfill uses the Sharesansar daily page because it is the only source that 
   - metrics including Brier, reliability buckets and ECE, with clusters as non-overlapping horizon windows;
   - a 13-situation × 8-horizon matrix labelled only from data at the close of *t*, the PASS / NO EVIDENCE / INSUFFICIENT SAMPLE gates, the look-ahead audit, rolling monitoring and kill criteria, and failure-cause tags.
 - Power table (arithmetic on the 2,435 sessions of 2014-06-01 to 2025-01-19, no outcome data): independent windows 405/221/115/59/30/20/15/10 for horizons 5…240. A 60% claim can be supported against 50% only at 5-40 sessions, and with the gate's 55% lower bound only at 5-20 sessions. At 80 or more sessions no history this long can prove it. With the 104-cell penalty, no horizon has enough windows (463 needed).
+
+## Phase S2 - Scorecard implementation
+
+- `src/scorecard/`:
+  - `spec` holds the protocol constants.
+  - `schema` (`python -m src.scorecard.schema`) creates `scorecard_calls` and `scorecard_grades` with BEFORE UPDATE/DELETE row triggers and BEFORE TRUNCATE statement triggers that raise "append-only". A CHECK rejects a `live` call created after 11:00 NPT on the day after its signal date. Calls carry `model_version`, `feature_hash`, `batch_id`, `mode`, `probability` and situation labels.
+  - `ledger` writes calls and grades with COPY.
+  - `grading` vectorizes all symbols × signal sessions per horizon: open-to-open total return through explicit corporate actions (close-to-close before 2018-02-18), unfilled on no-trade or locked-upper entry, blocked/stranded exits graded wrong, corrupt windows as `data_error`, same-date universe median and mean, sector medians, NEPSE, baseline share, and vectorized failure causes.
+  - `situations` gives the 13 point-in-time labels; `metrics` the cell metrics, gate, matrix and rolling monitor with kill flags; `audit` the look-ahead audit; `strategies` the three no-edge baselines plus a deliberately leaky one; `replay` the day-by-day replay into the ledger.
+- Tests (`tests/test_scorecard.py`, 10): next-open entry and exit at the open after the horizon; close rule before 2018-02-18; locked-upper entry unfilled and wrong; a blocked sell graded wrong even after a price rise; 100 calls on 4 dates give 4 independent windows and INSUFFICIENT SAMPLE; a perfect 10-call batch cannot pass; situation and market-state labels up to *t* unchanged when later prices are changed or removed (a one-session look-ahead injected into a label fails it); the audit flags only the leaky strategy; the ledger rejects UPDATE, DELETE and TRUNCATE on both tables in a throwaway schema; a late live call is rejected. Schema applied to local Postgres. Backend suite 435 passed.
