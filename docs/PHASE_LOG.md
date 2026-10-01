@@ -123,3 +123,26 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - Real-data check (2014-06-01 to 2025-01-19): 479 equities, 2,435 sessions, 411,751 traded symbol-days, 276 returns flagged corrupt (126 symbols), 117 locked-upper and 926 locked-lower days. On ex-sessions, |return| < 6%: bonus 14 raw → 442 adjusted of 551; dividend 218 → 676 of 830; rights 6 → 58 of 119. The adjusted bonus ex-session return has median +0.2% and SD 3.6% (normal daily noise). The adjusted rights ex-session return has median +3.9%, and a quarter close near the upper limit, which looks like a real post-adjustment move rather than a formula error. This was observed before pre-registration and is disclosed there.
 - No corporate actions are recorded for any of the 259 delisted equities, so their bonus drops are visible only through the corrupt-return flag (drops > 12%).
 - Tests: `tests/test_event_study.py` (10): explicit bonus/dividend/rights adjustment, flagging of an unrecorded split, no buy on a locked upper day, sells deferred past a no-trade day and a locked lower day, next-close entry before 2018-02-18, no read past `last_index`, abnormal paths up to *k* unchanged when prices after anchor + *k* are changed or removed, trades unchanged when prices after exit change, and the counter and clustering. Two injected one-session look-aheads (stock cumulative and benchmark cumulative) each failed both leakage tests. Backend suite 416 passed.
+
+## Phase E2 - Event tables and statistical power
+
+- `src/backtest/event_tables.py` builds event tables from existing local data only (prices, corporate actions, `symbol_history`, NEPSE Index, short-term rates) for 2014-06-01 to 2025-01-19, and writes Parquet to `~/Desktop/arthasignal-ai/derived/events/`: `book_close`, `new_listing`, `since_listing`, `circuit_days`, `circuit_streak_end`, `volume_anomaly` and `market_state`. Counts and power: `docs/event_counts.json`. No event return was computed.
+- **Power yardstick:** the SD of 20-session abnormal returns (vs the equal-weight universe) over 20,000 random symbol-days is 14.8%. The minimum detectable 20-session effect at α = 0.05/8 and 80% power, treating each event date as a cluster, is listed per table below.
+
+| Event table | Events | Distinct dates | MDE (20 sessions) | Per year |
+| --- | ---: | ---: | ---: | --- |
+| Book close, all | 1,161 (bonus + cash 745, cash only 184, right 135, bonus only 97; 171 symbols) | 651 | 1.55% | 2014 180, 2015 64, 2016 86, 2017 104, 2018 90, 2019 110, 2020 73, 2021 116, 2022 84, 2023 112, 2024 124, 2025 18 |
+| Book close with bonus | 852 | 504 | 1.81% | |
+| Book close, cash only | 184 | 126 | 3.90% | |
+| Book close, right | 135 | 118 | 4.56% | |
+| New listings (merger symbols excluded: 81) | 253 | 220 | 3.33% | 2014 28, 2015 21, 2016 11, 2017 22, 2018 15, 2019 23, 2020 18, 2021 26, 2022 31, 2023 51, 2024 7 (IPO pause, consistent with `ipo_calendar`) |
+| Upper-circuit close, streak start | 4,703 | 1,342 | 0.77% | |
+| Upper-circuit streak reaching 3 | 318 | 284 | 2.97% | 2014 19, 2015 15, 2016 58, 2017 28, 2018 5, 2019 13, 2020 34, 2021 62, 2022 23, 2023 31, 2024 30 |
+| Upper streak ≥ 3 ended, outside first 60 sessions after listing | 219 | 195 | 3.58% | |
+| Lower-circuit streak reaching 3 | 17 | 16 | 12.8% (too few to test) | |
+| Volume ≥ 5× 60-session median, no corporate action within ±20 sessions, ≥ 60 sessions since first price | 23,180 | 2,161 | 0.35% | 2015 1,557 … 2024 4,486 |
+| Same, up day | 15,031 | 1,868 | 0.43% | |
+| Market state (daily) | 2,435 sessions; 200-session trend defined from 2015-04-09; trend up on 55.5% of sessions; 64 trend switches; T-bill rate known from 2016-11-03 (45-day publication lag) | | ~10 years | |
+
+- Findings that limit tests: there are 6,520 upper-limit closes but 0 sessions where every trade was at the upper limit (on limit-up days the low equals the open), so the locked-upper fill rule rarely binds; 448 lower-limit sessions were fully locked. Corporate actions exist only for the 171 symbols active when they were scraped, so book-close events carry survivorship bias. The book-close announcement date is not stored; any run-up test must assume when the date was public.
+- Point in time: listing, circuit, volume and market-state tables up to *t* are unchanged when later prices and volumes are removed or changed (`tests/test_event_tables.py`, 4; an injected 3-session volume look-ahead fails the test). The volume table's "no action in the next 20 sessions" filter uses known future book-close dates, on the same announcement assumption. Backend suite 420 passed.

@@ -1,0 +1,195 @@
+{
+  "development_end": "2025-01-19",
+  "panel_symbols": 479,
+  "panel_sessions": 2435,
+  "survivorship_note": "corporate actions exist only for symbols active when they were scraped; 0 of 259 delisted equities have any",
+  "abnormal_20_session_sd_pct_random_symbol_days": 14.81,
+  "book_close": {
+    "by_kind": {
+      "bonus_and_cash": 745,
+      "cash_only": 184,
+      "right": 135,
+      "bonus_only": 97
+    },
+    "by_year": {
+      "2014": 180,
+      "2015": 64,
+      "2016": 86,
+      "2017": 104,
+      "2018": 90,
+      "2019": 110,
+      "2020": 73,
+      "2021": 116,
+      "2022": 84,
+      "2023": 112,
+      "2024": 124,
+      "2025": 18
+    },
+    "symbols": 171,
+    "traded_on_ex_session": 1026,
+    "power_all": {
+      "events": 1161,
+      "distinct_dates": 651,
+      "mde_20_session_pct_at_alpha_0.00625_power_0.8": 1.55
+    },
+    "power_bonus_any": {
+      "events": 852,
+      "distinct_dates": 504,
+      "mde_20_session_pct_at_alpha_0.00625_power_0.8": 1.81
+    },
+    "power_cash_only": {
+      "events": 184,
+      "distinct_dates": 126,
+      "mde_20_session_pct_at_alpha_0.00625_power_0.8": 3.9
+    },
+    "power_right": {
+      "events": 135,
+      "distinct_dates": 118,
+      "mde_20_session_pct_at_alpha_0.00625_power_0.8": 4.56
+    }
+  },
+  "new_listing": {
+    "by_year": {
+      "2014": 28,
+      "2015": 21,
+      "2016": 11,
+      "2017": 22,
+      "2018": 15,
+      "2019": 23,
+      "2020": 18,
+      "2021": 26,
+      "2022": 31,
+      "2023": 51,
+      "2024": 7
+    },
+    "count": 253,
+    "merger_symbols_excluded": 81,
+    "power": {
+      "events": 253,
+      "distinct_dates": 220,
+      "mde_20_session_pct_at_alpha_0.00625_power_0.8": 3.33
+    }
+  },
+  "circuit": {
+    "upper_close_days": 6520,
+    "lower_close_days": 1494,
+    "upper_locked_days": 0,
+    "lower_locked_days": 448,
+    "upper_streak_length_distribution": {
+      "count": 422.0,
+      "mean": 3.55,
+      "std": 3.14,
+      "min": 1.0,
+      "25%": 2.0,
+      "50%": 2.0,
+      "75%": 4.0,
+      "max": 20.0
+    },
+    "upper_streaks_reaching_3_by_year": {
+      "2014": 19,
+      "2015": 15,
+      "2016": 58,
+      "2017": 28,
+      "2018": 5,
+      "2019": 13,
+      "2020": 34,
+      "2021": 62,
+      "2022": 23,
+      "2023": 31,
+      "2024": 30
+    },
+    "upper_streaks_reaching_3_excluding_new_listings": 219,
+    "lower_streaks_reaching_3_by_year": {
+      "2014": 2,
+      "2016": 1,
+      "2017": 1,
+      "2018": 1,
+      "2019": 2,
+      "2020": 3,
+      "2021": 2,
+      "2023": 2,
+      "2024": 2,
+      "2025": 1
+    },
+    "upper_streak_ends_by_length": {
+      "1": 3785,
+      "2": 595,
+      "3": 144,
+      "4": 58,
+      "5": 44,
+      "6": 72
+    },
+    "power_upper_streak_start": {
+      "events": 4703,
+      "distinct_dates": 1342,
+      "mde_20_session_pct_at_alpha_0.00625_power_0.8": 0.77
+    },
+    "power_upper_streak_3": {
+      "events": 318,
+      "distinct_dates": 284,
+      "mde_20_session_pct_at_alpha_0.00625_power_0.8": 2.97
+    },
+    "power_upper_streak_end_len_ge_3_seasoned": {
+      "events": 219,
+      "distinct_dates": 195,
+      "mde_20_session_pct_at_alpha_0.00625_power_0.8": 3.58
+    },
+    "power_lower_streak_3": {
+      "events": 17,
+      "distinct_dates": 16,
+      "mde_20_session_pct_at_alpha_0.00625_power_0.8": 12.84
+    }
+  },
+  "volume_anomaly": {
+    "all_by_year": {
+      "2014": 319,
+      "2015": 1713,
+      "2016": 1651,
+      "2017": 1924,
+      "2018": 2143,
+      "2019": 2772,
+      "2020": 3884,
+      "2021": 1594,
+      "2022": 1386,
+      "2023": 3937,
+      "2024": 4834,
+      "2025": 81
+    },
+    "no_news_by_year": {
+      "2014": 228,
+      "2015": 1557,
+      "2016": 1490,
+      "2017": 1639,
+      "2018": 1912,
+      "2019": 2284,
+      "2020": 3460,
+      "2021": 1463,
+      "2022": 1248,
+      "2023": 3342,
+      "2024": 4486,
+      "2025": 71
+    },
+    "no_news": 23180,
+    "excluded_action_in_past_20": 943,
+    "excluded_action_in_next_20": 1873,
+    "power_no_news": {
+      "events": 23180,
+      "distinct_dates": 2161,
+      "mde_20_session_pct_at_alpha_0.00625_power_0.8": 0.35
+    },
+    "power_no_news_up_day": {
+      "events": 15031,
+      "distinct_dates": 1868,
+      "mde_20_session_pct_at_alpha_0.00625_power_0.8": 0.43
+    }
+  },
+  "market_state": {
+    "sessions": 2435,
+    "trend_defined_from": "2015-04-09",
+    "share_sessions_trend_up": 0.555,
+    "breadth_mean": 0.456,
+    "rate_known_from": "2016-11-03",
+    "trend_regime_switches": 64,
+    "independent_years": 10.1
+  }
+}
