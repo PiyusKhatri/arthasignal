@@ -45,7 +45,7 @@ def reliability(probability: np.ndarray, correct: np.ndarray) -> tuple[list[dict
 def top_bottom_spread(frame: pd.DataFrame) -> float | None:
     spreads = []
     for _, group in frame[frame["score"].notna() & frame["gross_return"].notna()].groupby("signal_date"):
-        if len(group) < 10:
+        if len(group) < 10 or group["score"].nunique() < 2:
             continue
         ordered = group.sort_values(["score", "symbol"], ascending=[False, True])
         k = max(1, int(np.ceil(len(ordered) * 0.2)))
@@ -151,6 +151,22 @@ def cell_metrics(
     }
 
 
+def matrix_column(
+    graded: pd.DataFrame,
+    horizon: int,
+    session_index: Mapping[date, int],
+    sessions: int,
+    strategy_versions: int = 1,
+    leaky: bool = False,
+) -> dict[str, dict[str, Any]]:
+    tests = penalty_tests(strategy_versions, len(spec.SITUATIONS) * len(spec.HORIZONS))
+    exploded = graded[graded["horizon"] == horizon].explode("situations")
+    return {
+        situation: cell_metrics(exploded[exploded["situations"] == situation], horizon, session_index, sessions, tests, leaky)
+        for situation in spec.SITUATIONS
+    }
+
+
 def build_matrix(
     graded: pd.DataFrame,
     session_index: Mapping[date, int],
@@ -158,16 +174,11 @@ def build_matrix(
     strategy_versions: int = 1,
     leaky: bool = False,
 ) -> dict[str, dict[str, Any]]:
-    tests = penalty_tests(strategy_versions, len(spec.SITUATIONS) * len(spec.HORIZONS))
-    exploded = graded.explode("situations")
-    matrix: dict[str, dict[str, Any]] = {}
-    for situation in spec.SITUATIONS:
-        subset = exploded[exploded["situations"] == situation]
-        row: dict[str, Any] = {}
-        for horizon in spec.HORIZONS:
-            cell = subset[subset["horizon"] == horizon]
-            row[str(horizon)] = cell_metrics(cell, horizon, session_index, sessions, tests, leaky)
-        matrix[situation] = row
+    matrix: dict[str, dict[str, Any]] = {situation: {} for situation in spec.SITUATIONS}
+    for horizon in spec.HORIZONS:
+        column = matrix_column(graded, horizon, session_index, sessions, strategy_versions, leaky)
+        for situation, cell in column.items():
+            matrix[situation][str(horizon)] = cell
     return matrix
 
 

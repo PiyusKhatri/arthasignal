@@ -20,7 +20,7 @@ from src.scorecard import spec
 from src.scorecard.audit import lookahead_audit
 from src.scorecard.grading import build_cube, build_market, cumulative_flags, grade_calls
 from src.scorecard.ledger import feature_hash, graded_call_ids, load_graded, record_calls, record_grades
-from src.scorecard.metrics import build_matrix, rolling_monitor
+from src.scorecard.metrics import matrix_column, rolling_monitor
 from src.scorecard.schema import apply_schema
 from src.scorecard.situations import labels_for, situation_matrix
 from src.scorecard.strategies import STRATEGIES, Strategy
@@ -72,6 +72,8 @@ def run(output: Path = DEFAULT_OUTPUT, strategies: tuple[Strategy, ...] = STRATE
     started = time.perf_counter()
     apply_schema(engine)
     inputs = load_inputs(spec.DEVELOPMENT_END)
+    invalid = sorted({s for s in inputs["prices"]["symbol"].unique() if not spec.valid_symbol(s)})
+    inputs["prices"] = inputs["prices"][inputs["prices"]["symbol"].map(spec.valid_symbol)]
     panel = load_panel(inputs)
     if panel.sessions[-1] > spec.DEVELOPMENT_END:
         raise SystemExit("panel extends past the development window")
@@ -116,6 +118,7 @@ def run(output: Path = DEFAULT_OUTPUT, strategies: tuple[Strategy, ...] = STRATE
         "first_session": panel.sessions[0].isoformat(),
         "last_session": panel.sessions[-1].isoformat(),
         "strategy_versions_in_family": versions,
+        "excluded_invalid_symbols": invalid,
         "universe": universe_summary,
         "strategies": {},
     }
@@ -136,12 +139,19 @@ def run(output: Path = DEFAULT_OUTPUT, strategies: tuple[Strategy, ...] = STRATE
             grades = grades[[key not in done for key in keys]]
         if not grades.empty:
             record_grades(engine, grades)
-        graded = load_graded(engine, strategy.name, strategy.version)
-        if (graded["exit_date"].dropna() >= spec.HOLDOUT_START).any() or (graded["exit_date"].dropna() > spec.DEVELOPMENT_END).any():
-            raise SystemExit("a graded exit reached past the development window")
-        matrix = build_matrix(graded, session_index, len(panel.sessions), versions, leaky=audit["leaky"])
+        del grades
+        matrix: dict[str, dict[str, Any]] = {situation: {} for situation in spec.SITUATIONS}
         monitors = {}
+        graded_rows = 0
         for h in spec.HORIZONS:
+            graded = load_graded(engine, strategy.name, strategy.version, horizon=h)
+            graded_rows += len(graded)
+            exits = graded["exit_date"].dropna()
+            if (exits >= spec.HOLDOUT_START).any() or (exits > spec.DEVELOPMENT_END).any():
+                raise SystemExit("a graded exit reached past the development window")
+            column = matrix_column(graded, h, session_index, len(panel.sessions), versions, leaky=audit["leaky"])
+            for situation, cell in column.items():
+                matrix[situation][str(h)] = cell
             monitor = rolling_monitor(graded, h, panel.sessions)
             monitors[str(h)] = {
                 "points": int(len(monitor)),
@@ -151,7 +161,7 @@ def run(output: Path = DEFAULT_OUTPUT, strategies: tuple[Strategy, ...] = STRATE
         report["strategies"][strategy.name] = {
             "version": strategy.version,
             "calls": int(len(existing)),
-            "grades": int(len(graded)),
+            "grades": int(graded_rows),
             "audit": audit,
             "matrix": matrix,
             "monitoring": monitors,

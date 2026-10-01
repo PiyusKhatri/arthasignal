@@ -97,7 +97,9 @@ def load_calls(engine: Engine, strategy: str | None = None, schema: str = "publi
         return pd.read_sql(text(query), connection, params=params)
 
 
-def load_graded(engine: Engine, strategy: str, model_version: str, schema: str = "public") -> pd.DataFrame:
+def load_graded(
+    engine: Engine, strategy: str, model_version: str, schema: str = "public", horizon: int | None = None
+) -> pd.DataFrame:
     query = f"""
         SELECT c.id AS call_id, c.mode, c.strategy, c.model_version, c.symbol, c.signal_date, c.probability,
                c.score, c.situations, g.horizon, g.horizon_class, g.status, g.entry_rule, g.entry_date, g.exit_date,
@@ -107,12 +109,12 @@ def load_graded(engine: Engine, strategy: str, model_version: str, schema: str =
         JOIN {schema}.scorecard_grades g ON g.call_id = c.id AND g.grade_version = :grade_version
         WHERE c.strategy = :strategy AND c.model_version = :model_version
     """
+    params: dict[str, Any] = {"strategy": strategy, "model_version": model_version, "grade_version": spec.GRADE_VERSION}
+    if horizon is not None:
+        query += " AND g.horizon = :horizon"
+        params["horizon"] = horizon
     with engine.connect() as connection:
-        frame = pd.read_sql(
-            text(query),
-            connection,
-            params={"strategy": strategy, "model_version": model_version, "grade_version": spec.GRADE_VERSION},
-        )
+        frame = pd.read_sql(text(query), connection, params=params)
     frame["probability"] = frame["probability"].astype(float)
     return frame
 

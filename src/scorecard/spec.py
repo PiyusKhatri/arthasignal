@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import date
 
 PROTOCOL_VERSION = "accuracy-v1"
@@ -85,3 +86,10 @@ def horizon_class(horizon: int) -> str:
     if horizon in MID:
         return "mid"
     return "long"
+
+
+VALID_SYMBOL = re.compile(r"^[A-Z0-9]{2,20}$")
+
+
+def valid_symbol(symbol: str | None) -> bool:
+    return bool(symbol) and VALID_SYMBOL.match(symbol) is not None

@@ -185,3 +185,19 @@ The backfill uses the Sharesansar daily page because it is the only source that 
   - `grading` vectorizes all symbols × signal sessions per horizon: open-to-open total return through explicit corporate actions (close-to-close before 2018-02-18), unfilled on no-trade or locked-upper entry, blocked/stranded exits graded wrong, corrupt windows as `data_error`, same-date universe median and mean, sector medians, NEPSE, baseline share, and vectorized failure causes.
   - `situations` gives the 13 point-in-time labels; `metrics` the cell metrics, gate, matrix and rolling monitor with kill flags; `audit` the look-ahead audit; `strategies` the three no-edge baselines plus a deliberately leaky one; `replay` the day-by-day replay into the ledger.
 - Tests (`tests/test_scorecard.py`, 10): next-open entry and exit at the open after the horizon; close rule before 2018-02-18; locked-upper entry unfilled and wrong; a blocked sell graded wrong even after a price rise; 100 calls on 4 dates give 4 independent windows and INSUFFICIENT SAMPLE; a perfect 10-call batch cannot pass; situation and market-state labels up to *t* unchanged when later prices are changed or removed (a one-session look-ahead injected into a label fails it); the audit flags only the leaky strategy; the ledger rejects UPDATE, DELETE and TRUNCATE on both tables in a throwaway schema; a late live call is rejected. Schema applied to local Postgres. Backend suite 435 passed.
+
+## Phase S3 - Scorecard validated with no-edge strategies
+
+- `python -m src.scorecard.replay` replayed four strategies day by day over 2014-06-01 to 2025-01-19 (last price 2025-01-19, holdout untouched) into the append-only ledger: 484,298 calls and 3,684,963 grades. A rerun inserted nothing. Report: `docs/SCORECARD_BASELINES.md`; raw output: `docs/scorecard_baselines.json`.
+- All 416 cells are NO EVIDENCE. The equal-weight universe scores exactly its baseline at every horizon (edge 0.0). The random picker is within ±0.4 points of baseline. Momentum has +1.3 to +1.7 points at 5-20 sessions and is negative beyond 120. The leaky future-return strategy was caught by the look-ahead audit (40/40 dates mismatched). Without the audit it clears the win, lower-bound, edge, expectancy, fold and sample gates at 10-40 sessions; in this run only calibration and data errors would also have blocked it.
+- Power in practice: 16 of 104 cells can ever PASS for a 10-calls-a-day strategy, all at 5-20 sessions. Nothing at 40+ can, because of the data-error gate (2.4-16% of windows) and ≤ 59 independent windows.
+- Bugs and implausible numbers:
+  - an empty-symbol Equity row with 16 mixed price rows and two debentures labelled Equity aborted the first replay (nothing written); they are now excluded by a symbol filter;
+  - data errors grow with horizon because delisted symbols have no corporate actions;
+  - the top-minus-bottom spread on constant scores (fixed, test added);
+  - positive expectancy at all costs is automatic for no-edge strategies at 20+ sessions;
+  - the 62% absolute gate is nearly unreachable at mid horizons (baselines 23-24%);
+  - failure causes collapse into news and circuit at long horizons;
+  - stated 0.5 probabilities are miscalibrated against 24-37% baselines;
+  - the Brier kill rule cannot fire for a 0.5 claimer.
+- Backend suite 437 passed.

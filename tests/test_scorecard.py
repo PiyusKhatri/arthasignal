@@ -278,3 +278,23 @@ def test_live_call_recorded_after_the_entry_open_is_rejected(ledger_schema) -> N
             ),
             {"u": str(uuid.uuid4()), "h": "0" * 64, "c": early},
         )
+
+
+def test_invalid_symbols_are_rejected() -> None:
+    assert not spec.valid_symbol("")
+    assert not spec.valid_symbol(None)
+    assert not spec.valid_symbol("NICAD 85/8")
+    assert not spec.valid_symbol("NIFRAUR85/")
+    assert spec.valid_symbol("NABIL")
+
+
+def test_spread_is_not_reported_for_constant_scores() -> None:
+    from src.scorecard.metrics import top_bottom_spread
+
+    frame = pd.DataFrame(
+        {"signal_date": [date(2020, 1, 1)] * 20, "symbol": [f"S{i:02d}" for i in range(20)], "score": 0.0,
+         "gross_return": np.linspace(-0.1, 0.1, 20)}
+    )
+    assert top_bottom_spread(frame) is None
+    frame["score"] = np.linspace(0, 1, 20)
+    assert top_bottom_spread(frame) == pytest.approx(0.2 * (1 - 3 / 19), rel=1e-6)
