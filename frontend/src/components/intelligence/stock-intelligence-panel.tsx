@@ -2,6 +2,7 @@ import { AiAnalystCard } from "@/components/intelligence/ai-analyst-card";
 import { ArthaScoreCard } from "@/components/intelligence/artha-score-card";
 import { IntelligenceBreakdown } from "@/components/intelligence/intelligence-breakdown";
 import type { StockIntelligence } from "@/lib/market-data";
+import { NEUTRAL_TIER_CLASS, signalStatusLabel, signalStatusTitle } from "@/lib/signal-tiers";
 
 type IntelligenceView = StockIntelligence & {
   confidence_score?: number;
@@ -270,10 +271,12 @@ export function StockIntelligencePanel({ intelligence }: { intelligence: Intelli
                     <div key={item.signal_name} className="rounded-lg border border-border bg-card p-3">
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <p className="text-sm font-medium text-text-primary">{prettyLabel(item.signal_name)}</p>
-                        <span className="text-xs font-medium text-accent-text">{prettyLabel(item.tier)}</span>
+                        <span title={signalStatusTitle(item.signal_name, item.validation)} className={`rounded-md px-2 py-0.5 text-xs font-medium ${NEUTRAL_TIER_CLASS}`}>
+                          {signalStatusLabel(item.tier, item.validation)}
+                        </span>
                       </div>
                       <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-text-secondary">
-                        <span>Edge <strong className="font-medium text-text-primary">{asPercent(item.edge_vs_baseline)}</strong></span>
+                        <span>Earlier backtest edge <strong className="font-medium text-text-primary">{asPercent(item.edge_vs_baseline)}</strong></span>
                         <span>Min sample <strong className="font-medium text-text-primary">{item.min_sample_size}</strong></span>
                       </div>
                     </div>

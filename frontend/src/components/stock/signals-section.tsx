@@ -1,18 +1,16 @@
 import type { StockSignal } from "@/lib/market-data";
 import { plainLanguageSignalLabel } from "@/lib/signal-labels";
-import { isHighConfidenceTier, tierLabel } from "@/lib/signal-tiers";
+import { NEUTRAL_TIER_CLASS, signalStatusLabel, signalStatusTitle } from "@/lib/signal-tiers";
 
 function formatEdge(value: string | null): string {
   if (value === null) {
-    return "No edge data";
+    return "No earlier backtest data";
   }
   const num = Number(value);
-  return `${num >= 0 ? "+" : ""}${num.toFixed(2)} pts win rate vs. baseline`;
+  return `Earlier backtest, not re-validated: ${num >= 0 ? "+" : ""}${num.toFixed(2)} pts win rate vs. baseline`;
 }
 
 function SignalCard({ signal }: { signal: StockSignal }) {
-  const isHighConfidence = isHighConfidenceTier(signal.tier);
-
   return (
     <div className="rounded-lg border border-border bg-card p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -21,16 +19,15 @@ function SignalCard({ signal }: { signal: StockSignal }) {
           <p className="mt-0.5 text-xs text-text-secondary">{signal.signal_name}</p>
         </div>
         <span
-          className={`rounded-md px-2 py-0.5 text-xs font-medium ${
-            isHighConfidence ? "bg-success/10 text-success-text" : "bg-warning/10 text-warning-text"
-          }`}
+          title={signalStatusTitle(signal.signal_name, signal.validation)}
+          className={`rounded-md px-2 py-0.5 text-xs font-medium ${NEUTRAL_TIER_CLASS}`}
         >
-          {tierLabel(signal.tier)}
+          {signalStatusLabel(signal.tier, signal.validation)}
         </span>
       </div>
 
       <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-text-primary">
-        <span>{formatEdge(signal.avg_win_rate_minus_baseline)}</span>
+        <span className="text-text-secondary">{formatEdge(signal.avg_win_rate_minus_baseline)}</span>
         {signal.recommended_holding_period ? (
           <span className="text-text-secondary">Hold: {signal.recommended_holding_period}</span>
         ) : null}
@@ -49,8 +46,8 @@ export function SignalsSection({ signals }: { signals: StockSignal[] }) {
   if (activeSignals.length === 0) {
     return (
       <div className="rounded-lg border border-border bg-card p-6 text-sm text-text-secondary">
-        No signal is currently active for this symbol. Edges shown here are backtested and honest about their
-        limits — they only appear when the underlying condition actually triggers.
+        No signal is currently active for this symbol. Signals are under validation on live paper trades and
+        only appear when the underlying condition actually triggers.
       </div>
     );
   }

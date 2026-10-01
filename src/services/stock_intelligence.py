@@ -22,6 +22,7 @@ from src.database.models import (
     TechnicalSignal,
 )
 from src.pipeline.run_signal_backtests import build_signal_conditions
+from src.pipeline.signal_labels import load_signal_evidence, public_signal_label
 from src.pipeline.signal_validation_policy import VALIDATION_SIGNAL_SPECS
 from src.pipeline.validation_status import build_validation_status
 
@@ -183,6 +184,7 @@ def _backtest_summary(rows: Iterable[Any]) -> list[dict[str, Any]]:
 
 
 def _confidence_summary(rows: Iterable[Any], signal_names: set[str]) -> list[dict[str, Any]]:
+    evidence = load_signal_evidence()
     relevant = [row for row in rows if row.signal_name in signal_names]
     relevant.sort(
         key=lambda row: (
@@ -194,7 +196,7 @@ def _confidence_summary(rows: Iterable[Any], signal_names: set[str]) -> list[dic
     return [
         {
             "signal_name": row.signal_name,
-            "tier": _enum_value(row.tier),
+            **public_signal_label(row.signal_name, _enum_value(row.tier), evidence),
             "edge_vs_baseline": _number(row.avg_win_rate_minus_baseline),
             "min_sample_size": row.min_sample_size,
             "recommended_holding_period": row.recommended_holding_period,

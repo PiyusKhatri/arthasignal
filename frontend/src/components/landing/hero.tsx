@@ -10,8 +10,8 @@ export function Hero({ stock }: { stock: { summary: StockSummary; signals: Stock
           NEPSE analysis, backed by data.
         </h1>
         <p className="mt-5 max-w-md text-base leading-relaxed text-text-secondary">
-          Every signal is backtested against real NEPSE price history and reported with its actual win rate, not a
-          guess.
+          Every signal is under validation on live paper trades, and shows how much evidence it has collected so
+          far.
         </p>
         <Link
           href="/signup"

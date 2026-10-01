@@ -184,6 +184,8 @@ def build_price_and_signal_rows(symbols: list[str], company_names: dict[str, str
                     {
                         "signal_name": active_signal["signal_name"],
                         "tier": active_signal["tier"],
+                        "backtest_tier": active_signal["backtest_tier"],
+                        "validation": active_signal["validation"],
                         "avg_win_rate_minus_baseline": active_signal["avg_win_rate_minus_baseline"],
                     }
                     if active_signal is not None

@@ -5,7 +5,7 @@ import { ArrowUpRight, RefreshCw, TrendingDown, TrendingUp } from "lucide-react"
 import { useEffect, useMemo, useState } from "react";
 import { getSectorStocks, type SectorStock } from "@/lib/market-data";
 import { plainLanguageSignalLabel } from "@/lib/signal-labels";
-import { isHighConfidenceTier, tierLabel } from "@/lib/signal-tiers";
+import { NEUTRAL_TIER_CLASS, signalStatusLabel, signalStatusTitle } from "@/lib/signal-tiers";
 
 function formatPrice(value: string | null): string {
   if (value === null) return "—";
@@ -31,16 +31,13 @@ function Change({ value }: { value: string | null }) {
 
 function SignalBadge({ stock }: { stock: SectorStock }) {
   if (!stock.active_signal) return <span className="text-xs text-text-secondary">No active signal</span>;
-  const high = isHighConfidenceTier(stock.active_signal.tier);
   return (
     <span
-      title={stock.active_signal.signal_name}
-      className={`inline-flex max-w-full items-center rounded-md px-2 py-1 text-xs font-medium ${
-        high ? "bg-success/10 text-success-text" : "bg-warning/10 text-warning-text"
-      }`}
+      title={signalStatusTitle(stock.active_signal.signal_name, stock.active_signal.validation)}
+      className={`inline-flex max-w-full items-center rounded-md px-2 py-1 text-xs font-medium ${NEUTRAL_TIER_CLASS}`}
     >
       <span className="truncate">{plainLanguageSignalLabel(stock.active_signal.signal_name)}</span>
-      <span className="ml-1 shrink-0 opacity-70">· {tierLabel(stock.active_signal.tier)}</span>
+      <span className="ml-1 shrink-0 opacity-70">· {signalStatusLabel(stock.active_signal.tier, stock.active_signal.validation)}</span>
     </span>
   );
 }

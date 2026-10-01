@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from decimal import Decimal
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
@@ -23,6 +24,8 @@ class WatchlistAdd(BaseModel):
 class ActiveSignal(BaseModel):
     signal_name: str
     tier: str | None
+    backtest_tier: str | None = None
+    validation: dict[str, Any] | None = None
     avg_win_rate_minus_baseline: Decimal | None
 
 

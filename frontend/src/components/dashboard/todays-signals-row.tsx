@@ -1,6 +1,7 @@
 import { TrendingDown, TrendingUp } from "lucide-react";
 import type { ActiveSignal } from "@/lib/market-data";
 import { plainLanguageSignalLabel } from "@/lib/signal-labels";
+import { NEUTRAL_TIER_CLASS, signalStatusLabel, signalStatusTitle } from "@/lib/signal-tiers";
 
 function formatPercent(value: string | null): string {
   if (value === null) {
@@ -13,7 +14,6 @@ function formatPercent(value: string | null): string {
 function SignalCard({ signal }: { signal: ActiveSignal }) {
   const change = Number(signal.percent_change ?? 0);
   const isUp = change >= 0;
-  const isHighConfidence = signal.tier === "high_confidence";
 
   return (
     <div className="w-64 shrink-0 snap-start rounded-lg border border-border bg-card p-4">
@@ -38,11 +38,10 @@ function SignalCard({ signal }: { signal: ActiveSignal }) {
         <p className="text-sm text-text-primary">{plainLanguageSignalLabel(signal.signal_name)}</p>
         <p className="mt-0.5 text-xs text-text-secondary">{signal.signal_name}</p>
         <span
-          className={`mt-2 inline-block rounded-md px-2 py-0.5 text-xs font-medium ${
-            isHighConfidence ? "bg-accent-text/10 text-accent-text" : "bg-border text-text-secondary"
-          }`}
+          title={signalStatusTitle(signal.signal_name, signal.validation)}
+          className={`mt-2 inline-block rounded-md px-2 py-0.5 text-xs font-medium ${NEUTRAL_TIER_CLASS}`}
         >
-          {(signal.tier ?? "unrated").replace(/_/g, " ")}
+          {signalStatusLabel(signal.tier, signal.validation)}
         </span>
       </div>
     </div>

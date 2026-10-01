@@ -1,4 +1,5 @@
 import { getApiBaseUrl } from "@/lib/api-config";
+import type { SignalValidation } from "@/lib/signal-tiers";
 
 export const HERO_SYMBOL = "SBL";
 
@@ -99,6 +100,8 @@ export type StockSignal = {
   active: boolean;
   tier: string | null;
   avg_win_rate_minus_baseline: string | null;
+  backtest_tier?: string | null;
+  validation?: SignalValidation | null;
   recommended_holding_period: string | null;
   cost_viability_note: string | null;
 };
@@ -112,6 +115,8 @@ export type StockSignals = {
 export type StockIntelligenceConfidence = {
   signal_name: string;
   tier: string;
+  backtest_tier?: string | null;
+  validation?: SignalValidation | null;
   edge_vs_baseline: number | null;
   min_sample_size: number;
   recommended_holding_period: string | null;
@@ -260,6 +265,8 @@ export type ActiveSignal = {
   signal_name: string;
   tier: string | null;
   avg_win_rate_minus_baseline: string | null;
+  backtest_tier?: string | null;
+  validation?: SignalValidation | null;
   recommended_holding_period: string | null;
 };
 
@@ -323,6 +330,8 @@ export type SectorStock = {
     signal_name: string;
     tier: string | null;
     avg_win_rate_minus_baseline: string | null;
+    backtest_tier?: string | null;
+    validation?: SignalValidation | null;
   } | null;
 };
 

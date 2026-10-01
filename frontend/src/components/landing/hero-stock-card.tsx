@@ -1,6 +1,7 @@
 import { TrendingDown, TrendingUp } from "lucide-react";
 import type { StockSignals, StockSummary } from "@/lib/market-data";
 import { plainLanguageSignalLabel } from "@/lib/signal-labels";
+import { NEUTRAL_TIER_CLASS, signalStatusLabel, signalStatusTitle } from "@/lib/signal-tiers";
 
 function formatPercent(value: string | null): string {
   if (value === null) {
@@ -47,10 +48,12 @@ export function HeroStockCard({ summary, signals }: { summary: StockSummary; sig
           <div>
             <p className="text-sm font-medium text-text-primary">{plainLanguageSignalLabel(activeSignal.signal_name)}</p>
             <p className="mt-0.5 text-xs text-text-secondary">{activeSignal.signal_name}</p>
-            <p className="mt-1 text-xs text-text-secondary">
-              Historically {activeSignal.avg_win_rate_minus_baseline}pp above baseline win rate, held{" "}
-              {activeSignal.recommended_holding_period?.toLowerCase()}.
-            </p>
+            <span
+              title={signalStatusTitle(activeSignal.signal_name, activeSignal.validation)}
+              className={`mt-2 inline-block rounded-md px-2 py-0.5 text-xs font-medium ${NEUTRAL_TIER_CLASS}`}
+            >
+              {signalStatusLabel(activeSignal.tier, activeSignal.validation)}
+            </span>
           </div>
         ) : (
           <p className="text-sm text-text-secondary">No tracked signal is active for {summary.symbol} right now.</p>

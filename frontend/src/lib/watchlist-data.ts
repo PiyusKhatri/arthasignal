@@ -1,11 +1,14 @@
 import { cookies } from "next/headers";
 import { getApiBaseUrl } from "@/lib/api-config";
+import type { SignalValidation } from "@/lib/signal-tiers";
 import { ACCESS_TOKEN_COOKIE } from "@/lib/auth-cookies";
 
 export type WatchlistActiveSignal = {
   signal_name: string;
   tier: string | null;
   avg_win_rate_minus_baseline: string | null;
+  backtest_tier?: string | null;
+  validation?: SignalValidation | null;
 };
 
 export type WatchlistItem = {

@@ -24,6 +24,7 @@ from src.database.models import (
 from src.pipeline.data_quality import _trailing_trading_days
 from src.pipeline.extract_signal_calls import DOJI_REQUIRED_LIQUIDITY_TIER, DOJI_SIGNAL_NAME, TARGET_SIGNAL_HORIZONS
 from src.pipeline.run_signal_backtests import build_signal_conditions
+from src.pipeline.signal_labels import load_signal_evidence, public_signal_label
 from src.scrapers import nepse_api
 
 TOP_BROKER_COUNT = 5
@@ -689,6 +690,7 @@ def compute_active_signals() -> dict[str, Any]:
     conditions = build_signal_conditions()
 
     results = []
+    evidence = load_signal_evidence()
     for signal_row, close_price, company_name, sector in rows:
         prev_close = prev_closes.get(signal_row.symbol)
         percent_change = None
@@ -713,7 +715,7 @@ def compute_active_signals() -> dict[str, Any]:
                     "latest_close": close_price,
                     "percent_change": percent_change,
                     "signal_name": signal_name,
-                    "tier": confidence.tier.value if confidence is not None else None,
+                    **public_signal_label(signal_name, confidence.tier.value if confidence is not None else None, evidence),
                     "avg_win_rate_minus_baseline": confidence.avg_win_rate_minus_baseline if confidence is not None else None,
                     "recommended_holding_period": confidence.recommended_holding_period if confidence is not None else None,
                 }

@@ -102,7 +102,7 @@ export function MarketIntelligenceOverview({ intelligence }: { intelligence: Mar
             </div>
             <div>
               <div className="flex items-center justify-between text-sm">
-                <dt className="text-text-secondary">High-confidence signals</dt>
+                <dt className="text-text-secondary">Forward-validated signals</dt>
                 <dd className="font-semibold text-text-primary">{percent(intelligence.market.high_confidence_share)}</dd>
               </div>
               <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-background">
@@ -121,8 +121,8 @@ export function MarketIntelligenceOverview({ intelligence }: { intelligence: Mar
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <article className="rounded-xl border border-border bg-card p-5">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.16em] text-text-secondary">Validated signals</p>
-            <h2 className="mt-1 text-lg font-semibold text-text-primary">High-confidence opportunities</h2>
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-text-secondary">Forward validation</p>
+            <h2 className="mt-1 text-lg font-semibold text-text-primary">Forward-validated opportunities</h2>
           </div>
 
           {intelligence.high_confidence_signals.length > 0 ? (
@@ -144,7 +144,7 @@ export function MarketIntelligenceOverview({ intelligence }: { intelligence: Mar
             </div>
           ) : (
             <p className="mt-4 rounded-lg border border-border bg-background p-4 text-sm text-text-secondary">
-              No active signal currently meets the high-confidence threshold. This is a valid market state, not missing data.
+              No signal has passed forward validation yet. Every signal is under validation on live paper trades.
             </p>
           )}
         </article>
@@ -161,7 +161,7 @@ export function MarketIntelligenceOverview({ intelligence }: { intelligence: Mar
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-text-primary">{sector.sector}</p>
                   <p className="mt-1 text-xs text-text-secondary">
-                    Top: {sector.top_symbol} ({sector.top_score}) · {sector.high_confidence_count} high-confidence · {sector.stock_count} tracked
+                    Top: {sector.top_symbol} ({sector.top_score}) · {sector.high_confidence_count} forward-validated · {sector.stock_count} tracked
                   </p>
                 </div>
                 <div className="text-right">

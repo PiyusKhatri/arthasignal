@@ -183,7 +183,7 @@ export function QuantResearchSummary({ research }: { research: QuantResearchPayl
               <li>• Gate: {pretty(validation?.gate_status)}</li>
               <li>• Resolved shadow calls: {validation?.resolved_calls ?? 0}</li>
               <li>• Pending shadow calls: {validation?.pending_calls ?? 0}</li>
-              <li>• Public high-confidence wording stays disabled until the precommitted gate passes.</li>
+              <li>• Confidence labels stay disabled until the precommitted gate passes.</li>
             </ul>
           </div>
         </div>

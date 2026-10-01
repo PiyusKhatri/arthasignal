@@ -27,6 +27,7 @@ from src.database.models import (
 from src.pipeline.extract_signal_calls import DOJI_REQUIRED_LIQUIDITY_TIER, DOJI_SIGNAL_NAME, TARGET_SIGNAL_HORIZONS
 from src.pipeline.fundamental_ratios import payout_ratio, sector_relative_valuation
 from src.pipeline.run_signal_backtests import build_signal_conditions
+from src.pipeline.signal_labels import load_signal_evidence, public_signal_label
 
 router = APIRouter(prefix="/stocks", tags=["stocks"])
 
@@ -44,6 +45,7 @@ def evaluate_target_signal_conditions(
     confidence_by_name: dict[str, SignalConfidence],
 ) -> list[dict[str, Any]]:
     conditions = build_signal_conditions()
+    evidence = load_signal_evidence()
 
     results = []
     for signal_name in TARGET_SIGNAL_HORIZONS:
@@ -58,7 +60,7 @@ def evaluate_target_signal_conditions(
             {
                 "signal_name": signal_name,
                 "active": active,
-                "tier": confidence.tier.value if confidence is not None else None,
+                **public_signal_label(signal_name, confidence.tier.value if confidence is not None else None, evidence),
                 "avg_win_rate_minus_baseline": confidence.avg_win_rate_minus_baseline if confidence is not None else None,
                 "recommended_holding_period": confidence.recommended_holding_period if confidence is not None else None,
                 "cost_viability_note": confidence.cost_viability_note if confidence is not None else None,
