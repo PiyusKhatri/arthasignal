@@ -715,16 +715,13 @@ def compute_active_signals() -> dict[str, Any]:
                     "latest_close": close_price,
                     "percent_change": percent_change,
                     "signal_name": signal_name,
-                    **public_signal_label(signal_name, confidence.tier.value if confidence is not None else None, evidence),
+                    **public_signal_label(signal_name, evidence),
                     "avg_win_rate_minus_baseline": confidence.avg_win_rate_minus_baseline if confidence is not None else None,
                     "recommended_holding_period": confidence.recommended_holding_period if confidence is not None else None,
                 }
             )
 
-    results.sort(
-        key=lambda r: r["avg_win_rate_minus_baseline"] if r["avg_win_rate_minus_baseline"] is not None else Decimal("-Infinity"),
-        reverse=True,
-    )
+    results.sort(key=lambda r: (r["symbol"], r["signal_name"]))
     return {"as_of_date": latest_date, "signals": results}
 
 

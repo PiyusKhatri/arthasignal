@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import dataclass
+from urllib.parse import urlparse
 
 from dotenv import load_dotenv
 
@@ -13,6 +14,16 @@ logger = logging.getLogger(__name__)
 
 class ConfigError(Exception):
     pass
+
+
+BLOCKED_DATABASE_HOST_SUFFIXES = ("supabase.co", "supabase.com")
+
+
+def assert_allowed_database_url(name: str, url: str) -> str:
+    host = (urlparse(url).hostname or "").lower()
+    if any(host == suffix or host.endswith("." + suffix) for suffix in BLOCKED_DATABASE_HOST_SUFFIXES):
+        raise ConfigError(f"{name} points at a Supabase host ({host}); only the local Postgres database is allowed")
+    return url
 
 
 @dataclass(frozen=True)
@@ -49,12 +60,15 @@ def _env_bool(name: str, default: bool) -> bool:
 
 
 def get_settings() -> Settings:
-    database_url = _require_env("DATABASE_URL")
+    database_url = assert_allowed_database_url("DATABASE_URL", _require_env("DATABASE_URL"))
+    database_url_readonly = assert_allowed_database_url(
+        "DATABASE_URL_READONLY", os.getenv("DATABASE_URL_READONLY") or database_url
+    )
     return Settings(
         database_url=database_url,
         # A dedicated read replica is optional. Local development and small
         # deployments intentionally share the primary DB unless configured.
-        database_url_readonly=os.getenv("DATABASE_URL_READONLY") or database_url,
+        database_url_readonly=database_url_readonly,
         discord_webhook_url=os.getenv("DISCORD_WEBHOOK_URL"),
         google_service_account_json=os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON"),
         google_drive_folder_id=os.getenv("GOOGLE_DRIVE_FOLDER_ID"),

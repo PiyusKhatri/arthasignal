@@ -46,13 +46,11 @@ def load_signal_evidence() -> dict[str, dict[str, Any]]:
 
 def public_signal_label(
     signal_name: str,
-    backtest_tier: str | None,
     evidence: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     evidence = evidence if evidence is not None else load_signal_evidence()
     return {
         "tier": UNDER_VALIDATION_TIER,
-        "backtest_tier": backtest_tier,
         "validation": evidence.get(signal_name)
         or {
             "status": "collecting",

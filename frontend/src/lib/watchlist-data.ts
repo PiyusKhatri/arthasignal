@@ -7,7 +7,6 @@ export type WatchlistActiveSignal = {
   signal_name: string;
   tier: string | null;
   avg_win_rate_minus_baseline: string | null;
-  backtest_tier?: string | null;
   validation?: SignalValidation | null;
 };
 

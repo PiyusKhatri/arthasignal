@@ -167,12 +167,7 @@ def build_price_and_signal_rows(symbols: list[str], company_names: dict[str, str
             evaluated = evaluate_target_signal_conditions(signal_row, latest_close, liquidity_tier, confidence_by_name)
             active = [s for s in evaluated if s["active"]]
             if active:
-                active_signal = max(
-                    active,
-                    key=lambda s: s["avg_win_rate_minus_baseline"]
-                    if s["avg_win_rate_minus_baseline"] is not None
-                    else Decimal("-Infinity"),
-                )
+                active_signal = active[0]
 
         results.append(
             {
@@ -184,7 +179,6 @@ def build_price_and_signal_rows(symbols: list[str], company_names: dict[str, str
                     {
                         "signal_name": active_signal["signal_name"],
                         "tier": active_signal["tier"],
-                        "backtest_tier": active_signal["backtest_tier"],
                         "validation": active_signal["validation"],
                         "avg_win_rate_minus_baseline": active_signal["avg_win_rate_minus_baseline"],
                     }

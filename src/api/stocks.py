@@ -60,7 +60,7 @@ def evaluate_target_signal_conditions(
             {
                 "signal_name": signal_name,
                 "active": active,
-                **public_signal_label(signal_name, confidence.tier.value if confidence is not None else None, evidence),
+                **public_signal_label(signal_name, evidence),
                 "avg_win_rate_minus_baseline": confidence.avg_win_rate_minus_baseline if confidence is not None else None,
                 "recommended_holding_period": confidence.recommended_holding_period if confidence is not None else None,
                 "cost_viability_note": confidence.cost_viability_note if confidence is not None else None,

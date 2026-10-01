@@ -213,10 +213,12 @@ def _upsert_signals(rows: list[dict[str, Any]]) -> int:
     return len(rows)
 
 
-def compute_and_store_signals(symbol: str, timeframe: str = "daily") -> int:
+def compute_and_store_signals(symbol: str, timeframe: str = "daily", full: bool = False) -> int:
     tf = SignalTimeframe(timeframe)
     bars = _load_bars(symbol, tf)
     rows = _build_rows(symbol, tf, bars)
+    if full:
+        return _upsert_signals(rows)
     existing_dates = _load_existing_signal_dates(symbol, tf)
     rows_to_write = _filter_rows_to_write(rows, existing_dates)
     return _upsert_signals(rows_to_write)

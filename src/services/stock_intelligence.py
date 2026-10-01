@@ -91,25 +91,6 @@ def _liquidity_score(tier: Any) -> int:
     return 3
 
 
-def _confidence_score(rows: Iterable[Any], signal_names: set[str]) -> int:
-    """Compatibility helper: classify historical evidence quality on 0-100."""
-    score = 0
-    for row in rows:
-        if row.signal_name not in signal_names:
-            continue
-        tier = _enum_value(row.tier).lower()
-        edge = _number(getattr(row, "avg_win_rate_minus_baseline", None))
-        if "high_confidence" in tier and (edge is None or edge > 0):
-            score = max(score, 80)
-        elif "unreliable_low_sample" in tier:
-            score = max(score, 30)
-        elif "weak_or_no_edge" in tier or "decayed" in tier or "inconsistent" in tier:
-            score = max(score, 20)
-        else:
-            score = max(score, 40)
-    return score
-
-
 def _confidence_level(score: int) -> str:
     if score >= 70:
         return "high"
@@ -185,18 +166,11 @@ def _backtest_summary(rows: Iterable[Any]) -> list[dict[str, Any]]:
 
 def _confidence_summary(rows: Iterable[Any], signal_names: set[str]) -> list[dict[str, Any]]:
     evidence = load_signal_evidence()
-    relevant = [row for row in rows if row.signal_name in signal_names]
-    relevant.sort(
-        key=lambda row: (
-            0 if "high_confidence" in _enum_value(row.tier).lower() else 1,
-            -(row.min_sample_size or 0),
-            row.signal_name,
-        )
-    )
+    relevant = sorted((row for row in rows if row.signal_name in signal_names), key=lambda row: row.signal_name)
     return [
         {
             "signal_name": row.signal_name,
-            **public_signal_label(row.signal_name, _enum_value(row.tier), evidence),
+            **public_signal_label(row.signal_name, evidence),
             "edge_vs_baseline": _number(row.avg_win_rate_minus_baseline),
             "min_sample_size": row.min_sample_size,
             "recommended_holding_period": row.recommended_holding_period,
@@ -271,7 +245,6 @@ def _select_preferred_backtests(rows: Iterable[Any], signal_names: set[str]) -> 
 
 def _historical_evidence(
     backtests: Iterable[Any],
-    confidence_rows: Iterable[Any],
     signal_names: set[str],
 ) -> dict[str, Any]:
     """
@@ -294,7 +267,6 @@ def _historical_evidence(
         }
 
     selected = _select_preferred_backtests(backtests, signal_names)
-    relevant_conf = [row for row in confidence_rows if row.signal_name in signal_names]
 
     total_weight = sum(max(int(row.sample_size or 0), 0) for row in selected)
     weighted_win_rate = None
@@ -319,37 +291,9 @@ def _historical_evidence(
         if return_weight:
             weighted_average_return = return_numerator / return_weight
 
-    edge_rows: list[tuple[float, int]] = []
-    for row in relevant_conf:
-        edge = _number(getattr(row, "avg_win_rate_minus_baseline", None))
-        if edge is None:
-            continue
-        edge_rows.append((edge, max(int(getattr(row, "min_sample_size", 0) or 0), 1)))
-
     average_edge = None
-    if edge_rows:
-        edge_weight = sum(weight for _, weight in edge_rows)
-        average_edge = sum(edge * weight for edge, weight in edge_rows) / edge_weight
-
-    sample_candidates = [
-        int(getattr(row, "min_sample_size", 0) or 0)
-        for row in relevant_conf
-        if int(getattr(row, "min_sample_size", 0) or 0) > 0
-    ]
-    if not sample_candidates:
-        sample_candidates = [int(row.sample_size or 0) for row in selected if int(row.sample_size or 0) > 0]
+    sample_candidates = [int(row.sample_size or 0) for row in selected if int(row.sample_size or 0) > 0]
     min_sample_size = min(sample_candidates) if sample_candidates else 0
-
-    edge_points = 0
-    if average_edge is not None:
-        if average_edge >= 5:
-            edge_points = 14
-        elif average_edge >= 3:
-            edge_points = 11
-        elif average_edge >= 1:
-            edge_points = 7
-        elif average_edge > 0:
-            edge_points = 4
 
     if min_sample_size >= 1000:
         sample_points = 8
@@ -364,19 +308,6 @@ def _historical_evidence(
     else:
         sample_points = 0
 
-    tiers_by_signal = {row.signal_name: _enum_value(row.tier).lower() for row in relevant_conf}
-    high_confidence_signals = {
-        signal for signal, tier in tiers_by_signal.items() if "high_confidence" in tier
-    }
-    if signal_names and high_confidence_signals == signal_names:
-        tier_points = 5
-    elif high_confidence_signals:
-        tier_points = 3
-    elif any("unreliable_low_sample" in tier for tier in tiers_by_signal.values()):
-        tier_points = 1
-    else:
-        tier_points = 0
-
     return_points = 0
     if weighted_average_return is not None:
         if weighted_average_return >= 5:
@@ -386,17 +317,17 @@ def _historical_evidence(
         elif weighted_average_return > 0:
             return_points = 1
 
-    reliability_score = min(30, edge_points + sample_points + tier_points + return_points)
-    coverage_ratio = len(set(tiers_by_signal) & signal_names) / max(len(signal_names), 1)
+    reliability_score = min(30, sample_points + return_points)
+    covered = {row.signal_name for row in selected} & signal_names
+    coverage_ratio = len(covered) / max(len(signal_names), 1)
     sample_confidence = min(1.0, min_sample_size / 500.0) if min_sample_size else 0.0
-    edge_confidence = min(1.0, max(average_edge or 0.0, 0.0) / 5.0)
-    confidence_score = round(100 * (0.40 * coverage_ratio + 0.35 * sample_confidence + 0.25 * edge_confidence))
+    confidence_score = round(100 * (0.40 * coverage_ratio + 0.35 * sample_confidence))
 
     return {
         "scope": "market_wide_signal_backtest",
         "score": reliability_score,
         "confidence_score": confidence_score,
-        "signals_covered": len(set(tiers_by_signal) & signal_names),
+        "signals_covered": len(covered),
         "signals_requested": len(signal_names),
         "min_sample_size": min_sample_size,
         "weighted_win_rate": weighted_win_rate,
@@ -660,7 +591,7 @@ def _build_payload(
     elif 0 < liquidity_pts <= 3:
         warnings.append("Low liquidity can increase slippage and execution risk.")
 
-    evidence = _historical_evidence(backtest_list, confidence_list, signal_names)
+    evidence = _historical_evidence(backtest_list, signal_names)
     reliability_pts = int(evidence["score"])
     if signal_names:
         edge = evidence.get("average_edge_vs_baseline")

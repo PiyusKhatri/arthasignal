@@ -9,7 +9,6 @@ from src.services.stock_intelligence import (
     _build_payload,
     _classify_market_regime,
     _confidence_level,
-    _confidence_score,
     _forward_validation_for_signals,
     _historical_evidence,
     _liquidity_score,
@@ -70,29 +69,6 @@ def test_liquidity_scoring_supports_current_and_legacy_tiers() -> None:
     assert _liquidity_score(None) == 0
 
 
-def test_confidence_score_does_not_reward_low_sample_as_high_confidence() -> None:
-    rows = [
-        SimpleNamespace(
-            signal_name="relevant",
-            tier="high_confidence",
-            avg_win_rate_minus_baseline=4.0,
-        ),
-        SimpleNamespace(
-            signal_name="low-sample",
-            tier="unreliable_low_sample",
-            avg_win_rate_minus_baseline=5.0,
-        ),
-        SimpleNamespace(
-            signal_name="unrelated",
-            tier="high_confidence",
-            avg_win_rate_minus_baseline=8.0,
-        ),
-    ]
-    assert _confidence_score(rows, {"relevant"}) == 80
-    assert _confidence_score(rows, {"low-sample"}) == 30
-    assert _confidence_score(rows, {"missing"}) == 0
-
-
 def test_backtest_summary_exposes_horizon_and_return() -> None:
     rows = [
         SimpleNamespace(
@@ -136,7 +112,7 @@ def test_valuation_scoring_is_conservative_when_data_missing() -> None:
     assert any("not elevated on an absolute basis" in item for item in insights)
 
 
-def test_historical_evidence_uses_edge_vs_market_baseline_and_sample_size() -> None:
+def test_historical_evidence_uses_backtest_sample_size_and_return_only() -> None:
     signal = "rsi_14 < 30 (oversold)"
     backtests = [
         SimpleNamespace(
@@ -154,54 +130,72 @@ def test_historical_evidence_uses_edge_vs_market_baseline_and_sample_size() -> N
             mean_return=1.1,
         ),
     ]
-    confidence = [
-        SimpleNamespace(
+
+    evidence = _historical_evidence(backtests, {signal})
+    assert evidence["scope"] == "market_wide_signal_backtest"
+    assert evidence["signals_covered"] == 1
+    assert evidence["min_sample_size"] == 900
+    assert evidence["weighted_win_rate"] == 0.62
+    assert evidence["weighted_average_return"] == 3.2
+    assert evidence["average_edge_vs_baseline"] is None
+    assert evidence["score"] == 9
+    assert evidence["confidence_score"] == 75
+
+
+def _payload_with_confidence(confidence_rows):
+    technical = SimpleNamespace(
+        date=date(2026, 8, 20),
+        sma_50=500.0,
+        sma_200=450.0,
+        rsi_14=25.0,
+        macd_line=10.0,
+        macd_signal=8.0,
+    )
+    signal = "rsi_14 < 30 (oversold)"
+    return _build_payload(
+        symbol="TEST",
+        company_name="Test Corp",
+        sector="Commercial Banks",
+        technical=technical,
+        fundamental=None,
+        price=550.0,
+        liquidity="high_liquidity",
+        calls=[],
+        active_signal_names={signal},
+        confidence_rows=confidence_rows,
+        backtests=[
+            SimpleNamespace(signal_name=signal, forward_days=20, win_rate=62.0, sample_size=900, mean_return=3.2)
+        ],
+        market_regime=_classify_market_regime([100.0 + i for i in range(260)]),
+        validation_status={"policy_version": "test", "signals": {}},
+        include_ai=False,
+    )
+
+
+def test_signal_confidence_tiers_do_not_change_any_score_or_label() -> None:
+    signal = "rsi_14 < 30 (oversold)"
+
+    def confidence(tier, edge, samples):
+        return SimpleNamespace(
             signal_name=signal,
-            tier="high_confidence",
-            avg_win_rate_minus_baseline=4.0,
-            min_sample_size=800,
+            tier=tier,
+            avg_win_rate_minus_baseline=edge,
+            min_sample_size=samples,
             recommended_holding_period="20d",
             cost_viability_note=None,
         )
-    ]
 
-    evidence = _historical_evidence(backtests, confidence, {signal})
-    assert evidence["scope"] == "market_wide_signal_backtest"
-    assert evidence["signals_covered"] == 1
-    assert evidence["min_sample_size"] == 800
-    assert evidence["weighted_win_rate"] == 0.62
-    assert evidence["weighted_average_return"] == 3.2
-    assert evidence["average_edge_vs_baseline"] == 4.0
-    assert evidence["score"] >= 20
-    assert evidence["confidence_score"] >= 70
+    high = _payload_with_confidence([confidence("high_confidence", 9.0, 5000)])
+    weak = _payload_with_confidence([confidence("weak_or_no_edge", -4.0, 10)])
+    none = _payload_with_confidence([])
 
-
-def test_historical_evidence_does_not_reward_negative_edge() -> None:
-    signal = "rsi_14 > 70 (overbought)"
-    evidence = _historical_evidence(
-        [
-            SimpleNamespace(
-                signal_name=signal,
-                forward_days=20,
-                win_rate=60.0,
-                sample_size=1000,
-                mean_return=2.5,
-            )
-        ],
-        [
-            SimpleNamespace(
-                signal_name=signal,
-                tier="weak_or_no_edge",
-                avg_win_rate_minus_baseline=-2.0,
-                min_sample_size=1000,
-                recommended_holding_period="20d",
-                cost_viability_note=None,
-            )
-        ],
-        {signal},
-    )
-    assert evidence["average_edge_vs_baseline"] == -2.0
-    assert evidence["score"] < 15
+    for key in ("artha_score", "rating", "confidence_score", "confidence_level", "signal_quality", "scores"):
+        assert high[key] == weak[key] == none[key]
+    assert high["evidence"] == weak["evidence"] == none["evidence"]
+    for item in high["confidence"] + weak["confidence"]:
+        assert item["tier"] == "under_validation"
+        assert "backtest_tier" not in item
+        assert "high_confidence" not in str(item)
 
 
 def test_market_regime_classification_uses_index_history_not_stock_scores() -> None:

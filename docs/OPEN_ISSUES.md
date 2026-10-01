@@ -11,7 +11,7 @@ Severity: **Critical** blocks trust in anything shown to users. **High** blocks 
 | D2 | High | No real opening price before 2018-02-18 | Prices now start 2014-06-01, but the public source's `open` equals the previous close until 2018-02-15. Next-open entry can only be tested from 2018-02-18 |
 | D3 | High | Floorsheet history is 18 days | Pruning is stopped, but rows before 2026-08-31 were already deleted here. About 2,930 sessions since 2014 are missing |
 | D4 | Medium | Survivorship gap narrowed | 211 of 259 delisted and 6 of 25 suspended equities now have prices. 48 delisted still have none |
-| D5 | High | Two databases have diverged | The calendar rebuild, signal-call re-grade and index repair were run on the local database only. The Supabase database rejects this machine's login, so its state is unknown and none of these repairs have been applied there |
+| D5 | High | Two databases have diverged | Local Postgres is the only allowed database; config and workflows refuse Supabase hosts. Supabase rejects this machine's login, so data that may exist only there (users, watchlists, alerts, scheduled signal calls) has not been exported or compared |
 | D7 | Medium | Index `open` is a placeholder for new broad-index rows | The NEPSE API gives high and low but no open, so the refresh writes `open = close` for the four broad indices. `repair_index_dates` corrects it from the public history when run |
 | D8 | High | `adjusted_close` is partial and disagrees with an independent source | Present on 67.4% of equity rows; only 56.5% of factors match Merolagani within 2% (2015-2021 sample). Use raw prices with corporate-action exclusion windows |
 | D9 | Medium | Non-equity rows in `daily_prices` since 2026-08-21 | About 45 mutual funds and 33 debentures a day. Any universe built without an instrument-type filter includes them |
@@ -35,7 +35,6 @@ Severity: **Critical** blocks trust in anything shown to users. **High** blocks 
 | M1 | High | No signal has an edge to show users | The UI now says "under validation" with live evidence. The 2026-10-01 rerun (`docs/BACKTEST_RERUN.md`) found no former high-confidence signal that beats the equal-weight universe reliably; the two oversold signals are negative in every fold |
 | M2 | High | No model has passed its own gate | V2 to V4.1 and E1 all failed; V5 was never run. All are archived |
 | M3 | High | V1 is served and retrained weekly with no recorded validation | No V1 result exists, and this database has no model snapshot or shadow signal at all |
-| M5 | Medium | `signal_confidence` tiers are still the July values | The API no longer shows them, but the table and the scoring in `stock_intelligence` still use them |
 | M6 | Low | Own-row horizon drifts for thin stocks | For 97.8% of price rows the 20th later row is exactly 20 market sessions away; for 0.6% it is more than 23 sessions, up to 595 |
 | M7 | Medium | Forward capture for V4.1 and E1 is switched off | Removed from the daily workflow when the code was archived. Their ledgers are empty here |
 
@@ -72,3 +71,9 @@ Severity: **Critical** blocks trust in anything shown to users. **High** blocks 
 - P1: scheduled workflows now run only on manual dispatch; CI only on pull requests.
 - D6: the index refresh falls back to the public index history, and a data-quality check fails when any price session lacks a NEPSE Index row.
 - D1: 2026-07-27 prices backfilled (358 rows), calendar rebuilt, 494 signal calls re-graded.
+
+## Fixed on 2026-10-01 (Phase A)
+
+- `technical_signals` recomputed over full history for all 312 active equities; 0 price days without an indicator row.
+- M5: `signal_confidence` tiers no longer feed any score, ranking or label.
+- No code path or workflow can connect to a Supabase host.

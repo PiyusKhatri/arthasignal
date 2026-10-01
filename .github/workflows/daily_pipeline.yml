@@ -48,6 +48,8 @@ jobs:
           host = urlparse(url).hostname
           if not url:
               raise SystemExit("DATABASE_URL secret is not configured")
+          if host and (host.endswith("supabase.co") or host.endswith("supabase.com")):
+              raise SystemExit("DATABASE_URL points at Supabase; writes to Supabase are not allowed")
           if host in {"localhost", "127.0.0.1", "db"}:
               raise SystemExit(
                   "Scheduled GitHub-hosted jobs cannot use the local Docker database. "

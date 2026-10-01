@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import logging
 import time
 from typing import Any
@@ -27,7 +28,9 @@ def _active_equity_symbols() -> list[str]:
     return [r.symbol for r in rows]
 
 
-def run_signals_backfill(symbols: list[str] | None = None, timeframe: str = "daily") -> dict[str, Any]:
+def run_signals_backfill(
+    symbols: list[str] | None = None, timeframe: str = "daily", full: bool = False
+) -> dict[str, Any]:
     start_time = time.perf_counter()
 
     if symbols is None:
@@ -41,7 +44,7 @@ def run_signals_backfill(symbols: list[str] | None = None, timeframe: str = "dai
     for symbol in symbols:
         symbols_processed += 1
         try:
-            rows_upserted_total += compute_and_store_signals(symbol, timeframe)
+            rows_upserted_total += compute_and_store_signals(symbol, timeframe, full=full)
         except Exception:
             logger.exception("Failed to compute signals for symbol %s", symbol)
             failures += 1
@@ -75,5 +78,14 @@ def run_signals_backfill(symbols: list[str] | None = None, timeframe: str = "dai
     return summary
 
 
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--full", action="store_true")
+    parser.add_argument("--timeframe", default="daily")
+    parser.add_argument("--symbols", nargs="*")
+    args = parser.parse_args()
+    run_signals_backfill(symbols=args.symbols or None, timeframe=args.timeframe, full=args.full)
+
+
 if __name__ == "__main__":
-    run_signals_backfill()
+    main()
