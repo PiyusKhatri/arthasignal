@@ -16,6 +16,7 @@ HOMEPAGE_URL = "https://www.sharesansar.com/"
 TODAY_PRICE_URL = "https://www.sharesansar.com/today-share-price"
 COMPANY_PAGE_URL_TEMPLATE = "https://www.sharesansar.com/company/{slug}"
 PRICE_HISTORY_URL = "https://www.sharesansar.com/company-price-history"
+SESSION_PRICE_URL = "https://www.sharesansar.com/ajaxtodayshareprice"
 PRICE_HISTORY_PAGE_SIZE = 50
 
 TOKEN_PATTERN = re.compile(r'name="_token" content="([^"]+)"')
@@ -137,6 +138,61 @@ def scrape_sub_indices() -> list[dict[str, Any]]:
 
     logger.info("sharesansar: parsed %d sub-index rows", len(results))
     return results
+
+
+def _parse_session_table(html: str, requested: date) -> tuple[date | None, list[dict[str, Any]]]:
+    soup = BeautifulSoup(html, "html.parser")
+    as_of = parse_as_of_date(soup.get_text(" ", strip=True).replace("As of :", "As of"))
+    table = soup.find("table")
+    if table is None:
+        return as_of, []
+
+    header_cells = table.find("tr").find_all(["th", "td"])
+    headers = [c.get_text(strip=True) for c in header_cells]
+    position = {name: i for i, name in enumerate(headers)}
+    required = ["Symbol", "Open", "High", "Low", "Close", "Vol", "Turnover"]
+    if any(name not in position for name in required):
+        raise ValueError(f"sharesansar: unexpected session table headers {headers}")
+
+    rows: list[dict[str, Any]] = []
+    for tr in table.find_all("tr")[1:]:
+        cells = [c.get_text(strip=True) for c in tr.find_all("td")]
+        if len(cells) < len(headers):
+            continue
+        rows.append(
+            {
+                "symbol": cells[position["Symbol"]],
+                "date": requested,
+                "open": _parse_number(cells[position["Open"]]),
+                "high": _parse_number(cells[position["High"]]),
+                "low": _parse_number(cells[position["Low"]]),
+                "close": _parse_number(cells[position["Close"]]),
+                "volume": int(_parse_number(cells[position["Vol"]]) or 0),
+                "turnover": _parse_number(cells[position["Turnover"]]) or 0.0,
+                "prev_close": _parse_number(cells[position["Prev. Close"]]) if "Prev. Close" in position else None,
+            }
+        )
+    return as_of, rows
+
+
+def get_session_prices(session_date: date, http: requests.Session | None = None) -> tuple[date | None, list[dict[str, Any]]]:
+    http = http or requests.Session()
+    page = fetch(TODAY_PRICE_URL, session=http)
+    token_match = TOKEN_PATTERN.search(page.text)
+    if token_match is None:
+        raise ValueError("sharesansar: could not locate CSRF token on today-share-price")
+    token = token_match.group(1)
+    response = post(
+        SESSION_PRICE_URL,
+        session=http,
+        data={"_token": token, "sector": "all_sec", "date": session_date.isoformat()},
+        headers={
+            "X-CSRF-Token": token,
+            "X-Requested-With": "XMLHttpRequest",
+            "Referer": TODAY_PRICE_URL,
+        },
+    )
+    return _parse_session_table(response.text, session_date)
 
 
 def _get_company_session(symbol: str) -> tuple[requests.Session, str, str]:

@@ -223,3 +223,23 @@ def test_call_resolved_before_its_true_target_is_miscounted() -> None:
     assert is_miscounted(on_time, sessions) is False
     assert is_miscounted(too_recent, sessions) is True
     assert is_miscounted(void, sessions) is True
+
+
+def test_call_resolved_after_a_newly_added_session_is_miscounted() -> None:
+    sessions = sorted(_sessions())
+    signal_date = date(2026, 4, 9)
+    target = _resolution_target_date(signal_date, 20, sessions)
+    later = sessions[sessions.index(target) + 1]
+    call = {
+        "id": 1,
+        "symbol": "ABC",
+        "entry_date": signal_date,
+        "horizon": 20,
+        "status": SignalCallStatus.RESOLVED,
+        "outcome": SignalCallOutcome.WIN,
+        "resolution_date": later,
+    }
+
+    assert is_miscounted(call, sessions, {"ABC": [signal_date, target, later]}) is True
+    assert is_miscounted(call, sessions, {"ABC": [signal_date, later]}) is False
+    assert is_miscounted(call, sessions) is False

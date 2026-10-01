@@ -8,7 +8,6 @@ Severity: **Critical** blocks trust in anything shown to users. **High** blocks 
 
 | # | Severity | Issue | Detail |
 | --- | --- | --- | --- |
-| D1 | High | One real session has no prices | 2026-07-27: the public index shows NEPSE down 33.28 points, but `daily_prices` has no rows. Every symbol's series is one row short, so indicators and 20-session horizons that cross it are off by one. The calendar lists it as unexplained non-trading |
 | D2 | High | Price history starts 2021-07-25 | About four years remain for development once the 12-month holdout is removed. The longer history is on another machine |
 | D3 | High | Floorsheet history is 18 days | Pruning is stopped, but rows before 2026-08-31 were already deleted here. About 2,930 sessions since 2014 are missing |
 | D4 | High | Survivor-only universe | 152 of 184 delisted and 22 of 25 suspended equities have no prices |
@@ -69,3 +68,7 @@ Severity: **Critical** blocks trust in anything shown to users. **High** blocks 
 - 1,046 signal calls were re-graded on real sessions.
 - Index rows are stamped with the source session date; 117 mis-dated rows were moved or removed, 136 missing rows were restored from the public history, and the NEPSE Index is present on every price session.
 - The malformed `.env` line is split.
+
+## Fixed on 2026-10-01
+
+- D1: 2026-07-27 prices backfilled (358 rows), calendar rebuilt, 494 signal calls re-graded.

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import bisect
 import json
 import logging
 from collections import Counter
@@ -10,7 +11,7 @@ from typing import Any
 from sqlalchemy import select, update
 
 from src.database.connection import get_session
-from src.database.models import SignalCall, SignalCallStatus
+from src.database.models import DailyPrice, SignalCall, SignalCallStatus
 from src.pipeline.grade_signal_calls import (
     _load_trading_days,
     _resolution_target_date,
@@ -36,6 +37,7 @@ def _load_graded_calls() -> list[dict[str, Any]]:
         rows = session.execute(
             select(
                 SignalCall.id,
+                SignalCall.symbol,
                 SignalCall.entry_date,
                 SignalCall.forward_days_horizon,
                 SignalCall.status,
@@ -46,6 +48,7 @@ def _load_graded_calls() -> list[dict[str, Any]]:
     return [
         {
             "id": row.id,
+            "symbol": row.symbol,
             "entry_date": row.entry_date,
             "horizon": row.forward_days_horizon,
             "status": row.status,
@@ -56,20 +59,49 @@ def _load_graded_calls() -> list[dict[str, Any]]:
     ]
 
 
-def is_miscounted(call: dict[str, Any], sessions: list[date]) -> bool:
+def is_miscounted(
+    call: dict[str, Any],
+    sessions: list[date],
+    symbol_dates: dict[str, list[date]] | None = None,
+) -> bool:
     if call["status"] == SignalCallStatus.VOID:
         return True
     target_date = _resolution_target_date(call["entry_date"], call["horizon"], sessions)
     if target_date is None or call["resolution_date"] is None:
         return True
-    return call["resolution_date"] < target_date
+    if call["resolution_date"] < target_date:
+        return True
+    if call["resolution_date"] > target_date and symbol_dates is not None:
+        dates = symbol_dates.get(call["symbol"], [])
+        pos = bisect.bisect_left(dates, target_date)
+        return pos < len(dates) and dates[pos] < call["resolution_date"]
+    return False
+
+
+def _load_symbol_dates(calls: list[dict[str, Any]]) -> dict[str, list[date]]:
+    symbols = {call["symbol"] for call in calls}
+    if not symbols:
+        return {}
+    start = min(call["entry_date"] for call in calls)
+    with get_session() as session:
+        rows = session.execute(
+            select(DailyPrice.symbol, DailyPrice.date)
+            .where(DailyPrice.symbol.in_(symbols))
+            .where(DailyPrice.date >= start)
+            .order_by(DailyPrice.symbol, DailyPrice.date)
+        ).all()
+    index: dict[str, list[date]] = {}
+    for symbol, day in rows:
+        index.setdefault(symbol, []).append(day)
+    return index
 
 
 def regrade_miscounted_signal_calls(as_of: date | None = None, dry_run: bool = False) -> dict[str, Any]:
     as_of = as_of or date.today()
     sessions = _load_trading_days()
     graded = _load_graded_calls()
-    miscounted = [call for call in graded if is_miscounted(call, sessions)]
+    symbol_dates = _load_symbol_dates(graded)
+    miscounted = [call for call in graded if is_miscounted(call, sessions, symbol_dates)]
     before = _status_counts()
     previous_outcome = {call["id"]: call["outcome"].value if call["outcome"] else None for call in miscounted}
 
