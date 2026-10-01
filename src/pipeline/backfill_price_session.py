@@ -6,7 +6,6 @@ import logging
 from datetime import date
 from typing import Any
 
-import requests
 from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
@@ -66,9 +65,9 @@ def _symbols_with_actions(symbols: set[str]) -> list[str]:
         )
 
 
-def backfill_price_session(session_date: date, http: requests.Session | None = None) -> dict[str, Any]:
+def backfill_price_session(session_date: date) -> dict[str, Any]:
     before = _row_count(session_date)
-    as_of, rows = sharesansar_scraper.get_session_prices(session_date, http=http)
+    as_of, rows = sharesansar_scraper.get_session_prices(session_date)
     if as_of != session_date:
         raise ValueError(f"source returned session {as_of}, expected {session_date}")
 

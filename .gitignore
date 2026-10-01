@@ -12,3 +12,4 @@ env/
 
 # Local DB backup dump (contains user data)
 backups/
+logs/

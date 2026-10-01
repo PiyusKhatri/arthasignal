@@ -175,13 +175,22 @@ def _parse_session_table(html: str, requested: date) -> tuple[date | None, list[
     return as_of, rows
 
 
-def get_session_prices(session_date: date, http: requests.Session | None = None) -> tuple[date | None, list[dict[str, Any]]]:
-    http = http or requests.Session()
+def open_price_session() -> tuple[requests.Session, str]:
+    http = requests.Session()
     page = fetch(TODAY_PRICE_URL, session=http)
     token_match = TOKEN_PATTERN.search(page.text)
     if token_match is None:
         raise ValueError("sharesansar: could not locate CSRF token on today-share-price")
-    token = token_match.group(1)
+    return http, token_match.group(1)
+
+
+def get_session_prices(
+    session_date: date,
+    http: requests.Session | None = None,
+    token: str | None = None,
+) -> tuple[date | None, list[dict[str, Any]]]:
+    if http is None or token is None:
+        http, token = open_price_session()
     response = post(
         SESSION_PRICE_URL,
         session=http,
