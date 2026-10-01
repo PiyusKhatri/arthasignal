@@ -14,7 +14,7 @@ from src.pipeline.backup_to_drive import run_backup
 from src.pipeline.check_alerts import check_signal_alerts
 from src.pipeline.cleanup_intraday_tables import run_intraday_table_cleanup
 from src.pipeline.compute_liquidity_tiers import compute_liquidity_tiers
-from src.pipeline.data_quality import check_daily_pipeline_health
+from src.pipeline.data_quality import MissingIndexSessionsError, check_daily_pipeline_health
 from src.pipeline.extract_signal_calls import extract_signal_calls
 from src.pipeline.grade_signal_calls import grade_signal_calls
 from src.pipeline.refresh_ipo_status import refresh_ipo_status
@@ -160,6 +160,16 @@ def run_all_daily() -> dict[str, Any]:
             severity="failure",
         )
 
+    index_coverage = quality_summary.get("results", {}).get("benchmark_index_coverage", {})
+    if index_coverage.get("flagged") or index_coverage.get("error"):
+        missing_sessions = index_coverage.get("missing_sessions", [])
+        send_discord_alert(
+            "BENCHMARK INDEX MISSING\n"
+            f"{len(missing_sessions)} price sessions have no NEPSE Index row: "
+            + ", ".join(str(day) for day in missing_sessions[:20]),
+            severity="failure",
+        )
+
     try:
         signal_alert_summary = check_signal_alerts()
     except Exception:
@@ -237,6 +247,9 @@ def run_all_daily() -> dict[str, Any]:
 
     send_discord_alert(message, severity=severity)
     logger.info(message.replace("\n", " | "))
+
+    if index_coverage.get("flagged") or index_coverage.get("error"):
+        raise MissingIndexSessionsError("price sessions without a NEPSE Index row; see data_quality log")
 
     return {
         "gap_summary": gap_summary,

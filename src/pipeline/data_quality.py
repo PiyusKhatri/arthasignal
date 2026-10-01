@@ -24,6 +24,11 @@ STALE_FUNDAMENTALS_SYMBOL_DAYS = 45
 STALE_FUNDAMENTALS_TABLE_DAYS = 14
 STALE_SECTOR_FUNDAMENTAL_BASELINE_DAYS = 14
 SIGNAL_CALL_EXTRACTION_STALL_CONSECUTIVE_DAYS = 3
+BENCHMARK_INDEX_NAME = "NEPSE Index"
+
+
+class MissingIndexSessionsError(RuntimeError):
+    pass
 
 
 def _circuit_breaker_flag_threshold(as_of_date: date) -> float:
@@ -385,6 +390,45 @@ def _check_trading_day_ingestion_gap(_latest_date) -> dict[str, Any]:
     }
 
 
+def missing_benchmark_index_sessions() -> list[date]:
+    with get_session() as session:
+        rows = session.execute(
+            text(
+                """
+                SELECT DISTINCT dp.date FROM daily_prices dp
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM market_index mi
+                    WHERE mi.date = dp.date AND mi.index_name = :index_name
+                )
+                ORDER BY dp.date
+                """
+            ),
+            {"index_name": BENCHMARK_INDEX_NAME},
+        ).all()
+    return [row.date for row in rows]
+
+
+def _check_benchmark_index_coverage(_latest_date) -> dict[str, Any]:
+    missing = missing_benchmark_index_sessions()
+    if missing:
+        logger.error(
+            "data_quality: %d price sessions have no %s row: %s",
+            len(missing),
+            BENCHMARK_INDEX_NAME,
+            ", ".join(day.isoformat() for day in missing[:20]),
+        )
+    return {"flagged": bool(missing), "missing_sessions": missing}
+
+
+def assert_benchmark_index_coverage() -> None:
+    missing = missing_benchmark_index_sessions()
+    if missing:
+        raise MissingIndexSessionsError(
+            f"{len(missing)} price sessions have no {BENCHMARK_INDEX_NAME} row: "
+            + ", ".join(day.isoformat() for day in missing[:20])
+        )
+
+
 def check_daily_pipeline_health() -> dict[str, Any]:
     latest_date = _latest_price_date()
     if latest_date is None:
@@ -404,6 +448,7 @@ def check_daily_pipeline_health() -> dict[str, Any]:
         ("sector_fundamental_baseline_freshness", _check_sector_fundamental_baseline_freshness),
         ("signal_call_extraction_liveness", _check_signal_call_extraction_liveness),
         ("trading_day_ingestion_gap", _check_trading_day_ingestion_gap),
+        ("benchmark_index_coverage", _check_benchmark_index_coverage),
     ):
         try:
             results[name] = check(latest_date)
@@ -428,3 +473,8 @@ def check_daily_pipeline_health() -> dict[str, Any]:
     )
 
     return summary
+
+
+if __name__ == "__main__":
+    assert_benchmark_index_coverage()
+    print(f"Every price session has a {BENCHMARK_INDEX_NAME} row")

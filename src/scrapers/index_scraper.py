@@ -85,13 +85,18 @@ def _fetch_page(
     return response.json()
 
 
-def get_index_history(index_name: str, years: int = 5) -> list[dict[str, Any]]:
+def get_index_history(
+    index_name: str,
+    years: float = 5,
+    start_date: date | None = None,
+    end_date: date | None = None,
+) -> list[dict[str, Any]]:
     index_id = INDEX_NAME_TO_ID.get(index_name)
     if index_id is None:
         raise ValueError(f"Unknown index name: {index_name}")
 
-    end_date = date.today()
-    start_date = end_date - timedelta(days=years * 365)
+    end_date = end_date or date.today()
+    start_date = start_date or end_date - timedelta(days=years * 365)
 
     rows: list[dict[str, Any]] = []
     offset = 0

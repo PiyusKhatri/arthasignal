@@ -20,6 +20,7 @@ def _patch_sources(monkeypatch, nepse_rows, sub_rows) -> list[dict]:
     monkeypatch.setattr(refresh.nepse_api, "get_nepse_index", lambda: nepse_rows)
     monkeypatch.setattr(refresh.sharesansar_scraper, "scrape_sub_indices", lambda: sub_rows)
     monkeypatch.setattr(refresh, "upsert_recent_market_index_rows", fake_upsert)
+    monkeypatch.setattr(refresh, "_recent_price_sessions", lambda count: [])
     return written
 
 

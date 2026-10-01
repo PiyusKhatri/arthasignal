@@ -12,7 +12,6 @@ Severity: **Critical** blocks trust in anything shown to users. **High** blocks 
 | D3 | High | Floorsheet history is 18 days | Pruning is stopped, but rows before 2026-08-31 were already deleted here. About 2,930 sessions since 2014 are missing |
 | D4 | High | Survivor-only universe | 152 of 184 delisted and 22 of 25 suspended equities have no prices |
 | D5 | High | Two databases have diverged | The calendar rebuild, signal-call re-grade and index repair were run on the local database only. The Supabase database rejects this machine's login, so its state is unknown and none of these repairs have been applied there |
-| D6 | Medium | Broad indices can go missing again | The four broad indices come only from the NEPSE API, which the code notes is blocked from non-Nepal IPs. When it fails, only the 13 sector series are stored. This is the likely cause of the 20 missing sessions, not verified. The refresh has no fallback to the public history source |
 | D7 | Medium | Index `open` is a placeholder for new broad-index rows | The NEPSE API gives high and low but no open, so the refresh writes `open = close` for the four broad indices. `repair_index_dates` corrects it from the public history when run |
 | D8 | Medium | `adjusted_close` missing on 23.5% of price rows | 63,896 of 271,863. Code that falls back to raw close mixes adjusted and unadjusted prices |
 | D9 | Medium | Non-equity rows in `daily_prices` since 2026-08-21 | About 45 mutual funds and 33 debentures a day. Any universe built without an instrument-type filter includes them |
@@ -26,7 +25,6 @@ Severity: **Critical** blocks trust in anything shown to users. **High** blocks 
 
 | # | Severity | Issue | Detail |
 | --- | --- | --- | --- |
-| P1 | High | Scheduled workflows are live on `main` with an unsettled database | The daily job needs a reachable `DATABASE_URL` secret (`TODOS.md`, production database topology). Whatever it reaches has not had today's repairs (D5) |
 | P2 | Medium | A change of trading week can stall ingestion | The first day of a newly traded weekday is classed as a weekend until prices for it arrive another way. NEPSE has changed its week twice in this data (2022 Fridays, April 2026) |
 | P3 | Medium | Missed price sessions are not detected | D1 went unnoticed for two months. Nothing compares stored price dates against the public index history |
 | P4 | Low | The test suite writes to the configured database | Each run of the auth integration test leaves a `ci-…@example.com` user; `users` holds 17 rows, several from tests |
@@ -71,4 +69,6 @@ Severity: **Critical** blocks trust in anything shown to users. **High** blocks 
 
 ## Fixed on 2026-10-01
 
+- P1: scheduled workflows now run only on manual dispatch; CI only on pull requests.
+- D6: the index refresh falls back to the public index history, and a data-quality check fails when any price session lacks a NEPSE Index row.
 - D1: 2026-07-27 prices backfilled (358 rows), calendar rebuilt, 494 signal calls re-graded.
