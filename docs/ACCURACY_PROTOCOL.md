@@ -1,146 +1,106 @@
-# Accuracy Protocol (Scorecard)
+# Accuracy Protocol (Scorecard) v2
 
-Protocol `accuracy-v1`, written on 2026-10-01 **before any scorecard result was computed**. It defines how every analysis or prediction the system makes is recorded, graded and judged, by horizon and by situation. The implementation lives in `src/scorecard/`. Constants live in `src/scorecard/spec.py`; changing any of them requires a new protocol version (`accuracy-v2`, …) and a new entry in this document. Results under one version are never re-graded under another without keeping both.
+Protocol `accuracy-v2`, adopted on 2026-10-02. It replaces `accuracy-v1` (`git show d3ec7f8:docs/ACCURACY_PROTOCOL.md`). Grades under v1 stay in the ledger with `grade_version = 'accuracy-v1'`, and v2 grades are inserted alongside as `'accuracy-v2'`. Neither is edited. Code: `src/scorecard/` (v2 rules in `src/scorecard/v2.py`).
 
-## 0. Scope and data
+## Changelog: why v2
 
-- **Development window for replay validation:** signal dates from 2014-06-01, with every price used (including exits) on or before **2025-01-19**. The repository holdout (2025-09-30 onward) is never read by replay. Live calls are graded only as their horizons mature.
-- **Prices:** raw `daily_prices` for equities, with explicit corporate-action handling (`src/backtest/event_study.build_panel`): on the ex-session (the first session on or after the book-close date), the cash dividend net of 5% tax on pre-bonus shares, then bonus shares, then rights subscribed at par 100.
-- **Replay versus live:** every call is stamped `mode = 'replay'` or `mode = 'live'`. Replay calls validate the machine and describe historical behaviour. **Only live calls, recorded before the entry session opens, count as evidence that a production model works.**
+The v1 baselines (`docs/SCORECARD_BASELINES.md`) showed the v1 gate measuring the wrong things:
 
-## 1. Horizons, entry, exit, costs, fills
-
-| Class | Horizons (sessions) | Calendar span |
+| v1 rule | What the no-edge replay showed | v2 rule |
 | --- | --- | --- |
-| Short | 5, 10, 20 | within about 1 month |
-| Mid | 40, 80, 120 | about 2-6 months |
-| Long | 160, 240 | about 6-12 months |
+| Absolute win rate ≥ 62% | A random stock is "correct" only 23-37% of the time. 62% would require +25 to +38 points of edge; perfect 20-session foresight reached only 55% at 80 sessions | **Edge over the same-date baseline ≥ +8 points**, with a clustered lower bound above zero |
+| Expectancy > 0 at all costs | Automatic for no-edge strategies at ≥ 20 sessions in a rising decade (+1.5% to +28%) | Kept as a necessary condition, **plus excess expectancy over the same-date universe mean > 0** at 1% cost |
+| Calibration against stated probability, default 0.5 | An honest no-edge strategy stating 0.5 fails calibration (true rate 24-37%) | **Calibration judged against the real baseline:** a stated probability must be calibrated (ECE ≤ 0.05) **and** have a Brier score no worse than the baseline forecast (the same-date baseline share). A call may state no probability; it is then graded on edge only and may not show a probability to users |
+| Brier kill rule "Brier > 0.25" | Can never fire for a 0.5 claimer (Brier is exactly 0.25) | **Kill when rolling Brier > rolling Brier of the baseline forecast** on the same calls (a test shows it fires) |
+| Failure causes by "any event in the window" | Beyond 40 sessions almost every window contains an event, so `news`/`circuit` absorbed 60-80% | **Magnitude decomposition:** market, sector and idiosyncratic components of the shortfall; event causes only when ≥ 50% of the idiosyncratic loss happened on event days |
+| Data errors ≤ 1% as a gate | Unrecorded corporate actions made 1.3-16% of windows "data errors" at ≥ 20 sessions | Unresolved price steps are detected and windows spanning them are **excluded** (`docs/PRICE_INTEGRITY.md`), counted and reported; a warning above 10% |
+| Sample: 150 calls, 60 dates | Silent on how many independent windows a horizon has | **Minimum independent windows per horizon** (below) |
 
-A call made with data up to the close of session *t* (the **signal session**):
+Unchanged from v1: horizons, entry and exit rules, costs, fills (unfilled and blocked counted wrong, never voided), the definition of a correct call per horizon class, situations, the look-ahead audit, folds and replay-versus-live.
 
-- **Entry:** from 2018-02-18 (the first session with real opening prices), at the **open of session *t*+1**. Before 2018-02-18 the stored open equals the previous close, so entry is at the **close of session *t*+1** and every price in that call is a close.
-- **Exit:** at the **open of session *t*+1+*h*** (the open after the horizon), or its close for calls entered before 2018-02-18. All session counts use the market session calendar (every date with at least one price row).
-- **Costs:** 0.5%, 1.0% and 1.5% round trip, subtracted from the gross return. **1.0% is primary** for the definition of a correct call.
-- **No buy on a locked upper circuit:** if the stock does not trade in the entry session, or every trade in it is at the upper limit (low ≥ previous close × (1 + limit − 0.5 pt); limit 10%, 15% from 2026-04-20), the call is **UNFILLED**. An unfilled call is graded **incorrect** with net return 0 and lowers coverage. It is never voided.
-- **Blocked sells count as losses:** if the stock does not trade in the exit session, or every trade in it is at the lower limit, the position is sold at the first later session where it trades without a lower lock (up to 20 sessions), otherwise at the last available price (**STRANDED**). Either way the call is graded **incorrect**, whatever the return, and the realized return enters expectancy. It is never voided.
-- **Data errors:** if the holding window contains a corrupt price step (a one-session move beyond the circuit limit + 2 points after corporate-action adjustment, usually an unrecorded split or bonus), the call is graded **DATA_ERROR**. These calls are counted and reported per strategy. If more than 1% of a cell's calls are data errors, the cell's verdict cannot be PASS.
-- **Not yet matured:** a call whose exit session is after the last available price is **PENDING**, not graded.
+## 1. Horizons, entry, exit, costs, fills (unchanged)
 
-## 2. What counts as a correct call
+Short 5/10/20, mid 40/80/120, long 160/240 sessions. Entry at the open of session *t*+1 from 2018-02-18, at the close of *t*+1 before. Exit at the open (close before 2018-02-18) of *t*+1+*h*. Costs 0.5/1.0/1.5% round trip, 1.0% primary. No buy when the entry session does not trade or every trade is at the upper limit (UNFILLED, graded wrong, return 0). A blocked or stranded sell is graded wrong at its realized return.
 
-Benchmarks use the **same-date universe**: every equity that traded in signal session *t*, graded with exactly the same entry, exit and fill rules (unfilled universe stocks are excluded from the medians and means, and blocked ones enter at their realized return).
+**New in v2: excluded windows.** A window whose entry-to-exit span contains an **unresolved price step** is marked `data_error` and excluded from every metric. An unresolved step is a move beyond the circuit band + 0.5 point that no recorded corporate action or ≥ 20-session halt explains, or where the recorded action does not reconcile the move (`src/backtest/price_integrity.py`). Exclusion counts are reported per cell.
 
-| Class | Correct (at 1.0% cost) |
-| --- | --- |
-| Short (5/10/20) | net return > 0 **and** gross return > same-date universe median gross return |
-| Mid (40/80/120) | net return > 0 **and** gross > universe median **and** gross > same-date median of the stock's sector (`companies.sector`) |
-| Long (160/240) | gross return > same-date equal-weight universe mean gross return. For strategies that rank at least 10 stocks on a date, also report the **top-minus-bottom quintile spread** of gross returns among the ranked stocks |
+## 2. Correct call (unchanged) and baselines
 
-Comparing gross against gross is the same as comparing net against net under a common cost.
+Short: net > 0 **and** gross > same-date universe median. Mid: also > same-date sector median. Long: gross > same-date universe mean (plus the top-minus-bottom spread when ≥ 10 scored calls exist on a date and the scores vary).
 
-**Baselines**, computed for every call from the same-date universe:
-
-- **Same-date random stock:** the share of universe stocks on that date that would be correct under the same definition. This is the baseline win rate; its mean over a cell's calls is the cell's baseline.
-- **Equal-weight universe:** mean gross return of the same-date universe.
-- **NEPSE buy-and-hold:** NEPSE Index over the same entry and exit sessions (open to open from 2018-02-18, close to close before).
+**Same-date baseline share** = the share of all universe stocks on that signal date that would be correct under the same rule and fills. It is stored with each grade and is both the benchmark for edge and the baseline probability forecast. NEPSE buy-and-hold over the same sessions is reported.
 
 ## 3. Metrics
 
-For every strategy version × horizon × situation cell:
+Per strategy version × horizon × situation cell:
+- calls and excluded windows;
+- graded calls, distinct dates and independent windows (cluster = ⌊signal-session index / (*h*+1)⌋);
+- win rate, baseline and **edge** (mean of correct − baseline share per call);
+- the edge's one-sided lower bound at 90% and at the penalized level α = 0.10 / *K*, with *K* = versions in the family × 104 cells, both computed on cluster means;
+- expectancy at the three costs, and excess expectancy over the universe mean at 1%;
+- calibration (Brier, baseline-forecast Brier, Brier skill, ECE, reliability buckets);
+- fold edges and failure-cause shares.
 
-- **Calls; filled share (coverage);** unfilled, blocked, stranded, data-error and pending counts.
-- **Net win rate** (correct / graded) and **baseline win rate**; **edge** = win rate − baseline (percentage points).
-- **Expectancy** at 0.5/1.0/1.5%: mean net return per graded call (unfilled = 0). Also excess over the equal-weight universe and over NEPSE.
-- **Brier score** of the call's stated probability of being correct (`probability`; a strategy that states none is recorded at 0.5) against the outcome. **Reliability buckets:** deciles of stated probability, each with calls, mean stated probability and observed win rate. **Calibration error (ECE)** = call-weighted mean |stated − observed| over buckets with ≥ 30 calls.
-- **Clustered intervals:** calls are clustered into **non-overlapping windows of the horizon**: cluster = ⌊signal-session index / (*h*+1)⌋. Windows that share no holding sessions are treated as independent. The win rate's one-sided lower bound uses the mean and standard error of cluster means (`src/backtest/stats.clustered_mean_interval`). Many calls in one window count as roughly one observation of that window.
-- **Distinct dates** and **independent windows** per cell.
-- **Multiple testing:** each strategy version is registered in `backtest_variant_trials` (family `scorecard_accuracy_v1`). The penalty uses *K* = (strategy versions registered in the family) × (matrix cells evaluated per version); the one-sided level is α = 0.10 / *K*. The plain 90% bound is reported next to it.
+## 4. Gate (PASS needs all of these)
 
-### Power table, 2014-06-01 to 2025-01-19 (2,435 sessions)
+1. **Edge ≥ +8 points.**
+2. **Edge lower bound > 0**, at both the plain one-sided 90% level and the penalized level.
+3. **Expectancy > 0 at 0.5%, 1.0% and 1.5%**, and **excess expectancy over the same-date universe mean > 0 at 1.0%**.
+4. **Edge > 0 in at least 3 of the 4 time folds** (4 equal blocks of signal sessions).
+5. **Sample:** ≥ 150 graded calls, ≥ 60 distinct signal dates, and at least the independent windows below.
+6. **Calibration:** if probabilities are stated, ECE ≤ 0.05, |mean stated − observed| ≤ 0.05 and Brier ≤ the baseline-forecast Brier. If none are stated, this gate is passed, but the cell is marked "uncalibrated" and no probability may be shown to users.
+7. **Look-ahead audit passed** for the strategy version.
 
-Independent windows = ⌊2,435 / (*h*+1)⌋. The required count is the worst case of one call per window (Bernoulli). With many calls per window the cluster SE can be smaller, but it cannot be relied on, because stocks in the same window move together.
+Verdicts: **INSUFFICIENT SAMPLE** when gate 5 fails, **PASS** when all pass, **NO EVIDENCE** otherwise.
 
-| Horizon | Independent windows | Prove 60% vs 50% (90% one-sided, needs 39) | Gate: 62% with lower bound ≥ 55% (needs 79) | Prove 60% with lower bound ≥ 55% (needs 158) | Gate with the 104-cell penalty (α = 0.10/104, z = 3.10, needs 463) |
-| ---: | ---: | :-: | :-: | :-: | :-: |
-| 5 | 405 | yes | yes | yes | **no** |
-| 10 | 221 | yes | yes | yes | no |
-| 20 | 115 | yes | yes | **no** | no |
-| 40 | 59 | yes | **no** | no | no |
-| 80 | 30 | **no** | no | no | no |
-| 120 | 20 | no | no | no | no |
-| 160 | 15 | no | no | no | no |
-| 240 | 10 | no | no | no | no |
+### Minimum independent windows, and which horizons can ever support a claim (2014-06-01 to 2025-01-19, 2,435 sessions)
 
-**Plainly:** over this 10.6-year window a "60% accurate" claim can be supported against a coin flip only at horizons of 5-40 sessions, and with the gate's 55% lower bound only at 5, 10 and 20 sessions. **At 80 sessions and beyond, no amount of cross-sectional calls in this history can prove 60%**, because there are only 30 or fewer independent windows. If all 104 cells are tested, the penalty pushes the requirement to 463 windows, more than any horizon has, so a PASS needs either far fewer cells tested or live data accumulating over years. Sub-cells (situations) have fewer windows still.
+| Horizon | Windows in history | Minimum required | Can a claim ever be supported? |
+| ---: | ---: | ---: | --- |
+| 5 | 405 | 40 | yes |
+| 10 | 221 | 40 | yes |
+| 20 | 115 | 40 | yes |
+| 40 | 59 | 30 | yes, if calls fall in at least half the windows |
+| 80 | 30 | 25 | barely: calls are needed in 25 of the 30 windows |
+| 120 | 20 | 25 | **no** |
+| 160 | 15 | 25 | **no** |
+| 240 | 10 | 25 | **no** |
 
-## 4. Horizon × situation matrix
+**Plainly: no claim at 120, 160 or 240 sessions can be supported by this history.** At 80 sessions a claim is possible only for a strategy active in nearly every window. Long-horizon claims need years of live data. Situation cells have the same or fewer windows.
 
-Situations are labelled for each call **only from data available at the close of the signal session *t*** (event-table definitions in `src/backtest/event_tables.py`, label code in `src/scorecard/situations.py`). A call can carry several labels. `all` is always present.
+## 5. Monitoring, kill criteria, failure causes
 
-| Situation | Label | Definition at close of *t* |
-| --- | --- | --- |
-| Market state | `market_bull` | NEPSE close > its 200-session SMA, 50-session SMA > 200-session SMA, and not overheated |
-| | `market_overheated` | NEPSE close ≥ 1.20 × 200-session SMA |
-| | `market_bear` | NEPSE close < 200-session SMA and 50-session SMA < 200-session SMA |
-| | `market_sideways` | the 200-session SMA exists and none of the above |
-| Book-close proximity | `pre_book_close` | the stock has a book-close ex-session in *t*+1 … *t*+15 (assumes the date was announced by *t*; announcement dates are not stored, see `docs/DATA_PLAN.md`) |
-| | `post_book_close` | a book-close ex-session in *t*−9 … *t* |
-| New listing | `new_listing` | the stock's first price is within the last 60 sessions, after 2014-07-01, and the symbol is not the product of a merger |
-| Circuit-lock aftermath | `post_upper_circuit` | an upper-limit close streak of ≥ 2 sessions that ended within *t*−9 … *t* |
-| | `post_lower_circuit` | a lower-limit close in *t*−4 … *t* |
-| Volume anomaly | `volume_anomaly` | volume in *t* ≥ 5 × median of the previous 60 sessions (≥ 40 traded) |
-| Interest-rate change | `rate_rising` / `rate_falling` | the last published T-bill rate (45-day publication lag, from 2016-11-03) differs from the value known 60 sessions earlier by ≥ +1.0 / ≤ −1.0 point. NRB policy-rate announcements are not yet stored; this is a proxy until `policy_events` exists |
+Rolling, over the last 60 matured calls at monitoring points every 20 sessions:
+- edge and its plain lower bound;
+- excess expectancy over the universe at 1% and its upper bound;
+- Brier against the baseline-forecast Brier, on calls with stated probabilities.
 
-Each cell (strategy version × horizon × situation) reports: calls, distinct dates, independent windows, net win rate, baseline, edge, one-sided 90% and penalized lower bounds, expectancy at three costs, excess over the universe and over NEPSE, Brier, ECE, fold signs and a **verdict**:
+**Suspend** a version × horizon when any of these holds:
+- the edge lower bound is < 0 at two consecutive points;
+- excess expectancy < 0 with an upper bound < 0;
+- rolling Brier > rolling baseline-forecast Brier;
+- the audit fails.
 
-- **PASS** only if **all** of the following hold:
-  1. Net win rate (1.0% cost) ≥ **62%**.
-  2. One-sided lower bound on the win rate at the penalized level (α = 0.10/*K*) ≥ **55%**. The plain 90% bound must also be ≥ 55%.
-  3. Edge over the same-date random-stock baseline ≥ **8 points**.
-  4. Expectancy **> 0 at 0.5%, 1.0% and 1.5%**.
-  5. Edge > 0 in **at least 3 of the 4 time folds** (4 equal blocks of signal sessions; a fold with no calls counts as not positive).
-  6. **≥ 150 graded calls on ≥ 60 distinct signal dates.**
-  7. Calibration within tolerance: ECE ≤ **0.05** and |mean stated probability − observed win rate| ≤ **0.05** over the cell.
-  8. Data errors ≤ 1% of calls, and the look-ahead audit (section 5) passed for this strategy version.
-- **INSUFFICIENT SAMPLE** if fewer than 150 graded calls or fewer than 60 distinct dates. Below that, the cell cannot pass whatever its numbers.
-- **NO EVIDENCE** otherwise.
+A suspended version returns only as a new version.
 
-## 5. Look-ahead audit, rolling monitoring, kill criteria, refine loop
+**Failure causes (wrong graded calls), in order:**
 
-**Look-ahead audit (every strategy version, before any verdict).** For a fixed sample of 40 signal dates, the strategy is re-run on a copy of the data with everything after the close of *t* removed. Its calls must be identical to the calls it made with the full data. Any difference marks the version **LEAKY**: all its cells are blocked from PASS and the report says so. Separately, any cell with a win rate ≥ 80% and ≥ 150 calls is flagged **IMPLAUSIBLE** for manual review.
+- `liquidity`: unfilled, blocked or stranded.
 
-**Rolling monitoring (live mode; also shown for replay).** Per strategy version and horizon, over the most recent 60 graded calls and the most recent 120 signal sessions:
+Otherwise the shortfall is decomposed in log terms into three components:
+- market: the same-date universe mean, if negative;
+- sector: the sector median − universe median, if negative;
+- idiosyncratic: the stock − sector median, if negative.
 
-- edge over baseline with its plain 90% lower bound;
-- expectancy at 1.0%;
-- Brier score against the always-0.5 score of 0.25.
+The cause is the most negative component:
+- `market`, or
+- `sector`, or, for the idiosyncratic component:
+  - `circuit` if at least half of it happened on the stock's lower-limit-close days inside the window;
+  - `news` if at least half happened on corporate-action or volume-spike (≥ 5×) days;
+  - `model` otherwise.
 
-**Kill criteria.** A strategy version × horizon is **suspended** (no new user-facing calls) when any of these holds:
+A call that is wrong with no negative component, such as a small gain below the cost or median threshold, is `model`.
 
-1. Rolling edge lower bound < 0 for two consecutive monitoring points 20 sessions apart.
-2. Rolling expectancy at 1.0% < 0 with an upper bound < 0.
-3. Rolling Brier > 0.25 (worse than claiming nothing) over ≥ 60 graded calls.
-4. The look-ahead audit fails, or data errors exceed 1%.
+## 6. What this protocol forbids (unchanged)
 
-A suspended version can come back only as a new version, registered as a new variant.
-
-**Refine loop: failure causes for wrong calls.** Every incorrect graded call gets exactly one cause, in this priority order:
-
-| Cause | Rule |
-| --- | --- |
-| `liquidity` | unfilled, blocked exit or stranded |
-| `circuit` | a lower-limit close inside the holding window |
-| `news` | a corporate-action ex-session or a volume ≥ 5× its 60-session median inside the holding window (a proxy until text data exists) |
-| `market` | the same-date universe mean return < 0 and the stock's gross return ≥ universe mean − 2 points (it fell with the market) |
-| `sector` | the sector median < the universe median and the stock's gross return ≥ sector median − 2 points |
-| `model` | none of the above |
-
-The refine loop reads the cause mix per cell. A model change may target only a cause share that is materially larger than the same cause share for the no-edge baselines in the same cell (`docs/SCORECARD_BASELINES.md`), and every change is a new version.
-
-## 6. What this protocol forbids
-
-- Re-grading or editing a call: the ledger rejects UPDATE and DELETE at the database level, and a new grading version inserts new rows.
-- Calling a replay PASS a production result.
-- Dropping blocked, stranded or unfilled calls.
-- Changing horizons, the correctness definitions, gates, situations or costs without a new protocol version.
-- Training a predictive model inside this machine.
+Editing or deleting ledger rows; calling a replay PASS a production result; dropping blocked, stranded or unfilled calls; changing rules without a new version; training a predictive model inside this machine; reading the holdout (2025-09-30 onward) for any evaluation.

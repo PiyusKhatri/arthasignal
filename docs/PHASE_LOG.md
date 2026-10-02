@@ -210,3 +210,15 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - Windows spanning an unresolved step are excluded from every horizon. Universe exclusion 2014-06 to 2025-01-19: 0.15% (5 sessions), 0.27%, 0.48%, 0.91%, 1.73%, 2.51%, 3.24%, 4.67% (240), against 0.4-9.7% in the v1 replay before recovery.
 - Loud check: `python -m src.backtest.price_integrity --check` exited 1 on real data (6 unresolved steps in the last 60 sessions to 2025-09-29). The daily health check `unresolved_price_steps` makes `run_all_daily` alert and raise `UnresolvedPriceStepsError`.
 - Tests: `tests/test_price_integrity.py` (10) and a scorecard exclusion test. Report: `docs/PRICE_INTEGRITY.md`. Earlier studies used pre-recovery prices and were not rerun.
+
+## Phase P2 - Accuracy protocol v2
+
+- `docs/ACCURACY_PROTOCOL.md` was rewritten as `accuracy-v2`, with a changelog; v1 stays in git (d3ec7f8). The changes:
+  - the gate is edge over the same-date baseline (≥ +8 points, clustered lower bound > 0 at plain and penalized levels), expectancy > 0 at all three costs plus excess expectancy over the universe, ≥ 3 of 4 folds positive, and minimum calls, dates and independent windows per horizon;
+  - calibration is judged against the baseline forecast, and a call may state no probability;
+  - the Brier kill compares with the baseline-forecast Brier;
+  - failure causes come from a magnitude decomposition (market / sector / idiosyncratic, with an event share);
+  - windows spanning unresolved price steps are excluded.
+- Plainly stated: 120, 160 and 240 sessions can never support a claim with 2014-2025 data (20, 15 and 10 windows against a minimum of 25); 80 sessions needs calls in 25 of its 30 windows.
+- `src/scorecard/v2.py` and `replay_v2.py`; the ledger allows a NULL probability, and COPY now clears the inherited statement timeout (a regrade first failed on it and wrote nothing). Tests: `tests/test_scorecard_v2.py` (7): the edge gate, excess expectancy, calibration against the baseline, the Brier kill firing, long-horizon causes including event attribution, the window minimums, and the rounding guard.
+- Rerun under v2 on the corrected data: random, equal-weight, momentum and leaky each get 49 NO EVIDENCE and 55 INSUFFICIENT SAMPLE cells; none passes. The leaky strategy is caught by the audit, which is the only gate that stops it at 80 sessions. Backend suite 462 passed.

@@ -43,6 +43,7 @@ def _copy(engine: Engine, table: str, columns: Sequence[str], rows: Iterable[Seq
     raw = engine.raw_connection()
     try:
         with raw.cursor() as cursor:
+            cursor.execute("SET statement_timeout = 0")
             cursor.copy_expert(
                 f"COPY {schema}.{table} ({', '.join(columns)}) FROM STDIN WITH (FORMAT csv, NULL '')", buffer
             )

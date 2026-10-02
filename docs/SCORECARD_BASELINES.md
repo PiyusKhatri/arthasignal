@@ -128,3 +128,28 @@ The machine behaves as designed on known answers:
 - a strategy that sees the future scores impossibly well and is stopped by the audit.
 
 Real models should be judged at 5-20 sessions first. Mid and long horizons need the corporate-action data for delisted symbols (and live time) before any verdict there can mean anything.
+
+## Protocol v2 rerun (2026-10-02)
+
+Same four strategies and the same immutable calls, regraded under `accuracy-v2` (`python -m src.scorecard.replay_v2`, raw output `docs/scorecard_baselines_v2.json`) on the corrected data (`docs/PRICE_INTEGRITY.md`): 1,012 recovered corporate actions, and windows spanning the 187 unresolved step sessions excluded. v1 grades are kept; v2 added 3,684,963 grade rows with `grade_version = 'accuracy-v2'`.
+
+**No cell passes for any strategy.** Each strategy has 49 NO EVIDENCE and 55 INSUFFICIENT SAMPLE cells. The INSUFFICIENT cells are all 39 cells at 120/160/240 sessions plus 16 sparse situation cells. The leaky strategy is caught by the look-ahead audit (40/40 dates mismatched).
+
+| Strategy (situation = all) | 5 | 10 | 20 | 40 | 80 |
+| --- | --- | --- | --- | --- | --- |
+| Random: edge / penalized lower bound | +0.4 / −0.5 pt | +0.1 / −0.8 | −0.2 / −1.1 | 0.0 / −0.9 | −0.3 / −1.5 |
+| Equal-weight: edge / excess expectancy at 1% | 0.0 / −0.97% | 0.0 / −0.97% | 0.0 / −0.97% | 0.0 / −0.97% | 0.0 / −0.96% |
+| Momentum: edge / penalized lower bound / excess expectancy | +1.8 / −0.3 / +0.17% | +1.5 / −1.3 / +1.12% | +1.4 / −2.4 / +2.28% | +0.7 / −2.9 / +2.74% | −0.3 / −5.3 / +2.69% |
+| Leaky: edge / penalized lower bound | +26.4 / +24.1 | +36.7 / +33.7 | +49.7 / +45.7 | +42.5 / +36.6 | +30.4 / +23.9 |
+
+Gates that block each strategy:
+- **Random and equal-weight:** edge, lower bound, excess expectancy and calibration (they state 0.5).
+- **Momentum:** the 8-point edge and the penalized lower bound. Its excess expectancy is positive, so momentum stocks beat the universe on average return, but not on the share of calls that are right.
+- **Leaky:** at 5-40 sessions, calibration and the audit. **At 80 sessions only the audit blocks it**, because its stated 0.5 happens to be within 5 points of its 54.7% win rate and its Brier (0.25) beats the baseline forecast (0.31). The audit is the only reliable guard against look-ahead.
+
+What v2 fixed, checked on these runs:
+- **The Brier kill fires for a miscalibrated claim:** 97-112 of 109-116 monitoring points for random and 77-99 for momentum. For the leaky strategy only 7-33 points flag, because its outcomes are far from the baseline.
+- **Failure causes stay informative at long horizons.** For the equal-weight universe at 160 and 240 sessions: sector 32%, liquidity 22-25%, model 21-25%, market 16%, circuit 4-5%, news 0.2-0.5%. Under v1, news and circuit were 60-80%.
+- **Exclusions are small:** universe windows excluded for unresolved steps are 0.15% (5), 0.27%, 0.48%, 0.91%, 1.73%, 2.51%, 3.24%, 4.67% (240).
+
+Found and fixed in v2: for the equal-weight universe the edge is exactly 0, but floating-point rounding let the "edge lower bound > 0" gate pass at 40 sessions. The gate now requires > 1e-9 (test added). The verdicts were unaffected, since the 8-point gate failed anyway.

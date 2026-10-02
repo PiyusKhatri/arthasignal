@@ -54,6 +54,18 @@ CREATE TABLE IF NOT EXISTS {schema}.scorecard_grades (
 
 CREATE INDEX IF NOT EXISTS ix_scorecard_grades_call ON {schema}.scorecard_grades (call_id);
 
+CREATE TABLE IF NOT EXISTS {schema}.scorecard_models (
+    id              BIGSERIAL PRIMARY KEY,
+    model_name      VARCHAR(80) NOT NULL,
+    model_version   VARCHAR(80) NOT NULL,
+    description     TEXT NOT NULL,
+    parameters      JSONB NOT NULL,
+    parameters_hash CHAR(64) NOT NULL,
+    code_commit     VARCHAR(40) NOT NULL,
+    registered_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (model_name, model_version)
+);
+
 CREATE OR REPLACE FUNCTION {schema}.scorecard_reject_change() RETURNS trigger AS $$
 BEGIN
     RAISE EXCEPTION 'scorecard ledger is append-only: % on % rejected', TG_OP, TG_TABLE_NAME;
@@ -65,6 +77,13 @@ CREATE TRIGGER scorecard_calls_immutable BEFORE UPDATE OR DELETE ON {schema}.sco
     FOR EACH ROW EXECUTE FUNCTION {schema}.scorecard_reject_change();
 DROP TRIGGER IF EXISTS scorecard_calls_no_truncate ON {schema}.scorecard_calls;
 CREATE TRIGGER scorecard_calls_no_truncate BEFORE TRUNCATE ON {schema}.scorecard_calls
+    FOR EACH STATEMENT EXECUTE FUNCTION {schema}.scorecard_reject_change();
+
+DROP TRIGGER IF EXISTS scorecard_models_immutable ON {schema}.scorecard_models;
+CREATE TRIGGER scorecard_models_immutable BEFORE UPDATE OR DELETE ON {schema}.scorecard_models
+    FOR EACH ROW EXECUTE FUNCTION {schema}.scorecard_reject_change();
+DROP TRIGGER IF EXISTS scorecard_models_no_truncate ON {schema}.scorecard_models;
+CREATE TRIGGER scorecard_models_no_truncate BEFORE TRUNCATE ON {schema}.scorecard_models
     FOR EACH STATEMENT EXECUTE FUNCTION {schema}.scorecard_reject_change();
 
 DROP TRIGGER IF EXISTS scorecard_grades_immutable ON {schema}.scorecard_grades;

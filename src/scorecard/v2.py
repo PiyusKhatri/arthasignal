@@ -30,6 +30,7 @@ MIN_WINDOWS = {5: 40, 10: 40, 20: 40, 40: 30, 80: 25, 120: 25, 160: 25, 240: 25}
 EXCLUSION_WARNING = 0.10
 EVENT_SHARE = 0.5
 TOTAL_SESSIONS_2014_2025 = 2435
+LOWER_BOUND_EPSILON = 1e-9
 
 
 def supportable_horizons(sessions: int = TOTAL_SESSIONS_2014_2025) -> dict[int, dict[str, Any]]:
@@ -160,7 +161,10 @@ def cell_metrics_v2(
     edge_value = float(diff.mean())
     gates = {
         "edge_8_points": edge_value >= GATE_EDGE,
-        "edge_lower_bound_above_zero": (lower_plain or -1) > 0 and (lower_penalized or -1) > 0,
+        "edge_lower_bound_above_zero": (
+            lower_plain is not None and lower_penalized is not None
+            and lower_plain > LOWER_BOUND_EPSILON and lower_penalized > LOWER_BOUND_EPSILON
+        ),
         "expectancy_all_costs": all(v > 0 for v in expectancy.values()),
         "excess_expectancy_1pct": excess_expectancy > 0,
         "folds": folds_positive >= spec.GATE_FOLDS_POSITIVE,
