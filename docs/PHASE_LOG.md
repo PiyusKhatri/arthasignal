@@ -234,3 +234,11 @@ The backfill uses the Sharesansar daily page because it is the only source that 
   It is registered in the new append-only `scorecard_models` table (id 1, parameters hash `46ba8c8c…`, commit c3f800c) and as variant 70. Registration is idempotent.
 - `python -m src.scorecard.daily` computes the day's v0 calls from data up to that close, writes them as `live` calls (model version, feature hash, situations) with ON CONFLICT DO NOTHING under an advisory lock, refuses after 11:00 NPT the next day (exit 2; the database CHECK also rejects late rows), and grades matured live calls under v2. Cron line documented in `docs/LIVE_LEDGER.md`, not installed.
 - Dry run for 2025-01-16 (before the holdout): market bull, 10 calls with hashes, nothing written, and a live write would have been refused. A non-session date exits 3. Tests: `tests/test_scorecard_daily.py` (6). No live rows were written.
+
+## Phase P4 - Situation matrix v2 on corrected data
+
+- Model v0 was replayed day by day over 2014-06-01 to 2025-01-19 into the ledger as replay calls (20,944 calls, 160,478 v2 grades; look-ahead audit 0/40 mismatches) and its 13 × 8 matrix built under `accuracy-v2` on the corrected data. Report: `docs/MATRIX_V2.md`; raw output: `docs/matrix_v2.json`.
+- **Nothing passed:** 0 PASS, 38 NO EVIDENCE, 66 INSUFFICIENT SAMPLE. 120-240 sessions cannot support a claim; 80 meets its window minimum exactly.
+- v0 overall: edge +1.9 to +2.1 points at 5-40 sessions (plain 90% bound +0.3 to +0.8, penalized −0.8 to −2.2), with positive excess expectancy over the universe (+0.4% to +3.7%). That is far from the 8-point gate and about the same as simple momentum.
+- Closest cell: `new_listing` at 40 sessions, edge +8.75 points, plain bound +1.1, 4/4 folds, excess +13.6%. It fails only the penalized bound (−6.4, *K* = 520), and the effect had already been seen post hoc, so it is not a pass. It is the one candidate worth stating in advance for live tracking. `post_lower_circuit` is −3 to −11 points, a weakness in v0's momentum ranking, noted and not acted on.
+- Backend suite 461 passed.
