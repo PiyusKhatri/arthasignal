@@ -1,0 +1,77 @@
+{
+ "unresolved_steps_in_dev_window": 187,
+ "symbols": 107,
+ "by_kind": {
+  "resolved_by_action": 806,
+  "halt_resumption": 180,
+  "unresolved": 96,
+  "action_mismatch": 51,
+  "adjustment_overshoot": 40
+ },
+ "per_horizon": {
+  "5": {
+   "windows_before_exclusion": 410170,
+   "excluded_unresolved_steps": 623,
+   "after_exclusion": 409547,
+   "excluded_share": 0.0015,
+   "v1_rule_excluded": 433,
+   "v1_share": 0.0011
+  },
+  "10": {
+   "windows_before_exclusion": 408929,
+   "excluded_unresolved_steps": 1099,
+   "after_exclusion": 407830,
+   "excluded_share": 0.0027,
+   "v1_rule_excluded": 750,
+   "v1_share": 0.0018
+  },
+  "20": {
+   "windows_before_exclusion": 406437,
+   "excluded_unresolved_steps": 1967,
+   "after_exclusion": 404470,
+   "excluded_share": 0.0048,
+   "v1_rule_excluded": 1320,
+   "v1_share": 0.0032
+  },
+  "40": {
+   "windows_before_exclusion": 401449,
+   "excluded_unresolved_steps": 3649,
+   "after_exclusion": 397800,
+   "excluded_share": 0.0091,
+   "v1_rule_excluded": 2440,
+   "v1_share": 0.0061
+  },
+  "80": {
+   "windows_before_exclusion": 391481,
+   "excluded_unresolved_steps": 6766,
+   "after_exclusion": 384715,
+   "excluded_share": 0.0173,
+   "v1_rule_excluded": 4542,
+   "v1_share": 0.0116
+  },
+  "120": {
+   "windows_before_exclusion": 381543,
+   "excluded_unresolved_steps": 9594,
+   "after_exclusion": 371949,
+   "excluded_share": 0.0251,
+   "v1_rule_excluded": 6374,
+   "v1_share": 0.0167
+  },
+  "160": {
+   "windows_before_exclusion": 371485,
+   "excluded_unresolved_steps": 12051,
+   "after_exclusion": 359434,
+   "excluded_share": 0.0324,
+   "v1_rule_excluded": 8017,
+   "v1_share": 0.0216
+  },
+  "240": {
+   "windows_before_exclusion": 351409,
+   "excluded_unresolved_steps": 16395,
+   "after_exclusion": 335014,
+   "excluded_share": 0.0467,
+   "v1_rule_excluded": 10770,
+   "v1_share": 0.0306
+  }
+ }
+}

@@ -14,7 +14,7 @@ from src.pipeline.backup_to_drive import run_backup
 from src.pipeline.check_alerts import check_signal_alerts
 from src.pipeline.cleanup_intraday_tables import run_intraday_table_cleanup
 from src.pipeline.compute_liquidity_tiers import compute_liquidity_tiers
-from src.pipeline.data_quality import MissingIndexSessionsError, check_daily_pipeline_health
+from src.pipeline.data_quality import MissingIndexSessionsError, UnresolvedPriceStepsError, check_daily_pipeline_health
 from src.pipeline.extract_signal_calls import extract_signal_calls
 from src.pipeline.grade_signal_calls import grade_signal_calls
 from src.pipeline.refresh_ipo_status import refresh_ipo_status
@@ -250,6 +250,15 @@ def run_all_daily() -> dict[str, Any]:
 
     if index_coverage.get("flagged") or index_coverage.get("error"):
         raise MissingIndexSessionsError("price sessions without a NEPSE Index row; see data_quality log")
+
+    price_steps = quality_summary.get("results", {}).get("unresolved_price_steps", {})
+    if price_steps.get("flagged") or price_steps.get("error"):
+        send_discord_alert(
+            "UNRESOLVED PRICE STEPS: moves beyond the circuit band with no recorded corporate action\n"
+            + "\n".join(f"{r['symbol']} {r['date']} {float(r['raw_move']):+.1%}" for r in price_steps.get("steps", [])[:20]),
+            severity="failure",
+        )
+        raise UnresolvedPriceStepsError("unresolved price steps in recent sessions; see data_quality log")
 
     return {
         "gap_summary": gap_summary,

@@ -56,7 +56,9 @@ def volume_spikes(panel: es.Panel) -> np.ndarray:
         return np.nan_to_num(ratio, nan=0.0) >= spec.VOLUME_RATIO
 
 
-def build_market(panel: es.Panel, actions: pd.DataFrame, index: pd.DataFrame) -> Market:
+def build_market(
+    panel: es.Panel, actions: pd.DataFrame, index: pd.DataFrame, unresolved: np.ndarray | None = None
+) -> Market:
     sessions = panel.sessions
     shape = panel.close.shape
     traded = ~np.isnan(panel.close)
@@ -99,7 +101,7 @@ def build_market(panel: es.Panel, actions: pd.DataFrame, index: pd.DataFrame) ->
                 wealth *= 1 + ret
             w_close[r, c] = wealth
     w_close = pd.DataFrame(w_close.T).ffill().to_numpy().T
-    poison = np.cumsum(panel.corrupt | corrupt_open, axis=1)
+    poison = np.cumsum(panel.corrupt | corrupt_open if unresolved is None else unresolved, axis=1)
     sectors = [s if s else "unknown" for s in panel.sector]
     names = tuple(sorted(set(sectors)))
     code = np.array([names.index(s) for s in sectors])
@@ -276,8 +278,11 @@ def grade_calls(
     cubes: Mapping[int, Cube],
     calls: pd.DataFrame,
     cumulative: Mapping[str, np.ndarray] | None = None,
+    causes_fn=None,
+    grade_version: str = spec.GRADE_VERSION,
 ) -> pd.DataFrame:
     cumulative = cumulative_flags(market) if cumulative is None else cumulative
+    causes_fn = failure_causes if causes_fn is None else causes_fn
     session_index = {day: i for i, day in enumerate(market.sessions)}
     rows = calls["symbol"].map(market.panel.row)
     cols = calls["signal_date"].map(session_index)
@@ -289,7 +294,7 @@ def grade_calls(
         if len(unknown):
             frames.append(
                 pd.DataFrame(
-                    {"call_id": unknown["call_id"].to_numpy(), "grade_version": spec.GRADE_VERSION, "horizon": horizon,
+                    {"call_id": unknown["call_id"].to_numpy(), "grade_version": grade_version, "horizon": horizon,
                      "horizon_class": spec.horizon_class(horizon), "status": spec.STATUS_UNFILLED, "entry_rule": None,
                      "entry_date": None, "exit_date": None, "gross_return": np.nan, "universe_median": np.nan,
                      "universe_mean": np.nan, "sector_median": np.nan, "nepse_return": np.nan,
@@ -307,7 +312,7 @@ def grade_calls(
             pd.DataFrame(
                 {
                     "call_id": ids,
-                    "grade_version": spec.GRADE_VERSION,
+                    "grade_version": grade_version,
                     "horizon": horizon,
                     "horizon_class": spec.horizon_class(horizon),
                     "status": np.array(spec.STATUSES, dtype=object)[status],
@@ -321,8 +326,15 @@ def grade_calls(
                     "nepse_return": cube.nepse[t],
                     "baseline_share": cube.baseline_share[t],
                     "correct": cube.correct[r, t],
-                    "failure_cause": failure_causes(market, cube, r, t, cumulative),
+                    "failure_cause": causes_fn(market, cube, r, t, cumulative),
                 }
             )
         )
     return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+
+
+def unresolved_steps_mask(prices: pd.DataFrame, actions: pd.DataFrame, panel: es.Panel) -> tuple[np.ndarray, pd.DataFrame]:
+    from src.backtest.price_integrity import detect_steps, unresolved_mask
+
+    steps = detect_steps(prices, actions, panel.sessions)
+    return unresolved_mask(steps, panel.symbols, len(panel.sessions)), steps

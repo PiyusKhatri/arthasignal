@@ -63,7 +63,8 @@ def record_calls(engine: Engine, calls: pd.DataFrame, schema: str = "public") ->
     rows = (
         (
             r.call_uid, r.mode, r.strategy, r.model_version, r.feature_hash, r.batch_id, r.symbol,
-            r.signal_date.isoformat(), f"{float(r.probability):.5f}",
+            r.signal_date.isoformat(),
+            None if r.probability is None or pd.isna(r.probability) else f"{float(r.probability):.5f}",
             None if r.score is None or pd.isna(r.score) else float(r.score),
             _pg_array(list(r.situations)),
         )
@@ -98,7 +99,12 @@ def load_calls(engine: Engine, strategy: str | None = None, schema: str = "publi
 
 
 def load_graded(
-    engine: Engine, strategy: str, model_version: str, schema: str = "public", horizon: int | None = None
+    engine: Engine,
+    strategy: str,
+    model_version: str,
+    schema: str = "public",
+    horizon: int | None = None,
+    grade_version: str = spec.GRADE_VERSION,
 ) -> pd.DataFrame:
     query = f"""
         SELECT c.id AS call_id, c.mode, c.strategy, c.model_version, c.symbol, c.signal_date, c.probability,
@@ -109,13 +115,13 @@ def load_graded(
         JOIN {schema}.scorecard_grades g ON g.call_id = c.id AND g.grade_version = :grade_version
         WHERE c.strategy = :strategy AND c.model_version = :model_version
     """
-    params: dict[str, Any] = {"strategy": strategy, "model_version": model_version, "grade_version": spec.GRADE_VERSION}
+    params: dict[str, Any] = {"strategy": strategy, "model_version": model_version, "grade_version": grade_version}
     if horizon is not None:
         query += " AND g.horizon = :horizon"
         params["horizon"] = horizon
     with engine.connect() as connection:
         frame = pd.read_sql(text(query), connection, params=params)
-    frame["probability"] = frame["probability"].astype(float)
+    frame["probability"] = pd.to_numeric(frame["probability"], errors="coerce")
     return frame
 
 
@@ -128,13 +134,15 @@ def call_ids(engine: Engine, uids: Sequence[str], schema: str = "public") -> dic
     return {uid: int(i) for uid, i in rows}
 
 
-def graded_call_ids(engine: Engine, strategy: str, model_version: str, schema: str = "public") -> set[tuple[int, int]]:
+def graded_call_ids(
+    engine: Engine, strategy: str, model_version: str, schema: str = "public", grade_version: str = spec.GRADE_VERSION
+) -> set[tuple[int, int]]:
     with engine.connect() as connection:
         rows = connection.execute(
             text(
                 f"SELECT g.call_id, g.horizon FROM {schema}.scorecard_grades g JOIN {schema}.scorecard_calls c "
                 "ON c.id = g.call_id WHERE c.strategy = :s AND c.model_version = :m AND g.grade_version = :v"
             ),
-            {"s": strategy, "m": model_version, "v": spec.GRADE_VERSION},
+            {"s": strategy, "m": model_version, "v": grade_version},
         ).all()
     return {(int(a), int(b)) for a, b in rows}

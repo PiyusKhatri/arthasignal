@@ -201,3 +201,12 @@ The backfill uses the Sharesansar daily page because it is the only source that 
   - stated 0.5 probabilities are miscalibrated against 24-37% baselines;
   - the Brier kill rule cannot fire for a 0.5 claimer.
 - Backend suite 437 passed.
+
+## Phase P1 - Price integrity
+
+- `src/backtest/price_integrity.py` flags close (and, from 2018-02-18, open) moves beyond the circuit band + 0.5 point against the last traded close. Band history from data: 10% throughout 2014-06 to 2025-09-29, no rounding cluster, and gaps do not widen it. The 15% band from 2026-04-20 is not confirmed because that is holdout data. Steps are classified as resolved by an action, halt resumption (≥ 20 sessions without trade), or unresolved (unresolved, action mismatch, adjustment overshoot).
+- Calibration on the 185 symbols with stored actions (2,005 records before the holdout): precision 97.96%; recall 97.4% on detectable bonus or right events (63.1% on all, since small bonuses are invisible in prices). Bonus ratios cannot be recovered from prices: median error 2.9 points, only 33% within 2 points. Ratios are never inferred.
+- Delisted symbols had 0 stored actions and 326 unresolved steps. Sharesansar returned real dividend, bonus and right history for 105 of 114 delisted or suspended symbols: 1,012 rows inserted (`docs/recovered_corporate_actions.csv`). Unresolved steps overall fell from 453 to 202, and on delisted symbols from 326 (112 symbols) to 76 (45).
+- Windows spanning an unresolved step are excluded from every horizon. Universe exclusion 2014-06 to 2025-01-19: 0.15% (5 sessions), 0.27%, 0.48%, 0.91%, 1.73%, 2.51%, 3.24%, 4.67% (240), against 0.4-9.7% in the v1 replay before recovery.
+- Loud check: `python -m src.backtest.price_integrity --check` exited 1 on real data (6 unresolved steps in the last 60 sessions to 2025-09-29). The daily health check `unresolved_price_steps` makes `run_all_daily` alert and raise `UnresolvedPriceStepsError`.
+- Tests: `tests/test_price_integrity.py` (10) and a scorecard exclusion test. Report: `docs/PRICE_INTEGRITY.md`. Earlier studies used pre-recovery prices and were not rerun.

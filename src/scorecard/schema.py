@@ -25,6 +25,8 @@ CREATE TABLE IF NOT EXISTS {schema}.scorecard_calls (
     CHECK (mode = 'replay' OR created_at < (((signal_date + 1)::timestamp + interval '11 hours') AT TIME ZONE 'Asia/Kathmandu'))
 );
 
+ALTER TABLE {schema}.scorecard_calls ALTER COLUMN probability DROP NOT NULL;
+
 CREATE INDEX IF NOT EXISTS ix_scorecard_calls_strategy_version
     ON {schema}.scorecard_calls (strategy, model_version, signal_date);
 

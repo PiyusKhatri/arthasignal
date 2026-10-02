@@ -27,6 +27,10 @@ SIGNAL_CALL_EXTRACTION_STALL_CONSECUTIVE_DAYS = 3
 BENCHMARK_INDEX_NAME = "NEPSE Index"
 
 
+class UnresolvedPriceStepsError(RuntimeError):
+    pass
+
+
 class MissingIndexSessionsError(RuntimeError):
     pass
 
@@ -429,6 +433,68 @@ def assert_benchmark_index_coverage() -> None:
         )
 
 
+PRICE_STEP_LOOKBACK_SESSIONS = 20
+PRICE_STEP_HISTORY_SESSIONS = 80
+
+
+def recent_unresolved_price_steps(
+    latest_date, lookback: int = PRICE_STEP_LOOKBACK_SESSIONS
+) -> list[dict[str, Any]]:
+    import pandas as pd
+
+    from src.backtest.price_integrity import check_recent, detect_steps
+
+    sessions = _trailing_trading_days(latest_date, PRICE_STEP_HISTORY_SESSIONS) + [latest_date]
+    sessions = sorted(set(sessions))
+    with get_session() as session:
+        prices = pd.DataFrame(
+            session.execute(
+                text(
+                    "SELECT p.symbol, p.date, p.open::float AS open, p.close::float AS close FROM daily_prices p "
+                    "JOIN companies c ON c.symbol = p.symbol AND c.instrument_type = 'Equity' "
+                    "WHERE p.date >= :start AND p.date <= :end"
+                ),
+                {"start": sessions[0], "end": latest_date},
+            ).mappings().all()
+        )
+        actions = pd.DataFrame(
+            session.execute(
+                text(
+                    "SELECT symbol, action_date, action_type::text AS action_type, ratio_or_amount::float AS ratio_or_amount "
+                    "FROM corporate_actions WHERE action_date >= :start AND action_date <= :end"
+                ),
+                {"start": sessions[0], "end": latest_date},
+            ).mappings().all(),
+            columns=["symbol", "action_date", "action_type", "ratio_or_amount"],
+        )
+    if prices.empty:
+        return []
+    steps = detect_steps(prices, actions, sessions)
+    return check_recent(steps, sessions, lookback)
+
+
+def _check_unresolved_price_steps(latest_date) -> dict[str, Any]:
+    recent = recent_unresolved_price_steps(latest_date)
+    if recent:
+        logger.error(
+            "data_quality: %d unresolved price steps (move beyond the circuit band with no recorded corporate action "
+            "or halt) in the last %d sessions: %s",
+            len(recent),
+            PRICE_STEP_LOOKBACK_SESSIONS,
+            ", ".join(f"{r['symbol']} {r['date']} {float(r['raw_move']):+.1%}" for r in recent[:20]),
+        )
+    return {"flagged": bool(recent), "steps": recent}
+
+
+def assert_no_unresolved_price_steps(latest_date) -> None:
+    recent = recent_unresolved_price_steps(latest_date)
+    if recent:
+        raise UnresolvedPriceStepsError(
+            f"{len(recent)} unresolved price steps in the last {PRICE_STEP_LOOKBACK_SESSIONS} sessions: "
+            + ", ".join(f"{r['symbol']} {r['date']}" for r in recent[:20])
+        )
+
+
 def check_daily_pipeline_health() -> dict[str, Any]:
     latest_date = _latest_price_date()
     if latest_date is None:
@@ -449,6 +515,7 @@ def check_daily_pipeline_health() -> dict[str, Any]:
         ("signal_call_extraction_liveness", _check_signal_call_extraction_liveness),
         ("trading_day_ingestion_gap", _check_trading_day_ingestion_gap),
         ("benchmark_index_coverage", _check_benchmark_index_coverage),
+        ("unresolved_price_steps", _check_unresolved_price_steps),
     ):
         try:
             results[name] = check(latest_date)

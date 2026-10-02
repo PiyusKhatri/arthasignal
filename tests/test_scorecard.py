@@ -298,3 +298,21 @@ def test_spread_is_not_reported_for_constant_scores() -> None:
     assert top_bottom_spread(frame) is None
     frame["score"] = np.linspace(0, 1, 20)
     assert top_bottom_spread(frame) == pytest.approx(0.2 * (1 - 3 / 19), rel=1e-6)
+
+
+def test_window_spanning_an_unresolved_step_is_excluded() -> None:
+    from src.scorecard.grading import DATA_ERROR, unresolved_steps_mask
+
+    sessions = _sessions(date(2019, 1, 1), 80)
+    prices = _prices(sessions)
+    later = prices["symbol"].eq("S05") & prices["date"].ge(sessions[14])
+    prices.loc[later, ["open", "high", "low", "close"]] /= 1.3
+    panel = es.build_panel(prices, NO_ACTIONS, SECTORS, sessions=sessions)
+    mask, steps = unresolved_steps_mask(prices, NO_ACTIONS, panel)
+    assert list(steps["symbol"]) == ["S05"]
+    market = build_market(panel, NO_ACTIONS, _index(prices), unresolved=mask)
+    cube = build_cube(market, 5, len(sessions) - 1)
+    r = market.panel.row["S05"]
+    assert cube.status[r, 10] == DATA_ERROR
+    assert cube.status[r, 20] != DATA_ERROR
+    assert cube.status[market.panel.row["S06"], 10] != DATA_ERROR

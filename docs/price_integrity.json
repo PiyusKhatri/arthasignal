@@ -1,0 +1,336 @@
+{
+  "generated_on": "2026-10-02",
+  "end": "2025-09-29",
+  "band": "10% before 2026-04-20, 15% from then (code constant); tolerance 0.5 point; halt = gap >= 20 sessions",
+  "before_recovery": {
+    "steps": 1205,
+    "by_kind": {
+      "resolved_by_action": 534,
+      "unresolved": 392,
+      "halt_resumption": 218,
+      "action_mismatch": 39,
+      "adjustment_overshoot": 22
+    },
+    "status_A": {
+      "steps": 835,
+      "symbols": 178,
+      "by_kind": {
+        "resolved_by_action": 534,
+        "halt_resumption": 177,
+        "unresolved": 63,
+        "action_mismatch": 39,
+        "adjustment_overshoot": 22
+      },
+      "unresolved_symbols": 73
+    },
+    "status_D": {
+      "steps": 366,
+      "symbols": 122,
+      "by_kind": {
+        "unresolved": 326,
+        "halt_resumption": 40
+      },
+      "unresolved_symbols": 112
+    },
+    "status_S": {
+      "steps": 4,
+      "symbols": 2,
+      "by_kind": {
+        "unresolved": 3,
+        "halt_resumption": 1
+      },
+      "unresolved_symbols": 2
+    },
+    "unresolved_by_direction": {
+      "down": 410,
+      "up": 43
+    },
+    "unresolved_by_year": {
+      "2014": 45,
+      "2015": 44,
+      "2016": 83,
+      "2017": 70,
+      "2018": 45,
+      "2019": 43,
+      "2020": 28,
+      "2021": 29,
+      "2022": 14,
+      "2023": 23,
+      "2024": 13,
+      "2025": 16
+    }
+  },
+  "calibration": {
+    "symbols_with_actions": 185,
+    "stored_actions": 2005,
+    "bonus_right_events_with_trades_around": 927,
+    "downward_steps_detected": 588,
+    "downward_steps_matched_to_bonus_or_right": 576,
+    "precision": 0.9796,
+    "recall_all_events": 0.6311,
+    "recall_detectable_events": 0.9739,
+    "detectable_events": 383,
+    "recall_by_type": {
+      "BONUS": 0.5799,
+      "RIGHT": 0.9209
+    },
+    "recall_detectable_by_type": {
+      "BONUS": 0.9653,
+      "RIGHT": 0.9919
+    },
+    "bonus_ratio_recovery": {
+      "detected_bonus_events": 457,
+      "median_abs_error_pct_points": 2.92,
+      "share_within_2_points": 0.3304,
+      "share_within_5_points": 0.744,
+      "p90_abs_error_pct_points": 8.53
+    },
+    "unmatched_downward_steps_examples": [
+      {
+        "symbol": "BFC",
+        "date": "2019-01-03",
+        "raw_move": "-0.19999999999999996",
+        "gap_sessions": "17"
+      },
+      {
+        "symbol": "CFCL",
+        "date": "2017-03-09",
+        "raw_move": "-0.2757009345794392",
+        "gap_sessions": "214"
+      },
+      {
+        "symbol": "CIT",
+        "date": "2016-02-28",
+        "raw_move": "-0.21546499477533965",
+        "gap_sessions": "1"
+      },
+      {
+        "symbol": "CIT",
+        "date": "2018-04-05",
+        "raw_move": "-0.14878137504547106",
+        "gap_sessions": "1"
+      },
+      {
+        "symbol": "IGI",
+        "date": "2018-11-25",
+        "raw_move": "-0.4002932551319648",
+        "gap_sessions": "1"
+      },
+      {
+        "symbol": "IGI",
+        "date": "2022-02-13",
+        "raw_move": "-0.3035230352303523",
+        "gap_sessions": "1"
+      },
+      {
+        "symbol": "JSLBB",
+        "date": "2016-03-31",
+        "raw_move": "-0.11409395973154357",
+        "gap_sessions": "3"
+      },
+      {
+        "symbol": "MLBBL",
+        "date": "2014-09-23",
+        "raw_move": "-0.16924664602683182",
+        "gap_sessions": "2"
+      },
+      {
+        "symbol": "NLG",
+        "date": "2020-02-10",
+        "raw_move": "-0.2899408284023669",
+        "gap_sessions": "1"
+      },
+      {
+        "symbol": "NLO",
+        "date": "2020-02-23",
+        "raw_move": "-0.12616822429906538",
+        "gap_sessions": "141"
+      }
+    ]
+  },
+  "recovery": {
+    "attempted": 114,
+    "found_symbols": 105,
+    "rows_found": 1014,
+    "rows_inserted": 1012,
+    "errors": 5,
+    "per_symbol": {
+      "ADLB": 2,
+      "AIC": 7,
+      "AKBSL": 4,
+      "ALDBL": 9,
+      "AMFI": 1,
+      "ARDBL": 9,
+      "ARUN": "error: HTTPError",
+      "BGDBL": 6,
+      "BHBL": 9,
+      "BLDBL": 8,
+      "BOKL": 12,
+      "BUDBL": 4,
+      "CBL": 18,
+      "CCBL": 20,
+      "CDBL": 11,
+      "CEFL": 1,
+      "CIVIC": 3,
+      "CLBSL": "error: HTTPError",
+      "CSDBL": 5,
+      "DBBL": 9,
+      "EFL": 6,
+      "EIC": 8,
+      "FBBL": 2,
+      "FFCL": 7,
+      "GDBL": 15,
+      "GFL": "error: HTTPError",
+      "GLICL": 16,
+      "HAMRO": 11,
+      "HGI": 15,
+      "INDB": 10,
+      "JALPA": 2,
+      "JBLBP": 0,
+      "JBNL": 10,
+      "JEFL": 9,
+      "JHBL": 3,
+      "KADBL": 17,
+      "KAFIL": 6,
+      "KBBL": 14,
+      "KEBL": 8,
+      "KLBSL": 3,
+      "KMFL": 9,
+      "KNBL": 13,
+      "KRBL": 7,
+      "LBL": 19,
+      "LFC": 0,
+      "LFLC": 8,
+      "LGIL": 20,
+      "MBBL": 7,
+      "MDBL": 8,
+      "MEGA": 19,
+      "METRO": 10,
+      "MIDBL": 10,
+      "MKLB": 3,
+      "MMDBL": 4,
+      "MMFDB": 13,
+      "MSBBL": 7,
+      "MSMBS": 8,
+      "MTBL": 4,
+      "NBB": 18,
+      "NBBL": 13,
+      "NBIL": "error: HTTPError",
+      "NBSL": 5,
+      "NCCB": 16,
+      "NCDB": 10,
+      "NGBL": 8,
+      "NIB": 24,
+      "NLBBL": 24,
+      "NNFC": 6,
+      "NNLB": 5,
+      "NSLB": 6,
+      "ODBL": 3,
+      "PADBL": 8,
+      "PIC": 15,
+      "PICL": 17,
+      "PLIC": 15,
+      "PURBL": 14,
+      "RBBBL": 4,
+      "RHPC": 15,
+      "RMDC": 19,
+      "RMFL": "error: HTTPError",
+      "RRHP": 1,
+      "SABSL": 8,
+      "SAFL": 3,
+      "SAMAJ": 2,
+      "SBBLJ": 17,
+      "SDBL": 4,
+      "SDESI": 4,
+      "SDLBSL": 6,
+      "SETI": 10,
+      "SEWA": 11,
+      "SFCL": 2,
+      "SFFIL": 15,
+      "SGICP": 0,
+      "SHBL": 5,
+      "SIC": 17,
+      "SIL": 18,
+      "SKDBL": 7,
+      "SLBS": 10,
+      "SLICL": 14,
+      "SMFDB": 17,
+      "SPARS": 4,
+      "SRBL": 17,
+      "SUBBL": 9,
+      "TBBL": 10,
+      "TDBL": 8,
+      "TMDBL": 2,
+      "TNBL": 17,
+      "UFIL": 9,
+      "UFL": 14,
+      "UIC": 6,
+      "UMB": 5,
+      "WDBL": 14,
+      "WNLBP": 0,
+      "WOMI": 14
+    }
+  },
+  "after_recovery": {
+    "steps": 1215,
+    "by_kind": {
+      "resolved_by_action": 817,
+      "halt_resumption": 196,
+      "unresolved": 99,
+      "action_mismatch": 63,
+      "adjustment_overshoot": 40
+    },
+    "status_A": {
+      "steps": 835,
+      "symbols": 178,
+      "by_kind": {
+        "resolved_by_action": 534,
+        "halt_resumption": 177,
+        "unresolved": 63,
+        "action_mismatch": 39,
+        "adjustment_overshoot": 22
+      },
+      "unresolved_symbols": 73
+    },
+    "status_D": {
+      "steps": 375,
+      "symbols": 121,
+      "by_kind": {
+        "resolved_by_action": 280,
+        "unresolved": 36,
+        "action_mismatch": 23,
+        "halt_resumption": 19,
+        "adjustment_overshoot": 17
+      },
+      "unresolved_symbols": 45
+    },
+    "status_S": {
+      "steps": 5,
+      "symbols": 2,
+      "by_kind": {
+        "resolved_by_action": 3,
+        "action_mismatch": 1,
+        "adjustment_overshoot": 1
+      },
+      "unresolved_symbols": 2
+    },
+    "unresolved_by_direction": {
+      "down": 148,
+      "up": 54
+    },
+    "unresolved_by_year": {
+      "2014": 13,
+      "2015": 14,
+      "2016": 30,
+      "2017": 29,
+      "2018": 15,
+      "2019": 24,
+      "2020": 19,
+      "2021": 14,
+      "2022": 6,
+      "2023": 9,
+      "2024": 13,
+      "2025": 16
+    }
+  }
+}
