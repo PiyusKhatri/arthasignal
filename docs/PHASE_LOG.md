@@ -221,4 +221,16 @@ The backfill uses the Sharesansar daily page because it is the only source that 
   - windows spanning unresolved price steps are excluded.
 - Plainly stated: 120, 160 and 240 sessions can never support a claim with 2014-2025 data (20, 15 and 10 windows against a minimum of 25); 80 sessions needs calls in 25 of its 30 windows.
 - `src/scorecard/v2.py` and `replay_v2.py`; the ledger allows a NULL probability, and COPY now clears the inherited statement timeout (a regrade first failed on it and wrote nothing). Tests: `tests/test_scorecard_v2.py` (7): the edge gate, excess expectancy, calibration against the baseline, the Brier kill firing, long-horizon causes including event attribution, the window minimums, and the rounding guard.
-- Rerun under v2 on the corrected data: random, equal-weight, momentum and leaky each get 49 NO EVIDENCE and 55 INSUFFICIENT SAMPLE cells; none passes. The leaky strategy is caught by the audit, which is the only gate that stops it at 80 sessions. Backend suite 462 passed.
+- Rerun under v2 on the corrected data: random, equal-weight, momentum and leaky each get 49 NO EVIDENCE and 55 INSUFFICIENT SAMPLE cells; none passes. The leaky strategy is caught by the audit, which is the only gate that stops it at 80 sessions. Backend suite 461 passed.
+
+## Phase P3 - Live ledger readiness
+
+- `src/scorecard/model_v0.py` freezes the current simple analysis as model v0:
+  - bear-state abstention;
+  - top 10 by 20-session return plus top 5 new listings;
+  - avoid rules E2 (after a bonus book close) and E4 (after a ≥ 3 upper-circuit streak ends);
+  - no stated probability.
+
+  It is registered in the new append-only `scorecard_models` table (id 1, parameters hash `46ba8c8c…`, commit c3f800c) and as variant 70. Registration is idempotent.
+- `python -m src.scorecard.daily` computes the day's v0 calls from data up to that close, writes them as `live` calls (model version, feature hash, situations) with ON CONFLICT DO NOTHING under an advisory lock, refuses after 11:00 NPT the next day (exit 2; the database CHECK also rejects late rows), and grades matured live calls under v2. Cron line documented in `docs/LIVE_LEDGER.md`, not installed.
+- Dry run for 2025-01-16 (before the holdout): market bull, 10 calls with hashes, nothing written, and a live write would have been refused. A non-session date exits 3. Tests: `tests/test_scorecard_daily.py` (6). No live rows were written.
