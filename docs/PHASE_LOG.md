@@ -254,3 +254,20 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - Unresolved steps over 2014-06 to 2025-09-29 went from 202 to 159; calibration precision is 97.47% and detectable recall 96.12%. The horizon exclusion counts and `MATRIX_V2` were not rerun.
 - An unbounded ad hoc query returned two WNLBP rows from after 2025-09-29; they were not used.
 - Tests: 5 added. Backend suite 467 passed.
+
+## Phase Q2 - Live hypotheses declared
+
+- Declared at 2026-10-04 01:04:22 Nepal time, before anything else was run, in `docs/LIVE_HYPOTHESES.md`. The four hypotheses:
+  - H1: avoid rule E2 at 20 sessions;
+  - H2: avoid rule E4 at 20 sessions;
+  - H3: momentum tilt at 5, 10 and 20 sessions;
+  - H4: new_listing at 40 sessions. H4 was found after looking at the replay results, so it is a hypothesis and not evidence.
+- The gate is protocol v2 unchanged, and avoid observations mirror the buy definition.
+- Minimum live sample before any claim: H3 at 5 sessions, about 1.5 years; H3 at 10 and 20 sessions, about 2.7 and 5.1 years; H4, about 6.9 years; H1, at least 3.7 years; H2, about 9.3 years.
+- No claim on any of the four is possible within a year.
+- Gap: the live writer does not yet record avoid observations, so H1 and H2 are declared but not tracked.
+- Registered in `backtest_variant_trials`, family `live_hypotheses_v0`, ids 74-77. Fingerprints:
+  - H1: 815a8bdb0aa6bcec…
+  - H2: bc59228a4881e2b6…
+  - H3: 74fe5c9daaa5f5f3…
+  - H4: cfb941d2acfe073f…
