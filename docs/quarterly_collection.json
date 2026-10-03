@@ -1,0 +1,275 @@
+{
+  "generated_at": "2026-10-04T03:33:07",
+  "progress": {
+    "merolagani:done": 237,
+    "sharesansar:done": 569,
+    "sharesansar:not_found": 24
+  },
+  "merolagani": {
+    "rows": 11794,
+    "corrections": 72,
+    "first_published": "2009-10-16",
+    "last_published": "2026-09-18",
+    "rows_before_holdout": 10653,
+    "unmatched_symbol_rows": 375,
+    "unmatched_company_names": 63,
+    "fiscal_year_parsed": 0.9971,
+    "quarter_parsed": 0.9975,
+    "net_profit_parsed": 0.0,
+    "per_year": {
+      "2009": 19,
+      "2010": 105,
+      "2011": 181,
+      "2012": 229,
+      "2013": 296,
+      "2014": 512,
+      "2015": 684,
+      "2016": 765,
+      "2017": 701,
+      "2018": 745,
+      "2019": 865,
+      "2020": 858,
+      "2021": 902,
+      "2022": 927,
+      "2023": 1000,
+      "2024": 1069,
+      "2025": 1067,
+      "2026": 869
+    },
+    "symbols": 461,
+    "coverage_by_status": {
+      "A": {
+        "symbols": 312,
+        "with_reports": 280
+      },
+      "D": {
+        "symbols": 256,
+        "with_reports": 177
+      },
+      "S": {
+        "symbols": 25,
+        "with_reports": 3
+      }
+    },
+    "reports_per_symbol": {
+      "p10": 4.0,
+      "median": 20.0,
+      "p90": 48.0
+    },
+    "first_year_per_symbol": {
+      "2009": 19,
+      "2010": 20,
+      "2011": 19,
+      "2012": 17,
+      "2013": 13,
+      "2014": 103,
+      "2015": 25,
+      "2016": 21,
+      "2017": 27,
+      "2018": 27,
+      "2019": 29,
+      "2020": 10,
+      "2021": 17,
+      "2022": 22,
+      "2023": 48,
+      "2024": 11,
+      "2025": 9,
+      "2026": 24
+    }
+  },
+  "sharesansar": {
+    "rows": 13176,
+    "corrections": 64,
+    "first_published": "2011-04-19",
+    "last_published": "2026-09-03",
+    "rows_before_holdout": 12101,
+    "unmatched_symbol_rows": 0,
+    "unmatched_company_names": 0,
+    "fiscal_year_parsed": 0.9995,
+    "quarter_parsed": 1.0,
+    "net_profit_parsed": 0.9413,
+    "per_year": {
+      "2011": 560,
+      "2012": 746,
+      "2013": 787,
+      "2014": 791,
+      "2015": 928,
+      "2016": 783,
+      "2017": 707,
+      "2018": 758,
+      "2019": 810,
+      "2020": 795,
+      "2021": 850,
+      "2022": 881,
+      "2023": 942,
+      "2024": 1009,
+      "2025": 1011,
+      "2026": 818
+    },
+    "symbols": 491,
+    "coverage_by_status": {
+      "A": {
+        "symbols": 312,
+        "with_reports": 280
+      },
+      "D": {
+        "symbols": 256,
+        "with_reports": 205
+      },
+      "S": {
+        "symbols": 25,
+        "with_reports": 6
+      }
+    },
+    "reports_per_symbol": {
+      "p10": 5.0,
+      "median": 22.0,
+      "p90": 61.0
+    },
+    "first_year_per_symbol": {
+      "2011": 197,
+      "2012": 12,
+      "2013": 18,
+      "2014": 14,
+      "2015": 16,
+      "2016": 17,
+      "2017": 23,
+      "2018": 23,
+      "2019": 25,
+      "2020": 13,
+      "2021": 17,
+      "2022": 24,
+      "2023": 47,
+      "2024": 12,
+      "2025": 9,
+      "2026": 24
+    }
+  },
+  "cross_source_dates": {
+    "matched_reports": 10619,
+    "same_day": 0.6503,
+    "within_1_day": 0.8961,
+    "within_7_days": 0.922,
+    "sharesansar_later_by_more_than_7": 771,
+    "merolagani_later_by_more_than_7": 57
+  },
+  "headline_vs_statement_profit": {
+    "pairs": 262,
+    "within_2pct": 0.9008,
+    "within_10pct": 0.9008
+  },
+  "validation_against_fundamentals": {
+    "fundamentals_rows": 2525,
+    "fundamentals_symbols": 281,
+    "latest_snapshot_dates": [
+      "2026-08-29",
+      "2026-09-26"
+    ],
+    "symbols_with_figures": 265,
+    "symbols_in_both": 264,
+    "same_fiscal_year": 222,
+    "eps_pairs": 181,
+    "eps_exact_0.01": 0.9282,
+    "eps_within_1pct": 0.9337,
+    "book_value_pairs": 104,
+    "book_value_exact_0.01": 0.9615,
+    "eps_mismatch_examples": [
+      {
+        "symbol": "EBL",
+        "fiscal_year_fund": "2082/2083",
+        "quarter": "4",
+        "eps_fund": "35.19",
+        "eps_qr": "36.95"
+      },
+      {
+        "symbol": "GBIME",
+        "fiscal_year_fund": "2082/2083",
+        "quarter": "4",
+        "eps_fund": "15.71",
+        "eps_qr": "16.34"
+      },
+      {
+        "symbol": "KSBBL",
+        "fiscal_year_fund": "2082/2083",
+        "quarter": "4",
+        "eps_fund": "22.75",
+        "eps_qr": "22.34"
+      },
+      {
+        "symbol": "MANDU",
+        "fiscal_year_fund": "2082/2083",
+        "quarter": "4",
+        "eps_fund": "21.24",
+        "eps_qr": "23.36"
+      },
+      {
+        "symbol": "MBL",
+        "fiscal_year_fund": "2082/2083",
+        "quarter": "4",
+        "eps_fund": "17.49",
+        "eps_qr": "15.44"
+      },
+      {
+        "symbol": "MKHC",
+        "fiscal_year_fund": "2082/2083",
+        "quarter": "4",
+        "eps_fund": "1.58",
+        "eps_qr": "1.59"
+      },
+      {
+        "symbol": "NABIL",
+        "fiscal_year_fund": "2082/2083",
+        "quarter": "4",
+        "eps_fund": "28.36",
+        "eps_qr": "27.74"
+      },
+      {
+        "symbol": "NMB",
+        "fiscal_year_fund": "2082/2083",
+        "quarter": "4",
+        "eps_fund": "20.18",
+        "eps_qr": "19.53"
+      },
+      {
+        "symbol": "SADBL",
+        "fiscal_year_fund": "2082/2083",
+        "quarter": "4",
+        "eps_fund": "22.92",
+        "eps_qr": "23.83"
+      },
+      {
+        "symbol": "SANIMA",
+        "fiscal_year_fund": "2082/2083",
+        "quarter": "4",
+        "eps_fund": "26.14",
+        "eps_qr": "24.92"
+      }
+    ]
+  },
+  "figures": {
+    "rows": 265,
+    "by_label": {
+      "4th Quarter 2082/2083": 260,
+      "3rd Quarter 2082/2083": 4,
+      "1st Quarter 2081/2082": 1
+    },
+    "eps_present": 217,
+    "net_worth_present": 111,
+    "with_published_date": 264
+  },
+  "dividend_declarations": {
+    "rows": 1014,
+    "symbols": 248,
+    "per_year": {
+      "2018": 82,
+      "2019": 115,
+      "2020": 153,
+      "2021": 158,
+      "2022": 111,
+      "2023": 118,
+      "2024": 106,
+      "2025": 131,
+      "2026": 40
+    }
+  }
+}

@@ -271,3 +271,22 @@ The backfill uses the Sharesansar daily page because it is the only source that 
   - H2: bc59228a4881e2b6…
   - H3: 74fe5c9daaa5f5f3…
   - H4: cfb941d2acfe073f…
+
+## Phase Q3 - Information survey and quarterly-report collector
+
+- `docs/INFORMATION_SURVEY.md` covers, for each source, what it offers, its depth, whether publication dates are recorded, scraping difficulty and robots and terms. Neither site's terms have been read: their pages load the clauses with JavaScript. It also gives the point-in-time schema.
+- Findings:
+  - Sharesansar's quarterly tab has the latest quarter only.
+  - Report images need OCR.
+  - Merolagani has a JSON index of every quarterly report with its date.
+  - Sharesansar's dividend table has announcement dates.
+- `src/scrapers/quarterly_reports_collector.py` is resumable, rate-limited (3 s or more) and insert-only. Run with `nohup` on 2026-10-04: 0 errors, and 24 symbols with no Sharesansar page.
+- Rows collected:
+  - 13,176 Sharesansar and 11,794 Merolagani report announcements, from 2011 and 2009;
+  - 265 latest-quarter statements;
+  - 1,014 dividend declarations.
+- Coverage: 491 and 461 symbols, including 280 of 312 active symbols and 205 of 256 delisted symbols on Sharesansar.
+- Publication dates agree within 1 day for 89.6% of 10,619 matched reports. Research joins should use the later date.
+- Validation against the 2,525 fundamentals rows: EPS equal to 0.01 for 92.8% of 181 pairs, and book value for 96.2% of 104 pairs; the differences are unexplained.
+- There is no dated EPS or balance-sheet history in text form.
+- Tests: 9 added; backend suite 476 passed.
