@@ -442,7 +442,7 @@ def recent_unresolved_price_steps(
 ) -> list[dict[str, Any]]:
     import pandas as pd
 
-    from src.backtest.price_integrity import check_recent, detect_steps
+    from src.backtest.price_integrity import check_recent, detect_steps, load_quarantine
 
     sessions = _trailing_trading_days(latest_date, PRICE_STEP_HISTORY_SESSIONS) + [latest_date]
     sessions = sorted(set(sessions))
@@ -467,10 +467,11 @@ def recent_unresolved_price_steps(
             ).mappings().all(),
             columns=["symbol", "action_date", "action_type", "ratio_or_amount"],
         )
+        quarantine = load_quarantine(session.connection())
     if prices.empty:
         return []
     steps = detect_steps(prices, actions, sessions)
-    return check_recent(steps, sessions, lookback)
+    return check_recent(steps, sessions, lookback, zip(quarantine["symbol"], quarantine["step_date"]))
 
 
 def _check_unresolved_price_steps(latest_date) -> dict[str, Any]:

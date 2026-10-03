@@ -1,0 +1,187 @@
+{
+  "recent_steps": [
+    {
+      "symbol": "CITY",
+      "date": "2025-08-12",
+      "raw_move": "-0.3380845861728138",
+      "adjusted_move": "0.10821411850387563",
+      "base_move": "0.09989914997838745",
+      "kind": "resolved_by_action",
+      "actions_in_gap": "RIGHT:80"
+    },
+    {
+      "symbol": "KKHC",
+      "date": "2025-07-13",
+      "raw_move": "-0.321852205728135",
+      "adjusted_move": "0.12325510941250495",
+      "base_move": "0.09996031071043832",
+      "kind": "resolved_by_action",
+      "actions_in_gap": "RIGHT:100"
+    },
+    {
+      "symbol": "NABBC",
+      "date": "2025-08-25",
+      "raw_move": "-0.4088953727602589",
+      "adjusted_move": "0.1073953540567838",
+      "base_move": "0.0999199526676644",
+      "kind": "resolved_by_action",
+      "actions_in_gap": "RIGHT:100"
+    },
+    {
+      "symbol": "PRIN",
+      "date": "2025-07-20",
+      "raw_move": "-0.13108476710029382",
+      "adjusted_move": "0.02626419429290805",
+      "base_move": "0.026289016894539774",
+      "kind": "resolved_by_action",
+      "actions_in_gap": "BONUS:18;DIVIDEND:0.9474"
+    },
+    {
+      "symbol": "RFPL",
+      "date": "2025-08-11",
+      "raw_move": "-0.36392826376380294",
+      "adjusted_move": "0.11551413579763481",
+      "base_move": "0.09987135215654419",
+      "kind": "resolved_by_action",
+      "actions_in_gap": "RIGHT:100"
+    },
+    {
+      "symbol": "SSHL",
+      "date": "2025-08-03",
+      "raw_move": "-0.25748293366007347",
+      "adjusted_move": "0.13495536495711535",
+      "base_move": "0.09996110462854935",
+      "kind": "resolved_by_action",
+      "actions_in_gap": "RIGHT:100"
+    },
+    {
+      "symbol": "WNLBP",
+      "date": "2025-07-15",
+      "raw_move": "-0.9287241625089094",
+      "adjusted_move": "-0.9287241625089094",
+      "base_move": "-0.9287241625089094",
+      "kind": "unresolved",
+      "actions_in_gap": ""
+    }
+  ],
+  "sources_recorded": [
+    {
+      "symbol": "CITY",
+      "action_date": "2025-08-12",
+      "type": "RIGHT",
+      "value": 80.0,
+      "sharesansar": true,
+      "merolagani": true
+    },
+    {
+      "symbol": "KKHC",
+      "action_date": "2025-07-11",
+      "type": "RIGHT",
+      "value": 100.0,
+      "sharesansar": true,
+      "merolagani": true
+    },
+    {
+      "symbol": "NABBC",
+      "action_date": "2025-08-25",
+      "type": "RIGHT",
+      "value": 100.0,
+      "sharesansar": true,
+      "merolagani": true
+    },
+    {
+      "symbol": "PRIN",
+      "action_date": "2025-07-18",
+      "type": "BONUS",
+      "value": 18.0,
+      "sharesansar": true,
+      "merolagani": false
+    },
+    {
+      "symbol": "PRIN",
+      "action_date": "2025-07-18",
+      "type": "DIVIDEND",
+      "value": 0.9474,
+      "sharesansar": true,
+      "merolagani": false
+    },
+    {
+      "symbol": "RFPL",
+      "action_date": "2025-08-11",
+      "type": "RIGHT",
+      "value": 100.0,
+      "sharesansar": true,
+      "merolagani": true
+    },
+    {
+      "symbol": "SSHL",
+      "action_date": "2025-08-01",
+      "type": "RIGHT",
+      "value": 100.0,
+      "sharesansar": true,
+      "merolagani": true
+    }
+  ],
+  "actions_inserted": 0,
+  "quarantined": [
+    {
+      "symbol": "WNLBP",
+      "date": "2025-07-15",
+      "raw_move": -0.9287,
+      "kind": "unresolved"
+    }
+  ],
+  "merolagani": {
+    "CITY": "checked",
+    "KKHC": "checked",
+    "NABBC": "checked",
+    "PRIN": "checked",
+    "RFPL": "checked",
+    "SSHL": "checked",
+    "WNLBP": "checked"
+  },
+  "after": [
+    {
+      "symbol": "CITY",
+      "date": "2025-08-12",
+      "base_move": "0.09989914997838745",
+      "kind": "resolved_by_action"
+    },
+    {
+      "symbol": "KKHC",
+      "date": "2025-07-13",
+      "base_move": "0.09996031071043832",
+      "kind": "resolved_by_action"
+    },
+    {
+      "symbol": "NABBC",
+      "date": "2025-08-25",
+      "base_move": "0.0999199526676644",
+      "kind": "resolved_by_action"
+    },
+    {
+      "symbol": "PRIN",
+      "date": "2025-07-20",
+      "base_move": "0.026289016894539774",
+      "kind": "resolved_by_action"
+    },
+    {
+      "symbol": "RFPL",
+      "date": "2025-08-11",
+      "base_move": "0.09987135215654419",
+      "kind": "resolved_by_action"
+    },
+    {
+      "symbol": "SSHL",
+      "date": "2025-08-03",
+      "base_move": "0.09996110462854935",
+      "kind": "resolved_by_action"
+    },
+    {
+      "symbol": "WNLBP",
+      "date": "2025-07-15",
+      "base_move": "-0.9287241625089094",
+      "kind": "unresolved"
+    }
+  ]
+}

@@ -82,3 +82,28 @@ Before recovery, the v1 replay excluded 0.4% (5 sessions) to 9.7% (240 sessions)
 ## Effect on earlier results
 
 The 1,012 recovered rows change the price panels that every earlier study used (broker flow, events, scorecard v1). Those documents were produced on the pre-recovery data and were not rerun, except the scorecard under protocol v2.
+
+## 6. Recent steps resolved (2026-10-04)
+
+The six steps flagged by the check in the last 60 sessions to 2025-09-29 were each checked against Sharesansar (company dividend and right-share tables) and Merolagani (company page bonus and right-share sections). Output: `docs/price_integrity_recent_resolution.json`. Provenance is stored in the new table `corporate_action_sources` (symbol, date, type, value, source, URL, detail, verified time).
+
+| Symbol | Step date | Raw move | Stored action | Sharesansar | Merolagani | Move from NEPSE adjusted base | Result |
+| --- | --- | ---: | --- | --- | --- | ---: | --- |
+| CITY | 2025-08-12 | −33.8% | right 80% (book close 2025-08-12) | right 1:0.8, 2025-08-12 | 1:0.8, FY 082-083 | +9.99% | resolved |
+| KKHC | 2025-07-13 | −32.2% | right 100% (2025-07-11) | right 1:1, 2025-07-11 | 1:1, FY 082-083 | +10.00% | resolved |
+| NABBC | 2025-08-25 | −40.9% | right 100% (2025-08-25) | right 1:1, 2025-08-25 | 1:1, FY 082-083 | +9.99% | resolved |
+| RFPL | 2025-08-11 | −36.4% | right 100% (2025-08-11) | right 1:1, 2025-08-11 | 1:1, FY 082-083 | +9.99% | resolved |
+| SSHL | 2025-08-03 | −25.7% | right 100% (2025-08-01) | right 1:1, 2025-08-01 | 1:1, FY 082-083 | +10.00% | resolved |
+| WNLBP | 2025-07-15 | −92.9% | none | none | none (promoter share line) | −92.9% | **quarantined** |
+
+**Why the five were flagged.** The actions were already stored and correct. On the ex-date NEPSE resets the reference price to the adjusted base, (previous close + 100 × right ratio) / (1 + right ratio) for a right and previous close / (1 + bonus) for a bonus, and the circuit band applies around that base. All five closed at the upper circuit from that base, with moves between +9.99% and +10.00%. The detector measured holder value instead: a rights holder pays Rs 100 per new share, so a 10% move from the base shows up as 10% + 10% × 100q / previous close, which comes to +10.7% to +13.5% here. The detector now also computes the move from the adjusted base (`adjusted_base`, column `base_move`) and treats a step with a recorded action as resolved if either the holder-value move or the base move is inside the band. That the five land at exactly +10.0% from the base confirms both the ratio and the ex-date.
+
+**WNLBP** is a promoter-share line of Wean Nepal Laghubitta (Merolagani lists it under "Promotor Share"). It traded at 1,403 on 2025-07-14 and at 100 (par) the next session. Neither source has a bonus, right or dividend for WNLBP or WNLB, so nothing was inferred. It is in `price_quarantine` with the URLs checked. The live writer drops quarantined symbols from its calls and lists them in its daily output (`quarantined_symbols`, `quarantine_excluded_from_calls`). A quarantined step remains unresolved for grading, so windows that span it stay excluded.
+
+**PRIN** (in the window, already resolved): Sharesansar records an 18% bonus and a 0.9474% dividend with book close 2025-07-18 for FY 2080/81. Merolagani's page shows only an 8.70% bonus for FY 081-082 and nothing for FY 080/81, so only the Sharesansar source is stored. The two sources do not confirm each other.
+
+**Check rerun.** `python -m src.backtest.price_integrity --check` now exits 0 and prints the WNLBP quarantine. The check (and the daily `unresolved_price_steps` health check) still exits 1 or raises on any unresolved step that has no quarantine record. A new jump on a quarantined symbol on a different date still fails (test `test_quarantine_silences_only_the_acknowledged_step`).
+
+**Effect over 2014-06 to 2025-09-29.** With the adjusted-base rule, unresolved steps fall from 202 to 159 (unresolved 99, overshoot 40 → 38, mismatch 63 → 22). Calibration on the current action table: precision 97.47%, recall 96.12% on 619 detectable bonus or right events, 65.2% on all. The horizon exclusion counts in section 4 and the matrix in `docs/MATRIX_V2.md` were computed before this change and were not rerun. They exclude slightly more windows than the new rule would.
+
+**Holdout note.** While this was investigated, one ad hoc query listed WNLBP rows without a date bound and returned two rows dated after 2025-09-29. They were not used in any computation. Every query since has been bounded at 2025-09-29.

@@ -242,3 +242,15 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - v0 overall: edge +1.9 to +2.1 points at 5-40 sessions (plain 90% bound +0.3 to +0.8, penalized −0.8 to −2.2), with positive excess expectancy over the universe (+0.4% to +3.7%). That is far from the 8-point gate and about the same as simple momentum.
 - Closest cell: `new_listing` at 40 sessions, edge +8.75 points, plain bound +1.1, 4/4 folds, excess +13.6%. It fails only the penalized bound (−6.4, *K* = 520), and the effect had already been seen post hoc, so it is not a pass. It is the one candidate worth stating in advance for live tracking. `post_lower_circuit` is −3 to −11 points, a weakness in v0's momentum ranking, noted and not acted on.
 - Backend suite 461 passed.
+
+## Phase Q1 - Cleanup and recent price steps
+
+- Removed the two assistant-vendor mentions (`docs/KEEP_PARK_REMOVE.md`, `docs/designs/paper-trade-validation-engine.md`). A grep of tracked files finds the name only in tooling paths that the editor setup requires (`CLAUDE.md`, the `.claude/` hook and skills folders), which were left alone. None in commit messages.
+- The six flagged steps were checked on Sharesansar and Merolagani; provenance is in the new table `corporate_action_sources` (12 rows).
+  - Five (CITY, KKHC, NABBC, RFPL, SSHL) are rights issues already stored with the correct ratio and date. Both sources confirm them, and each closed at exactly +10.0% from NEPSE's adjusted base price, an upper circuit on the ex-date. The detector now also measures moves from the adjusted base (`adjusted_base`, `base_move`).
+  - WNLBP (a promoter share, 1,403 to 100) has no action on either source, so it is quarantined in the new table `price_quarantine`. The live writer excludes quarantined symbols and reports them.
+  - PRIN's 18% bonus is on Sharesansar only, and Merolagani does not confirm it.
+- `python -m src.backtest.price_integrity --check` now exits 0 with WNLBP listed as quarantined. Any unquarantined unresolved step still exits 1 or raises in the daily health check.
+- Unresolved steps over 2014-06 to 2025-09-29 went from 202 to 159; calibration precision is 97.47% and detectable recall 96.12%. The horizon exclusion counts and `MATRIX_V2` were not rerun.
+- An unbounded ad hoc query returned two WNLBP rows from after 2025-09-29; they were not used.
+- Tests: 5 added. Backend suite 467 passed.

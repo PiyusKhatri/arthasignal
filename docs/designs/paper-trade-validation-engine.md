@@ -41,7 +41,7 @@ Traders in this segment already pay for signal subscriptions and treat them as i
 
 ## Cross-Model Perspective
 
-Independent Claude subagent cold read (no access to this conversation, given only a structured summary):
+Independent second-model cold read (no access to this conversation, given only a structured summary):
 
 - **Steelman:** "A signals engine that publishes every call it makes, timestamped, before outcome is known — a public, append-only track record with win rate, avg return, and significance stats per signal type... The product isn't 'signals,' it's 'signals with a scoreboard nobody else in the NEPSE space has the discipline to publish.'"
 - **Key insight:** "the uncle now cross-verifies across MULTIPLE paid apps before trading... He's not lacking signals — he's drowning in unverifiable ones and manually building his own trust layer by triangulating. The product to build first isn't a better signal generator, it's the trust layer itself."

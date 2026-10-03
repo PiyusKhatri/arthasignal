@@ -133,3 +133,17 @@ def test_model_registry_is_append_only(temp_schema) -> None:
     with pytest.raises(Exception, match="append-only"):
         with engine.begin() as connection:
             connection.exec_driver_sql(f"UPDATE {schema}.scorecard_models SET description = 'x'")
+
+
+def test_quarantined_symbols_are_excluded_from_live_calls(monkeypatch) -> None:
+    from types import SimpleNamespace
+
+    picks = pd.DataFrame({"symbol": ["AAA", "BBB", "CCC"], "score": [0.3, 0.2, 0.1]})
+    monkeypatch.setattr(daily.model_v0, "strategy", lambda *a: SimpleNamespace(select=lambda panel, t: picks))
+    monkeypatch.setattr(daily, "situation_matrix", lambda *a: None)
+    monkeypatch.setattr(daily, "labels_for", lambda *a: [])
+    panel = SimpleNamespace(sessions=(date(2025, 1, 15), date(2025, 1, 16)), row={"AAA": 0, "BBB": 1, "CCC": 2})
+    state = {"panel": panel, "inputs": {"index": None, "rates": None}, "actions": NO_ACTIONS, "mergers": set(), "market": None}
+    calls = daily.compute_calls(state, {"BBB": "2025-01-10 unresolved"})
+    assert list(calls["symbol"]) == ["AAA", "CCC"]
+    assert state["quarantine_excluded"] == ["BBB"]

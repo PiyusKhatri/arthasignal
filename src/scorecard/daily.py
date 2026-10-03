@@ -80,11 +80,22 @@ def build_state(as_of: date) -> dict[str, Any]:
     return {"inputs": inputs, "panel": panel, "actions": actions, "market": market, "mergers": mergers}
 
 
-def compute_calls(state: dict[str, Any]) -> pd.DataFrame:
+def quarantined_symbols(engine: Engine) -> dict[str, str]:
+    from src.backtest.price_integrity import load_quarantine
+
+    with engine.connect() as connection:
+        quarantine = load_quarantine(connection)
+    return {s: f"{d} {r}" for s, d, r in zip(quarantine["symbol"], quarantine["step_date"], quarantine["reason"])}
+
+
+def compute_calls(state: dict[str, Any], quarantined: Any = ()) -> pd.DataFrame:
     panel = state["panel"]
     t = len(panel.sessions) - 1
     strategy = model_v0.strategy(state["inputs"]["index"], state["actions"], state["mergers"])
     picks = strategy.select(panel, t)
+    blocked = set(quarantined)
+    state["quarantine_excluded"] = sorted(set(picks["symbol"]) & blocked)
+    picks = picks[~picks["symbol"].isin(blocked)].reset_index(drop=True)
     if picks.empty:
         return pd.DataFrame(columns=["symbol", "signal_date", "score", "situations", "feature_hash"])
     situations = situation_matrix(state["market"], state["inputs"]["index"], state["inputs"]["rates"], state["mergers"])
@@ -174,7 +185,10 @@ def run(as_of: date | None, dry_run: bool, now: datetime | None = None, schema: 
         apply_schema(engine, schema)
         report["model"] = register_model(engine, schema)
     state = build_state(as_of)
-    calls = compute_calls(state)
+    quarantine = quarantined_symbols(engine)
+    calls = compute_calls(state, quarantine)
+    report["quarantined_symbols"] = quarantine
+    report["quarantine_excluded_from_calls"] = state["quarantine_excluded"]
     states = market_state_labels(state["inputs"]["index"], state["panel"].sessions)
     report["market_state"] = states.iloc[-1]
     report["calls"] = calls[["symbol", "score", "situations", "feature_hash"]].assign(score=lambda f: f["score"].round(4)).to_dict("records")

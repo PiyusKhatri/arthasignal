@@ -102,3 +102,43 @@ def test_data_quality_check_fails_loudly(monkeypatch) -> None:
     monkeypatch.setattr(dq, "recent_unresolved_price_steps", lambda latest_date, lookback=20: [])
     assert not dq._check_unresolved_price_steps(date(2025, 1, 10))["flagged"]
     dq.assert_no_unresolved_price_steps(date(2025, 1, 10))
+
+
+def test_right_issue_at_upper_circuit_from_the_adjusted_base_is_resolved() -> None:
+    previous = 961.15
+    base = (previous + 100 * 0.8) / 1.8
+    prices = _series("AAA", [previous, previous, base * 1.0999, base * 1.0999])
+    actions = pd.DataFrame({"symbol": ["AAA"], "action_date": [SESSIONS[2]], "action_type": ["RIGHT"], "ratio_or_amount": [80.0]})
+    steps = pi.detect_steps(prices, actions, SESSIONS)
+    assert list(steps["kind"]) == [pi.RESOLVED]
+    assert np.isclose(steps["base_move"].iloc[0], 0.0999)
+    assert steps["adjusted_move"].iloc[0] > 0.105
+    beyond = _series("BBB", [previous, previous, base * 1.2, base * 1.2])
+    actions_b = actions.assign(symbol="BBB")
+    assert list(pi.detect_steps(beyond, actions_b, SESSIONS)["kind"]) == [pi.MISMATCH]
+
+
+def test_adjusted_base_matches_nepse_reference_prices() -> None:
+    assert np.isclose(pi.adjusted_base(400.0, [("RIGHT", 100.0)]), 250.0)
+    assert np.isclose(pi.adjusted_base(240.0, [("BONUS", 20.0)]), 200.0)
+    assert pi.adjusted_base(240.0, []) == 240.0
+
+
+def test_quarantine_silences_only_the_acknowledged_step() -> None:
+    prices = _series("AAA", [100] * 50 + [60, 60, 30, 30])
+    steps = pi.detect_steps(prices, NO_ACTIONS, SESSIONS)
+    assert len(pi.check_recent(steps, SESSIONS, 10)) == 2
+    remaining = pi.check_recent(steps, SESSIONS, 10, [("AAA", SESSIONS[50])])
+    assert [r["date"] for r in remaining] == [str(SESSIONS[52])]
+    assert pi.check_recent(steps, SESSIONS, 10, [("AAA", SESSIONS[50]), ("AAA", SESSIONS[52])]) == []
+
+
+def test_parse_merolagani_actions() -> None:
+    html = (
+        "<div>% Bonus 8.70 (FY:081-082) # Value Fiscal Year 1. 10.00% (FY: 080-081) 2. 0.00% (FY: 079-080)</div>"
+        "<div>Right Share 1:0.8 (FY:082-083) # Value Fiscal Year 1. 1:0.8 (FY: 082-083) 2. 1:1 (FY: 078-079)</div>"
+        "<span>30-Day Avg Volume 1,000</span>"
+    )
+    parsed = pi.parse_merolagani_actions(html)
+    assert parsed["RIGHT"] == [(80.0, "082-083"), (100.0, "078-079")]
+    assert parsed["BONUS"] == [(10.0, "080-081"), (8.7, "081-082")]

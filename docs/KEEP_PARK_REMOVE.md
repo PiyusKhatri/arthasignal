@@ -61,5 +61,5 @@ Nothing was removed.
 | --- | --- |
 | V1 weekly retraining in the daily workflow | The "champion" is retrained weekly with no recorded validation. Consider freezing it or labelling its output experimental |
 | `venv/` | A virtual environment created on another machine; ignored by git and unusable here. A working one is in `.venv/` |
-| `.agents/`, `.claude/skills/`, `skills-lock.json` | Tooling files, not application code; left alone |
+| `.agents/`, editor skill folders, `skills-lock.json` | Tooling files, not application code; left alone |
 | `docs/ARCHITECTURE.md` | Out of date: omits quant, intelligence and alerts |

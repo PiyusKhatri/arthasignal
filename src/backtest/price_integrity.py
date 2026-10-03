@@ -4,6 +4,7 @@ import argparse
 import bisect
 import json
 import logging
+import re
 import sys
 import time
 from dataclasses import dataclass
@@ -27,6 +28,39 @@ RIGHTS_PRICE = es.RIGHTS_SUBSCRIPTION_PRICE
 PRE_HOLDOUT_END = date(2025, 9, 29)
 DEFAULT_REPORT = Path("docs/price_integrity.json")
 SCRAPE_DELAY_SECONDS = 3.0
+SHARESANSAR_SOURCE = "sharesansar"
+MEROLAGANI_SOURCE = "merolagani"
+SHARESANSAR_URL = "https://www.sharesansar.com/company/{slug}"
+MEROLAGANI_URL = "https://merolagani.com/CompanyDetail.aspx?symbol={symbol}"
+
+TABLES_DDL = (
+    """
+    CREATE TABLE IF NOT EXISTS corporate_action_sources (
+        id SERIAL PRIMARY KEY,
+        symbol VARCHAR(20) NOT NULL,
+        action_date DATE NOT NULL,
+        action_type TEXT NOT NULL,
+        ratio_or_amount NUMERIC(14,4) NOT NULL,
+        source TEXT NOT NULL,
+        source_url TEXT NOT NULL,
+        source_detail TEXT NOT NULL,
+        verified_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        UNIQUE (symbol, action_date, action_type, source)
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS price_quarantine (
+        id SERIAL PRIMARY KEY,
+        symbol VARCHAR(20) NOT NULL,
+        step_date DATE NOT NULL,
+        raw_move DOUBLE PRECISION NOT NULL,
+        reason TEXT NOT NULL,
+        sources_checked TEXT NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        UNIQUE (symbol, step_date)
+    )
+    """,
+)
 
 RESOLVED = "resolved_by_action"
 HALT = "halt_resumption"
@@ -65,13 +99,16 @@ def detect_steps(
             raw = closes[k] / closes[k - 1] - 1.0
             entries = [e for s in range(p + 1, c + 1) for e in symbol_effects.get(s, [])]
             adjusted = es._apply_actions(closes[k], entries) / closes[k - 1] - 1.0
+            base = adjusted_base(closes[k - 1], entries)
+            base_move = closes[k] / base - 1.0 if base > 0 else adjusted
             day = sessions[c]
             raw_step = is_step(raw, day)
-            adjusted_step = is_step(adjusted, day)
+            adjusted_step = is_step(adjusted, day) and is_step(base_move, day)
             open_step = False
             if day >= es.FIRST_REAL_OPEN_SESSION and opens[k] > 0:
                 open_adjusted = es._apply_actions(opens[k], entries) / closes[k - 1] - 1.0
-                open_step = is_step(open_adjusted, day)
+                open_base = opens[k] / base - 1.0 if base > 0 else open_adjusted
+                open_step = is_step(open_adjusted, day) and is_step(open_base, day)
             if not raw_step and not adjusted_step and not open_step:
                 continue
             gap = c - p
@@ -96,6 +133,7 @@ def detect_steps(
                     "close": float(closes[k]),
                     "raw_move": float(raw),
                     "adjusted_move": float(adjusted),
+                    "base_move": float(base_move),
                     "open_step": bool(open_step),
                     "actions_in_gap": ";".join(f"{kind_}:{value:g}" for kind_, value in entries),
                     "kind": kind,
@@ -105,9 +143,17 @@ def detect_steps(
         records,
         columns=[
             "symbol", "date", "session_index", "previous_date", "gap_sessions", "previous_close", "close",
-            "raw_move", "adjusted_move", "open_step", "actions_in_gap", "kind",
+            "raw_move", "adjusted_move", "base_move", "open_step", "actions_in_gap", "kind",
         ],
     )
+
+
+def adjusted_base(previous_close: float, entries: Sequence[tuple[str, float]]) -> float:
+    if not entries:
+        return previous_close
+    extra = es._apply_actions(0.0, entries)
+    shares = es._apply_actions(1.0, entries) - extra
+    return (previous_close - extra) / shares
 
 
 def unresolved_mask(steps: pd.DataFrame, symbols: Sequence[str], n_sessions: int) -> np.ndarray:
@@ -299,12 +345,154 @@ def recover_delisted(symbols: Iterable[str], delay: float = SCRAPE_DELAY_SECONDS
     return report
 
 
-def check_recent(steps: pd.DataFrame, sessions: Sequence[date], lookback: int) -> list[dict[str, Any]]:
+def recent_unresolved(steps: pd.DataFrame, sessions: Sequence[date], lookback: int) -> pd.DataFrame:
     if not sessions:
-        return []
+        return steps.iloc[0:0]
     cutoff = sessions[max(0, len(sessions) - lookback)]
-    recent = steps[(steps["kind"].isin(UNRESOLVED_KINDS)) & (steps["date"] >= cutoff)]
+    return steps[(steps["kind"].isin(UNRESOLVED_KINDS)) & (steps["date"] >= cutoff)]
+
+
+def check_recent(
+    steps: pd.DataFrame,
+    sessions: Sequence[date],
+    lookback: int,
+    quarantined: Iterable[tuple[str, date]] = (),
+) -> list[dict[str, Any]]:
+    known = set(quarantined)
+    recent = recent_unresolved(steps, sessions, lookback)
+    recent = recent[[(s, d) not in known for s, d in zip(recent["symbol"], recent["date"])]]
     return recent[["symbol", "date", "raw_move", "adjusted_move", "kind"]].astype(str).to_dict("records")
+
+
+def apply_tables(connection: Any) -> None:
+    for statement in TABLES_DDL:
+        connection.execute(text(statement))
+
+
+def load_quarantine(connection: Any) -> pd.DataFrame:
+    exists = connection.execute(text("SELECT to_regclass('public.price_quarantine')")).scalar()
+    if exists is None:
+        return pd.DataFrame(columns=["symbol", "step_date", "raw_move", "reason", "sources_checked"])
+    return pd.read_sql(
+        text("SELECT symbol, step_date, raw_move, reason, sources_checked FROM price_quarantine ORDER BY symbol, step_date"),
+        connection,
+    )
+
+
+def parse_merolagani_actions(html: str) -> dict[str, list[tuple[float, str]]]:
+    body = re.sub(r"<script.*?</script>|<style.*?</style>", " ", html, flags=re.S)
+    body = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", body))
+    out: dict[str, list[tuple[float, str]]] = {"RIGHT": [], "BONUS": []}
+    right = re.search(r"Right Share .*?# Value Fiscal Year(.*?)(?:30-Day Avg Volume|$)", body)
+    if right:
+        for old, new, fy in re.findall(r"\d+\.\s*([\d.]+):([\d.]+)\s*\(FY:\s*([\d-]+)\)", right.group(1)):
+            if float(old) > 0:
+                out["RIGHT"].append((float(new) / float(old) * 100.0, fy))
+    bonus = re.search(r"% Bonus ([^#]*)# Value Fiscal Year(.*?)Right Share", body)
+    if bonus:
+        listed = re.findall(r"\d+\.\s*([\d.]+)%\s*\(FY:\s*([\d-]+)\)", bonus.group(2))
+        headline = re.findall(r"([\d.]+)\s*\(FY:\s*([\d-]+)\)", bonus.group(1))
+        for value, fy in listed + headline:
+            if float(value) > 0 and (float(value), fy) not in out["BONUS"]:
+                out["BONUS"].append((float(value), fy))
+    return out
+
+
+def fetch_merolagani_actions(symbol: str) -> dict[str, list[tuple[float, str]]]:
+    from src.scrapers.http_utils import fetch
+
+    return parse_merolagani_actions(fetch(MEROLAGANI_URL.format(symbol=symbol)).text)
+
+
+def resolve_recent(
+    inputs: dict[str, Any],
+    lookback: int,
+    engine: Any,
+    delay: float = SCRAPE_DELAY_SECONDS,
+) -> dict[str, Any]:
+    from src.pipeline.db_writers import insert_new_corporate_actions
+    from src.scrapers.corporate_actions_scraper import get_corporate_actions
+
+    sessions = inputs["sessions"]
+    steps = detect_steps(inputs["prices"], inputs["actions"], sessions)
+    cutoff = sessions[max(0, len(sessions) - lookback)]
+    near = steps[(steps["date"] >= cutoff) & ((steps["kind"] == RESOLVED) | steps["kind"].isin(UNRESOLVED_KINDS))]
+    report: dict[str, Any] = {"recent_steps": near[["symbol", "date", "raw_move", "adjusted_move", "base_move", "kind", "actions_in_gap"]].astype(str).to_dict("records"),
+                              "sources_recorded": [], "actions_inserted": 0, "quarantined": []}
+    merolagani_status: dict[str, str] = {}
+    with engine.begin() as connection:
+        apply_tables(connection)
+    for symbol, group in near.groupby("symbol"):
+        sharesansar = get_corporate_actions(symbol)
+        time.sleep(delay)
+        try:
+            merolagani = fetch_merolagani_actions(symbol)
+            merolagani_status[symbol] = "checked"
+        except Exception as error:
+            merolagani = {}
+            merolagani_status[symbol] = f"unreachable ({type(error).__name__})"
+        time.sleep(delay)
+        positions = {int(i) for i in group["session_index"]}
+        nearby = [
+            row for row in sharesansar
+            if row["action_date"] <= PRE_HOLDOUT_END
+            and any(abs(bisect.bisect_left(sessions, row["action_date"]) - p) <= HALT_GAP_SESSIONS for p in positions)
+        ]
+        new_rows = [r for r in nearby if r["action_type"] in ("bonus", "right")]
+        if new_rows:
+            inserted, _ = insert_new_corporate_actions(new_rows)
+            report["actions_inserted"] += inserted
+        with engine.begin() as connection:
+            for row in nearby:
+                kind = row["action_type"].upper()
+                value = float(row["ratio_or_amount"])
+                connection.execute(
+                    text(
+                        "INSERT INTO corporate_action_sources (symbol, action_date, action_type, ratio_or_amount, source, source_url, source_detail) "
+                        "VALUES (:s, :d, :t, :v, :src, :u, :det) ON CONFLICT DO NOTHING"
+                    ),
+                    {"s": symbol, "d": row["action_date"], "t": kind, "v": value, "src": SHARESANSAR_SOURCE,
+                     "u": SHARESANSAR_URL.format(slug=symbol.lower()),
+                     "det": f"{kind.lower()} {value:g}% book close {row['action_date']} fiscal year {row['fiscal_year']}"},
+                )
+                match = [fy for v, fy in merolagani.get(kind, []) if abs(v - value) < 0.01]
+                if match:
+                    connection.execute(
+                        text(
+                            "INSERT INTO corporate_action_sources (symbol, action_date, action_type, ratio_or_amount, source, source_url, source_detail) "
+                            "VALUES (:s, :d, :t, :v, :src, :u, :det) ON CONFLICT DO NOTHING"
+                        ),
+                        {"s": symbol, "d": row["action_date"], "t": kind, "v": value, "src": MEROLAGANI_SOURCE,
+                         "u": MEROLAGANI_URL.format(symbol=symbol),
+                         "det": f"{kind.lower()} {value:g}% fiscal year {match[0]} (no book-close date on page)"},
+                    )
+                report["sources_recorded"].append(
+                    {"symbol": symbol, "action_date": str(row["action_date"]), "type": kind, "value": value,
+                     "sharesansar": True, "merolagani": bool(match)}
+                )
+    refreshed = load_inputs(sessions[-1])
+    after = detect_steps(refreshed["prices"], refreshed["actions"], refreshed["sessions"])
+    still = recent_unresolved(after, refreshed["sessions"], lookback)
+    with engine.begin() as connection:
+        for step in still.itertuples(index=False):
+            checked = (
+                f"{SHARESANSAR_URL.format(slug=step.symbol.lower())} dividend and right-share tables: no action within "
+                f"{HALT_GAP_SESSIONS} sessions; {MEROLAGANI_URL.format(symbol=step.symbol)} bonus and right-share sections: "
+                f"{'none' if merolagani_status.get(step.symbol) == 'checked' else merolagani_status.get(step.symbol, 'not checked')}"
+            )
+            connection.execute(
+                text(
+                    "INSERT INTO price_quarantine (symbol, step_date, raw_move, reason, sources_checked) "
+                    "VALUES (:s, :d, :m, :r, :c) ON CONFLICT (symbol, step_date) DO NOTHING"
+                ),
+                {"s": step.symbol, "d": step.date, "m": float(step.raw_move),
+                 "r": f"{step.kind}: close {step.previous_close:g} to {step.close:g} with no corporate action found", "c": checked},
+            )
+            report["quarantined"].append({"symbol": step.symbol, "date": str(step.date), "raw_move": round(float(step.raw_move), 4), "kind": step.kind})
+    report["merolagani"] = merolagani_status
+    report["after"] = after[(after["date"] >= cutoff) & (after["kind"].isin(UNRESOLVED_KINDS) | (after["kind"] == RESOLVED))][
+        ["symbol", "date", "base_move", "kind"]].astype(str).to_dict("records")
+    return report
 
 
 def main() -> None:
@@ -315,19 +503,36 @@ def main() -> None:
     parser.add_argument("--recover-delisted", action="store_true")
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--lookback", type=int, default=60)
+    parser.add_argument("--resolve-recent", action="store_true")
     args = parser.parse_args()
     if args.end > PRE_HOLDOUT_END:
         raise SystemExit(f"--end may not be inside the holdout (after {PRE_HOLDOUT_END})")
     inputs = load_inputs(args.end)
+    if args.resolve_recent:
+        from src.database.connection import engine
+
+        print(json.dumps(resolve_recent(inputs, args.lookback, engine), indent=2, default=str))
+        return
     steps = detect_steps(inputs["prices"], inputs["actions"], inputs["sessions"])
     if args.check:
-        recent = check_recent(steps, inputs["sessions"], args.lookback)
+        from src.database.connection import engine
+
+        with engine.connect() as connection:
+            quarantine = load_quarantine(connection)
+        known = set(zip(quarantine["symbol"], quarantine["step_date"]))
+        acknowledged = [
+            r for r in recent_unresolved(steps, inputs["sessions"], args.lookback)[["symbol", "date", "raw_move", "kind"]].astype(str).to_dict("records")
+            if (r["symbol"], date.fromisoformat(r["date"])) in known
+        ]
+        for row in acknowledged:
+            print(f"quarantined (excluded from live calls): {row}")
+        recent = check_recent(steps, inputs["sessions"], args.lookback, known)
         if recent:
             print(f"DATA QUALITY FAILURE: {len(recent)} unresolved price steps in the last {args.lookback} sessions")
             for row in recent[:50]:
                 print(row)
             sys.exit(1)
-        print(f"price steps check passed: no unresolved steps in the last {args.lookback} sessions")
+        print(f"price steps check passed: no unquarantined unresolved steps in the last {args.lookback} sessions")
         return
     report: dict[str, Any] = {
         "generated_on": date.today().isoformat(),
