@@ -200,7 +200,7 @@ def grade_matured(engine: Engine, state: dict[str, Any], dry_run: bool, schema: 
     return {"live_calls": int(len(calls)), "matured_new_grades": int(len(grades))}
 
 
-def run(as_of: date | None, dry_run: bool, now: datetime | None = None, schema: str = "public") -> dict[str, Any]:
+def run(as_of: date | None, dry_run: bool, now: datetime | None = None, schema: str = "public", write_only: bool = False) -> dict[str, Any]:
     from src.database.connection import engine
     from src.database.holdout_guard import HOLDOUT_START, HoldoutQueryViolation, allow
 
@@ -208,14 +208,14 @@ def run(as_of: date | None, dry_run: bool, now: datetime | None = None, schema: 
         latest = connection.execute(text("SELECT max(date) FROM daily_prices")).scalar_one()
     as_of = as_of or latest
     if as_of < HOLDOUT_START:
-        return _run(as_of, dry_run, now, schema)
+        return _run(as_of, dry_run, now, schema, write_only)
     if as_of != latest:
         raise HoldoutQueryViolation(f"{as_of} is inside the holdout and is not the latest session ({latest}); only live operation may read it")
     with allow("live_ledger"):
-        return _run(as_of, dry_run, now, schema)
+        return _run(as_of, dry_run, now, schema, write_only)
 
 
-def _run(as_of: date, dry_run: bool, now: datetime | None, schema: str) -> dict[str, Any]:
+def _run(as_of: date, dry_run: bool, now: datetime | None, schema: str, write_only: bool = False) -> dict[str, Any]:
     from src.database.connection import engine
 
     now = now or datetime.now(tz=NPT)
@@ -239,7 +239,7 @@ def _run(as_of: date, dry_run: bool, now: datetime | None, schema: str) -> dict[
         report["write"] = "dry run: nothing written" + (" (a live write would be refused: deadline passed)" if report["deadline_passed"] else "")
     else:
         report["write"] = write_live_calls(engine, pd.concat([calls, avoid], ignore_index=True), now, schema)
-    report["grading"] = grade_matured(engine, state, dry_run, schema)
+    report["grading"] = "write-only run: grading is a separate step" if write_only else grade_matured(engine, state, dry_run, schema)
     return report
 
 
@@ -249,9 +249,10 @@ def main() -> None:
     parser.add_argument("--date", type=date.fromisoformat)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--schema", default="public")
+    parser.add_argument("--write-only", action="store_true")
     args = parser.parse_args()
     try:
-        report = run(args.date, args.dry_run, schema=args.schema)
+        report = run(args.date, args.dry_run, schema=args.schema, write_only=args.write_only)
     except TimeoutError as error:
         logger.error("%s", error)
         sys.exit(EXIT_TOO_LATE)

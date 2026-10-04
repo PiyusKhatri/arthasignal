@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily retention purge
+
+[Timer]
+OnCalendar=*-*-* 03:30:00 Asia/Kathmandu
+Persistent=true
+Unit=arthasignal-purge.service
+
+[Install]
+WantedBy=timers.target

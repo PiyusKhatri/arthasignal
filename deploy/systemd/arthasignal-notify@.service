@@ -1,0 +1,10 @@
+[Unit]
+Description=Post failure of %i to Discord
+
+[Service]
+Type=oneshot
+User=arthasignal
+Group=systemd-journal
+WorkingDirectory=/srv/arthasignal/app
+EnvironmentFile=/srv/arthasignal/app/.env
+ExecStart=/srv/arthasignal/app/.venv/bin/python -m src.ops.notify --unit %i

@@ -1,0 +1,16 @@
+[Unit]
+Description=Encrypted daily database backup
+After=network-online.target postgresql.service
+Wants=network-online.target
+OnFailure=arthasignal-notify@%n.service
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+WorkingDirectory=/srv/arthasignal/app
+EnvironmentFile=-/etc/arthasignal/backup.env
+Environment=TZ=Asia/Kathmandu PYTHONUNBUFFERED=1
+ExecStart=/srv/arthasignal/app/deploy/scripts/backup.sh
+TimeoutStartSec=3h
+Nice=5

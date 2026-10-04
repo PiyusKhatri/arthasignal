@@ -497,3 +497,29 @@ The backfill uses the Sharesansar daily page because it is the only source that 
   - the tip hypotheses T1, T2 and A1 were amended in `public_tips_v1`, with their versions unchanged.
 - *K* is now 20 × 104 = 2,080.
 - Tests: 6 for v2.1 (pure, database trigger and writer) and 12 for the promoter rule (including that the research universe has HIDCL but not HIDCLP); suite 543 passed.
+
+## Phase E-B - Production deployment kit
+
+- No server runbook existed. The only earlier server mention is the floorsheet VM backfill in `OPEN_ISSUES.md` D3. `docs/PROD_DEPLOY.md` is new and resolves the open "PRODUCTION DATABASE TOPOLOGY" item in `TODOS.md`; the README points to it.
+- Target: Ubuntu 24.04, t3.medium, ap-south-1, Elastic IP. Postgres 17 (PGDG) on localhost only, ufw with SSH only, a security group with SSH from your IP only, Python 3.12 via uv, server time zone Asia/Kathmandu.
+- Code:
+  - `src/ops/`: `capture` (NEPSE API, Sharesansar and Merolagani fallbacks, retries until 20:30, checked against both calendars), `daily` (ordered chain with resume, plus the gating described below), `scoring` (grade and metrics), `report` (daily and weekly Discord reports), `health` (failed jobs, stale prices, writers not done, stale news, backups, disk; one alert per issue through `ops_alerts`), `notify` (systemd OnFailure), `backfill`, and the append-only `runlog` (`ops_runs`);
+  - `price_integrity --live` checks the latest 60 sessions under the live-ledger exception;
+  - the league and v0.1 writers gained `--write-only`, so grading and metrics run as separate steps.
+- Chain gating: a session with no prices stops everything except news. A capture failure does the same and alerts. An integrity failure blocks the three writers (league, avoid writer, tips) and alerts, while grading and metrics still run.
+- `deploy/`:
+  - 8 timers plus services and `arthasignal-notify@`;
+  - `bootstrap_server.sh`, `dump_local.sh`, `restore_server.sh`, `backup.sh` (`age` encryption to an offline key, keeps 14, optional S3), `install_units.sh`;
+  - SQL for owner hand-over and role grants;
+  - Postgres, logrotate, tmpfiles and journald config;
+  - `.env` and password templates. No secret is committed.
+- **Checked on the laptop (real output, 2026-10-04):**
+  - `dump_local.sh`: 286 MB dump, 113 tables counted, 33 s.
+  - A restore **as a non-superuser owner failed**: 26 errors, among them "query would be affected by row-level security policy" on 9 tables and permission denied for 7 Supabase-era event triggers.
+  - Fixed path: restore as superuser with `--no-owner` (0 errors), then reassign ownership to a non-superuser role (0 public tables left with another owner). **All 113 table row counts match the manifest** (for example `scorecard_grades` 7,695,134 and `daily_prices` 596,256). 23 holdout policies and 15 append-only or deadline triggers present. The non-superuser owner can write a valid live call.
+  - Found on the way: locally `arthasignal_research` gets its access by being a **member of the superuser owner role**, a global object `pg_dump` does not carry, and broader than needed. The server gets explicit grants instead: select on all tables, insert only into the registry and ledger tables. On the restored copy the research role saw `daily_prices` up to 2025-09-28 only, 0 `text_items` and 0 holdout-era calls, and was refused an UPDATE on `daily_prices`.
+  - The scratch database and role were dropped.
+  - All requirements resolve as Linux x86_64 Python 3.12 wheels (71), plus the pure-Python `pyaes` source package that Telethon needs.
+  - Ops dry runs: the chain list prints 9 steps in the requested order. `backfill --since 2026-09-29 --dry-run` expects 2026-09-30, 10-01 and 10-02 and finds all three missing (some may be Dashain holidays; the holiday list is empty). The health check flags stale prices and no backup. The reports render. Fixed on the way: an unreadable backup directory crashed the check, and now it is reported.
+  - Nothing was run on any server.
+- Tests: 8 added (`tests/test_ops.py`); suite 551 passed.

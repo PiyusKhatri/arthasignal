@@ -1,0 +1,11 @@
+[Unit]
+Description=Tip cycle hourly and before the open
+
+[Timer]
+OnCalendar=*-*-* *:05:00
+OnCalendar=Mon..Fri *-*-* 10:25:00 Asia/Kathmandu
+Persistent=false
+Unit=arthasignal-tips.service
+
+[Install]
+WantedBy=timers.target

@@ -93,7 +93,7 @@ This creates the new `refresh_sessions` and `user_auth_state` tables without dro
 
 ## PRODUCTION DATABASE TOPOLOGY
 
-**Status:** OPEN deployment decision.
+**Status:** DECIDED 2026-10-04: one Ubuntu 24.04 server in AWS Mumbai runs Postgres (localhost only) and every scheduled job under systemd. Step-by-step runbook: `docs/PROD_DEPLOY.md`. The notes below describe the earlier options.
 
 The local Docker PostgreSQL instance is valid for local development only. GitHub-hosted scheduled runners cannot reach a laptop-local database.
 

@@ -511,6 +511,23 @@ def resolve_recent(
     return report
 
 
+def live_check(lookback: int) -> int:
+    from src.database.connection import engine as main_engine
+    from src.database.holdout_guard import allow
+
+    with main_engine.connect() as connection:
+        latest = connection.execute(text("SELECT max(date) FROM daily_prices")).scalar_one()
+        quarantine = load_quarantine(connection)
+    with allow("live_ledger"):
+        inputs = load_inputs(latest)
+    steps = detect_steps(inputs["prices"], inputs["actions"], inputs["sessions"])
+    known = set(zip(quarantine["symbol"], quarantine["step_date"]))
+    recent = check_recent(steps, inputs["sessions"], lookback, known)
+    print(json.dumps({"latest_session": latest.isoformat(), "lookback": lookback, "unresolved_unquarantined": recent[:50],
+                      "count": len(recent)}, indent=2, default=str))
+    return 1 if recent else 0
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     parser = argparse.ArgumentParser()
@@ -520,7 +537,10 @@ def main() -> None:
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--lookback", type=int, default=60)
     parser.add_argument("--resolve-recent", action="store_true")
+    parser.add_argument("--live", action="store_true")
     args = parser.parse_args()
+    if args.live:
+        sys.exit(live_check(args.lookback))
     if args.end > PRE_HOLDOUT_END:
         raise SystemExit(f"--end may not be inside the holdout (after {PRE_HOLDOUT_END})")
     inputs = load_inputs(args.end)

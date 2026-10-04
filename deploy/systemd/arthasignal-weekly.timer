@@ -1,0 +1,10 @@
+[Unit]
+Description=Weekly report on Saturday morning
+
+[Timer]
+OnCalendar=Sat *-*-* 09:00:00 Asia/Kathmandu
+Persistent=true
+Unit=arthasignal-weekly.service
+
+[Install]
+WantedBy=timers.target

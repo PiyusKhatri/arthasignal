@@ -1,0 +1,15 @@
+[Unit]
+Description=Health check: failed jobs, stale data, backups, disk
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=arthasignal
+Group=arthasignal
+WorkingDirectory=/srv/arthasignal/app
+EnvironmentFile=/srv/arthasignal/app/.env
+Environment=TZ=Asia/Kathmandu PYTHONUNBUFFERED=1
+ExecStart=/srv/arthasignal/app/.venv/bin/python -m src.ops.health
+TimeoutStartSec=10min
+Nice=5

@@ -1,0 +1,10 @@
+[Unit]
+Description=Run the post-close chain on NEPSE weekdays at 15:35 NPT
+
+[Timer]
+OnCalendar=Mon..Fri *-*-* 15:35:00 Asia/Kathmandu
+Persistent=true
+Unit=arthasignal-daily.service
+
+[Install]
+WantedBy=timers.target

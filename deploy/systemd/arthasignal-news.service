@@ -1,0 +1,16 @@
+[Unit]
+Description=Collect news-portal items
+After=network-online.target postgresql.service
+Wants=network-online.target
+OnFailure=arthasignal-notify@%n.service
+
+[Service]
+Type=oneshot
+User=arthasignal
+Group=arthasignal
+WorkingDirectory=/srv/arthasignal/app
+EnvironmentFile=/srv/arthasignal/app/.env
+Environment=TZ=Asia/Kathmandu PYTHONUNBUFFERED=1
+ExecStart=/srv/arthasignal/app/.venv/bin/python -m src.collectors.run news
+TimeoutStartSec=25min
+Nice=5

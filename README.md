@@ -89,6 +89,8 @@ Legacy plaintext reset tokens created by older code are intentionally no longer 
 
 ## Scheduled pipelines: important deployment rule
 
+The production setup for the prediction system (one server, Postgres on localhost, systemd timers, Discord reports, encrypted backups) is in `docs/PROD_DEPLOY.md`. The GitHub workflow notes below apply only if you run the legacy workflows.
+
 The local Docker database is for local development. A GitHub-hosted Actions runner cannot connect to a database that exists only on a developer laptop or at `localhost`.
 
 For the scheduled daily, intraday, and fundamentals workflows, choose one production topology:

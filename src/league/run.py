@@ -243,7 +243,7 @@ def write_leaderboard(engine: Engine, board: dict[int, list[dict[str, Any]]], as
 
 
 def run(as_of: date | None, dry_run: bool, now: datetime | None = None, schema: str = "public",
-        markdown_dir: Path | None = None) -> dict[str, Any]:
+        markdown_dir: Path | None = None, write_only: bool = False) -> dict[str, Any]:
     from src.database.connection import engine
     from src.database.holdout_guard import HOLDOUT_START, HoldoutQueryViolation, allow
 
@@ -253,14 +253,15 @@ def run(as_of: date | None, dry_run: bool, now: datetime | None = None, schema: 
     if as_of < HOLDOUT_START:
         if not dry_run:
             raise HoldoutQueryViolation(f"{as_of} is before the league start; only dry runs may use development dates")
-        return _run(as_of, dry_run, now, schema, markdown_dir)
+        return _run(as_of, dry_run, now, schema, markdown_dir, write_only)
     if as_of != latest:
         raise HoldoutQueryViolation(f"{as_of} is inside the holdout and is not the latest session ({latest}); only live operation may read it")
     with allow("live_ledger"):
-        return _run(as_of, dry_run, now, schema, markdown_dir)
+        return _run(as_of, dry_run, now, schema, markdown_dir, write_only)
 
 
-def _run(as_of: date, dry_run: bool, now: datetime | None, schema: str, markdown_dir: Path | None) -> dict[str, Any]:
+def _run(as_of: date, dry_run: bool, now: datetime | None, schema: str, markdown_dir: Path | None,
+         write_only: bool = False) -> dict[str, Any]:
     from src.database.connection import engine
 
     started = datetime.now(tz=NPT)
@@ -295,6 +296,10 @@ def _run(as_of: date, dry_run: bool, now: datetime | None, schema: str, markdown
         report["grading"] = "dry run: not graded"
     else:
         report["write"] = write_calls(engine, batch, now, schema)
+        if write_only:
+            report["grading"] = "write-only run: grading and leaderboard are separate steps"
+            _log_run(engine, as_of, started, report, schema)
+            return report
         report["grading"] = grade_matured(engine, state, dry_run, schema)
         graded = load_live_graded(engine, schema)
     tests = penalty_tests(engine)
@@ -310,12 +315,16 @@ def _run(as_of: date, dry_run: bool, now: datetime | None, schema: str, markdown
         path.write_text(markdown(board, as_of))
         report["markdown"] = str(path)
     if not dry_run:
-        with engine.begin() as connection:
-            connection.execute(
-                text(f"INSERT INTO {schema}.league_runs (as_of, started_at, code_commit, report) VALUES (:d, :s, :c, CAST(:r AS jsonb))"),
-                {"d": as_of, "s": started, "c": code_commit(), "r": json.dumps(report, default=str)},
-            )
+        _log_run(engine, as_of, started, report, schema)
     return report
+
+
+def _log_run(engine: Engine, as_of: date, started: datetime, report: dict[str, Any], schema: str) -> None:
+    with engine.begin() as connection:
+        connection.execute(
+            text(f"INSERT INTO {schema}.league_runs (as_of, started_at, code_commit, report) VALUES (:d, :s, :c, CAST(:r AS jsonb))"),
+            {"d": as_of, "s": started, "c": code_commit(), "r": json.dumps(report, default=str)},
+        )
 
 
 def main() -> None:
@@ -326,6 +335,7 @@ def main() -> None:
     parser.add_argument("--schema", default="public")
     parser.add_argument("--markdown-dir", type=Path)
     parser.add_argument("--register-only", action="store_true")
+    parser.add_argument("--write-only", action="store_true")
     args = parser.parse_args()
     if args.register_only:
         from src.database.connection import engine
@@ -334,7 +344,7 @@ def main() -> None:
         print(json.dumps(register_bots(engine, args.schema, DatabaseLedger()), indent=2, default=str))
         return
     try:
-        report = run(args.date, args.dry_run, schema=args.schema, markdown_dir=args.markdown_dir)
+        report = run(args.date, args.dry_run, schema=args.schema, markdown_dir=args.markdown_dir, write_only=args.write_only)
     except TimeoutError as error:
         logger.error("%s", error)
         sys.exit(EXIT_TOO_LATE)

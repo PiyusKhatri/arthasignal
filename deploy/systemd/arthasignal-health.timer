@@ -1,0 +1,10 @@
+[Unit]
+Description=Hourly health check
+
+[Timer]
+OnCalendar=*-*-* *:50:00
+Persistent=false
+Unit=arthasignal-health.service
+
+[Install]
+WantedBy=timers.target
