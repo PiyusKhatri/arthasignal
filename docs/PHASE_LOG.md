@@ -360,3 +360,10 @@ The backfill uses the Sharesansar daily page because it is the only source that 
   - 1 is a possible same-issuer case (SMLBSL / MLBS) to verify;
   - the rest are issuers missing from `companies`.
 - Nothing was merged. A first version wrongly called the two `symbol_history` merger cases "certain"; that was corrected before any write.
+
+## Phase Q4 follow-up - first latest-quarter capture
+
+- First full run on 2026-10-04 (09:31-10:03 Nepal time) over 312 active symbols: 263 statements captured, 0 errors, 49 with no statement on the tab. 32 of those 49 are promoter-share lines.
+- 259 rows are 4th quarter 2082/83 and 4 are 3rd quarter 2082/83. EPS was present in 215.
+- A second run on NABIL and EBL stored nothing new (2 unchanged), so a capture is written only when the statement changes.
+- The dated EPS and balance-sheet history starts here. No schedule was installed.
