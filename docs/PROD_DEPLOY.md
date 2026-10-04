@@ -138,11 +138,15 @@ sudo -u arthasignal /srv/arthasignal/app/.venv/bin/python --version   # Python 3
    - the api_readonly password in `DATABASE_URL_READONLY`;
    - your Discord webhook in `DISCORD_WEBHOOK_URL`;
    - a new random `JWT_SECRET_KEY` (`openssl rand -hex 32`).
-3. **Research role login** (the holdout guard connects as `arthasignal_research` without a password in the URL, so it is read from `.pgpass`). Use the RESEARCH password from step 1:
+3. **Research role login.** The holdout guard (`src/database/holdout_guard.py`, `research_url()`) builds its connection from `DATABASE_URL`: same host, port and database, user `arthasignal_research`, and **no password at all**. The app's password is never reused for it. The login library therefore reads the research password from `.pgpass`. Use the RESEARCH password from step 1:
    ```bash
    echo "localhost:5432:arthasignal:arthasignal_research:<RESEARCH_PASSWORD>" | sudo -u arthasignal tee /srv/arthasignal/.pgpass >/dev/null
    sudo chmod 600 /srv/arthasignal/.pgpass
    ```
+   - The host field must match the host written in `DATABASE_URL` exactly. With the template that is `localhost`; if you wrote `127.0.0.1` there, write `127.0.0.1` here.
+   - The file must be `chmod 600`, or it is ignored.
+   - **Optional alternative:** instead of `.pgpass`, put `RESEARCH_DATABASE_URL=postgresql+psycopg2://arthasignal_research:<RESEARCH_PASSWORD>@localhost:5432/arthasignal` in `.env`. It is refused unless the user name is exactly `arthasignal_research`, so it can never point the guard at the app role.
+   - Before 2026-10-04 the code reused the app password for this login, which fails on a server with real passwords. If your server checkout is older than that, `git pull` first.
 4. **Backup public key** (the `age1…` line from Part 1, step 3):
    ```bash
    echo "age1PASTE_YOUR_PUBLIC_KEY" | sudo tee /etc/arthasignal/backup_recipient.txt
@@ -196,6 +200,10 @@ with research_engine().connect() as c:
 ```
 
 It must print `2025-09-28`, the last session before the holdout. If it prints a later date, stop and do not run research on this server.
+
+If it fails instead:
+- "fe_sendauth: no password supplied" means `.pgpass` is missing, not `chmod 600`, or its host field differs from `DATABASE_URL`'s host.
+- "password authentication failed for user arthasignal_research" means the password in `.pgpass` is not the RESEARCH password from `/etc/arthasignal/db_passwords.env`.
 
 ## Part 7: Fill the missing price sessions (once)
 

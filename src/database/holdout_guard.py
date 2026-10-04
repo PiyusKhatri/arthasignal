@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 from contextlib import contextmanager
 from contextvars import ContextVar
@@ -8,7 +9,7 @@ from datetime import date, datetime
 from typing import Any, Iterator
 
 from sqlalchemy import create_engine, event, text
-from sqlalchemy.engine import Engine
+from sqlalchemy.engine import URL, Engine, make_url
 from sqlalchemy.pool import QueuePool
 
 logger = logging.getLogger(__name__)
@@ -138,14 +139,35 @@ def install(engine: Engine) -> Engine:
     return engine
 
 
+def research_url(base_url: str | None = None, override: str | None = None) -> URL:
+    from src.config import assert_allowed_database_url
+
+    override = override if override is not None else os.environ.get("RESEARCH_DATABASE_URL") or None
+    if override:
+        url = make_url(assert_allowed_database_url("RESEARCH_DATABASE_URL", override))
+        if url.username != RESEARCH_ROLE:
+            raise HoldoutQueryViolation(f"RESEARCH_DATABASE_URL must log in as {RESEARCH_ROLE}, not {url.username!r}")
+        return url
+    if base_url is None:
+        from src.config import settings
+
+        base_url = settings.database_url
+    base = make_url(base_url)
+    return URL.create(
+        drivername=base.drivername,
+        username=RESEARCH_ROLE,
+        password=None,
+        host=base.host,
+        port=base.port,
+        database=base.database,
+        query=base.query,
+    )
+
+
 def research_engine() -> Engine:
     global _research_engine
     if _research_engine is None:
-        from src.config import settings
-
-        from sqlalchemy.engine import make_url
-
-        url = make_url(settings.database_url).set(username=RESEARCH_ROLE, password=None)
+        url = research_url()
         _research_engine = install(
             create_engine(
                 url,

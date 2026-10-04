@@ -541,3 +541,24 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - **Not ready to run live** (no live broker features, audit failure), so no challenger bot was registered. Report: `docs/RANKER_RESULTS.md`.
 - `lightgbm==4.7.0` and `scikit-learn==1.9.1` were added; both resolve as Linux Python 3.12 wheels. On macOS LightGBM needs `brew install libomp`.
 - Tests: 6 added (`tests/test_ranker.py`, including a synthetic no-look-ahead feature check).
+
+## Fix - research role URL kept the app password
+
+- **Bug:** `research_engine()` built its URL with `make_url(settings.database_url).set(username=RESEARCH_ROLE, password=None)`. SQLAlchemy's `URL.set` ignores `None`, so the app role's password was sent for `arthasignal_research`. Confirmed on SQLAlchemy 2.0.52: the derived URL still carried the password. It only worked on the laptop because the local login needs no password.
+- **Fix** (`src/database/holdout_guard.py`): a new `research_url()` rebuilds the URL with `URL.create(...)` from the parsed parts (driver, host, port, database, query), with user `arthasignal_research` and no password. The login library then reads the password from `~/.pgpass`.
+- An optional `RESEARCH_DATABASE_URL` overrides it. It is refused unless its user is `arthasignal_research`, so it cannot point the guard at the app role, and refused if it names a Supabase host.
+- **Other places:** a search of `src`, `tests`, `scripts`, `deploy` and `archive` for `.set(`, `make_url`, `password=None`, `username=` and string surgery on the database URL found no other derived role URL.
+- **Tests** (`tests/test_research_url.py`, 4):
+  - the research URL has no password and never contains the app password, while host, port, database and query are kept;
+  - the old `.set` call is shown to keep the password;
+  - `research_engine()` built from the configured settings has no password;
+  - the override rules.
+- Full suite on the laptop database: **561 passed**.
+- **Scram proof:** a scratch PostgreSQL 17 cluster with `scram-sha-256` for every connection (TCP only). The real dump was restored into it as the server does it: 57 s, 0 errors, then ownership hand-over and role grants, with password-protected roles `arthasignal` (non-superuser owner), `arthasignal_research` and `api_readonly`.
+  1. Fixed URL with the research password in `PGPASSFILE`: connects as `arthasignal_research`, and the latest visible `daily_prices` date is 2025-09-28 (the holdout guard holds).
+  2. Fixed URL with an empty `.pgpass`: refused with "fe_sendauth: no password supplied".
+  3. The old `.set(password=None)` URL with the same `.pgpass`: it still carried a password and was refused with "password authentication failed for user arthasignal_research". This is the bug, reproduced.
+  4. The app role with its own password: connects and sees 2026-09-29.
+  - **The full suite against that cluster, as the non-superuser app role with the research login only through `.pgpass`: 561 passed, 0 skipped.** A test user row created by the auth integration test appeared in the scram cluster, confirming the suite ran there.
+  - The scratch cluster and its passwords were deleted afterwards.
+- `docs/PROD_DEPLOY.md`: the research-login step now explains the no-password URL, the `.pgpass` host-matching and permission rules, the optional `RESEARCH_DATABASE_URL`, and the two error messages to expect.
