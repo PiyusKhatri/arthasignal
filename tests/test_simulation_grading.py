@@ -13,6 +13,7 @@ from src.simulation.grading import (
     FLOORSHEET_DERIVED,
     GRADED,
     HOLD,
+    LEARNING_EMBARGO,
     LOCKED_UPPER,
     NO_BUY,
     NO_TRADE,
@@ -33,6 +34,7 @@ from src.simulation.grading import (
     grade,
     hidden,
     last_price_date,
+    learning_call_allowed,
     max_drawdown,
     position_call,
     risk_control,
@@ -67,7 +69,7 @@ def call(kind, holding=20, target=None, stop=None, reference=100.0, horizon="sho
 
 
 def test_protocol_identity_and_horizons():
-    assert P.version == "sim-protocol-v1.2"
+    assert P.version == "sim-protocol-v1.3"
     assert len(P.sha256) == 64
     assert P.holding_range("short") == (19, 57)
     assert P.holding_range("mid") == (57, 133)
@@ -398,7 +400,7 @@ def test_risk_control_empty_and_no_tail_loss():
 def test_registration_parameters_carry_config_hash():
     from src.simulation.register import protocol_parameters
 
-    assert protocol_parameters() == {"protocol": "sim-protocol-v1.2", "config_sha256": P.sha256}
+    assert protocol_parameters() == {"protocol": "sim-protocol-v1.3", "config_sha256": P.sha256}
 
 
 def free_protocol():
@@ -414,7 +416,6 @@ def free_protocol():
 
 
 def test_v11_decisions_in_config():
-    assert P.raw["protocol"]["previous"]["version"] == "sim-protocol-v1.1"
     assert P.raw["costs"]["notional_npr"] == 100000
     assert P.settlement_sessions(date(2016, 1, 1)) == 3
     assert P.settlement_sessions(date(2024, 6, 1)) == 3
@@ -621,7 +622,6 @@ def test_sealing_spans_every_later_exam_year_and_ignores_own_and_learning_years(
 
 
 def test_v12_decisions_in_config():
-    assert P.raw["protocol"]["previous"]["config_sha256"].startswith("d495721a")
     assert P.raw["target_stop"]["max_pbo"] == 0.3
     assert "call accuracy edge" in P.raw["target_stop"]["selection"]
     assert P.raw["floorsheet_ohlc"]["min_quantity"] == 10
@@ -665,3 +665,51 @@ def test_floorsheet_derived_bars_before_2018():
     out = grade(call(BUY, target=120, stop=90, day=day), bars, P)
     assert out.entry_price == 98.0
     assert out.reason == "target" and out.exit_price == 120
+
+
+def test_v13_learning_embargo_in_config():
+    assert P.raw["protocol"]["previous"] == {
+        "version": "sim-protocol-v1.2",
+        "config_sha256": "7d961a97a0352d306506e9fd38ecfa898030bef727669ea06ef457667e0e2e37",
+        "commit": "a200731",
+    }
+    assert P.learning_end == date(2019, 12, 31)
+    assert P.raw["periods"]["learning_embargo"]["kind"] == "embargo, not sealing"
+
+
+def test_learning_call_crossing_into_2020_is_not_made():
+    day = date(2019, 11, 3)
+    crossing = call(BUY, holding=40, stop=80, day=day)
+    assert learning_call_allowed(crossing, 35) is False
+    with pytest.raises(ValueError, match=LEARNING_EMBARGO):
+        grade(crossing, path(flat(35), start=day), P, sessions_before_learning_end=35)
+    for kind in (HOLD, NO_BUY, SELL, WAIT):
+        with pytest.raises(ValueError, match=LEARNING_EMBARGO):
+            grade(call(kind, holding=40, stop=80, day=day), path(flat(35), start=day), P, sessions_before_learning_end=35)
+
+
+def test_learning_call_ending_by_2019_is_graded():
+    day = date(2019, 11, 3)
+    inside = call(BUY, holding=20, stop=80, day=day)
+    assert learning_call_allowed(inside, 35) is True
+    out = grade(inside, path(flat(35), start=day), P, sessions_before_learning_end=35)
+    assert out.status == GRADED and out.exit_date <= date(2019, 12, 31)
+    exact = grade(call(BUY, holding=35, stop=80, day=day), path(flat(35), start=day), P, sessions_before_learning_end=35)
+    assert exact.status == GRADED and exact.exit_date == date(2019, 12, 8)
+
+
+def test_learning_run_never_reads_2020_prices_and_delayed_exits_are_ungraded():
+    day = date(2019, 11, 3)
+    with pytest.raises(ValueError, match="after the learning period"):
+        grade(call(BUY, holding=20, stop=80, day=day), path(flat(60), start=day), P, sessions_before_learning_end=35)
+    delayed = path(flat(20), start=day, no_trade={19})
+    out = grade(call(BUY, holding=20, stop=80, day=day), delayed, P, sessions_before_learning_end=20)
+    assert out.status == UNGRADED and out.reason == LEARNING_EMBARGO and out.correct is None
+    with pytest.raises(ValueError, match="not in the learning period"):
+        grade(call(BUY, holding=20, stop=80, day=date(2020, 1, 5)), path(flat(20), start=date(2020, 1, 5)), P, sessions_before_learning_end=20)
+
+
+def test_check_and_exam_runs_are_not_embargoed():
+    day = date(2020, 12, 6)
+    out = grade(call(BUY, holding=40, stop=80, day=day), path(flat(45), start=day), P)
+    assert out.status == GRADED and out.exit_date > date(2020, 12, 31)

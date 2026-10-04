@@ -48,6 +48,10 @@ class Protocol:
         return int(effective_row(self.raw["entry"]["settlement"]["schedules"], entry_day)["sessions_before_sell"])
 
     @property
+    def learning_end(self) -> date:
+        return as_date(self.raw["periods"]["learning"]["end"])
+
+    @property
     def holdout_start(self) -> date:
         return as_date(self.raw["protocol"]["holdout_start"])
 

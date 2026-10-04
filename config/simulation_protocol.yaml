@@ -1,8 +1,8 @@
 protocol:
-  version: sim-protocol-v1.2
+  version: sim-protocol-v1.3
   locked_on: "2026-10-04"
-  previous: {version: sim-protocol-v1.1, config_sha256: d495721a14f38485aa56335ce367bc0f519e34bfb7a22f0e099b38f4a5233b20, commit: 2229c8d}
-  owner_decisions: all 15 open questions of v1 decided in v1.1; Q16 to Q20 decided in v1.2, 2026-10-04
+  previous: {version: sim-protocol-v1.2, config_sha256: 7d961a97a0352d306506e9fd38ecfa898030bef727669ea06ef457667e0e2e37, commit: a200731}
+  owner_decisions: all 15 open questions of v1 decided in v1.1; Q16 to Q20 decided in v1.2; Q22 decided in v1.3, 2026-10-04
   document: docs/SIMULATION_PROTOCOL.md
   trial_family: simulation_protocol
   holdout_start: "2025-09-30"
@@ -224,6 +224,11 @@ targets:
 
 periods:
   learning: {start: "2014-06-01", end: "2019-12-31", runs: unlimited}
+  learning_embargo:
+    rule: in learning runs a call is made only when its whole holding period ends by the learning end; a call that would cross into 2020 is not made
+    kind: embargo, not sealing
+    delayed_exit_past_learning_end: ungraded, counted
+    path_prices_after_learning_end: never read in learning runs
   check: {start: "2020-01-01", end: "2020-12-31", runs_per_version: 1}
   exam:
     - {name: exam_2021, start: "2021-01-01", end: "2021-12-31", runs_per_version: 1}

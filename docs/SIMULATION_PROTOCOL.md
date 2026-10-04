@@ -1,9 +1,9 @@
-# Simulation protocol v1.2
+# Simulation protocol v1.3
 
-- **Version:** `sim-protocol-v1.2`, locked 2026-10-04.
-  - **Replaces** `sim-protocol-v1.1` (commit 2229c8d, config SHA-256 `d495721a…3b20`).
-  - **Earlier versions:** v1.1 replaced `sim-protocol-v1` (commit 702dcc0, `be906e7f…5656`). Both stay in git history.
-  - **Decisions:** the owner decided v1's 15 open questions in v1.1, and Q16-Q20 in v1.2. The changelog is section 15.
+- **Version:** `sim-protocol-v1.3`, locked 2026-10-04.
+  - **Replaces** `sim-protocol-v1.2` (commit a200731, config SHA-256 `7d961a97…2e37`).
+  - **Earlier versions:** v1.2 replaced v1.1 (commit 2229c8d, `d495721a…3b20`), which replaced `sim-protocol-v1` (commit 702dcc0, `be906e7f…5656`). All stay in git history.
+  - **Decisions:** the owner decided v1's 15 open questions in v1.1, Q16-Q20 in v1.2 and Q22 in v1.3. The changelog is section 15.
 - **Constants:** every number and rule below lives in `config/simulation_protocol.yaml`. Code reads rules only from that file (`src/simulation/protocol.py`), and the SHA-256 of the file bytes is the protocol's identity. If the doc and the config disagree, the config is what runs, and the disagreement is a bug to fix in a new version.
 - **Scope:** this phase locks the rules and implements only call grading and costs (`src/simulation/grading.py`, `src/simulation/costs.py`), tested on synthetic price paths. Nothing was built yet: no simulator, no score, and no study run on real data. The real-data reads were:
   - in v1, a count of trading sessions per month from `trading_calendar` (section 3) and a check of the trial table;
@@ -216,7 +216,7 @@ NEPSE has no short selling, so SELL never means "go short".
   - **Which grades:** every horizon class and every graded call type. The prices counted are the latest used by the grade, at its exit or at the hold-to-horizon counterfactual.
   - **"Later exam year":** an exam year that starts after the call date and is not the call's own period. When the prices reach several later exam years, the grade stays hidden until all of them have run.
   - **Examples:** a 2024 long call that uses 2025 prices, a 2023 long call that uses 2024 prices, and a December 2021 short call that uses January 2022 prices. A check-year (2020) call that uses 2021 prices stays hidden until `exam_2021` has run.
-  - **Not sealed:** a learning-year call that uses 2020 prices, because the check year is not an exam year (Q22).
+  - **Learning calls never use 2020 prices:** the learning embargo (section 10) stops them from being made, so no sealing is needed for them.
   - **In code:** `hidden(outcome, completed_runs)`.
 
 ## 8. Risk control score (separate from accuracy)
@@ -264,6 +264,11 @@ NEPSE has no short selling, so SELL never means "go short".
 | Exam | 2021, 2022, 2023, 2024, then 2025-01-01 to 2025-09-29 (`exam_2025`), strictly in that order | Exactly one run per frozen version per year |
 | Holdout | 2025-09-30 onward | Final verdict only |
 
+- **Learning embargo (Q22, v1.3):** in a learning run, a call is made only when its whole holding period ends by **2019-12-31**.
+  - **Calls that would cross into 2020** are **not made**. This is an embargo, not sealing: the call never exists, so there is no grade to hide.
+  - **In code:** `learning_call_allowed(call, n)`, and `grade(..., sessions_before_learning_end=n)`, where *n* is the number of calendar sessions after the call date up to 2019-12-31. The grader refuses a crossing call and any path bar after 2019-12-31.
+  - **Delayed exits:** a made call whose exit is delayed past 2019-12-31 (no trade or a locked lower circuit on its horizon day) is `ungraded` with reason `learning_embargo` and counted.
+  - **The cost:** long calls (133-285 sessions) cannot be made after roughly the first half of 2018 or early 2019, and mid calls after mid-2019.
 - **No back-testing on the same year:** a lesson learned from an exam year can only be judged on a **later** year. A version created after seeing exam 2022 may be run on 2023 and later, never on 2022 or earlier exam years.
 - **2025-01 to 2025-09-29 is the last exam, `exam_2025` (decision 7).** It is the least-seen development window: no earlier study used prices after 2025-01-19.
   - **Holdout-reaching calls:** any call whose holding path would reach 2025-09-30 is left **ungraded** and counted. Outcomes may use prices after a period's end, but never past 2025-09-29. Most long calls made after about 2024-08 and nearly all mid and long calls in 2025 are lost this way.
@@ -313,6 +318,7 @@ NEPSE has no short selling, so SELL never means "go short".
   - v1: parameters `{protocol: sim-protocol-v1, config_sha256: be906e7f…5656}`, fingerprint `7fc6c9e4…eb5f`;
   - v1.1: parameters `{protocol: sim-protocol-v1.1, config_sha256: d495721a…3b20}`, fingerprint `a2e192bd…57f4`;
   - v1.2: parameters `{protocol: sim-protocol-v1.2, config_sha256: 7d961a97…2e37}`, fingerprint `9d87c529…77e2`;
+  - v1.3: parameters `{protocol: sim-protocol-v1.3, config_sha256: 22f2065e…0c89}`, fingerprint `1847392b…fe89`;
   - each was written by `python -m src.simulation.register` on the research role, idempotent. The server command is in `docs/PROD_DEPLOY.md` Part 11.
 
   Any change to the config changes the hash and needs a new version.
@@ -357,7 +363,7 @@ NEPSE has no short selling, so SELL never means "go short".
 
 ## 14. Open questions for the owner
 
-v1's 15 questions were decided in v1.1, and Q16-Q20 in v1.2 (section 15). Still open:
+v1's 15 questions were decided in v1.1, Q16-Q20 in v1.2 and Q22 in v1.3 (section 15). Still open:
 
 21. **Fee documents to obtain (decision 14).** None of the unconfirmed figures was found in an official SEBON or NEPSE document online. These are the documents to look for:
     - **Commission before 2016-08:** the schedule of the Securities Businessperson (Stockbroker, Securities Dealer and Market Maker) Regulations 2064 (2008) as in force from 2014 to July 2016.
@@ -367,9 +373,14 @@ v1's 15 questions were decided in v1.1, and Q16-Q20 in v1.2 (section 15). Still 
     - **CGT from 2026-07-17:** the Finance Act 2083 (Section 95A rates for listed securities), and the Nepal Gazette notice of 2026-09-22 with the reduced rates.
     - **T+2 settlement:** the CDSC notice that put T+2 into force under the SEBON amendment of the Securities Transactions Clearing and Settlement Regulations 2069 (January 2021).
 
-22. **Learning-year calls that use check-year prices.** Sealing covers only later exam years (Q20). A learning call made in late 2019 can use 2020 prices, which the check run treats as unseen, and learning runs are unlimited. Should such grades be sealed until the check has run, or should learning calls be cut so that their holding path ends by 2019-12-31?
 
 ## 15. Changelog
+
+### v1.3 (2026-10-04): the owner's decision on Q22
+
+22. **Learning embargo:** learning-year calls must have their whole holding period end by 2019-12-31. Calls that would cross into 2020 are not made in learning runs; this is an embargo, not sealing.
+    - **Delayed exits:** a made call whose exit is delayed past 2019-12-31 is ungraded (`learning_embargo`).
+    - **In code:** the grader refuses crossing calls and any 2020 bar in a learning run.
 
 ### v1.2 (2026-10-04): the owner's decisions on Q16-Q20
 

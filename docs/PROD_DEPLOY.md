@@ -369,9 +369,9 @@ A day without a session, for example `--as-of 2025-01-17`, must stop at capture 
 
 If step 6 does not print exit 0, or the rehearsal does not exit 0, **do not** let Monday's chain run: `sudo systemctl stop arthasignal-daily.timer`, and send me the output of steps 3-6.
 
-## Part 11: Register simulation protocol v1.2 in the trial table
+## Part 11: Register simulation protocol v1.3 in the trial table
 
-After `git pull` (Part 10 step 2), run this once on the server. It registers the protocol version in the committed config, which is now v1.2. It writes one row to `backtest_variant_trials` as `arthasignal_research` (the research login from Part 5 step 3), reads no prices and is safe to repeat.
+After `git pull` (Part 10 step 2), run this once on the server. It registers the protocol version in the committed config, which is now v1.3. It writes one row to `backtest_variant_trials` as `arthasignal_research` (the research login from Part 5 step 3), reads no prices and is safe to repeat.
 
 ```bash
 cd /srv/arthasignal/app
@@ -383,15 +383,15 @@ $RUN "$ENV .venv/bin/python -m src.simulation.register"; echo "exit $?"
 **Expected output (first run):**
 - `"role": "arthasignal_research"`;
 - `"family": "simulation_protocol"`;
-- `"protocol": "sim-protocol-v1.2"`;
-- `"config_sha256": "7d961a97a0352d306506e9fd38ecfa898030bef727669ea06ef457667e0e2e37"`;
-- `"fingerprint": "9d87c52951439c9a4df3a5cc758b6b6583f0cb501cd851c58fd5d0e9ae6377e2"`;
+- `"protocol": "sim-protocol-v1.3"`;
+- `"config_sha256": "22f2065e095ac89c324e1ae6e4fb28f4ac51cb54755f8fa2cc59ff5f489b0c89"`;
+- `"fingerprint": "1847392bf212852c478f9e8e9ab28a5af328d97fb7f9765f4dfc3f3bf54efe89"`;
 - `"inserted": 1`, then exit 0.
 
 **After that:**
 - **A second run** prints `"inserted": 0`.
-- **The family count:** v1 and v1.1 were registered on the laptop only, so on a server that never ran this command, `family_total` is 1 after the first run. It is 2 if v1.1 was registered there earlier with the previous version of this part.
-- **A different `config_sha256`** means the server's `config/simulation_protocol.yaml` is not the committed v1.2. Stop and run `git status` there.
+- **The family count:** v1, v1.1 and v1.2 were registered on the laptop only, so on a server that never ran this command, `family_total` is 1 after the first run. It is higher by one for each earlier version registered there with a previous version of this part.
+- **A different `config_sha256`** means the server's `config/simulation_protocol.yaml` is not the committed v1.3. Stop and run `git status` there.
 
 ## Security checklist
 

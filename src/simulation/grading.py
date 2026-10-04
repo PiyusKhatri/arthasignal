@@ -24,6 +24,7 @@ UNGRADED = "ungraded"
 NO_TRADE = "no_trade"
 LOCKED_UPPER = "locked_upper_circuit"
 REACHES_HOLDOUT = "reaches_holdout"
+LEARNING_EMBARGO = "learning_embargo"
 SELL_CALL = "sell_call"
 FLOORSHEET_DERIVED = "floorsheet_derived"
 
@@ -363,9 +364,19 @@ def grade(
     protocol: Protocol | None = None,
     sessions_before_holdout: int | None = None,
     sell_after: date | None = None,
+    sessions_before_learning_end: int | None = None,
 ) -> Outcome:
     p = protocol or load()
     _validate(call, p)
+    if sessions_before_learning_end is not None:
+        learning_end = p.learning_end
+        if call.call_date > learning_end:
+            raise ValueError(f"call date {call.call_date} is not in the learning period")
+        if not learning_call_allowed(call, sessions_before_learning_end):
+            raise ValueError(f"{LEARNING_EMBARGO}: the holding period would cross {learning_end}, so the call is not made")
+        for bar in path:
+            if bar is not None and bar.day > learning_end:
+                raise ValueError(f"path session {bar.day} is after the learning period")
     for bar in path:
         if bar is not None and bar.day <= call.call_date:
             raise ValueError(f"path session {bar.day} is not after the call date {call.call_date}")
@@ -381,7 +392,13 @@ def grade(
         outcome = GRADERS[call.call_type](call, path, p)
     if outcome.status == PENDING and sessions_before_holdout is not None and len(path) >= sessions_before_holdout:
         return replace(outcome, status=UNGRADED, correct=None, reason=REACHES_HOLDOUT)
+    if outcome.status == PENDING and sessions_before_learning_end is not None and len(path) >= sessions_before_learning_end:
+        return replace(outcome, status=UNGRADED, correct=None, reason=LEARNING_EMBARGO)
     return outcome
+
+
+def learning_call_allowed(call: Call, sessions_before_learning_end: int) -> bool:
+    return call.holding_sessions <= sessions_before_learning_end
 
 
 def last_price_date(outcome: Outcome) -> date | None:

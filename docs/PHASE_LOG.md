@@ -766,3 +766,14 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - **Trial table:** `python -m src.simulation.register` on the research role inserted 1 row (family `simulation_protocol`, fingerprint `9d87c529…77e2`; family 3, trials 138 → 139). A rerun inserted 0. The server command is in `docs/PROD_DEPLOY.md` Part 11, updated for v1.2.
 - **Not touched:** no prices or holdout data were read in this phase.
 - **Tests:** 8 tests added or changed in `tests/test_simulation_grading.py`. They cover sealing of short and mid grades for each graded call type, sealing across several later exam years, no sealing within a call's own year or from learning into the check year, WAIT slot handling, a BUY exit closing the position, position fields refused on non-SELL calls, and the v1.2 config values. Suite: 679 passed.
+
+## Simulation phase 4 - Protocol v1.3: learning embargo (Q22)
+
+- **Version:** `sim-protocol-v1.3` replaces v1.2 (kept in git history at a200731). Config SHA-256 `22f2065e095ac89c324e1ae6e4fb28f4ac51cb54755f8fa2cc59ff5f489b0c89`.
+- **Rule:** in learning runs, a call is made only if its whole holding period ends by 2019-12-31. Calls that would cross into 2020 are not made (an embargo, not sealing).
+- **Code:**
+  - `learning_call_allowed` decides whether a call may be made;
+  - `grade(..., sessions_before_learning_end=n)` refuses crossing calls, call dates after 2019 and any path bar after 2019-12-31;
+  - a delayed exit past 2019-12-31 is `ungraded` (`learning_embargo`).
+- **Trial table:** `python -m src.simulation.register` on the research role inserted 1 row (fingerprint `1847392b…fe89`; family 4, trials 140). A rerun inserted 0. `docs/PROD_DEPLOY.md` Part 11 now registers v1.3 on the server.
+- **Tests:** 5 added. They cover crossing calls refused for every call type, calls ending by 2019 graded including the exact boundary, 2020 bars refused, delayed exits ungraded, and check/exam runs not embargoed. Suite: 684 passed.
