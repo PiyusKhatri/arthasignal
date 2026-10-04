@@ -114,7 +114,7 @@ def _graded(strategy: str, version: str, correct, baseline, gross, days):
 
 def test_avoid_edge_is_buy_baseline_minus_buy_correctness() -> None:
     days = _sessions(date(2026, 1, 1), 40)
-    graded = _graded("bot_avoid_e2e4", "b1", [False] * 30 + [True] * 10, [0.4] * 40, [-0.05] * 40, days)
+    graded = _graded("bot_avoid_e2e4", "b2", [False] * 30 + [True] * 10, [0.4] * 40, [-0.05] * 40, days)
     board = lb.leaderboard(graded, days, tests=104, horizons=(5,))
     row = next(r for r in board[5] if r["bot"] == "bot_avoid_e2e4")
     assert row["edge"] == pytest.approx(0.4 - 0.25, abs=1e-4)
@@ -125,7 +125,7 @@ def test_avoid_edge_is_buy_baseline_minus_buy_correctness() -> None:
 def test_cohort_drawdown_uses_non_overlapping_dates() -> None:
     days = _sessions(date(2026, 1, 1), 30)
     gross = [0.11 if i % 2 == 0 else -0.5 for i in range(30)]
-    frame = _graded("bot_momentum", "b1", [True] * 30, [0.3] * 30, gross, days)
+    frame = _graded("bot_momentum", "b2", [True] * 30, [0.3] * 30, gross, days)
     index = {d: i for i, d in enumerate(days)}
     out = lb.cohort_drawdown(frame, 5, index)
     assert out["cohorts"] == 5
@@ -161,7 +161,7 @@ def test_league_write_is_idempotent_append_only_and_deadline_bound(temp_schema) 
     engine, schema = temp_schema
     today = datetime.now(tz=daily.NPT).date()
     now = datetime.now(tz=daily.NPT)
-    calls = pd.DataFrame({"strategy": ["bot_momentum", "bot_avoid_e2e4"], "model_version": ["b1", "b1"], "symbol": ["NABIL", "NICA"],
+    calls = pd.DataFrame({"strategy": ["bot_momentum", "bot_avoid_e2e4"], "model_version": ["b2", "b2"], "symbol": ["NABIL", "NICA"],
                           "signal_date": [today, today], "score": [0.1, None], "situations": [["all"], ["all"]],
                           "feature_hash": ["a" * 64, "b" * 64]})
     assert league_run.write_calls(engine, calls, now, schema) == {"attempted": 2, "inserted": 2}

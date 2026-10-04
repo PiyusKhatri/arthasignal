@@ -10,7 +10,8 @@ from src.scorecard import v2
 from src.scorecard.ledger import feature_hash
 
 FAMILY = league_bots.LEAGUE
-DECLARED_AT = "2026-10-04T10:35:04+05:45"
+DECLARED_AT = "2026-10-04T11:30:26+05:45"
+SUPERSEDES = {"version": "b1", "declared_at": "2026-10-04T10:35:04+05:45", "reason": "protocol v2.1 deadline and promoter shares removed from the universe before any live call"}
 DECLARATION_DOC = "docs/PAPER_BOT_LEAGUE.md"
 FIRST_LIVE_SIGNAL_DATE = "first NEPSE session written by src.league.run after this declaration"
 
@@ -38,6 +39,7 @@ def parameters(bot: league_bots.Bot) -> dict[str, Any]:
         "bot_version": bot.version,
         "bot_parameters_hash": feature_hash(params),
         "description": bot.description,
+        "supersedes": SUPERSEDES,
         "gate": GATE,
         **params,
     }

@@ -21,9 +21,10 @@ CREATE TABLE IF NOT EXISTS {schema}.scorecard_calls (
     score           DOUBLE PRECISION,
     situations      TEXT[] NOT NULL,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
-    UNIQUE (strategy, model_version, symbol, signal_date),
-    CHECK (mode = 'replay' OR created_at < (((signal_date + 1)::timestamp + interval '11 hours') AT TIME ZONE 'Asia/Kathmandu'))
+    UNIQUE (strategy, model_version, symbol, signal_date)
 );
+
+ALTER TABLE {schema}.scorecard_calls DROP CONSTRAINT IF EXISTS scorecard_calls_check;
 
 ALTER TABLE {schema}.scorecard_calls ALTER COLUMN probability DROP NOT NULL;
 
@@ -72,6 +73,60 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE TABLE IF NOT EXISTS {schema}.nepse_calendar_rules (
+    id              BIGSERIAL PRIMARY KEY,
+    rule_key        VARCHAR(40) NOT NULL UNIQUE,
+    kind            VARCHAR(10) NOT NULL CHECK (kind IN ('weekdays', 'holiday')),
+    effective_from  DATE,
+    weekdays        SMALLINT[],
+    holiday         DATE,
+    source          TEXT NOT NULL,
+    added_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CHECK ((kind = 'weekdays' AND effective_from IS NOT NULL AND weekdays IS NOT NULL) OR (kind = 'holiday' AND holiday IS NOT NULL))
+);
+
+DROP TRIGGER IF EXISTS nepse_calendar_rules_immutable ON {schema}.nepse_calendar_rules;
+CREATE TRIGGER nepse_calendar_rules_immutable BEFORE UPDATE OR DELETE ON {schema}.nepse_calendar_rules
+    FOR EACH ROW EXECUTE FUNCTION {schema}.scorecard_reject_change();
+
+CREATE OR REPLACE FUNCTION {schema}.scorecard_next_open(signal DATE) RETURNS TIMESTAMPTZ AS $$
+DECLARE
+    day DATE := signal + 1;
+    allowed SMALLINT[];
+BEGIN
+    FOR step IN 1..45 LOOP
+        IF EXISTS (SELECT 1 FROM public.daily_prices WHERE date = day) THEN
+            RETURN (day + TIME '11:00') AT TIME ZONE 'Asia/Kathmandu';
+        END IF;
+        SELECT r.weekdays INTO allowed FROM {schema}.nepse_calendar_rules r
+            WHERE r.kind = 'weekdays' AND r.effective_from <= day ORDER BY r.effective_from DESC LIMIT 1;
+        IF allowed IS NOT NULL AND (extract(isodow FROM day)::SMALLINT - 1) = ANY(allowed)
+           AND NOT EXISTS (SELECT 1 FROM {schema}.nepse_calendar_rules h WHERE h.kind = 'holiday' AND h.holiday = day) THEN
+            RETURN (day + TIME '11:00') AT TIME ZONE 'Asia/Kathmandu';
+        END IF;
+        day := day + 1;
+    END LOOP;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+CREATE OR REPLACE FUNCTION {schema}.scorecard_live_deadline() RETURNS trigger AS $$
+DECLARE
+    deadline TIMESTAMPTZ;
+BEGIN
+    IF NEW.mode = 'live' THEN
+        deadline := {schema}.scorecard_next_open(NEW.signal_date);
+        IF deadline IS NULL OR NEW.created_at >= deadline THEN
+            RAISE EXCEPTION 'accuracy-v2.1: live call for % created at % is not before the next session open %', NEW.signal_date, NEW.created_at, deadline;
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS scorecard_calls_live_deadline ON {schema}.scorecard_calls;
+CREATE TRIGGER scorecard_calls_live_deadline BEFORE INSERT ON {schema}.scorecard_calls
+    FOR EACH ROW EXECUTE FUNCTION {schema}.scorecard_live_deadline();
 DROP TRIGGER IF EXISTS scorecard_calls_immutable ON {schema}.scorecard_calls;
 CREATE TRIGGER scorecard_calls_immutable BEFORE UPDATE OR DELETE ON {schema}.scorecard_calls
     FOR EACH ROW EXECUTE FUNCTION {schema}.scorecard_reject_change();
@@ -104,6 +159,31 @@ def apply_schema(engine: Engine, schema: str = "public") -> None:
         raw.commit()
     finally:
         raw.close()
+    sync_calendar(engine, schema)
+
+
+def sync_calendar(engine: Engine, schema: str = "public", path: str | None = None) -> int:
+    import json
+    from pathlib import Path
+
+    from src.scorecard.calendar import CONFIG_PATH, DAY_NAMES
+
+    config = json.loads(Path(path or CONFIG_PATH).read_text())
+    rows = [{"k": f"weekdays:{r['effective_from']}", "kind": "weekdays", "e": r["effective_from"],
+             "w": [DAY_NAMES.index(d) for d in r["weekdays"]], "h": None, "s": r.get("source", "")} for r in config["weekday_rules"]]
+    for holiday in config.get("holidays", []):
+        day, source = (holiday, "") if isinstance(holiday, str) else (holiday["date"], holiday.get("source", ""))
+        rows.append({"k": f"holiday:{day}", "kind": "holiday", "e": None, "w": None, "h": day, "s": source})
+    inserted = 0
+    with engine.begin() as connection:
+        for row in rows:
+            result = connection.execute(
+                text(f"INSERT INTO {schema}.nepse_calendar_rules (rule_key, kind, effective_from, weekdays, holiday, source) "
+                     "VALUES (:k, :kind, :e, :w, :h, :s) ON CONFLICT (rule_key) DO NOTHING RETURNING id"),
+                row,
+            ).first()
+            inserted += int(result is not None)
+    return inserted
 
 
 def main() -> None:

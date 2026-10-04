@@ -1,0 +1,430 @@
+{
+  "applied": true,
+  "count": 53,
+  "rows": [
+    {
+      "symbol": "ACLBSLP",
+      "company_name": "ACLBSLP",
+      "from": "Equity",
+      "status": "D",
+      "base": "ACLBSL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "AKBSLP",
+      "company_name": "AKBSLP",
+      "from": "Equity",
+      "status": "D",
+      "base": "AKBSL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "ALICLP",
+      "company_name": "ALICLP",
+      "from": "Equity",
+      "status": "A",
+      "base": "ALICL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "CBBLPO",
+      "company_name": "CBBLPO",
+      "from": "Equity",
+      "status": "A",
+      "base": "CBBL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "CLBSLP",
+      "company_name": "CLBSLP",
+      "from": "Equity",
+      "status": "D",
+      "base": "CLBSL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "CORBLP",
+      "company_name": "CORBLP",
+      "from": "Equity",
+      "status": "D",
+      "base": "CORBL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "CYCLP",
+      "company_name": "CYCLP",
+      "from": "Equity",
+      "status": "D",
+      "base": "CYCL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "CZBILP",
+      "company_name": "CZBILP",
+      "from": "Equity",
+      "status": "A",
+      "base": "CZBIL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "GBBLPO",
+      "company_name": "GBBLPO",
+      "from": "Equity",
+      "status": "A",
+      "base": "GBBL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "GBIMEP",
+      "company_name": "Global IME Bank Limited Promoter Share",
+      "from": "Equity",
+      "status": "A",
+      "base": "GBIME",
+      "name_says_promoter": true
+    },
+    {
+      "symbol": "GRDBLP",
+      "company_name": "Green Development Bank Ltd. Promoter Share",
+      "from": "Equity",
+      "status": "A",
+      "base": "GRDBL",
+      "name_says_promoter": true
+    },
+    {
+      "symbol": "GUFLPO",
+      "company_name": "GUFLPO",
+      "from": "Equity",
+      "status": "A",
+      "base": "GUFL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "HBLPO",
+      "company_name": "HBLPO",
+      "from": "Equity",
+      "status": "A",
+      "base": "HBL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "HEIP",
+      "company_name": "Himalayan Everest Insurance Limited Promoter Share",
+      "from": "Equity",
+      "status": "A",
+      "base": "HEI",
+      "name_says_promoter": true
+    },
+    {
+      "symbol": "HIDCLP",
+      "company_name": "Hydroelectricity Investment and Development Company Limited Promoter Share",
+      "from": "Equity",
+      "status": "A",
+      "base": "HIDCL",
+      "name_says_promoter": true
+    },
+    {
+      "symbol": "IGIPO",
+      "company_name": "IGIPO",
+      "from": "Equity",
+      "status": "A",
+      "base": "IGI",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "ILBSP",
+      "company_name": "ILBSP",
+      "from": "Equity",
+      "status": "A",
+      "base": "ILBS",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "JBBLPO",
+      "company_name": "JBBLPO",
+      "from": "Equity",
+      "status": "A",
+      "base": "JBBL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "JBLBP",
+      "company_name": "JBLBP",
+      "from": "Equity",
+      "status": "D",
+      "base": "JBLB",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "KBLPO",
+      "company_name": "KBLPO",
+      "from": "Equity",
+      "status": "A",
+      "base": "KBL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "KMBSLP",
+      "company_name": "unknown",
+      "from": "Equity",
+      "status": "D",
+      "base": "KMBSL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "LSLPO",
+      "company_name": "Laxmi Sunrise Bank Limited Promoter Share",
+      "from": "Equity",
+      "status": "A",
+      "base": "LSL",
+      "name_says_promoter": true
+    },
+    {
+      "symbol": "MFILPO",
+      "company_name": "MFILPO",
+      "from": "Equity",
+      "status": "A",
+      "base": "MFIL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "MLBLPO",
+      "company_name": "MLBLPO",
+      "from": "Equity",
+      "status": "A",
+      "base": "MLBL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "MLBSLP",
+      "company_name": "MLBSLP",
+      "from": "Equity",
+      "status": "D",
+      "base": "MLBSL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "MLBSP",
+      "company_name": "MLBSP",
+      "from": "Equity",
+      "status": "D",
+      "base": "MLBS",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "MSLBP",
+      "company_name": "Mahuli Laghubitta Bittiya Sanstha Limited Promoter Share",
+      "from": "Equity",
+      "status": "A",
+      "base": "MSLB",
+      "name_says_promoter": true
+    },
+    {
+      "symbol": "NABBCP",
+      "company_name": "NABBCP",
+      "from": "Equity",
+      "status": "D",
+      "base": "NABBC",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "NABILP",
+      "company_name": "NABILP",
+      "from": "Equity",
+      "status": "A",
+      "base": "NABIL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "NICAP",
+      "company_name": "NICAP",
+      "from": "Equity",
+      "status": "A",
+      "base": "NICA",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "NICLBSLP",
+      "company_name": "NICLBSLP",
+      "from": "Equity",
+      "status": "D",
+      "base": "NICLBSL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "NIMBPO",
+      "company_name": "Nepal Investment Mega Bank Ltd. Promoter Share",
+      "from": "Equity",
+      "status": "A",
+      "base": "NIMB",
+      "name_says_promoter": true
+    },
+    {
+      "symbol": "NMBPO",
+      "company_name": "NMBPO",
+      "from": "Equity",
+      "status": "A",
+      "base": "NMB",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "NMFBSP",
+      "company_name": "NMFBSP",
+      "from": "Equity",
+      "status": "A",
+      "base": "NMFBS",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "NMLBBLP",
+      "company_name": "NMLBBLP",
+      "from": "Equity",
+      "status": "D",
+      "base": "NMLBBL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "PCBLP",
+      "company_name": "Prime Commercial Bank Limited Promoter Share",
+      "from": "Equity",
+      "status": "A",
+      "base": "PCBL",
+      "name_says_promoter": true
+    },
+    {
+      "symbol": "PMLIP",
+      "company_name": "Prabhu Mahalaxmi Life Insurance Limited promotor",
+      "from": "Equity",
+      "status": "D",
+      "base": "PMLI",
+      "name_says_promoter": true
+    },
+    {
+      "symbol": "PRVUPO",
+      "company_name": "PRVUPO",
+      "from": "Equity",
+      "status": "A",
+      "base": "PRVU",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "RBCLPO",
+      "company_name": "Rastriya Beema Company Limited Promoter Share",
+      "from": "Equity",
+      "status": "A",
+      "base": "RBCL",
+      "name_says_promoter": true
+    },
+    {
+      "symbol": "SABSLP",
+      "company_name": "SABSLP",
+      "from": "Equity",
+      "status": "D",
+      "base": "SABSL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "SADBLP",
+      "company_name": "SADBLP",
+      "from": "Equity",
+      "status": "A",
+      "base": "SADBL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "SALICOPO",
+      "company_name": "SALICOPO",
+      "from": "Equity",
+      "status": "A",
+      "base": "SALICO",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "SBLPO",
+      "company_name": "SBLPO",
+      "from": "Equity",
+      "status": "A",
+      "base": "SBL",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "SDESIP",
+      "company_name": "SDESIP",
+      "from": "Equity",
+      "status": "D",
+      "base": "SDESI",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "SGICP",
+      "company_name": "SGICP",
+      "from": "Equity",
+      "status": "D",
+      "base": "SGIC",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "SJLICP",
+      "company_name": "Suryajyoti Life Insurance Co. Ltd. Promotor Share",
+      "from": "Equity",
+      "status": "D",
+      "base": "SJLIC",
+      "name_says_promoter": true
+    },
+    {
+      "symbol": "SLBBLP",
+      "company_name": "Swarojgar Laghubitta Bittiya Sanstha Limited Promoter Share",
+      "from": "Equity",
+      "status": "A",
+      "base": "SLBBL",
+      "name_says_promoter": true
+    },
+    {
+      "symbol": "SLBSP",
+      "company_name": "SLBSP",
+      "from": "Equity",
+      "status": "D",
+      "base": "SLBS",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "SMFBSP",
+      "company_name": "SMFBSP",
+      "from": "Equity",
+      "status": "D",
+      "base": "SMFBS",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "SMPDAP",
+      "company_name": "SMPDAP",
+      "from": "Equity",
+      "status": "A",
+      "base": "SMPDA",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "SRLIP",
+      "company_name": "SRLIP",
+      "from": "Equity",
+      "status": "A",
+      "base": "SRLI",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "UNLBP",
+      "company_name": "UNLBP",
+      "from": "Equity",
+      "status": "D",
+      "base": "UNLB",
+      "name_says_promoter": false
+    },
+    {
+      "symbol": "WNLBP",
+      "company_name": "WNLBP",
+      "from": "Equity",
+      "status": "D",
+      "base": "WNLB",
+      "name_says_promoter": false
+    }
+  ]
+}

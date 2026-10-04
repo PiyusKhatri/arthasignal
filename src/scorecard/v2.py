@@ -19,7 +19,7 @@ from src.scorecard.grading import (
 )
 from src.scorecard.metrics import INSUFFICIENT, NO_EVIDENCE, PASS, one_sided_lower, reliability
 
-PROTOCOL_VERSION = "accuracy-v2"
+PROTOCOL_VERSION = "accuracy-v2.1"
 GRADE_VERSION = "accuracy-v2"
 VARIANT_FAMILY = "scorecard_accuracy_v2"
 

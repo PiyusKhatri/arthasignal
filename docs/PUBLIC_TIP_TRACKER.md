@@ -52,8 +52,7 @@ It uses no ML, so it is consistent with the terms of every source.
 ## Timing and the ledger
 
 - **Signal date:** the session before the first market open (11:00 NPT) after the tip's **posting time**. Posting time is used when the source gives it to the second or minute (YouTube, manual entry). Otherwise, as for web pages, it is the time we first saw the tip. Entry is at that open, under v2 rules.
-- **Write window:** v2's ledger CHECK requires a live call to be written before 11:00 NPT on the calendar day after its signal date. A tip we did not capture in time is stored and marked `outside_write_window`, and it is never graded or backdated. Running `cycle` hourly, and once before 10:30, keeps that loss small on trading days.
-- **Known limitation:** a tip posted on a Friday, Saturday or holiday maps to the previous trading day's signal date, whose window has already closed. Such tips can never be graded under the unchanged v2 CHECK. Their count is visible in `public_tip_events`. Fixing this needs a protocol amendment (deadline = the next session's open), which is your decision. It has not been made.
+- **Write window (protocol v2.1, amended 2026-10-04 11:30:26 NPT):** a tip must be written to the ledger before the **next NEPSE session open** after its signal date. A post on Saturday maps to Friday's session and may be written until Monday 11:00. The v2 problem, where weekend and holiday posts could never be graded, is gone. A tip we did not capture before that open is still stored, marked `outside_write_window`, and never backdated. The hypotheses T1, T2 and A1 were amended in `public_tips_v1` to name protocol v2.1; their strategy versions are unchanged.
 - **Each graded tip writes these live rows** to `scorecard_calls` (`probability` NULL; the situation labels of its signal date):
 
   | Row | Strategy | Version | Graded as |

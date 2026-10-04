@@ -5,7 +5,7 @@ import json
 import logging
 import re
 import sys
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
 import numpy as np
@@ -31,13 +31,13 @@ logger = logging.getLogger(__name__)
 
 FAMILY = "public_tips_v1"
 DECLARED_AT = "2026-10-04T11:08:40+05:45"
+AMENDED_AT = "2026-10-04T11:30:26+05:45"
 TRACKER_START = date(2026, 10, 4)
 TIP_SOURCES = ("tip_youtube_video", "tip_web_page", "tip_manual")
 AGGREGATE = "tips_all"
 PROMOTED = "tips_promoted_avoid"
 HORIZONS = (5, 10, 20)
 TARGET_HORIZONS = (5, 10, 20)
-MARKET_OPEN = time(11, 0)
 
 HYPOTHESES: tuple[dict[str, Any], ...] = (
     {"id": "T1_public_buy_tips", "strategy": AGGREGATE, "version": f"{PARSER_VERSION}-buy", "side": BUY, "horizons": list(HORIZONS),
@@ -62,13 +62,9 @@ def side_of(strategy: str, version: str) -> str:
 
 
 def signal_date_for(knowledge: datetime, sessions: list[date]) -> date | None:
-    moment = knowledge.astimezone(NPT)
-    for position, session in enumerate(sessions):
-        if datetime.combine(session, MARKET_OPEN, tzinfo=NPT) > moment:
-            return sessions[position - 1] if position > 0 else None
-    if sessions and moment.date() <= sessions[-1]:
-        return sessions[-1]
-    return None
+    from src.scorecard.calendar import signal_date_for as calendar_signal_date
+
+    return calendar_signal_date(knowledge, sessions)
 
 
 def tip_items(engine: Engine, now: datetime, schema: str = "public") -> list[dict[str, Any]]:
@@ -129,7 +125,7 @@ def write_tips(engine: Engine, state: dict[str, Any], quarantine: Any, now: date
         if signal is None:
             counts["pending"] += 1
             continue
-        if now >= entry_deadline(signal):
+        if now >= entry_deadline(signal, sessions):
             event, keys = "outside_write_window", []
         elif tip["symbol"] not in panel.row or not spec.valid_symbol(tip["symbol"]):
             event, keys = "unknown_symbol", []
@@ -270,6 +266,19 @@ def declare(engine: Engine) -> dict[str, Any]:
     return {"declared_at": DECLARED_AT, "hypotheses": out}
 
 
+def amend() -> dict[str, Any]:
+    ledger = DatabaseLedger()
+    out = []
+    for hypothesis in HYPOTHESES:
+        params = {"family": FAMILY, "declared_at": DECLARED_AT, "amended_at": AMENDED_AT, "parser_version": PARSER_VERSION,
+                  "tracker_start": TRACKER_START.isoformat(), "protocol": v2.PROTOCOL_VERSION, "edge_min": v2.GATE_EDGE,
+                  "min_windows": v2.MIN_WINDOWS, "amendment": "call deadline is the next NEPSE session open; promoter shares excluded",
+                  **hypothesis}
+        ledger.register_variant(FAMILY, params, f"{FAMILY} {hypothesis['id']} amended {AMENDED_AT}")
+        out.append({"id": hypothesis["id"], "fingerprint": variant_fingerprint(params)})
+    return {"amended_at": AMENDED_AT, "hypotheses": out}
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     parser = argparse.ArgumentParser(description="Public tip tracker: collect public tips, parse them, write them to the ledger, grade them")
@@ -286,10 +295,14 @@ def main() -> None:
     add.add_argument("--text", required=True)
     add.add_argument("--consent-ref")
     sub.add_parser("declare")
+    sub.add_parser("amend")
     args = parser.parse_args()
     from src.database.connection import engine
 
     now = datetime.now(tz=NPT)
+    if args.command == "amend":
+        print(json.dumps(amend(), indent=2))
+        return
     if args.command == "declare":
         store.apply_schema(engine)
         print(json.dumps(declare(engine), indent=2))

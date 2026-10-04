@@ -81,8 +81,32 @@ def register(ledger: Any = None) -> list[dict[str, Any]]:
 
 
 def main() -> None:
-    print(json.dumps(register(), indent=2))
+    import sys
+
+    print(json.dumps(amend() if "--amend" in sys.argv else register(), indent=2))
 
 
 if __name__ == "__main__":
     main()
+
+
+AMENDED_AT = "2026-10-04T11:30:26+05:45"
+AMENDMENT = {
+    "amended_at": AMENDED_AT,
+    "model_version": model_v0.VERSION,
+    "protocol": v2.PROTOCOL_VERSION,
+    "reason": "deadline moved to the next NEPSE session open and promoter shares removed from the universe; no live v0 call existed",
+}
+
+
+def amend(ledger: Any = None) -> list[dict[str, Any]]:
+    from src.scorecard.ledger import feature_hash
+
+    ledger = ledger or DatabaseLedger()
+    out = []
+    for hypothesis in HYPOTHESES:
+        params = {**parameters(hypothesis), **AMENDMENT, "model_version": model_v0.VERSION,
+                  "model_parameters_hash": feature_hash(model_v0.PARAMETERS), "gate": {**GATE, "protocol": v2.PROTOCOL_VERSION}}
+        ledger.register_variant(FAMILY, params, f"{FAMILY} {hypothesis['id']} amended {AMENDED_AT}")
+        out.append({"id": hypothesis["id"], "fingerprint": variant_fingerprint(params)})
+    return out

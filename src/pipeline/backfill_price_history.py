@@ -9,12 +9,13 @@ import re
 import time
 from datetime import date, datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from src.database.connection import get_session
+from src.database.instruments import is_promoter
 from src.database.models import Company
 from src.pipeline.backfill_price_session import insert_price_rows_only_new, is_valid_price_row
 from src.scrapers import sharesansar_scraper
@@ -33,9 +34,9 @@ DELISTED_STATUS = "D"
 DEBENTURE_SYMBOL = re.compile(r"^[A-Z]+D\d{2,4}(/\d{2})?$|^[A-Z]+\d{2}/\d{2}$")
 
 
-def infer_instrument_type(symbol: str, name: str | None) -> str:
+def infer_instrument_type(symbol: str, name: str | None, known: Iterable[str] = ()) -> str:
     text = (name or "").lower()
-    if "promoter" in text or symbol.endswith("PO"):
+    if "promoter" in text or symbol.endswith("PO") or is_promoter(symbol, name, known):
         return "Promoter Shares"
     if "pref" in text:
         return "Preference Shares"
@@ -85,7 +86,8 @@ def _known_symbols() -> set[str]:
 
 
 def ensure_companies(symbols: set[str], names: dict[str, str]) -> list[dict[str, Any]]:
-    missing = sorted(symbols - _known_symbols())
+    known = _known_symbols()
+    missing = sorted(symbols - known)
     if not missing:
         return []
     records = [
@@ -93,7 +95,7 @@ def ensure_companies(symbols: set[str], names: dict[str, str]) -> list[dict[str,
             "symbol": symbol,
             "company_name": names.get(symbol, symbol)[:255],
             "sector": None,
-            "instrument_type": infer_instrument_type(symbol, names.get(symbol)),
+            "instrument_type": infer_instrument_type(symbol, names.get(symbol), known | symbols),
             "status": DELISTED_STATUS,
         }
         for symbol in missing

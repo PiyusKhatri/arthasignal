@@ -14,7 +14,7 @@ from src.scorecard.situations import market_state_labels
 from src.scorecard.strategies import Strategy
 
 NAME = "model_v0"
-VERSION = "v0"
+VERSION = "v0.1"
 MOMENTUM_LOOKBACK = 20
 MOMENTUM_PICKS = 10
 NEW_LISTING_PICKS = 5
@@ -37,6 +37,8 @@ PARAMETERS: dict[str, Any] = {
     "upper_streak_min": STREAK_MIN,
     "abstain_market_states": list(ABSTAIN_STATES),
     "probability": None,
+    "protocol": "accuracy-v2.1",
+    "universe": "companies.instrument_type = 'Equity' after promoter shares were reclassified",
 }
 
 DESCRIPTION = (

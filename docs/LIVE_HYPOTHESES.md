@@ -60,3 +60,12 @@ These are lower bounds that assume every window qualifies and nothing is exclude
 ## Registry rows
 
 Registered in `backtest_variant_trials` (family `live_hypotheses_v0`) by `python -m src.scorecard.hypotheses`; the fingerprints are listed in `docs/PHASE_LOG.md` (Phase Q2).
+
+
+## Amendment, 2026-10-04 11:30:26 NPT (protocol v2.1, model v0.1)
+
+Before any live v0 call was written (0 live rows), the following changed:
+- the call deadline moved to the next NEPSE session open;
+- promoter shares were removed from the equity universe.
+
+The model rules are identical, but its universe changed, so the live writer now runs **model v0.1** (`scorecard_models` gets a new row when the writer first runs). H1-H4 are re-registered for v0.1 in `live_hypotheses_v0` by `python -m src.scorecard.hypotheses --amend`. The gate is unchanged apart from the protocol label. The minimum-sample estimates above came from v0's universe.

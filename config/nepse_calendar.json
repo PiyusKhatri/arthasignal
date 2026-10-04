@@ -1,0 +1,8 @@
+{
+  "weekday_rules": [
+    {"effective_from": "2014-01-01", "weekdays": ["Sun", "Mon", "Tue", "Wed", "Thu"], "source": "historical Sunday-Thursday week; actual sessions in daily_prices override"},
+    {"effective_from": "2026-04-08", "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri"], "source": "Council of Ministers decision of Chaitra 22, announced 2026-04-08 (nepsetrading.com); NEPSE trades Monday to Friday, 11:00-15:00"}
+  ],
+  "holidays": [],
+  "market_open": "11:00"
+}

@@ -65,7 +65,7 @@ def build_book(rows: Iterable[tuple[str, str | None]]) -> SymbolBook:
 def load_book(engine: Engine) -> SymbolBook:
     with engine.connect() as connection:
         rows = connection.execute(
-            text("SELECT symbol, company_name FROM companies WHERE instrument_type IN ('Equity', 'Promoter Shares') AND status = 'A'")
+            text("SELECT symbol, company_name FROM companies WHERE instrument_type = 'Equity' AND status = 'A'")
         ).all()
     return build_book((r[0], r[1]) for r in rows)
 

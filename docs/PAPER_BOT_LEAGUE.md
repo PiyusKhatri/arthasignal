@@ -1,5 +1,8 @@
 # Paper-bot league v1
 
+> **Amended 2026-10-04 11:30:26 NPT (protocol v2.1):** all six bots are now version **b2**. The rules and risk limits are identical to b1. What changed: the call deadline is the next NEPSE session open (`docs/ACCURACY_PROTOCOL.md` v2.1), and promoter shares are no longer in the universe. b1 never wrote a call and is retired. The b2 rows are registered in `paper_bot_league_v1` and `scorecard_accuracy_v2`. The coverage and minimum-sample table below was measured on b1's universe.
+
+
 **Declared:** 2026-10-04 10:35:04 Nepal time (04:50:04 UTC), before any league call was written and before the league read any data after 2025-09-29. **Code:** `src/league/` (`bots.py`, `run.py`, `leaderboard.py`, `declare.py`). **Registry:** `scorecard_models` (one immutable row per bot) and `backtest_variant_trials`. Each bot appears twice there: in family `paper_bot_league_v1` (the declaration) and in `scorecard_accuracy_v2` (which raises *K* for everyone). The fingerprints are listed in `docs/PHASE_LOG.md` (Phase B).
 
 Six independent paper-trading bots run side by side on the same ledger and the same scorecard. Each is frozen. Changing anything, including a risk rule, makes a new version (`b2`), which starts its record from zero. **No bot has evidence today.** Every rule below comes from earlier work, and the replay numbers that motivated some of them are not evidence (see `docs/LIVE_HYPOTHESES.md`).
@@ -98,6 +101,6 @@ The wrapper `scripts/cron/league_daily.sh` uses `flock` against overlapping runs
 45 17 * * 0-4  ARTHASIGNAL_ROOT=/srv/arthasignal /srv/arthasignal/scripts/cron/league_daily.sh
 ```
 
-- Exit codes: 0 done; 2 too late; 3 no price session for the date; 4 another run is active.
+- Exit codes: 0 done; 2 too late (after the next session open, v2.1); 3 no price session for the date; 4 another run is active.
 - Run `python -m src.database.holdout_guard` once after the first live run, so that the research role cannot read `league_leaderboard` or `league_runs` (both keyed by holdout dates).
 - The NEPSE trading week has changed before (`docs/OPEN_ISSUES.md` P2). The wrapper runs Sunday to Thursday; days without a session exit 3 harmlessly. If the week changes, adjust the day list.

@@ -31,6 +31,8 @@ RISK: dict[str, Any] = {
     "suspend_on_v2_kill_rule": "no new calls for a bot x horizon once rolling_monitor_v2 flags suspend at its primary horizon",
 }
 
+UNIVERSE = "companies.instrument_type = 'Equity' after promoter shares were reclassified (src/database/instruments.py)"
+
 MOMENTUM_LOOKBACK = 20
 RANKER_MOMENTUM_LOOKBACK = 120
 RANKER_MOMENTUM_SKIP = 5
@@ -56,26 +58,26 @@ class Bot:
 
 BOTS: tuple[Bot, ...] = (
     Bot(
-        "bot_avoid_e2e4", "b1", AVOID, (20,),
+        "bot_avoid_e2e4", "b2", AVOID, (20,),
         "Avoid list: every equity with a bonus book-close ex-session in the last 20 sessions (E2) or whose upper-circuit "
         "close streak of 3 or more ended in the last 20 sessions (E4). One observation per stock and date.",
         {"bonus_sessions": model_v0.AVOID_AFTER_BONUS_SESSIONS, "streak_sessions": model_v0.AVOID_AFTER_STREAK_SESSIONS,
          "streak_min": model_v0.STREAK_MIN, "risk_rules": "quarantine and equity filter only"},
     ),
     Bot(
-        "bot_momentum", "b1", BUY, (5, 10, 20),
+        "bot_momentum", "b2", BUY, (5, 10, 20),
         "Top 10 established equities by 20-session total return, abstaining when the NEPSE state is bear. No avoid filter.",
         {"lookback": MOMENTUM_LOOKBACK, "abstain_states": ["market_bear"], "excludes_new_listings": True},
     ),
     Bot(
-        "bot_new_listing", "b1", BUY, (40,),
+        "bot_new_listing", "b2", BUY, (40,),
         "Top 5 new listings (first price within 60 sessions, mergers excluded) by total return over the last 20 sessions, "
         "abstaining when the NEPSE state is bear. No avoid filter.",
         {"lookback": MOMENTUM_LOOKBACK, "picks": NEW_LISTING_PICKS, "new_listing_sessions": model_v0.NEW_LISTING_SESSIONS,
          "abstain_states": ["market_bear"]},
     ),
     Bot(
-        "bot_ranker_spec", "b1", BUY, (5, 10, 20),
+        "bot_ranker_spec", "b2", BUY, (5, 10, 20),
         "Cross-sectional ranker spec with fixed equal weights and no fitting: mean percentile rank of 120-session momentum "
         "skipping the last 5 sessions, 5-session reversal, low 60-session volatility and 60-session median turnover. Top 10.",
         {"momentum_lookback": RANKER_MOMENTUM_LOOKBACK, "momentum_skip": RANKER_MOMENTUM_SKIP,
@@ -83,14 +85,14 @@ BOTS: tuple[Bot, ...] = (
          "weights": "equal", "fitted": False},
     ),
     Bot(
-        "bot_market_timer", "b1", BUY, (5, 10, 20),
+        "bot_market_timer", "b2", BUY, (5, 10, 20),
         "Market-state timer: on when the NEPSE state is bull or sideways, at least half of traded equities close above their "
         "50-session average and NEPSE's 20-session return is positive. When on, calls the 10 most liquid eligible equities.",
         {"on_states": list(TIMER_ON_STATES), "breadth_sma": TIMER_BREADTH_SMA, "breadth_min": TIMER_BREADTH_MIN,
          "index_lookback": TIMER_INDEX_LOOKBACK, "basket": "top 10 by 60-session median turnover"},
     ),
     Bot(
-        "bot_combined", "b1", BUY, (5, 10, 20),
+        "bot_combined", "b2", BUY, (5, 10, 20),
         "Combined: only when the market timer is on; candidates are the top 20 of the momentum score and the top 20 of the "
         "ranker spec, minus every E2/E4 avoid hit; ranked by the mean of the two percentile ranks. Top 10.",
         {"candidates_each": COMBINED_CANDIDATES, "uses": ["bot_momentum", "bot_ranker_spec", "bot_market_timer", "bot_avoid_e2e4"]},
@@ -305,7 +307,7 @@ class League:
 
 def bot_parameters(bot: Bot) -> dict[str, Any]:
     return {"league": LEAGUE, "side": bot.side, "primary_horizons": list(bot.primary_horizons), "risk": RISK,
-            "probability": None, **bot.parameters}
+            "probability": None, "protocol": "accuracy-v2.1", "universe": UNIVERSE, **bot.parameters}
 
 
 def strategies(index: pd.DataFrame, actions: pd.DataFrame, mergers: set[str]) -> list[Strategy]:

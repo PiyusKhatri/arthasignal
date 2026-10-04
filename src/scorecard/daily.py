@@ -5,7 +5,7 @@ import json
 import logging
 import subprocess
 import sys
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -32,8 +32,10 @@ EXIT_NO_SESSION = 3
 TRACKED_STRATEGIES = (model_v0.NAME, *model_v0.AVOID_STRATEGIES)
 
 
-def entry_deadline(signal_date: date) -> datetime:
-    return datetime.combine(signal_date + timedelta(days=1), MARKET_OPEN, tzinfo=NPT)
+def entry_deadline(signal_date: date, known_sessions: Any = ()) -> datetime:
+    from src.scorecard.calendar import load
+
+    return load().next_open(signal_date, known_sessions)
 
 
 def code_commit() -> str:

@@ -1,4 +1,46 @@
-# Accuracy Protocol (Scorecard) v2
+# Accuracy Protocol (Scorecard) v2.1
+
+Protocol `accuracy-v2.1`, declared on **2026-10-04 at 11:30:26 Nepal time (05:45:26 UTC)**. At that moment no live call existed in `scorecard_calls` (0 rows with `mode = 'live'`) and no public tip existed (`public_tips` 0 rows). It amends v2 in one place, the live-call deadline. Grading is unchanged, so grades are still written as `grade_version = 'accuracy-v2'`, and the multiple-testing family stays `scorecard_accuracy_v2`.
+
+## v2.1 changelog
+
+| | v2 | v2.1 |
+| --- | --- | --- |
+| Live-call deadline | 11:00 NPT on the **calendar day** after the signal date | **The open (11:00 NPT) of the next NEPSE session** after the signal date |
+| Where it is enforced | A table CHECK on `scorecard_calls` | A `BEFORE INSERT` trigger, `scorecard_live_deadline()`, calling `scorecard_next_open()`. The old CHECK `scorecard_calls_check` was dropped |
+| Session calendar | None (calendar arithmetic) | `config/nepse_calendar.json`, synced append-only into `nepse_calendar_rules` (see below) |
+
+**Why:** under v2, a call or tip that became known on a Friday, Saturday or holiday mapped to the previous session, whose calendar-day deadline had already passed, so it could never be graded. Entry was always at the next session's open, so the old deadline was stricter than the entry rule required. In v2.1 such a call is valid if it is written before the next session opens, which is the earliest moment anyone could act on it.
+
+**How the next session is determined, in the same order in Python (`src/scorecard/calendar.py`) and SQL (`scorecard_next_open`):**
+
+1. The first day after the signal date that already has prices in `daily_prices`. Actual sessions always win.
+2. Otherwise, the first day that matches the weekday rule in force on that day and is not a listed holiday. The rules are:
+   - Sunday to Thursday from 2014-01-01;
+   - **Monday to Friday from 2026-04-08**. This follows the Council of Ministers decision of Chaitra 22, announced on 2026-04-08. The exact first Monday-to-Friday week is not confirmed, and recorded sessions override the rule.
+
+**Holidays:** the holiday list in `config/nepse_calendar.json` is empty, because no official 2026/27 list has been loaded. A missing holiday makes the deadline **earlier** than the true open, never later. A call can therefore be refused that would have been valid, but nothing can be written after a real open. NEPSE's holiday notices should be added to the config as they are published; each addition is a new append-only row.
+
+**Signal date of an event-timed call** (used by the tip tracker): the latest recorded session that had opened at or before the moment the information became known, provided the next session open after it is still in the future. Otherwise the call waits until the new session's prices are recorded. Examples:
+- a post on Saturday maps to Friday's session and may be written until Monday 11:00;
+- a post at 10:30 on a session day maps to the previous session, with entry at that morning's open.
+
+**Applied to:**
+- the model v0 daily writer, now **v0.1**;
+- the paper-bot league, now **b2**. The b1 versions never ran;
+- the tip tracker: its hypotheses were amended in `public_tips_v1`, and their strategy versions are unchanged.
+
+The bump to new versions also covers the second change made at the same time: promoter shares removed from the equity universe. See "Universe correction" below.
+
+**Universe correction (same declaration):**
+- 53 symbols stored as `Equity` (or another type) were promoter shares, for example HIDCLP, NABILP and GBIMEP. They are now `Promoter Shares`. A symbol counts as a promoter share if its name says "promoter" or "promotor", or if it is a listed symbol plus a `P` or `PO` suffix.
+- The rule lives in `src/database/instruments.py`. The company upsert and the price backfill use it, so the NEPSE API's "Equity" label no longer overwrites it.
+- Each change is listed in `docs/promoter_reclassification.json`.
+- In the development window these symbols had 6,449 price rows across 45 symbols, about 1.6% of the 411,751 equity price rows. Earlier study results included them and were **not** rerun, so whether removing these rows would change any earlier verdict (including the E2 and E4 passes) is not known. New studies, starting with the ranker, use the corrected universe.
+
+---
+
+## v2 (base text, still in force except for the deadline)
 
 Protocol `accuracy-v2`, adopted on 2026-10-02. It replaces `accuracy-v1` (`git show d3ec7f8:docs/ACCURACY_PROTOCOL.md`). Grades under v1 stay in the ledger with `grade_version = 'accuracy-v1'`, and v2 grades are inserted alongside as `'accuracy-v2'`. Neither is edited. Code: `src/scorecard/` (v2 rules in `src/scorecard/v2.py`).
 

@@ -8,6 +8,7 @@ from sqlalchemy import literal_column, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from src.database.connection import get_session
+from src.database.instruments import classify, known_symbols
 from src.database.models import (
     Broker,
     Company,
@@ -49,6 +50,8 @@ def build_company_records(symbols: list[str]) -> list[dict[str, Any]]:
         logger.exception("Could not fetch securities metadata, falling back to minimal company records")
 
     existing_data = _get_existing_company_data(symbols)
+    with get_session() as session:
+        known = known_symbols(session.connection()) | set(symbols)
 
     records = []
     for symbol in symbols:
@@ -86,6 +89,7 @@ def build_company_records(symbols: list[str]) -> list[dict[str, Any]]:
                 )
                 sector = existing_sector
 
+        instrument_type = classify(symbol, company_name, instrument_type, known)
         records.append(
             {
                 "symbol": symbol,
