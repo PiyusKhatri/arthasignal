@@ -1,0 +1,840 @@
+{
+  "protocol": "broker-flow-prereg-v1",
+  "generated_on": "2026-10-04",
+  "config_version": "2026-10-01-broker-flow-dev-v1",
+  "config_sha256": "d4dbc2786938d661c5c187602107e0ec04b06ac03d2db72f34d0154548eac26f",
+  "development_end": "2025-01-19",
+  "last_price_session_loaded": "2025-01-19",
+  "eligible_feature_rows": 330178,
+  "labeled_rows": 301375,
+  "exclusions": {
+    "no_label": 8169,
+    "corporate_action": 20279,
+    "price_discontinuity": 355,
+    "no_price_bars": 0,
+    "unresolved_step": 0
+  },
+  "exit_status": {
+    "on_time": 295207,
+    "delayed": 3368,
+    "stranded": 1516,
+    "blocked": 1284
+  },
+  "entry_rule_rows": {
+    "next_open": 246294,
+    "next_close": 55081
+  },
+  "signal_dates": 2269,
+  "first_signal_date": "2014-06-19",
+  "last_signal_date": "2024-12-11",
+  "last_exit_date": "2025-01-19",
+  "holdout_rows": 0,
+  "boundary_rows_dropped": 0,
+  "family_alpha": 0.01,
+  "ledger_variants": 52,
+  "ledger_alpha": 0.0009615384615384616,
+  "walk_forward_folds": [
+    {
+      "fold": 1,
+      "test_start": "2015-11-22",
+      "test_end": "2018-04-17",
+      "sessions": 497,
+      "gap_sessions": 29
+    },
+    {
+      "fold": 2,
+      "test_start": "2018-04-18",
+      "test_end": "2020-08-24",
+      "sessions": 497,
+      "gap_sessions": 29
+    },
+    {
+      "fold": 3,
+      "test_start": "2020-08-25",
+      "test_end": "2022-09-11",
+      "sessions": 497,
+      "gap_sessions": 29
+    },
+    {
+      "fold": 4,
+      "test_start": "2022-09-12",
+      "test_end": "2024-12-11",
+      "sessions": 497,
+      "gap_sessions": 29
+    }
+  ],
+  "universe_mean_gross_pct_all_dates": 2.079,
+  "hypotheses": {
+    "H1": {
+      "feature": "top5_net_buy_share",
+      "direction": "high",
+      "dates": 2263,
+      "pooled_dates": 1986,
+      "mean_eligible_per_date": 142.8,
+      "mean_portfolio_size": 29.0,
+      "mean_portfolio_gross_pct": 2.62,
+      "mean_universe_gross_pct": 2.159,
+      "excess": {
+        "0.5%": {
+          "by_date": {
+            "mean_pct": -0.039,
+            "low_pct": -0.18,
+            "high_pct": 0.102,
+            "clusters": 1986,
+            "alpha": 0.05
+          },
+          "by_20_session_block": {
+            "mean_pct": -0.029,
+            "low_pct": -0.436,
+            "high_pct": 0.378,
+            "clusters": 105,
+            "alpha": 0.05
+          },
+          "conservative_low_pct": -0.436
+        },
+        "1.0%": {
+          "by_date": {
+            "mean_pct": -0.539,
+            "low_pct": -0.68,
+            "high_pct": -0.398,
+            "clusters": 1986,
+            "alpha": 0.05
+          },
+          "by_20_session_block": {
+            "mean_pct": -0.529,
+            "low_pct": -0.936,
+            "high_pct": -0.122,
+            "clusters": 105,
+            "alpha": 0.05
+          },
+          "conservative_low_pct": -0.936
+        },
+        "1.5%": {
+          "by_date": {
+            "mean_pct": -1.039,
+            "low_pct": -1.18,
+            "high_pct": -0.898,
+            "clusters": 1986,
+            "alpha": 0.05
+          },
+          "by_20_session_block": {
+            "mean_pct": -1.029,
+            "low_pct": -1.436,
+            "high_pct": -0.622,
+            "clusters": 105,
+            "alpha": 0.05
+          },
+          "conservative_low_pct": -1.436
+        }
+      },
+      "excess_1pct_family_alpha": {
+        "by_date": {
+          "mean_pct": -0.539,
+          "low_pct": -0.725,
+          "high_pct": -0.354,
+          "clusters": 1986,
+          "alpha": 0.01
+        },
+        "by_20_session_block": {
+          "mean_pct": -0.529,
+          "low_pct": -1.064,
+          "high_pct": 0.006,
+          "clusters": 105,
+          "alpha": 0.01
+        },
+        "conservative_low_pct": -1.064
+      },
+      "excess_1pct_ledger_alpha": {
+        "by_date": {
+          "mean_pct": -0.539,
+          "low_pct": -0.777,
+          "high_pct": -0.301,
+          "clusters": 1986,
+          "alpha": 0.000962
+        },
+        "by_20_session_block": {
+          "mean_pct": -0.529,
+          "low_pct": -1.214,
+          "high_pct": 0.157,
+          "clusters": 105,
+          "alpha": 0.000962
+        },
+        "conservative_low_pct": -1.214
+      },
+      "vs_nepse_1pct_pct": 0.451,
+      "nepse_mean_pct": 1.168,
+      "vs_momentum_pct": -0.213,
+      "momentum_excess_1pct_pct": -0.326,
+      "real_open_dates": 1528,
+      "real_open_excess_1pct_pct": -0.53,
+      "close_entry_dates": 458,
+      "close_entry_excess_1pct_pct": -0.568,
+      "folds": [
+        {
+          "fold": 1,
+          "start": "2015-11-22",
+          "end": "2018-04-17",
+          "dates": 497,
+          "mean_excess_1pct_pct": -0.67,
+          "positive": false
+        },
+        {
+          "fold": 2,
+          "start": "2018-04-18",
+          "end": "2020-08-24",
+          "dates": 495,
+          "mean_excess_1pct_pct": -1.256,
+          "positive": false
+        },
+        {
+          "fold": 3,
+          "start": "2020-08-25",
+          "end": "2022-09-11",
+          "dates": 497,
+          "mean_excess_1pct_pct": 0.09,
+          "positive": true
+        },
+        {
+          "fold": 4,
+          "start": "2022-09-12",
+          "end": "2024-12-11",
+          "dates": 497,
+          "mean_excess_1pct_pct": -0.324,
+          "positive": false
+        }
+      ],
+      "diagnostics_not_gates": {
+        "mean_rank_ic": 0.0339,
+        "share_of_dates_ic_positive_pct": 57.7,
+        "top_minus_bottom_quintile_pct": 1.241,
+        "daily_turnover_pct": 33.1
+      },
+      "gates": {
+        "G1": false,
+        "G2": false,
+        "G3": false,
+        "G4": true,
+        "G5": false,
+        "G6": false
+      },
+      "passes": false
+    },
+    "H2": {
+      "feature": "buy_minus_sell_hhi",
+      "direction": "high",
+      "dates": 2263,
+      "pooled_dates": 1986,
+      "mean_eligible_per_date": 142.8,
+      "mean_portfolio_size": 29.0,
+      "mean_portfolio_gross_pct": 2.372,
+      "mean_universe_gross_pct": 2.159,
+      "excess": {
+        "0.5%": {
+          "by_date": {
+            "mean_pct": -0.287,
+            "low_pct": -0.39,
+            "high_pct": -0.184,
+            "clusters": 1986,
+            "alpha": 0.05
+          },
+          "by_20_session_block": {
+            "mean_pct": -0.276,
+            "low_pct": -0.546,
+            "high_pct": -0.006,
+            "clusters": 105,
+            "alpha": 0.05
+          },
+          "conservative_low_pct": -0.546
+        },
+        "1.0%": {
+          "by_date": {
+            "mean_pct": -0.787,
+            "low_pct": -0.89,
+            "high_pct": -0.684,
+            "clusters": 1986,
+            "alpha": 0.05
+          },
+          "by_20_session_block": {
+            "mean_pct": -0.776,
+            "low_pct": -1.046,
+            "high_pct": -0.506,
+            "clusters": 105,
+            "alpha": 0.05
+          },
+          "conservative_low_pct": -1.046
+        },
+        "1.5%": {
+          "by_date": {
+            "mean_pct": -1.287,
+            "low_pct": -1.39,
+            "high_pct": -1.184,
+            "clusters": 1986,
+            "alpha": 0.05
+          },
+          "by_20_session_block": {
+            "mean_pct": -1.276,
+            "low_pct": -1.546,
+            "high_pct": -1.006,
+            "clusters": 105,
+            "alpha": 0.05
+          },
+          "conservative_low_pct": -1.546
+        }
+      },
+      "excess_1pct_family_alpha": {
+        "by_date": {
+          "mean_pct": -0.787,
+          "low_pct": -0.922,
+          "high_pct": -0.652,
+          "clusters": 1986,
+          "alpha": 0.01
+        },
+        "by_20_session_block": {
+          "mean_pct": -0.776,
+          "low_pct": -1.131,
+          "high_pct": -0.421,
+          "clusters": 105,
+          "alpha": 0.01
+        },
+        "conservative_low_pct": -1.131
+      },
+      "excess_1pct_ledger_alpha": {
+        "by_date": {
+          "mean_pct": -0.787,
+          "low_pct": -0.961,
+          "high_pct": -0.614,
+          "clusters": 1986,
+          "alpha": 0.000962
+        },
+        "by_20_session_block": {
+          "mean_pct": -0.776,
+          "low_pct": -1.231,
+          "high_pct": -0.322,
+          "clusters": 105,
+          "alpha": 0.000962
+        },
+        "conservative_low_pct": -1.231
+      },
+      "vs_nepse_1pct_pct": 0.178,
+      "nepse_mean_pct": 1.194,
+      "vs_momentum_pct": -0.461,
+      "momentum_excess_1pct_pct": -0.326,
+      "real_open_dates": 1528,
+      "real_open_excess_1pct_pct": -0.791,
+      "close_entry_dates": 458,
+      "close_entry_excess_1pct_pct": -0.774,
+      "folds": [
+        {
+          "fold": 1,
+          "start": "2015-11-22",
+          "end": "2018-04-17",
+          "dates": 497,
+          "mean_excess_1pct_pct": -0.857,
+          "positive": false
+        },
+        {
+          "fold": 2,
+          "start": "2018-04-18",
+          "end": "2020-08-24",
+          "dates": 495,
+          "mean_excess_1pct_pct": -1.037,
+          "positive": false
+        },
+        {
+          "fold": 3,
+          "start": "2020-08-25",
+          "end": "2022-09-11",
+          "dates": 497,
+          "mean_excess_1pct_pct": -0.683,
+          "positive": false
+        },
+        {
+          "fold": 4,
+          "start": "2022-09-12",
+          "end": "2024-12-11",
+          "dates": 497,
+          "mean_excess_1pct_pct": -0.573,
+          "positive": false
+        }
+      ],
+      "diagnostics_not_gates": {
+        "mean_rank_ic": 0.0102,
+        "share_of_dates_ic_positive_pct": 52.6,
+        "top_minus_bottom_quintile_pct": 0.391,
+        "daily_turnover_pct": 32.4
+      },
+      "gates": {
+        "G1": false,
+        "G2": false,
+        "G3": false,
+        "G4": true,
+        "G5": false,
+        "G6": false
+      },
+      "passes": false
+    },
+    "H3": {
+      "feature": "buy_hhi_change_vs_20d",
+      "direction": "high",
+      "dates": 2263,
+      "pooled_dates": 1986,
+      "mean_eligible_per_date": 142.8,
+      "mean_portfolio_size": 29.0,
+      "mean_portfolio_gross_pct": 2.049,
+      "mean_universe_gross_pct": 2.159,
+      "excess": {
+        "0.5%": {
+          "by_date": {
+            "mean_pct": -0.61,
+            "low_pct": -0.709,
+            "high_pct": -0.51,
+            "clusters": 1986,
+            "alpha": 0.05
+          },
+          "by_20_session_block": {
+            "mean_pct": -0.606,
+            "low_pct": -0.781,
+            "high_pct": -0.43,
+            "clusters": 105,
+            "alpha": 0.05
+          },
+          "conservative_low_pct": -0.781
+        },
+        "1.0%": {
+          "by_date": {
+            "mean_pct": -1.11,
+            "low_pct": -1.209,
+            "high_pct": -1.01,
+            "clusters": 1986,
+            "alpha": 0.05
+          },
+          "by_20_session_block": {
+            "mean_pct": -1.106,
+            "low_pct": -1.281,
+            "high_pct": -0.93,
+            "clusters": 105,
+            "alpha": 0.05
+          },
+          "conservative_low_pct": -1.281
+        },
+        "1.5%": {
+          "by_date": {
+            "mean_pct": -1.61,
+            "low_pct": -1.709,
+            "high_pct": -1.51,
+            "clusters": 1986,
+            "alpha": 0.05
+          },
+          "by_20_session_block": {
+            "mean_pct": -1.606,
+            "low_pct": -1.781,
+            "high_pct": -1.43,
+            "clusters": 105,
+            "alpha": 0.05
+          },
+          "conservative_low_pct": -1.781
+        }
+      },
+      "excess_1pct_family_alpha": {
+        "by_date": {
+          "mean_pct": -1.11,
+          "low_pct": -1.241,
+          "high_pct": -0.979,
+          "clusters": 1986,
+          "alpha": 0.01
+        },
+        "by_20_session_block": {
+          "mean_pct": -1.106,
+          "low_pct": -1.336,
+          "high_pct": -0.875,
+          "clusters": 105,
+          "alpha": 0.01
+        },
+        "conservative_low_pct": -1.336
+      },
+      "excess_1pct_ledger_alpha": {
+        "by_date": {
+          "mean_pct": -1.11,
+          "low_pct": -1.277,
+          "high_pct": -0.942,
+          "clusters": 1986,
+          "alpha": 0.000962
+        },
+        "by_20_session_block": {
+          "mean_pct": -1.106,
+          "low_pct": -1.401,
+          "high_pct": -0.811,
+          "clusters": 105,
+          "alpha": 0.000962
+        },
+        "conservative_low_pct": -1.401
+      },
+      "vs_nepse_1pct_pct": -0.139,
+      "nepse_mean_pct": 1.189,
+      "vs_momentum_pct": -0.784,
+      "momentum_excess_1pct_pct": -0.326,
+      "real_open_dates": 1528,
+      "real_open_excess_1pct_pct": -1.066,
+      "close_entry_dates": 458,
+      "close_entry_excess_1pct_pct": -1.256,
+      "folds": [
+        {
+          "fold": 1,
+          "start": "2015-11-22",
+          "end": "2018-04-17",
+          "dates": 497,
+          "mean_excess_1pct_pct": -1.286,
+          "positive": false
+        },
+        {
+          "fold": 2,
+          "start": "2018-04-18",
+          "end": "2020-08-24",
+          "dates": 495,
+          "mean_excess_1pct_pct": -1.29,
+          "positive": false
+        },
+        {
+          "fold": 3,
+          "start": "2020-08-25",
+          "end": "2022-09-11",
+          "dates": 497,
+          "mean_excess_1pct_pct": -0.798,
+          "positive": false
+        },
+        {
+          "fold": 4,
+          "start": "2022-09-12",
+          "end": "2024-12-11",
+          "dates": 497,
+          "mean_excess_1pct_pct": -1.067,
+          "positive": false
+        }
+      ],
+      "diagnostics_not_gates": {
+        "mean_rank_ic": -0.019,
+        "share_of_dates_ic_positive_pct": 44.6,
+        "top_minus_bottom_quintile_pct": -0.547,
+        "daily_turnover_pct": 73.0
+      },
+      "gates": {
+        "G1": false,
+        "G2": false,
+        "G3": false,
+        "G4": false,
+        "G5": false,
+        "G6": false
+      },
+      "passes": false
+    },
+    "H4": {
+      "feature": "early_buyer_imbalance",
+      "direction": "high",
+      "dates": 2183,
+      "pooled_dates": 1986,
+      "mean_eligible_per_date": 142.8,
+      "mean_portfolio_size": 29.0,
+      "mean_portfolio_gross_pct": 2.327,
+      "mean_universe_gross_pct": 2.159,
+      "excess": {
+        "0.5%": {
+          "by_date": {
+            "mean_pct": -0.332,
+            "low_pct": -0.414,
+            "high_pct": -0.25,
+            "clusters": 1986,
+            "alpha": 0.05
+          },
+          "by_20_session_block": {
+            "mean_pct": -0.324,
+            "low_pct": -0.505,
+            "high_pct": -0.143,
+            "clusters": 105,
+            "alpha": 0.05
+          },
+          "conservative_low_pct": -0.505
+        },
+        "1.0%": {
+          "by_date": {
+            "mean_pct": -0.832,
+            "low_pct": -0.914,
+            "high_pct": -0.75,
+            "clusters": 1986,
+            "alpha": 0.05
+          },
+          "by_20_session_block": {
+            "mean_pct": -0.824,
+            "low_pct": -1.005,
+            "high_pct": -0.643,
+            "clusters": 105,
+            "alpha": 0.05
+          },
+          "conservative_low_pct": -1.005
+        },
+        "1.5%": {
+          "by_date": {
+            "mean_pct": -1.332,
+            "low_pct": -1.414,
+            "high_pct": -1.25,
+            "clusters": 1986,
+            "alpha": 0.05
+          },
+          "by_20_session_block": {
+            "mean_pct": -1.324,
+            "low_pct": -1.505,
+            "high_pct": -1.143,
+            "clusters": 105,
+            "alpha": 0.05
+          },
+          "conservative_low_pct": -1.505
+        }
+      },
+      "excess_1pct_family_alpha": {
+        "by_date": {
+          "mean_pct": -0.832,
+          "low_pct": -0.939,
+          "high_pct": -0.725,
+          "clusters": 1986,
+          "alpha": 0.01
+        },
+        "by_20_session_block": {
+          "mean_pct": -0.824,
+          "low_pct": -1.061,
+          "high_pct": -0.586,
+          "clusters": 105,
+          "alpha": 0.01
+        },
+        "conservative_low_pct": -1.061
+      },
+      "excess_1pct_ledger_alpha": {
+        "by_date": {
+          "mean_pct": -0.832,
+          "low_pct": -0.97,
+          "high_pct": -0.695,
+          "clusters": 1986,
+          "alpha": 0.000962
+        },
+        "by_20_session_block": {
+          "mean_pct": -0.824,
+          "low_pct": -1.128,
+          "high_pct": -0.52,
+          "clusters": 105,
+          "alpha": 0.000962
+        },
+        "conservative_low_pct": -1.128
+      },
+      "vs_nepse_1pct_pct": 0.165,
+      "nepse_mean_pct": 1.161,
+      "vs_momentum_pct": -0.506,
+      "momentum_excess_1pct_pct": -0.326,
+      "real_open_dates": 1528,
+      "real_open_excess_1pct_pct": -0.948,
+      "close_entry_dates": 458,
+      "close_entry_excess_1pct_pct": -0.447,
+      "folds": [
+        {
+          "fold": 1,
+          "start": "2015-11-22",
+          "end": "2018-04-17",
+          "dates": 497,
+          "mean_excess_1pct_pct": -0.488,
+          "positive": false
+        },
+        {
+          "fold": 2,
+          "start": "2018-04-18",
+          "end": "2020-08-24",
+          "dates": 495,
+          "mean_excess_1pct_pct": -1.163,
+          "positive": false
+        },
+        {
+          "fold": 3,
+          "start": "2020-08-25",
+          "end": "2022-09-11",
+          "dates": 497,
+          "mean_excess_1pct_pct": -0.736,
+          "positive": false
+        },
+        {
+          "fold": 4,
+          "start": "2022-09-12",
+          "end": "2024-12-11",
+          "dates": 497,
+          "mean_excess_1pct_pct": -0.943,
+          "positive": false
+        }
+      ],
+      "diagnostics_not_gates": {
+        "mean_rank_ic": 0.0056,
+        "share_of_dates_ic_positive_pct": 51.4,
+        "top_minus_bottom_quintile_pct": 0.255,
+        "daily_turnover_pct": 33.6
+      },
+      "gates": {
+        "G1": false,
+        "G2": false,
+        "G3": false,
+        "G4": true,
+        "G5": false,
+        "G6": false
+      },
+      "passes": false
+    },
+    "H5": {
+      "feature": "close_vs_top5_buyer_vwap",
+      "direction": "low",
+      "dates": 2262,
+      "pooled_dates": 1986,
+      "mean_eligible_per_date": 136.4,
+      "mean_portfolio_size": 27.7,
+      "mean_portfolio_gross_pct": 1.898,
+      "mean_universe_gross_pct": 2.196,
+      "excess": {
+        "0.5%": {
+          "by_date": {
+            "mean_pct": -0.798,
+            "low_pct": -0.967,
+            "high_pct": -0.63,
+            "clusters": 1986,
+            "alpha": 0.05
+          },
+          "by_20_session_block": {
+            "mean_pct": -0.793,
+            "low_pct": -1.275,
+            "high_pct": -0.311,
+            "clusters": 105,
+            "alpha": 0.05
+          },
+          "conservative_low_pct": -1.275
+        },
+        "1.0%": {
+          "by_date": {
+            "mean_pct": -1.298,
+            "low_pct": -1.467,
+            "high_pct": -1.13,
+            "clusters": 1986,
+            "alpha": 0.05
+          },
+          "by_20_session_block": {
+            "mean_pct": -1.293,
+            "low_pct": -1.775,
+            "high_pct": -0.811,
+            "clusters": 105,
+            "alpha": 0.05
+          },
+          "conservative_low_pct": -1.775
+        },
+        "1.5%": {
+          "by_date": {
+            "mean_pct": -1.798,
+            "low_pct": -1.967,
+            "high_pct": -1.63,
+            "clusters": 1986,
+            "alpha": 0.05
+          },
+          "by_20_session_block": {
+            "mean_pct": -1.793,
+            "low_pct": -2.275,
+            "high_pct": -1.311,
+            "clusters": 105,
+            "alpha": 0.05
+          },
+          "conservative_low_pct": -2.275
+        }
+      },
+      "excess_1pct_family_alpha": {
+        "by_date": {
+          "mean_pct": -1.298,
+          "low_pct": -1.52,
+          "high_pct": -1.077,
+          "clusters": 1986,
+          "alpha": 0.01
+        },
+        "by_20_session_block": {
+          "mean_pct": -1.293,
+          "low_pct": -1.927,
+          "high_pct": -0.66,
+          "clusters": 105,
+          "alpha": 0.01
+        },
+        "conservative_low_pct": -1.927
+      },
+      "excess_1pct_ledger_alpha": {
+        "by_date": {
+          "mean_pct": -1.298,
+          "low_pct": -1.582,
+          "high_pct": -1.014,
+          "clusters": 1986,
+          "alpha": 0.000962
+        },
+        "by_20_session_block": {
+          "mean_pct": -1.293,
+          "low_pct": -2.105,
+          "high_pct": -0.482,
+          "clusters": 105,
+          "alpha": 0.000962
+        },
+        "conservative_low_pct": -2.105
+      },
+      "vs_nepse_1pct_pct": -0.266,
+      "nepse_mean_pct": 1.164,
+      "vs_momentum_pct": -0.96,
+      "momentum_excess_1pct_pct": -0.339,
+      "real_open_dates": 1528,
+      "real_open_excess_1pct_pct": -1.312,
+      "close_entry_dates": 458,
+      "close_entry_excess_1pct_pct": -1.252,
+      "folds": [
+        {
+          "fold": 1,
+          "start": "2015-11-22",
+          "end": "2018-04-17",
+          "dates": 497,
+          "mean_excess_1pct_pct": -0.978,
+          "positive": false
+        },
+        {
+          "fold": 2,
+          "start": "2018-04-18",
+          "end": "2020-08-24",
+          "dates": 495,
+          "mean_excess_1pct_pct": -1.37,
+          "positive": false
+        },
+        {
+          "fold": 3,
+          "start": "2020-08-25",
+          "end": "2022-09-11",
+          "dates": 497,
+          "mean_excess_1pct_pct": -1.226,
+          "positive": false
+        },
+        {
+          "fold": 4,
+          "start": "2022-09-12",
+          "end": "2024-12-11",
+          "dates": 497,
+          "mean_excess_1pct_pct": -1.619,
+          "positive": false
+        }
+      ],
+      "diagnostics_not_gates": {
+        "mean_rank_ic": -0.0249,
+        "share_of_dates_ic_positive_pct": 41.5,
+        "top_minus_bottom_quintile_pct": -0.75,
+        "daily_turnover_pct": 31.2
+      },
+      "gates": {
+        "G1": false,
+        "G2": false,
+        "G3": false,
+        "G4": false,
+        "G5": false,
+        "G6": false
+      },
+      "passes": false
+    }
+  },
+  "runtime_seconds": 15.4
+}

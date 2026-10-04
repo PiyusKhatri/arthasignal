@@ -302,3 +302,14 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - **Avoid observations:** the live writer now writes `model_v0_avoid_e2` and `model_v0_avoid_e4` rows (rule, symbol, date, situations, feature hash) and grades them with the buy calls. A dry run for 2025-01-16 gave 10 buy calls and 34 avoid observations (31 E2, 3 E4). A holdout date other than the latest session is refused.
 - **Capture:** `src/scrapers/quarterly_capture.py` writes append-only `quarterly_figure_captures` rows (one per changed statement, with `captured_at`) and `quarterly_capture_runs`. The first full run over 312 active symbols was in progress at commit time; its result is logged below.
 - Tests: 9 added (guard, avoid hits and writes, holdout refusal, capture hash); backend suite passes.
+
+## Phase Q5 - Earlier studies rerun on corrected prices
+
+- Reran the event study, the broker-flow evaluation and the v0 situation matrix on the development window. Three versions: before (published), recovered (today's actions, 2,937 against 2,005) and corrected (plus the adjusted-base detector, with unresolved-step windows excluded). Report: `docs/RERUN_CORRECTED.md`.
+- **Event study:**
+  - E2 and E4 still pass. E2 now has 968 trades (was 683, because delisted companies are included), with abnormal −3.65% and bound −4.56%.
+  - E1 flipped to pass on the recovered data (bound +0.02%), then failed again when corrected (−0.02%), which is a knife edge. The corrected result stands: it fails.
+  - The other hypotheses are unchanged fails.
+- **Broker flow:** H1-H5 all still fail with near-identical excess returns (−0.54% to −1.30%). The corrected run excludes 103 more windows for unresolved steps.
+- **Matrix:** regraded as `accuracy-v2-pi2` (160,478 new grades). Window exclusions fell by about a quarter (623 → 459 at 5 sessions, 16,395 → 11,796 at 240). Still 0 PASS, 38 NO EVIDENCE and 66 INSUFFICIENT SAMPLE, with no verdict changes and a largest edge change of 1.2 points.
+- **No earlier conclusion changes.**
