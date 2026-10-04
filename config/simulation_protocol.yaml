@@ -1,0 +1,216 @@
+protocol:
+  version: sim-protocol-v1
+  locked_on: "2026-10-04"
+  document: docs/SIMULATION_PROTOCOL.md
+  trial_family: simulation_protocol
+  holdout_start: "2025-09-30"
+  last_development_day: "2025-09-29"
+
+calls:
+  types: [BUY, HOLD, WAIT, NO_BUY, SELL]
+  short_selling: false
+  sell_meaning: exit or stay out
+  graded: [BUY, HOLD, NO_BUY, SELL]
+  ungraded: [WAIT]
+
+score:
+  min: -100
+  max: 100
+  rounding: nearest integer, halves away from zero
+  bands:
+    - {call: BUY, min: 80, max: 100}
+    - {call: HOLD, min: 50, max: 79}
+    - {call: WAIT, min: -49, max: 49}
+    - {call: NO_BUY, min: -79, max: -50}
+    - {call: SELL, min: -100, max: -80}
+  pillars:
+    - technical
+    - volume
+    - floorsheet_broker
+    - fundamentals
+    - corporate_events
+    - news
+    - market_state
+    - historical_sentiment
+  missing_pillar_contribution: 0
+  record_missing_pillars: true
+  tuning_allowed_in: [learning]
+  frozen_before: [check, exam]
+
+horizons:
+  sessions_per_month: 19
+  sessions_per_month_source: median trading sessions per calendar month in trading_calendar, 2014-07 to 2019-12 (66 months, mean 19.36, median 19)
+  classes:
+    short: {min_months: 1, max_months: 3, min_sessions: 19, max_sessions: 57}
+    mid: {min_months: 3, max_months: 7, min_sessions: 57, max_sessions: 133}
+    long: {min_months: 12, max_months: 15, min_sessions: 228, max_sessions: 285}
+  holding_counted_from: entry session is holding session 1
+
+calendar:
+  source: trading_calendar table and config/nepse_calendar.json
+  week_rules:
+    - {effective_from: "2014-01-01", weekdays: [Sun, Mon, Tue, Wed, Thu]}
+    - {effective_from: "2026-04-08", weekdays: [Mon, Tue, Wed, Thu, Fri]}
+  real_open_start: "2018-02-18"
+  before_real_open: bar is reduced to its close (open, high and low are replaced by the close)
+
+entry:
+  session: next session after the call date
+  price: open of the entry session, or its close before real_open_start
+  backfill: false
+  unfilled_when: [no_trade, locked_upper_circuit]
+  settlement_sessions_before_sell: 3
+
+circuit:
+  limits:
+    - {effective_from: "2014-01-01", limit: 0.10}
+    - {effective_from: "2026-04-20", limit: 0.15}
+  lock_tolerance: 0.005
+  locked_definition: high equals low and the close is within lock_tolerance of the limit move from the previous close
+
+exit:
+  rule: first of target, stop or horizon end
+  same_session_order: stop before target
+  gap_fill: a gap through the stop or target fills at the session open
+  horizon_price: close of the last holding session
+  no_trade_on_exit: next session with a trade, at its open, delay recorded
+  locked_lower_circuit_on_exit: next session that is not locked, at its open, delay recorded
+  target_stop_rule: chosen per stock and situation by a rule fitted on learning years only, frozen per version, locked on each call when it is made
+
+costs:
+  notional_npr: 100000
+  shares: floor of notional over entry price, at least 1
+  minimum_commission_npr: 10
+  commission_schedules:
+    - effective_from: "2014-01-01"
+      confirmed: false
+      note: tiers before the July 2016 cut not found; sources give only a 0.7-1 percent range; conservative flat 1.0 percent; exact July 2016 date not found, conservative end 2016-07-31
+      sources: ["https://kathmandupost.com/money/2019/10/05/securities-board-of-nepal-mulls-lowering-stockbrokers-commissions"]
+      tiers:
+        - {up_to: null, rate: 0.0100}
+    - effective_from: "2016-08-01"
+      confirmed: false
+      note: sources give the range 0.60 to 0.40 percent; tier split differs between sources (3 or 5 tiers); the higher reading per tier is used
+      sources: ["https://kathmandupost.com/money/2019/10/05/securities-board-of-nepal-mulls-lowering-stockbrokers-commissions", "https://thehimalayantimes.com/business/brokers-commission-slashed-by-33-per-cent-from-today"]
+      tiers:
+        - {up_to: 50000, rate: 0.0060}
+        - {up_to: 500000, rate: 0.0055}
+        - {up_to: 2000000, rate: 0.0050}
+        - {up_to: 10000000, rate: 0.0045}
+        - {up_to: null, rate: 0.0040}
+    - effective_from: "2020-12-27"
+      confirmed: true
+      sources: ["https://thehimalayantimes.com/business/brokers-commission-slashed-by-33-per-cent-from-today", "https://myrepublica.nagariknetwork.com/news/commission-for-brokerage-service-reduced-by-up-to-60-percent/"]
+      tiers:
+        - {up_to: 50000, rate: 0.0040}
+        - {up_to: 500000, rate: 0.0037}
+        - {up_to: 2000000, rate: 0.0034}
+        - {up_to: 10000000, rate: 0.0030}
+        - {up_to: null, rate: 0.0027}
+    - effective_from: "2024-05-14"
+      confirmed: true
+      sources: ["https://www.sharesansar.com/newsdetail/sebon-to-enact-revised-commission-rates-for-stockbrokers-implementation-begins-today-2024-05-14", "https://www.investopaper.com/news/stock-broker-commission-nepal/"]
+      tiers:
+        - {up_to: 50000, rate: 0.0036}
+        - {up_to: 500000, rate: 0.0033}
+        - {up_to: 2000000, rate: 0.0031}
+        - {up_to: 10000000, rate: 0.0027}
+        - {up_to: null, rate: 0.0024}
+  sebon_fee:
+    rate: 0.00015
+    sides: both
+    confirmed: false
+    note: 0.015 percent is confirmed for the current schedule; a 10 percent SEBON fee cut was announced in October 2023 without a published new rate, and the rate before 2020 was not found; 0.015 percent is kept throughout as the conservative value
+    sources: ["https://kharchapatra.com/blog/nepse-share-trading-costs-nepal", "https://eng.merolagani.com/NewsDetail.aspx?newsID=96273"]
+  dp_charge:
+    npr_per_scrip_per_side: 25
+    sides: both
+    confirmed: false
+    note: Rs 25 per company per settlement is confirmed for the current schedule; sources disagree on whether the buy side pays it and earlier amounts were not found; charged on both sides throughout as the conservative value
+    sources: ["https://kharchapatra.com/blog/nepse-share-trading-costs-nepal", "https://ssl.com.np/trading-commission-and-fees"]
+  capital_gains_tax:
+    investor: resident natural person
+    base: positive net gain after buy and sell costs
+    long_term_after_days: 365
+    schedules:
+      - {effective_from: "2014-01-01", short: 0.05, long: 0.05, confirmed: true, sources: ["https://www.kbc-ca.com.np/_uploads/capital-gain-tax.pdf", "https://www.nbsm.com.np/uploads/large/1622709726242738.pdf"]}
+      - {effective_from: "2021-07-16", short: 0.075, long: 0.05, confirmed: true, sources: ["https://www.nbsm.com.np/uploads/large/1622709726242738.pdf"]}
+      - {effective_from: "2026-07-17", short: 0.10, long: 0.075, confirmed: false, note: secondary sources only, sources: ["https://kharchapatra.com/blog/nepse-share-trading-costs-nepal"]}
+      - {effective_from: "2026-09-22", short: 0.05, long: 0.0375, confirmed: false, note: sources give 3.75 or 3.5 percent long term; the higher is used, sources: ["https://www.sharesansar.com/newsdetail/capital-gains-tax-rates-reduced-decision-published-in-gazette-2026-09-22", "https://nepalpress.com/2026/09/16/764315/relief-for-individual-investors-in-the-stock-market-capital-gains-tax-reduced-to-3-5-and-5-percent/"]}
+
+grading:
+  BUY:
+    right_when: net profit after all costs and tax is above zero
+    stop_exit: wrong
+    unfilled: wrong
+  SELL:
+    reference: close on the call date
+    right_when: price at exit is below the reference
+    costs: none
+    unfilled: not applicable
+  NO_BUY:
+    counterfactual: buy at the next open held to horizon end with no target or stop
+    right_when: counterfactual net profit after all costs and tax is below zero
+    unfilled: not graded, counted
+  HOLD:
+    reference: close on the call date
+    right_when: a close at or above the reference within the horizon before any stop
+    stop_exit: wrong
+    no_recovery: wrong
+  WAIT:
+    graded: false
+    missed_buy: a buy at the next open held to horizon end would have made a net profit
+    missed_sell: the close at horizon end is below the reference
+
+risk_control:
+  calls: filled BUY calls with a resolved exit
+  counterfactual: same entry held to horizon end with no target or stop
+  tail_share: 0.10
+  score: 100 times (tail mean net return with exits minus tail mean held to horizon) over the absolute tail mean held to horizon, clipped to -100..100
+  components: [stop_exits, loss_avoided_npr, stop_regret_rate, tail_mean_actual, tail_mean_hold, max_drawdown_actual, max_drawdown_hold, mae_mean, mae_p95]
+
+targets:
+  accuracy_min: 0.60
+  beat_random_baseline: true
+  baseline: same call date, same call type, same horizon class and holding period, frozen target and stop rule applied to every eligible stock
+  interval: one-sided 95 percent lower bound on accuracy minus baseline, clustered by call week
+  min_graded_calls: 100
+  min_call_weeks: 30
+  min_calls_for_breakdown: 30
+  breakdowns: [call_type, horizon_class, score_band]
+  calibration_buckets: [[80, 89], [90, 100], [50, 64], [65, 79], [-64, -50], [-79, -65], [-89, -80], [-100, -90]]
+  coverage: share of eligible stock-weeks with a graded call
+
+periods:
+  learning: {start: "2014-06-01", end: "2019-12-31", runs: unlimited}
+  check: {start: "2020-01-01", end: "2020-12-31", runs_per_version: 1}
+  exam:
+    - {name: exam_2021, start: "2021-01-01", end: "2021-12-31", runs_per_version: 1}
+    - {name: exam_2022, start: "2022-01-01", end: "2022-12-31", runs_per_version: 1}
+    - {name: exam_2023, start: "2023-01-01", end: "2023-12-31", runs_per_version: 1}
+    - {name: exam_2024, start: "2024-01-01", end: "2024-12-31", runs_per_version: 1}
+  pre_holdout: {name: exam_2025a, start: "2025-01-01", end: "2025-09-29", runs_per_version: 1, status: proposed}
+  exam_order: strict
+  outcome_prices_until: "2025-09-29"
+  censor_when_path_reaches_holdout: true
+  earlier_studies_used_data_through: "2025-01-19"
+
+time_machine:
+  step: week
+  reveal: data up to the last close of the week
+  order: [reveal, score, call_and_lock, advance, check_open_calls]
+  point_in_time: first moment a value was actually observable in any source
+
+learning_loop:
+  max_changes_per_version: 3
+  reason_required: true
+  wrong_call_causes: [market_wide_move, sector_move, news_policy, circuit_lock, liquidity, corporate_action, model_error]
+  storage: immutable, keyed by config sha256, never deleted
+
+multiple_testing:
+  recommended: romano_wolf_stepdown
+  bootstrap: stationary block bootstrap over call weeks
+  bootstrap_reps: 10000
+  family_alpha: 0.05
+  diagnostics: [pbo_cscv_learning, deflated_accuracy_note]
+  legacy_counter_reported: true
