@@ -8,17 +8,7 @@ Everything below is typed by you. Nothing in this repository connects to the ser
 
 | When | Job (systemd unit) | What it does |
 | --- | --- | --- |
-| Mon-Fri 15:35 | `arthasignal-daily` | The post-close chain, in this order. It stops early with "no session" on a holiday |
-| | 1. capture | Today's prices and NEPSE index: NEPSE API, then Sharesansar, then Merolagani. Retries every 15 minutes until 20:30 |
-| | 2. quarterly_capture | Latest-quarter statements, timestamped |
-| | 3. news | News-portal collectors |
-| | 4. integrity | Price-integrity check on the last 60 sessions. **If it fails, steps 5-7 do not run and you get a Discord alert** |
-| | 5. league | The six paper bots (b2) write their calls |
-| | 6. avoid_writer | Model v0.1 calls and the avoid observations |
-| | 7. tips | Public tips are written to the ledger |
-| | 8. grading | Matured live calls are graded (protocol v2.1) |
-| | 9. metrics | Leaderboards, plus a Markdown copy in `logs/league/` |
-| | 10. report | The daily report to Discord |
+| Mon-Fri 15:35 | `arthasignal-daily` | The post-close chain; order and failure rules are below. It stops early with "no session" on a holiday |
 | Every 30 min | `arthasignal-news` | News collectors |
 | Hourly at :05, and Mon-Fri 10:25 | `arthasignal-tips` | Tip collection and ledger |
 | Hourly at :50 | `arthasignal-health` | Discord alert for a failed job, stale prices, writers not done by 21:30, stale news, stale backup, or disk above 85% |
@@ -26,6 +16,27 @@ Everything below is typed by you. Nothing in this repository connects to the ser
 | Daily 03:30 | `arthasignal-purge` | Deletes YouTube and Reddit text after 30 days |
 | Saturday 09:00 | `arthasignal-weekly` | The weekly report to Discord |
 | On any failure | `arthasignal-notify@` | Posts the failed unit and its last log lines to Discord |
+
+**The post-close chain, in order** (`python -m src.ops.daily --list` prints the same list on the server). Since 2026-10-04 the calls are written **before** anything that cannot make them invalid:
+
+| # | Step | If it fails | Why |
+| ---: | --- | --- | --- |
+| 1 | capture: today's prices and NEPSE index (NEPSE API, then Sharesansar, then Merolagani; retries every 15 min until 20:30) | **Hard stop**: every later step except news is skipped; Discord alert | Every call is computed from today's prices and index. Without them no call is valid |
+| 2 | integrity: unresolved price steps in the last 60 sessions | Three outcomes, described below | Only bad prices for a symbol make that symbol's call invalid |
+| 3 | league: the six paper bots (b2) | Recorded; the other writers still run; alert | Writers are independent of each other |
+| 4 | avoid_writer: model v0.1 calls and avoid observations | Same | Same |
+| 5 | tips: public tips to the ledger | Same | Same |
+| 6 | sectors: no non-equity symbol has an equity sector | **Never blocks**; alert | Calls use only the Equity price panel, so non-equity labels cannot make a call invalid |
+| 7 | quarterly_capture | Never blocks | No call uses it today; it only accrues data for later |
+| 8 | news collectors | Never blocks; also runs every 30 min on its own | No call uses it |
+| 9 | grading of matured calls | Never blocks; retried the next day | Grading never changes a written call |
+| 10 | metrics: leaderboards | Never blocks | Reporting only |
+| 11 | daily report to Discord | Always runs | |
+
+The three integrity outcomes:
+- **exit 3, specific symbols flagged:** they are written to `logs/daily/<date>/exclude_symbols.json`, the writers **drop** those symbols from today's calls and write the rest, and Discord gets a warning. Dropped symbols are not replaced by the next-ranked stock, because the frozen bot rules do not include a replacement; a bot may make fewer calls that day.
+- **exit 4, 10% or more of traded equities flagged:** that indicates a feed-wide price problem, so the writers are skipped and Discord gets an alert. Fix the data, then before the next open run `sudo systemctl start arthasignal-daily-resume.service`.
+- **The checker itself crashes:** the writers still run and Discord is alerted. A crash says nothing about the data, and the grader already excludes any holding window that spans an unresolved step, so an unflagged bad symbol cannot inflate results; it only wastes a call slot that day.
 
 **The deadline (protocol v2.1):** calls for a session must be written before the **next session opens** (11:00). If the evening chain fails, you have until then to fix it and run `sudo systemctl start arthasignal-daily-resume.service`.
 

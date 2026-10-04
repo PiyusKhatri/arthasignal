@@ -83,11 +83,11 @@ def build_state(as_of: date) -> dict[str, Any]:
     return {"inputs": inputs, "panel": panel, "actions": actions, "market": market, "mergers": mergers}
 
 
-def quarantined_symbols(engine: Engine) -> dict[str, str]:
+def quarantined_symbols(engine: Engine, until: date | None = None) -> dict[str, str]:
     from src.backtest.price_integrity import load_quarantine
 
     with engine.connect() as connection:
-        quarantine = load_quarantine(connection)
+        quarantine = load_quarantine(connection, until=until)
     return {s: f"{d} {r}" for s, d, r in zip(quarantine["symbol"], quarantine["step_date"], quarantine["reason"])}
 
 
@@ -204,6 +204,8 @@ def run(as_of: date | None, dry_run: bool, now: datetime | None = None, schema: 
     from src.database.connection import engine
     from src.database.holdout_guard import HOLDOUT_START, HoldoutQueryViolation, allow
 
+    if as_of is not None and as_of < HOLDOUT_START:
+        return _run(as_of, dry_run, now, schema, write_only)
     with engine.connect() as connection:
         latest = connection.execute(text("SELECT max(date) FROM daily_prices")).scalar_one()
     as_of = as_of or latest
@@ -216,7 +218,12 @@ def run(as_of: date | None, dry_run: bool, now: datetime | None = None, schema: 
 
 
 def _run(as_of: date, dry_run: bool, now: datetime | None, schema: str, write_only: bool = False) -> dict[str, Any]:
-    from src.database.connection import engine
+    from src.database.connection import engine as main_engine
+    from src.database.holdout_guard import HOLDOUT_START
+    from src.database.holdout_guard import engine as research
+
+    past = as_of < HOLDOUT_START
+    engine = research if past else main_engine
 
     now = now or datetime.now(tz=NPT)
     report: dict[str, Any] = {"as_of": as_of.isoformat(), "now": now.isoformat(), "dry_run": dry_run,
@@ -225,7 +232,10 @@ def _run(as_of: date, dry_run: bool, now: datetime | None, schema: str, write_on
         apply_schema(engine, schema)
         report["model"] = register_model(engine, schema)
     state = build_state(as_of)
-    quarantine = quarantined_symbols(engine)
+    from src.ops.exclusions import excluded_symbols
+
+    report["excluded_today"] = excluded_symbols()
+    quarantine = {**quarantined_symbols(engine, until=as_of if past else None), **report["excluded_today"]}
     calls = compute_calls(state, quarantine)
     report["quarantined_symbols"] = quarantine
     report["quarantine_excluded_from_calls"] = state["quarantine_excluded"]

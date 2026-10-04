@@ -376,6 +376,8 @@ def check_recent(
 ) -> list[dict[str, Any]]:
     known = set(quarantined)
     recent = recent_unresolved(steps, sessions, lookback)
+    if recent.empty:
+        return []
     recent = recent[[(s, d) not in known for s, d in zip(recent["symbol"], recent["date"])]]
     return recent[["symbol", "date", "raw_move", "adjusted_move", "kind"]].astype(str).to_dict("records")
 
@@ -385,13 +387,15 @@ def apply_tables(connection: Any) -> None:
         connection.execute(text(statement))
 
 
-def load_quarantine(connection: Any) -> pd.DataFrame:
+def load_quarantine(connection: Any, until: date | None = None) -> pd.DataFrame:
     exists = connection.execute(text("SELECT to_regclass('public.price_quarantine')")).scalar()
     if exists is None:
         return pd.DataFrame(columns=["symbol", "step_date", "raw_move", "reason", "sources_checked"])
+    where = " WHERE step_date <= :u" if until is not None else ""
     return pd.read_sql(
-        text("SELECT symbol, step_date, raw_move, reason, sources_checked FROM price_quarantine ORDER BY symbol, step_date"),
+        text(f"SELECT symbol, step_date, raw_move, reason, sources_checked FROM price_quarantine{where} ORDER BY symbol, step_date"),
         connection,
+        params={"u": until} if until is not None else None,
     )
 
 
@@ -511,21 +515,43 @@ def resolve_recent(
     return report
 
 
-def live_check(lookback: int) -> int:
-    from src.database.connection import engine as main_engine
-    from src.database.holdout_guard import allow
+EXIT_FLAGGED = 3
+EXIT_FEED_WIDE = 4
+FEED_WIDE_SHARE = 0.10
 
-    with main_engine.connect() as connection:
-        latest = connection.execute(text("SELECT max(date) FROM daily_prices")).scalar_one()
-        quarantine = load_quarantine(connection)
-    with allow("live_ledger"):
-        inputs = load_inputs(latest)
+
+def integrity_check(lookback: int, as_of: date | None = None, exclusions_out: Path | None = None) -> int:
+    from src.database.connection import engine as main_engine
+    from src.database.holdout_guard import HOLDOUT_START, allow
+    from src.database.holdout_guard import engine as research
+
+    if as_of is not None and as_of < HOLDOUT_START:
+        with research.connect() as connection:
+            quarantine = load_quarantine(connection, until=as_of)
+        inputs = load_inputs(as_of)
+        latest = as_of
+    else:
+        with main_engine.connect() as connection:
+            latest = connection.execute(text("SELECT max(date) FROM daily_prices")).scalar_one()
+            quarantine = load_quarantine(connection)
+        with allow("live_ledger"):
+            inputs = load_inputs(latest)
     steps = detect_steps(inputs["prices"], inputs["actions"], inputs["sessions"])
     known = set(zip(quarantine["symbol"], quarantine["step_date"]))
     recent = check_recent(steps, inputs["sessions"], lookback, known)
-    print(json.dumps({"latest_session": latest.isoformat(), "lookback": lookback, "unresolved_unquarantined": recent[:50],
-                      "count": len(recent)}, indent=2, default=str))
-    return 1 if recent else 0
+    symbols = sorted({r["symbol"] for r in recent})
+    traded = int(inputs["prices"].loc[inputs["prices"]["date"] == latest, "symbol"].nunique())
+    share = len(symbols) / traded if traded else 1.0
+    code = 0 if not symbols else (EXIT_FEED_WIDE if share >= FEED_WIDE_SHARE else EXIT_FLAGGED)
+    report = {"latest_session": latest.isoformat(), "lookback": lookback, "count": len(recent), "symbols": symbols,
+              "traded_equities": traded, "flagged_share": round(share, 4),
+              "decision": {0: "clean", EXIT_FLAGGED: "exclude these symbols from today's calls", EXIT_FEED_WIDE: "feed-wide problem: do not write calls"}[code],
+              "unresolved_unquarantined": recent[:50]}
+    if exclusions_out is not None:
+        exclusions_out.parent.mkdir(parents=True, exist_ok=True)
+        exclusions_out.write_text(json.dumps({"latest_session": latest.isoformat(), "symbols": {s: "unresolved price step" for s in symbols}}, indent=1))
+    print(json.dumps(report, indent=2, default=str))
+    return code
 
 
 def main() -> None:
@@ -538,9 +564,11 @@ def main() -> None:
     parser.add_argument("--lookback", type=int, default=60)
     parser.add_argument("--resolve-recent", action="store_true")
     parser.add_argument("--live", action="store_true")
+    parser.add_argument("--as-of", type=date.fromisoformat)
+    parser.add_argument("--exclusions-out", type=Path)
     args = parser.parse_args()
     if args.live:
-        sys.exit(live_check(args.lookback))
+        sys.exit(integrity_check(args.lookback, args.as_of, args.exclusions_out))
     if args.end > PRE_HOLDOUT_END:
         raise SystemExit(f"--end may not be inside the holdout (after {PRE_HOLDOUT_END})")
     inputs = load_inputs(args.end)

@@ -247,6 +247,10 @@ def run(as_of: date | None, dry_run: bool, now: datetime | None = None, schema: 
     from src.database.connection import engine
     from src.database.holdout_guard import HOLDOUT_START, HoldoutQueryViolation, allow
 
+    if as_of is not None and as_of < HOLDOUT_START:
+        if not dry_run:
+            raise HoldoutQueryViolation(f"{as_of} is before the league start; only dry runs may use development dates")
+        return _run(as_of, dry_run, now, schema, markdown_dir, write_only)
     with engine.connect() as connection:
         latest = connection.execute(text("SELECT max(date) FROM daily_prices")).scalar_one()
     as_of = as_of or latest
@@ -262,7 +266,12 @@ def run(as_of: date | None, dry_run: bool, now: datetime | None = None, schema: 
 
 def _run(as_of: date, dry_run: bool, now: datetime | None, schema: str, markdown_dir: Path | None,
          write_only: bool = False) -> dict[str, Any]:
-    from src.database.connection import engine
+    from src.database.connection import engine as main_engine
+    from src.database.holdout_guard import HOLDOUT_START
+    from src.database.holdout_guard import engine as research
+
+    past = as_of < HOLDOUT_START
+    engine = research if past else main_engine
 
     started = datetime.now(tz=NPT)
     now = now or started
@@ -272,7 +281,10 @@ def _run(as_of: date, dry_run: bool, now: datetime | None, schema: str, markdown
         apply_league_schema(engine, schema)
         report["bots_registered"] = register_bots(engine, schema)
     state = build_state(as_of)
-    quarantine = quarantined_symbols(engine)
+    from src.ops.exclusions import excluded_symbols
+
+    report["excluded_today"] = excluded_symbols()
+    quarantine = {**quarantined_symbols(engine, until=as_of if past else None), **report["excluded_today"]}
     report["market_state"] = market_state_labels(state["inputs"]["index"], state["panel"].sessions).iloc[-1]
     graded = load_live_graded(engine, schema) if not dry_run else pd.DataFrame()
     live_sessions = [d for d in state["panel"].sessions if d >= LEAGUE_START]

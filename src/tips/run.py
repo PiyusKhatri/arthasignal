@@ -334,7 +334,10 @@ def main() -> None:
         return
     state, latest = live_state()
     report["latest_session"] = latest.isoformat()
-    report["write"] = write_tips(engine, state, quarantined_symbols(engine), now, args.dry_run)
+    from src.ops.exclusions import excluded_symbols
+
+    report["excluded_today"] = excluded_symbols()
+    report["write"] = write_tips(engine, state, {**quarantined_symbols(engine), **report["excluded_today"]}, now, args.dry_run)
     if args.grade and not args.dry_run:
         report["grading"] = grade_matured(engine, state, False, pairs=tracked_pairs(engine)) if tracked_pairs(engine) else "no tip calls"
         board = boards(engine, state)

@@ -26,9 +26,11 @@ def test_capture_retries_until_the_cutoff_then_fails(monkeypatch) -> None:
     assert code == capture.EXIT_FAILED and len(out["attempts"]) == 1 and out["attempts"][0]["errors"] == {"prices": "boom"}
 
 
-def test_daily_chain_order_matches_the_runbook() -> None:
-    assert [s.name for s in daily.STEPS] == ["capture", "quarterly_capture", "news", "integrity", "sectors", "league", "avoid_writer", "tips",
-                                            "grading", "metrics"]
+def test_daily_chain_writes_calls_before_collectors_and_soft_checks() -> None:
+    assert [s.name for s in daily.STEPS] == ["capture", "integrity", "league", "avoid_writer", "tips", "sectors", "quarterly_capture",
+                                            "news", "grading", "metrics"]
+    gates = {s.name: s.gate for s in daily.STEPS}
+    assert gates["sectors"] == gates["quarterly_capture"] == gates["news"] == "soft"
     assert [s.name for s in daily.plan("league", None)][:2] == ["league", "avoid_writer"]
     with pytest.raises(SystemExit):
         daily.plan("nope", None)
@@ -44,22 +46,75 @@ def fake_chain(monkeypatch, tmp_path):
     return recorded, alerts
 
 
+def _outcomes(monkeypatch, outcomes):
+    def fake(step, log_dir, env):
+        assert env["ARTHASIGNAL_EXCLUSIONS"].endswith(daily.EXCLUSIONS_FILE)
+        return outcomes.get(step.name, ("ok", 0, {}))
+    monkeypatch.setattr(daily, "run_step", fake)
+
+
 def test_no_session_skips_everything_but_news(monkeypatch, fake_chain) -> None:
     recorded, _ = fake_chain
-    monkeypatch.setattr(daily, "run_step", lambda step, log_dir: ("no_session", 3, {}) if step.name == "capture" else ("ok", 0, {}))
+    _outcomes(monkeypatch, {"capture": ("no_session", 3, {})})
     assert daily.run(report=False) == 0
-    assert dict(recorded) == {"capture": "no_session", "quarterly_capture": "skipped", "news": "ok", "integrity": "skipped", "sectors": "skipped", "league": "skipped",
-                              "avoid_writer": "skipped", "tips": "skipped", "grading": "skipped", "metrics": "skipped"}
+    status = dict(recorded)
+    assert status.pop("capture") == "no_session" and status.pop("news") == "ok"
+    assert set(status.values()) == {"skipped"}
 
 
-def test_integrity_failure_blocks_writers_but_not_grading_and_alerts(monkeypatch, fake_chain) -> None:
+def test_flagged_symbols_are_excluded_but_calls_are_still_written(monkeypatch, fake_chain) -> None:
     recorded, alerts = fake_chain
-    monkeypatch.setattr(daily, "run_step", lambda step, log_dir: ("failed", 1, {}) if step.name == "integrity" else ("ok", 0, {}))
+    _outcomes(monkeypatch, {"integrity": ("flagged", 3, {})})
+    assert daily.run(report=False) == 0
+    status = dict(recorded)
+    assert status["integrity"] == "flagged" and status["league"] == status["avoid_writer"] == status["tips"] == "ok"
+    assert alerts == [next(a for a in alerts if a.startswith("integrity-flagged:"))]
+
+
+def test_feed_wide_price_problem_is_the_only_integrity_outcome_that_stops_the_writers(monkeypatch, fake_chain) -> None:
+    recorded, alerts = fake_chain
+    _outcomes(monkeypatch, {"integrity": ("failed", 4, {})})
     assert daily.run(report=False) == 1
     status = dict(recorded)
     assert status["league"] == status["avoid_writer"] == status["tips"] == "skipped"
-    assert status["grading"] == status["metrics"] == "ok"
-    assert alerts and alerts[0].startswith("integrity:")
+    assert status["sectors"] == status["grading"] == status["metrics"] == "ok"
+    assert alerts[0].startswith("integrity-feed:")
+
+
+def test_a_crashed_integrity_checker_does_not_stop_the_calls(monkeypatch, fake_chain) -> None:
+    recorded, alerts = fake_chain
+    _outcomes(monkeypatch, {"integrity": ("failed", 1, {})})
+    assert daily.run(report=False) == 1
+    status = dict(recorded)
+    assert status["league"] == status["avoid_writer"] == status["tips"] == "ok"
+    assert alerts[0].startswith("integrity-error:")
+
+
+def test_failing_sector_and_collector_checks_never_block_anything(monkeypatch, fake_chain) -> None:
+    recorded, _ = fake_chain
+    _outcomes(monkeypatch, {"sectors": ("failed", 1, {}), "quarterly_capture": ("timeout", None, {}), "news": ("failed", 1, {})})
+    assert daily.run(report=False) == 1
+    status = dict(recorded)
+    assert status["league"] == status["avoid_writer"] == status["tips"] == status["grading"] == status["metrics"] == "ok"
+
+
+def test_capture_failure_stops_the_writers(monkeypatch, fake_chain) -> None:
+    recorded, _ = fake_chain
+    _outcomes(monkeypatch, {"capture": ("failed", 2, {})})
+    assert daily.run(report=False) == 1
+    status = dict(recorded)
+    assert status["league"] == "skipped" and status["news"] == "ok"
+
+
+def test_exclusion_file_reaches_the_writers(monkeypatch, tmp_path) -> None:
+    from src.ops import exclusions
+
+    path = tmp_path / "x.json"
+    path.write_text('{"symbols": {"NLG": "unresolved price step"}}')
+    monkeypatch.setenv(exclusions.ENV, str(path))
+    assert exclusions.excluded_symbols() == {"NLG": "unresolved price step"}
+    monkeypatch.setenv(exclusions.ENV, str(tmp_path / "missing.json"))
+    assert exclusions.excluded_symbols() == {}
 
 
 def test_health_expects_the_last_rule_session(monkeypatch) -> None:

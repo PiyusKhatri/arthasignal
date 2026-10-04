@@ -22,6 +22,9 @@ CREATE TABLE IF NOT EXISTS {schema}.ops_runs (
     detail       JSONB NOT NULL DEFAULT '{{}}'::jsonb
 );
 CREATE INDEX IF NOT EXISTS ix_ops_runs_job_time ON {schema}.ops_runs (job, finished_at);
+ALTER TABLE {schema}.ops_runs DROP CONSTRAINT IF EXISTS ops_runs_status_check;
+ALTER TABLE {schema}.ops_runs ADD CONSTRAINT ops_runs_status_check
+    CHECK (status IN ('ok', 'failed', 'skipped', 'no_session', 'timeout', 'flagged'));
 
 CREATE TABLE IF NOT EXISTS {schema}.ops_alerts (
     id           BIGSERIAL PRIMARY KEY,

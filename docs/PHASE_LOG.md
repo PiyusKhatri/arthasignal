@@ -600,3 +600,27 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 
   Scratch database dropped.
 - `docs/PROD_DEPLOY.md` Part 10 gives the exact server commands: backup, `git pull`, packages, units, the check (expect exit 1), the migration (dry run, real, repeat) and the check (expect exit 0). It also fixes a wrong `~/.local/bin/uv` path in the update command.
+
+## Readiness 2 - Chain order and failure policy
+
+- **Before:**
+  - capture (hard stop) → quarterly_capture → news → integrity → sectors → league → avoid_writer → tips → grading → metrics;
+  - **sectors never blocked the writers**;
+  - integrity blocked **all** writers on any failure, including a crash of the checker or a single flagged symbol;
+  - the two slow collectors (up to 150 min) ran before the calls.
+- **After:** capture → integrity → league → avoid_writer → tips → sectors → quarterly_capture → news → grading → metrics → report.
+  - **Hard stops remain only where bad data makes a call invalid:**
+    - a capture failure or no session stops everything except news;
+    - integrity exit 4 (10% or more of traded equities flagged, a feed-wide problem) stops the writers.
+  - Integrity exit 3 (specific symbols flagged): the symbols are written to `exclude_symbols.json` and dropped from today's calls by all three writers (league, v0.1, tips); the other calls are written; Discord warning.
+  - A crash of the integrity checker: calls are written and Discord is alerted, because the grader already excludes windows spanning unresolved steps.
+  - sectors, collectors, grading and metrics never block.
+  - `ops_runs` gains the status `flagged`; the constraint is re-created idempotently.
+- **Verified on the development window:**
+  - `price_integrity --live --as-of 2025-01-16`: clean, exit 0, 243 traded;
+  - `--as-of 2020-03-18`: flagged NLG, PMHPL, RRHP and WOMI (2.6% of 157), exit 3.
+
+  The league dry run for 2020-03-18 received the exclusions; none of the four was a pick (the bots' liquidity rules had already excluded them). Excluding the real picks MFIL and HDL removed them: momentum went 10 → 8 calls, ranker 10 → 9. Excluded symbols are dropped, not replaced, as the frozen bot rules require.
+- **Holdout:** for a development date, the league and v0.1 writers no longer query `max(date)` over all of `daily_prices`, and their quarantine, penalty and grading reads go through the research engine (quarantine filtered in SQL to `step_date <= as_of`).
+- Also fixed: `check_recent` crashed on an empty window.
+- Tests: the chain policy tests were rewritten (no session, flagged, feed-wide, checker crash, soft failures, capture failure, exclusion file), giving 13 in `tests/test_ops.py`; suite 572 passed.
