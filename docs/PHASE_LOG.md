@@ -447,3 +447,27 @@ The backfill uses the Sharesansar daily page because it is the only source that 
   No paid API was called.
 - Cron wrapper `scripts/cron/collectors.sh` (news every 30 minutes, social hourly, purge daily), not scheduled. Exercised with a flock stand-in: social exit 5, purge exit 0. `.env.collectors` and `*.session` are gitignored. `telethon==1.45.0` was added to the requirements.
 - Tests: 8 added; suite 511 passed.
+
+## Phase D - Public tip tracker
+
+- Declared at 2026-10-04 11:08:40 Nepal time in `docs/PUBLIC_TIP_TRACKER.md`, before any tip was collected. `public_tips` holds 0 rows and `scorecard_calls` 0 `tip%` rows.
+- **Telegram is not collected automatically.** Its Content Licensing and AI Scraping Terms prohibit scraping, indexing, harvesting or aggregation of platform data beyond ordinary use, through the API and the no-login web preview alike. Manual entry of a Telegram tip requires a recorded permission reference. Facebook needs Meta App Review and is not built. Private and paid groups and logins are excluded.
+- Sources built:
+  - YouTube channel videos only (no comments; 30-day text retention);
+  - analyst web pages, fetched only when robots.txt allows;
+  - manual entry.
+
+  Only the public channel name and the post URL are stored. The Phase C Telegram item no longer keeps post signatures. `config/tip_sources.json` is empty, and no sources were invented.
+- Parser `p1` (`src/tips/parser.py`) is rule-based with no ML. It handles English and Nepali verbs and digits, entry, target and stop, and drops questions, holds, summaries with more than 5 symbols and contradictions. On the 56 real news articles it found 0 tips; its recall and precision on real tip posts are unmeasured.
+- Ledger:
+  - each tip is dated by its posting time (second or minute precision), otherwise by when it was first seen;
+  - it is written as live calls under v2's deadline: per channel (`tip_<platform>_<channel>`, `p1-buy` or `p1-sell`), aggregate (`tips_all`), and `tips_promoted_avoid` for buy tips;
+  - tips missed in time are stored as `outside_write_window`, never backdated. Tips posted on Fridays, Saturdays and holidays always fall outside the window under the unchanged CHECK, and fixing that needs a protocol decision.
+- Grading reuses `grade_calls_v2` and the league leaderboard (the league helpers now take strategy filters and a table name). Aggregate and per-channel (descriptive) boards go to `tip_leaderboard`, plus a supplementary target and stop report.
+- Hypotheses: T1 (public buy tips beat the baseline), T2 (sell tips as avoid), A1 (promoted stocks are an avoid signal). They are registered in `public_tips_v1` (ids 105, 107, 109) and `scorecard_accuracy_v2` (ids 106, 108, 110), so *K* is now 14 × 104 = 1,456. Fingerprints:
+  - T1: 68040557d4fb86ab…
+  - T2: 17b6eb78950c84a7…
+  - A1: 6c721f32518490fb…
+- Row-level security now covers `public_tips`, `public_tip_events` and `tip_leaderboard`.
+- Dry run: YouTube and web `not_configured`, Telegram `blocked`, 0 open tips, so no price data was loaded and nothing was written. The cron wrapper `scripts/cron/tips.sh` was exercised (exit 0). It is not scheduled.
+- Tests: 14 added; suite 525 passed.
