@@ -471,3 +471,29 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - Row-level security now covers `public_tips`, `public_tip_events` and `tip_leaderboard`.
 - Dry run: YouTube and web `not_configured`, Telegram `blocked`, 0 open tips, so no price data was loaded and nothing was written. The cron wrapper `scripts/cron/tips.sh` was exercised (exit 0). It is not scheduled.
 - Tests: 14 added; suite 525 passed.
+
+## Phase E-A - Protocol v2.1 and promoter-share exclusion
+
+- Declared at 2026-10-04 11:30:26 NPT. At that moment there were 0 live calls and 0 public tips.
+- `accuracy-v2.1` (`docs/ACCURACY_PROTOCOL.md`):
+  - the live-call deadline is the open of the **next NEPSE session**, not 11:00 on the next calendar day;
+  - grading is unchanged (`grade_version` stays `accuracy-v2`), and the *K* family stays `scorecard_accuracy_v2`.
+- The next session is the first later day with prices in `daily_prices`; otherwise the first day matching the weekday rule and not a listed holiday:
+  - Sunday to Thursday from 2014;
+  - Monday to Friday from 2026-04-08 (Council of Ministers decision, announced 2026-04-08).
+
+  The holiday list is empty, which errs early. The rules are synced append-only from `config/nepse_calendar.json` into `nepse_calendar_rules`.
+- Enforcement: a new `BEFORE INSERT` trigger `scorecard_live_deadline()` → `scorecard_next_open()`; the old CHECK `scorecard_calls_check` was dropped. Python uses the same rule (`src/scorecard/calendar.py`).
+- Verified in SQL: `scorecard_next_open('2026-10-02')` = 2026-10-05 11:00 and `('2025-01-16')` = 2025-01-19 11:00. A dry run of the league and of the v0.1 writer on 2025-01-16 now shows the deadline 2025-01-19 11:00.
+- The tip tracker maps posts to the latest session that had opened, so a Saturday post maps to Friday and is writable until Monday's open.
+- **Promoter shares:**
+  - 53 symbols were stored as `Equity` (HIDCLP, NABILP, GBIMEP, …) and are now `Promoter Shares`. They are listed in `docs/promoter_reclassification.json`;
+  - the rule (name says promoter or promotor, or a listed symbol plus a `P` or `PO` suffix) is in `src/database/instruments.py`, and the company upsert and price backfill now use it so the API's label no longer reverts it;
+  - they had 6,449 development-window price rows (45 symbols, about 1.6% of equity rows). Earlier studies were not rerun;
+  - the mention book now uses Equity only.
+- Because the universe changed:
+  - bots are now **b2** (`scorecard_models` ids 9-14 at commit `8975097`; `paper_bot_league_v1` and v2 rows); b1 never ran and is retired;
+  - model v0 is now **v0.1**, with H1-H4 amended in `live_hypotheses_v0`;
+  - the tip hypotheses T1, T2 and A1 were amended in `public_tips_v1`, with their versions unchanged.
+- *K* is now 20 × 104 = 2,080.
+- Tests: 6 for v2.1 (pure, database trigger and writer) and 12 for the promoter rule (including that the research universe has HIDCL but not HIDCLP); suite 543 passed.

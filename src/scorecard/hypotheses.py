@@ -86,9 +86,6 @@ def main() -> None:
     print(json.dumps(amend() if "--amend" in sys.argv else register(), indent=2))
 
 
-if __name__ == "__main__":
-    main()
-
 
 AMENDED_AT = "2026-10-04T11:30:26+05:45"
 AMENDMENT = {
@@ -110,3 +107,7 @@ def amend(ledger: Any = None) -> list[dict[str, Any]]:
         ledger.register_variant(FAMILY, params, f"{FAMILY} {hypothesis['id']} amended {AMENDED_AT}")
         out.append({"id": hypothesis["id"], "fingerprint": variant_fingerprint(params)})
     return out
+
+
+if __name__ == "__main__":
+    main()
