@@ -64,6 +64,9 @@ class Protocol:
         rows = [("learning", raw["learning"]), ("check", raw["check"])] + [(row["name"], row) for row in raw["exam"]]
         return [(name, as_date(row["start"]), as_date(row["end"])) for name, row in rows]
 
+    def exam_periods(self) -> list[tuple[str, date, date]]:
+        return [(str(row["name"]), as_date(row["start"]), as_date(row["end"])) for row in self.raw["periods"]["exam"]]
+
     def period_of(self, day: date) -> str | None:
         for name, start, end in self.periods():
             if start <= day <= end:

@@ -750,3 +750,19 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - **New open questions:** Q16-Q21 in `docs/SIMULATION_PROTOCOL.md` section 14.
 - **Not done, by instruction:** no simulator, no score, no study on real data beyond the floorsheet OHLC verification. Nothing was read from the holdout.
 - **Tests:** 24 in `tests/test_simulation_grading.py` and 3 in `tests/test_floorsheet_ohlc.py`. Suite: 671 passed.
+
+## Simulation phase 3 - Protocol v1.2: Q16-Q20 decided
+
+- **Version:** `sim-protocol-v1.2` replaces v1.1 (kept in git history at 2229c8d). Config SHA-256 `7d961a97a0352d306506e9fd38ecfa898030bef727669ea06ef457667e0e2e37`. The changelog is in `docs/SIMULATION_PROTOCOL.md` section 15.
+- **Decisions:**
+  - **Q16:** odd lots (fewer than 10 units) are confirmed excluded from the floorsheet-derived OHLC. The changelog records that the rule came after the first verification run, with both runs' numbers. Exact / within 1%:
+    - all trades: open 98.4 / 99.1, high 99.2 / 99.6, low 91.1 / 95.3;
+    - board lots: open 99.5 / 99.8, high 99.8 / 99.9, low 99.8 / 99.9.
+  - **Q17:** the target/stop rule is chosen on learning years by call-accuracy edge over the same-date baseline, then risk control score, among rules with PBO ≤ 0.3 (`target_stop.max_pbo`).
+  - **Q18:** WAIT never holds a slot and is blocked while another call is open.
+  - **Q19:** a BUY's exit closes the simulated position. HOLD and SELL use the call-date close unless a SELL closes an open BUY, and the grader refuses position fields on any other call.
+  - **Q20:** `hidden()` now seals every grade, for all horizons and call types, that uses prices from a later exam year that has not run yet, until all such years have run.
+- **New open question:** Q22, about learning-year calls that use check-year (2020) prices, which are not sealed because 2020 is not an exam year.
+- **Trial table:** `python -m src.simulation.register` on the research role inserted 1 row (family `simulation_protocol`, fingerprint `9d87c529…77e2`; family 3, trials 138 → 139). A rerun inserted 0. The server command is in `docs/PROD_DEPLOY.md` Part 11, updated for v1.2.
+- **Not touched:** no prices or holdout data were read in this phase.
+- **Tests:** 8 tests added or changed in `tests/test_simulation_grading.py`. They cover sealing of short and mid grades for each graded call type, sealing across several later exam years, no sealing within a call's own year or from learning into the check year, WAIT slot handling, a BUY exit closing the position, position fields refused on non-SELL calls, and the v1.2 config values. Suite: 679 passed.

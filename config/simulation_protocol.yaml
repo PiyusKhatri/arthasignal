@@ -1,8 +1,8 @@
 protocol:
-  version: sim-protocol-v1.1
+  version: sim-protocol-v1.2
   locked_on: "2026-10-04"
-  previous: {version: sim-protocol-v1, config_sha256: be906e7f4025aa8afc86ad7eb9a1407e517b59fd4cea4e6cc68ec43362985656, commit: 702dcc0}
-  owner_decisions: all 15 open questions of v1, decided 2026-10-04
+  previous: {version: sim-protocol-v1.1, config_sha256: d495721a14f38485aa56335ce367bc0f519e34bfb7a22f0e099b38f4a5233b20, commit: 2229c8d}
+  owner_decisions: all 15 open questions of v1 decided in v1.1; Q16 to Q20 decided in v1.2, 2026-10-04
   document: docs/SIMULATION_PROTOCOL.md
   trial_family: simulation_protocol
   holdout_start: "2025-09-30"
@@ -94,7 +94,8 @@ target_stop:
     - {family: atr_multiple, stop: entry minus k times ATR(14) at the call date, target: entry plus m times ATR(14) at the call date}
     - {family: swing_levels, stop: just below the most recent swing low before the call date, target: the most recent swing high above entry before the call date}
   compared_on: [learning]
-  selection: higher learning-year BUY accuracy edge over the same-date baseline, then higher risk control score, among candidates with PBO at most 0.5
+  selection: higher learning-year call accuracy edge over the same-date baseline first, then higher risk control score, among candidates with PBO at most max_pbo
+  max_pbo: 0.3
   frozen_before: [check, exam]
   stop_required: [BUY, HOLD]
 
@@ -169,8 +170,8 @@ grading:
     sell_call_exit: graded on its net like a horizon exit
     unfilled: wrong
   SELL:
-    reference: entry price of the system's simulated position when it holds one, otherwise the close on the call date
-    shares: the position's shares when it holds one, otherwise floor of notional over the reference, at least 1
+    reference: entry price of the open BUY when the SELL closes it, otherwise the close on the call date
+    shares: the BUY's shares when the SELL closes it, otherwise floor of notional over the reference, at least 1
     right_when: shares times the exit price is below shares times the reference minus the holder's sell-side costs (commission, SEBON fee and DP charge on shares times the reference at the rates in force on the call date)
     costs: holder's sell-side costs
     unfilled: not applicable
@@ -180,7 +181,7 @@ grading:
     net_zero: wrong
     unfilled: not graded, counted
   HOLD:
-    reference: entry price of the system's simulated position when it holds one, otherwise the close on the call date
+    reference: close on the call date
     right_when: a close at or above the reference within the horizon before any stop
     stop_exit: wrong
     no_recovery: wrong
@@ -195,6 +196,12 @@ open_calls:
   open_until: the call's exit, or its last holding session when it has no exit
   sell_closes_buy: true
   refused_call: not issued, counted as blocked
+  wait: never holds a slot, and is blocked while another call is open on that stock
+
+positions:
+  opened_by: a filled BUY
+  closed_by: the BUY's exit (target, stop or horizon end), or a SELL call that closes the open BUY
+  reference_from_position: only a SELL that closes an open BUY
 
 risk_control:
   calls: filled BUY calls with a resolved exit
@@ -228,7 +235,8 @@ periods:
   outcome_prices_until: "2025-09-29"
   holdout_reaching_calls: ungraded
   sealed_grades:
-    - {call_period: exam_2024, horizon_class: long, prices_from: "2025-01-01", hidden_until_run: exam_2025}
+    horizons: all
+    rule: a grade whose prices reach into an exam year later than the call's own period is hidden until every such exam year has run
   earlier_studies_used_data_through: "2025-01-19"
 
 reporting:
@@ -268,7 +276,7 @@ floorsheet_ohlc:
   high: highest trade price
   low: lowest trade price
   min_quantity: 10
-  min_quantity_note: trades of fewer than 10 units (odd lots) are left out; this was added after the first verification run with all trades, whose lows were below the published low on most mismatches, and both runs are reported
+  min_quantity_note: trades of fewer than 10 units (odd lots) are left out; this was added after the first verification run with all trades, whose lows were below the published low on most mismatches, and both runs are reported; confirmed by the owner in v1.2
   storage: ~/Desktop/arthasignal-ai/derived/floorsheet_ohlc/bars.parquet with source floorsheet_derived; daily_prices is never changed
   verification: {start: "2018-02-18", end: "2025-01-19"}
   acceptance:

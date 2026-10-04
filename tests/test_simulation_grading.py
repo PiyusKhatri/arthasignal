@@ -32,6 +32,7 @@ from src.simulation.grading import (
     effective_bar,
     grade,
     hidden,
+    last_price_date,
     max_drawdown,
     position_call,
     risk_control,
@@ -66,7 +67,7 @@ def call(kind, holding=20, target=None, stop=None, reference=100.0, horizon="sho
 
 
 def test_protocol_identity_and_horizons():
-    assert P.version == "sim-protocol-v1.1"
+    assert P.version == "sim-protocol-v1.2"
     assert len(P.sha256) == 64
     assert P.holding_range("short") == (19, 57)
     assert P.holding_range("mid") == (57, 133)
@@ -397,7 +398,7 @@ def test_risk_control_empty_and_no_tail_loss():
 def test_registration_parameters_carry_config_hash():
     from src.simulation.register import protocol_parameters
 
-    assert protocol_parameters() == {"protocol": "sim-protocol-v1.1", "config_sha256": P.sha256}
+    assert protocol_parameters() == {"protocol": "sim-protocol-v1.2", "config_sha256": P.sha256}
 
 
 def free_protocol():
@@ -413,7 +414,7 @@ def free_protocol():
 
 
 def test_v11_decisions_in_config():
-    assert P.raw["protocol"]["previous"]["version"] == "sim-protocol-v1"
+    assert P.raw["protocol"]["previous"]["version"] == "sim-protocol-v1.1"
     assert P.raw["costs"]["notional_npr"] == 100000
     assert P.settlement_sessions(date(2016, 1, 1)) == 3
     assert P.settlement_sessions(date(2024, 6, 1)) == 3
@@ -496,12 +497,13 @@ def test_sell_includes_holder_selling_costs():
     assert grade(call(SELL), path(flat(19, 100) + [(99.7,) * 4]), free_protocol()).correct is True
 
 
-def test_hold_and_sell_use_own_entry_when_holding():
-    held = call(HOLD, stop=80, reference=100)
-    own = Call("TEST", HOLD, CALL_DAY, 100.0, "short", 20, None, 80, position_entry_price=104.0, position_shares=961)
+def test_hold_uses_call_date_close_and_only_a_closing_sell_uses_the_entry():
     prices = flat(25, 102)
-    assert grade(held, path(prices), P).correct is True
-    assert grade(own, path(prices), P).correct is False
+    assert grade(call(HOLD, stop=80, reference=100), path(prices), P).correct is True
+    with pytest.raises(ValueError, match="SELL"):
+        grade(Call("TEST", HOLD, CALL_DAY, 100.0, "short", 20, None, 80, position_entry_price=104.0, position_shares=961), path(prices), P)
+    with pytest.raises(ValueError, match="SELL"):
+        grade(Call("TEST", NO_BUY, CALL_DAY, 100.0, "short", 20, position_entry_price=104.0), path(prices), P)
     sell = Call("TEST", SELL, CALL_DAY, 100.0, "short", 20, position_entry_price=104.0, position_shares=961)
     assert sell.reference == 104.0
     assert grade(sell, path(flat(20, 102)), P).correct is True
@@ -580,13 +582,75 @@ def test_2024_long_grades_hidden_until_2025_exam():
     early = grade(call(BUY, holding=150, horizon="long", stop=80, day=day), bars, P)
     assert early.exit_date < date(2025, 1, 1)
     assert hidden(early, set(), P) is False
-    mid = grade(call(BUY, holding=133, horizon="mid", stop=80, day=date(2024, 10, 6)), path(flat(140), start=date(2024, 10, 6)), P)
-    assert mid.exit_date >= date(2025, 1, 1) and hidden(mid, set(), P) is False
     hold = grade(call(HOLD, holding=200, horizon="long", stop=80, reference=101, day=day), bars, P)
     assert hold.reason == "not_recovered" and hidden(hold, set(), P) is True
     stopped = grade(call(BUY, holding=200, horizon="long", stop=95, day=day), path(flat(5) + [(94, 94, 94, 94)] + flat(200, 94), start=day, gap_days=2), P)
     assert stopped.exit_date < date(2025, 1, 1) and stopped.hold_exit_date >= date(2025, 1, 1)
     assert hidden(stopped, set(), P) is True
+
+
+@pytest.mark.parametrize("kind", [BUY, NO_BUY, SELL, HOLD])
+def test_short_and_mid_grades_reaching_a_later_exam_year_are_sealed(kind):
+    stop = None if kind == SELL else 80
+    day = date(2021, 12, 5)
+    out = grade(call(kind, holding=40, stop=stop, reference=101, day=day), path(flat(45), start=day), P)
+    assert out.status == GRADED and last_price_date(out) >= date(2022, 1, 1)
+    assert hidden(out, {"exam_2021"}, P) is True
+    assert hidden(out, {"exam_2021", "exam_2022"}, P) is False
+    mid_day = date(2024, 10, 6)
+    mid = grade(call(kind, holding=133, horizon="mid", stop=stop, reference=101, day=mid_day), path(flat(140), start=mid_day), P)
+    assert hidden(mid, {"exam_2024"}, P) is True
+    assert hidden(mid, {"exam_2024", "exam_2025"}, P) is False
+
+
+def test_sealing_spans_every_later_exam_year_and_ignores_own_and_learning_years():
+    day = date(2023, 9, 3)
+    long_call = grade(call(BUY, holding=285, horizon="long", stop=80, day=day), path(flat(290), start=day, gap_days=2), P)
+    assert last_price_date(long_call) >= date(2025, 1, 1)
+    assert hidden(long_call, {"exam_2023", "exam_2025"}, P) is True
+    assert hidden(long_call, {"exam_2023", "exam_2024"}, P) is True
+    assert hidden(long_call, {"exam_2023", "exam_2024", "exam_2025"}, P) is False
+    within = grade(call(BUY, holding=40, stop=80, day=day), path(flat(45), start=day), P)
+    assert hidden(within, set(), P) is False
+    check = grade(call(BUY, holding=40, stop=80, day=date(2020, 12, 6)), path(flat(45), start=date(2020, 12, 6)), P)
+    assert hidden(check, set(), P) is True and hidden(check, {"exam_2021"}, P) is False
+    learning = grade(call(BUY, holding=40, stop=80, day=date(2019, 12, 1)), path(flat(45), start=date(2019, 12, 1)), P)
+    assert last_price_date(learning) >= date(2020, 1, 1)
+    assert hidden(learning, set(), P) is False
+    assert hidden(grade(call(WAIT, day=date(2021, 12, 5)), path(flat(45), start=date(2021, 12, 5)), P), set(), P) is False
+
+
+def test_v12_decisions_in_config():
+    assert P.raw["protocol"]["previous"]["config_sha256"].startswith("d495721a")
+    assert P.raw["target_stop"]["max_pbo"] == 0.3
+    assert "call accuracy edge" in P.raw["target_stop"]["selection"]
+    assert P.raw["floorsheet_ohlc"]["min_quantity"] == 10
+    assert P.raw["grading"]["HOLD"]["reference"] == "close on the call date"
+    assert "BUY's exit" in P.raw["positions"]["closed_by"]
+    assert P.raw["periods"]["sealed_grades"]["horizons"] == "all"
+
+
+def test_wait_never_holds_a_slot_and_is_blocked_while_a_call_is_open():
+    book = OpenCalls(P)
+    assert book.admit(call(WAIT)) == (NOT_OPEN, None)
+    assert book.open == {}
+    buy = call(BUY, stop=90)
+    assert book.admit(buy) == (OPENED, None)
+    assert book.admit(call(WAIT, day=CALL_DAY + timedelta(days=7))) == (BLOCKED, buy)
+    book.resolve(buy)
+    assert book.admit(call(WAIT, day=CALL_DAY + timedelta(days=14))) == (NOT_OPEN, None)
+
+
+def test_buy_exit_closes_the_position():
+    book = OpenCalls(P)
+    buy = call(BUY, target=110, stop=90)
+    book.admit(buy)
+    out = grade(buy, path(flat(5) + [(101, 112, 100, 111)] + flat(30, 111)), P)
+    assert out.reason == "target"
+    book.resolve(buy)
+    later = call(SELL, day=out.exit_date)
+    assert book.admit(later) == (OPENED, None)
+    assert later.reference == later.reference_price
 
 
 def test_floorsheet_derived_bars_before_2018():

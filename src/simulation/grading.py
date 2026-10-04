@@ -126,6 +126,8 @@ def _validate(call: Call, protocol: Protocol) -> None:
         raise ValueError(f"{call.horizon_class} holding must be {low}..{high} sessions, got {call.holding_sessions}")
     if call.call_type in protocol.stop_required and call.stop is None:
         raise ValueError(f"{call.call_type} calls must carry a stop")
+    if call.call_type != SELL and (call.position_entry_price is not None or call.position_shares is not None):
+        raise ValueError("only a SELL closing an open BUY uses the position's entry price")
 
 
 def entry(path: Sequence[Bar | None], protocol: Protocol) -> tuple[int, float] | str:
@@ -392,16 +394,11 @@ def hidden(outcome: Outcome, completed_runs: set[str] | frozenset[str], protocol
     used = last_price_date(outcome)
     if outcome.status != GRADED or used is None:
         return False
-    period = p.period_of(outcome.call.call_date)
-    for rule in p.raw["periods"]["sealed_grades"]:
-        if (
-            period == rule["call_period"]
-            and outcome.call.horizon_class == rule["horizon_class"]
-            and used >= as_date(rule["prices_from"])
-            and rule["hidden_until_run"] not in completed_runs
-        ):
-            return True
-    return False
+    own = p.period_of(outcome.call.call_date)
+    return any(
+        name != own and outcome.call.call_date < start <= used and name not in completed_runs
+        for name, start, _ in p.exam_periods()
+    )
 
 
 def position_call(call: Call, buy: Outcome, protocol: Protocol | None = None) -> Call:
