@@ -380,3 +380,38 @@ The backfill uses the Sharesansar daily page because it is the only source that 
   - Documented LLM headline edges last about 2 days, shorter than our 5-session minimum horizon.
 - History we do not have: promotion and attention signals (Telegram, YouTube, Reddit) and point-in-time Google Trends. Margin-lending history must be collected from NRB publications. The IPO calendar (981 dated issues since 2011) and monthly rates (from FY 2073/74) exist locally.
 - The next replay round is capped at 12 pre-registered hypotheses because each one raises *K*.
+
+## Phase B - Paper-bot league declared and dry-run
+
+- Declared at 2026-10-04 10:35:04 Nepal time in `docs/PAPER_BOT_LEAGUE.md`, before any league call and before the league read any holdout data. `scorecard_calls` holds 0 `bot_%` rows.
+- Six frozen bots in `src/league/bots.py`:
+  - `bot_avoid_e2e4` (avoid, 20 sessions);
+  - `bot_momentum` (5, 10 and 20);
+  - `bot_new_listing` (40);
+  - `bot_ranker_spec`: fixed equal-weight ranks of 120-session momentum skipping 5, 5-session reversal, low volatility and turnover, with no fitting (5, 10 and 20);
+  - `bot_market_timer` (5, 10 and 20);
+  - `bot_combined`: timer-gated momentum and ranker vote minus avoid hits (5, 10 and 20).
+- Shared risk rules:
+  - equities only;
+  - at least 50 of 60 sessions traded and median turnover of at least Rs 2 M;
+  - no unresolved step in 120 sessions and no upper-limit close on the signal day;
+  - at most 10 calls a day and 3 per sector;
+  - equal weight;
+  - stop on the v2 kill rule.
+- `src/league/run.py` writes live calls before the 11:00 NPT deadline (idempotent, advisory lock), grades matured calls under v2, and stores the daily leaderboard append-only in `league_leaderboard`. It covers 5, 10, 20 and 40 sessions with win rate, baseline, edge and bounds, expectancy, excess expectancy, calibration, cohort drawdown, coverage and the verdict. It also logs `league_runs`. Avoid observations are mirrored as in `LIVE_HYPOTHESES.md`.
+- Registered (`python -m src.league.declare`):
+  - `scorecard_models` ids 3-8 at code commit `c6383a3`;
+  - `backtest_variant_trials` family `paper_bot_league_v1` ids 97-102;
+  - the six versions were added to `scorecard_accuracy_v2`, so *K* is now 11 × 104 = 1,144.
+- Fingerprints:
+  - bot_avoid_e2e4: 67e903fbe452ec58…
+  - bot_momentum: 52ce9379bec48632…
+  - bot_new_listing: 8494d31cbd355e7a…
+  - bot_ranker_spec: 15d43d59e1161870…
+  - bot_market_timer: b156e597bcb71d8a…
+  - bot_combined: 1a00cbe8ffd01bb4…
+- The look-ahead audit on real data (8 dates, 2018-02-18 to 2025-01-19) passes for all six.
+- Coverage from selections only (no outcomes) gives minimum live samples: the ranker at 5 sessions takes about 1.0 year, momentum at 5 about 1.7, the avoid bot at 20 about 3.7, timer and combined at 5 about 4.2, and new listing at 40 about 7.7. No bot can support a claim within a year.
+- Dry run for 2025-01-16 (a development date): 33 avoid observations, 10 momentum calls, 10 ranker calls, 0 for the other three (timer off). Nothing written. The cron wrapper `scripts/cron/league_daily.sh` was exercised with a flock stand-in: exit 0, and exit 3 on a non-session. It is not scheduled.
+- Row-level security now also covers `league_leaderboard` and `league_runs`.
+- Tests: 10 added (`tests/test_league.py`); suite 503 passed.
