@@ -17,9 +17,10 @@ DATE_COLUMNS = {
     "policy_events": "announced_date",
     "sentiment_observations": "published_date",
     "company_event_records": "reference_date",
+    "announcement_events": "published_date",
 }
 
-DDL = """
+DDL = r"""
 CREATE OR REPLACE FUNCTION archive_reject_change() RETURNS trigger AS $$
 BEGIN
     RAISE EXCEPTION 'archive tables are append-only: % on % rejected', TG_OP, TG_TABLE_NAME;
@@ -148,6 +149,34 @@ CREATE TABLE IF NOT EXISTS company_event_records (
     UNIQUE (source, symbol, record_type, record_key)
 );
 
+CREATE TABLE IF NOT EXISTS announcement_events (
+    announcement_id BIGINT NOT NULL REFERENCES corporate_announcements (id),
+    version         VARCHAR(20) NOT NULL,
+    symbol          VARCHAR(20),
+    event_type      VARCHAR(40) NOT NULL,
+    fiscal_year     VARCHAR(12),
+    cash_pct        NUMERIC,
+    bonus_pct       NUMERIC,
+    right_ratio     VARCHAR(20),
+    published_date  DATE NOT NULL,
+    PRIMARY KEY (announcement_id, version)
+);
+CREATE INDEX IF NOT EXISTS ix_announcement_events_type ON announcement_events (event_type, published_date);
+
+CREATE OR REPLACE VIEW dividend_proposals_pit WITH (security_invoker = true) AS
+SELECT r.id AS record_id, r.symbol, r.fiscal_year, r.cash_pct, r.bonus_pct, r.bookclose_date, r.event_date AS agm_date,
+       a.published_date AS announced_date, least(a.published_date, r.bookclose_date) AS knowledge_date,
+       CASE WHEN a.id IS NULL THEN 'bookclose' WHEN r.bookclose_date IS NULL OR a.published_date <= r.bookclose_date THEN 'agm_announcement'
+            ELSE 'bookclose' END AS knowledge_basis
+FROM company_event_records r
+LEFT JOIN LATERAL (
+    SELECT c.id, c.published_date FROM corporate_announcements c
+    WHERE c.symbol = r.symbol AND c.title ~* '(annual general meeting|\mAGM\M)'
+      AND c.published_date <= r.event_date AND c.published_date >= r.event_date - 90
+    ORDER BY c.published_date LIMIT 1
+) a ON true
+WHERE r.record_type = 'agm' AND (r.cash_pct IS NOT NULL OR r.bonus_pct IS NOT NULL);
+
 CREATE TABLE IF NOT EXISTS sentiment_observations (
     id              BIGSERIAL PRIMARY KEY,
     series          VARCHAR(60) NOT NULL,
@@ -164,7 +193,7 @@ CREATE TABLE IF NOT EXISTS sentiment_observations (
 );
 """
 
-APPEND_ONLY = ("corporate_announcements", "archive_documents", "news_articles", "news_symbol_mentions", "report_field_values",
+APPEND_ONLY = ("corporate_announcements", "archive_documents", "news_articles", "report_field_values",
                "policy_events", "sentiment_observations", "company_event_records")
 
 
@@ -174,6 +203,7 @@ def apply(engine: Engine) -> list[str]:
     with engine.begin() as connection:
         connection.execute(text("SELECT pg_advisory_xact_lock(820261010)"))
         connection.connection.cursor().execute(DDL)
+        connection.execute(text("DROP TRIGGER IF EXISTS news_symbol_mentions_append_only ON news_symbol_mentions"))
         for table in APPEND_ONLY:
             connection.execute(text(f"DROP TRIGGER IF EXISTS {table}_append_only ON {table}"))
             connection.execute(text(f"CREATE TRIGGER {table}_append_only BEFORE UPDATE OR DELETE ON {table} "

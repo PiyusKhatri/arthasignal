@@ -13,8 +13,9 @@ from sqlalchemy.engine import Engine
 from src.archive import schema
 
 MARKET_SOURCE = "daily_prices (equities, research role)"
-OVERSUBSCRIBED = re.compile(r"\b(IPO|FPO|right share|rights)\b.*?oversubscribed\s+by\s+([\d.,]+)\s*times", re.I)
-ISSUER = re.compile(r"^(.*?)(?:'s|’s)?\s+(?:IPO|FPO|right)", re.I)
+OVERSUBSCRIBED = re.compile(r"oversubscribed\s+(?:by\s+)?([\d.,]+)\s*times", re.I)
+ISSUE_TYPE = re.compile(r"\b(IPO|FPO|right share|rights|debenture)\b", re.I)
+ISSUER = re.compile(r"(?:(?:IPO|FPO|right shares?|debenture)\s+issue\s+of\s+(.*?)\s+(?:closing|closes|opens|oversubscribed|is|has|;))|^(.*?)(?:'s|’s)?\s+(?:IPO|FPO|right)", re.I)
 
 
 def market_series(research: Any, end: date) -> pd.DataFrame:
@@ -67,10 +68,13 @@ def oversubscription(research: Any) -> pd.DataFrame:
     out = []
     for row in news.itertuples():
         match = OVERSUBSCRIBED.search(row.title)
-        if not match:
+        kind = ISSUE_TYPE.search(row.title)
+        if not match or not kind:
             continue
         issuer = ISSUER.search(row.title)
-        out.append({"issue_type": match.group(1).upper(), "times": float(match.group(2).replace(",", "")), "issuer": issuer.group(1).strip() if issuer else None,
+        name = (issuer.group(1) or issuer.group(2)).strip() if issuer else None
+        out.append({"issue_type": "RIGHT" if kind.group(1).lower().startswith("right") else kind.group(1).upper(),
+                    "times": float(match.group(1).replace(",", "").rstrip(".")), "issuer": name,
                     "title": row.title, "url": row.url, "published_at": row.published_at, "final": bool(re.search(r"\bfinal|closed|closing|last day", row.title, re.I))})
     return pd.DataFrame(out)
 

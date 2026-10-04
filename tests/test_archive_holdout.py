@@ -104,3 +104,40 @@ def test_raw_store_never_overwrites(tmp_path, monkeypatch):
     stamp = path.stat().st_mtime_ns
     again, same = schema.store_raw("t", b"abc", ".html")
     assert (again, same) == (digest, path) and same.stat().st_mtime_ns == stamp
+
+
+def test_announcement_events_follow_their_announcement_date(engine):
+    with engine.connect() as connection:
+        transaction = connection.begin()
+        try:
+            ids = {}
+            for name, day in (("pit-test-old", OLD), ("pit-test-new", NEW)):
+                ids[name] = connection.execute(text(
+                    "INSERT INTO corporate_announcements (source, source_id, title, category, published_date) VALUES ('test', :k, 't', 'other', :d) RETURNING id"),
+                    {"k": name, "d": day}).scalar_one()
+                connection.execute(text("INSERT INTO announcement_events (announcement_id, version, event_type, published_date) VALUES (:a, 'test', 'other', :d)"),
+                                   {"a": ids[name], "d": day})
+            connection.execute(text(f"SET LOCAL ROLE {hg.RESEARCH_ROLE}"))
+            connection.execute(text(f"SET LOCAL {hg.GUC} = 'on'"))
+            seen = connection.execute(text("SELECT announcement_id FROM announcement_events WHERE version = 'test'")).fetchall()
+            assert [r[0] for r in seen] == [ids["pit-test-old"]]
+        finally:
+            transaction.rollback()
+
+
+def test_dividend_proposal_view_applies_base_table_policies(engine):
+    with engine.connect() as connection:
+        transaction = connection.begin()
+        try:
+            options = connection.execute(text("SELECT reloptions FROM pg_class WHERE relname = 'dividend_proposals_pit'")).scalar_one()
+            assert "security_invoker=true" in options
+            for name, day in (("pit-test-old", OLD), ("pit-test-new", NEW)):
+                connection.execute(text(
+                    "INSERT INTO company_event_records (source, symbol, record_type, record_key, event_date, bookclose_date, cash_pct, details, reference_date) "
+                    "VALUES ('test', 'TSTX', 'agm', :k, :d, :d, 5, '{}'::jsonb, :d)"), {"k": name, "d": day})
+            connection.execute(text(f"SET LOCAL ROLE {hg.RESEARCH_ROLE}"))
+            connection.execute(text(f"SET LOCAL {hg.GUC} = 'on'"))
+            seen = connection.execute(text("SELECT knowledge_date FROM dividend_proposals_pit WHERE symbol = 'TSTX'")).fetchall()
+            assert [r[0] for r in seen] == [OLD]
+        finally:
+            transaction.rollback()

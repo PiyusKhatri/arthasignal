@@ -847,3 +847,17 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - **Market series** (phase F, `python -m src.archive.sentiment_series market`): turnover, symbols traded, advances, declines, unchanged and breadth for 2,594 sessions, 2014-06-01 to 2025-09-28 (15,563 rows), dated by session close.
 - **OCR sample** (phase C): 72 sampled reports (6 per year, 2014-2025) gave 71 images; one page is a 404. 11 gold labels were read from the images (`docs/ocr/gold_labels.json`). The engine comparison is still running.
 - Suite: 706 passed.
+
+## Data phase G - Floorsheet completion (skipped, steps written)
+
+- **Not merged.** The VM at 3.89.163.188 did not answer: SSH port 22 timed out, so it is stopped or its IP changed. The backfill status could not be checked, and by instruction nothing was pulled or merged.
+- **Terms concern.** The floorsheet archive and the VM backfill are Merolagani collections, and Merolagani's terms forbid any automated collection. The owner must decide before any merge.
+- **Steps:** `docs/FLOORSHEET_COMPLETION.md` has the exact steps: find the VM, check its 99 `.done` markers, stage with `vm_pull_raw.sh`, merge with `--merge`, review the conflicts, audit as in `FLOORSHEET_AUDIT.md`, rebuild the derived bars and broker features, and report.
+
+## Data phase D - Event tables (in progress)
+
+- **`announcement_events`** (derived, holdout-protected, tested): a version-2 classifier over `corporate_announcements`. It separates quarterly reports (including "final quarter"), right-share issues, dividend proposals, approvals and distributions, book close, AGM/SGM, IPO/FPO, auctions, mergers, promoter sales, debentures, bank interest-rate notices, annual reports and registrar changes. It also parses cash and bonus percentages, right ratios and fiscal years from titles.
+- **Where dividend proposals are:** Sharesansar company announcements rarely state them; most dividend titles are distributions or reminders to collect unpaid dividends. Proposals are in the AGM table (`company_event_records`), whose agenda lists cash and bonus percentages.
+- **`dividend_proposals_pit` view** (`security_invoker`, so base-table holdout policies apply to the caller; tested):
+  - **Knowledge date:** the earlier of the first AGM announcement in the 90 days before the meeting and the book-close date. Both are dates by which the proposal was certainly public, so the earlier one is still safe.
+  - **Coverage:** this extends announcement-dated dividend data back to 2011 (2014: 26 proposals so far). The old `dividend_declarations` table starts in 2018.
