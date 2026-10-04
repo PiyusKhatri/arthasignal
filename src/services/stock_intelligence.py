@@ -9,6 +9,7 @@ from typing import Any, Iterable
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from src.database.instruments import equity_sector
 from src.database.models import (
     BacktestResult,
     Company,
@@ -834,7 +835,7 @@ def build_stock_intelligence(session: Session, symbol: str) -> dict[str, Any] | 
     return _build_payload(
         symbol=symbol,
         company_name=company.company_name,
-        sector=company.sector,
+        sector=equity_sector(company.instrument_type, company.sector),
         technical=technical,
         fundamental=fundamental,
         price=price,
@@ -946,7 +947,7 @@ def build_market_intelligence(session: Session, limit: int = 200) -> dict[str, A
         payload = _build_payload(
             symbol=company.symbol,
             company_name=company.company_name,
-            sector=company.sector,
+            sector=equity_sector(company.instrument_type, company.sector),
             technical=technical,
             fundamental=fundamental_by_symbol.get(company.symbol),
             price=price,

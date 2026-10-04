@@ -27,7 +27,7 @@ def test_capture_retries_until_the_cutoff_then_fails(monkeypatch) -> None:
 
 
 def test_daily_chain_order_matches_the_runbook() -> None:
-    assert [s.name for s in daily.STEPS] == ["capture", "quarterly_capture", "news", "integrity", "league", "avoid_writer", "tips",
+    assert [s.name for s in daily.STEPS] == ["capture", "quarterly_capture", "news", "integrity", "sectors", "league", "avoid_writer", "tips",
                                             "grading", "metrics"]
     assert [s.name for s in daily.plan("league", None)][:2] == ["league", "avoid_writer"]
     with pytest.raises(SystemExit):
@@ -48,7 +48,7 @@ def test_no_session_skips_everything_but_news(monkeypatch, fake_chain) -> None:
     recorded, _ = fake_chain
     monkeypatch.setattr(daily, "run_step", lambda step, log_dir: ("no_session", 3, {}) if step.name == "capture" else ("ok", 0, {}))
     assert daily.run(report=False) == 0
-    assert dict(recorded) == {"capture": "no_session", "quarterly_capture": "skipped", "news": "ok", "integrity": "skipped", "league": "skipped",
+    assert dict(recorded) == {"capture": "no_session", "quarterly_capture": "skipped", "news": "ok", "integrity": "skipped", "sectors": "skipped", "league": "skipped",
                               "avoid_writer": "skipped", "tips": "skipped", "grading": "skipped", "metrics": "skipped"}
 
 

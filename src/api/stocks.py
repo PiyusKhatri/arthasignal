@@ -7,6 +7,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Query, Request, status
 from sqlalchemy import func, select
 
+from src.database.instruments import equity_sector
 from src.api.cache import cached, intraday_today_cache, price_history_cache, technical_signals_cache
 from src.api.chart_ranges import VALID_RANGES, range_cutoff
 from src.api.db_readonly import get_readonly_session
@@ -253,9 +254,10 @@ def get_stock_fundamental(symbol: str, request: Request) -> dict[str, Any]:
             session.expunge(dividend)
 
         sector_baseline = None
-        if company.sector is not None:
+        baseline_sector = equity_sector(company.instrument_type, company.sector)
+        if baseline_sector is not None:
             sector_baseline = session.execute(
-                select(SectorFundamentalBaseline).where(SectorFundamentalBaseline.sector == company.sector)
+                select(SectorFundamentalBaseline).where(SectorFundamentalBaseline.sector == baseline_sector)
             ).scalar_one_or_none()
             if sector_baseline is not None:
                 session.expunge(sector_baseline)

@@ -473,6 +473,7 @@ def _load_floorsheet_by_sector(today: date) -> dict[str, list[tuple[str, str, De
                 FROM intraday_floorsheet f
                 JOIN companies c ON c.symbol = f.symbol
                 WHERE date_trunc('day', f.snapshot_time) = :d AND c.sector IS NOT NULL
+                  AND c.instrument_type = 'Equity' AND c.status = 'A'
                 """
             ),
             {"d": today},

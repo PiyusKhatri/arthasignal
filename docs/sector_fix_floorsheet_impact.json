@@ -1,0 +1,76 @@
+{
+ "window": [
+  "2024/month=10/day=21.parquet",
+  "2025/month=01/day=19.parquet"
+ ],
+ "rows": 3985347,
+ "nonequity_rows": 53325,
+ "by_sector": [
+  {
+   "sector": "Commercial Banks",
+   "days": 56,
+   "nonequity_share_mean": 0.0372,
+   "nonequity_share_max": 0.3073,
+   "top_broker_all": 0.1939,
+   "top_broker_eq": 0.1774,
+   "coverage_all": 3.1137,
+   "coverage_eq": 1.0,
+   "coverage_all_max": 3.8421
+  },
+  {
+   "sector": "Development Banks",
+   "days": 56,
+   "nonequity_share_mean": 0.0032,
+   "nonequity_share_max": 0.0464,
+   "top_broker_all": 0.1509,
+   "top_broker_eq": 0.1505,
+   "coverage_all": 1.2221,
+   "coverage_eq": 0.9833,
+   "coverage_all_max": 1.4375
+  },
+  {
+   "sector": "Finance",
+   "days": 56,
+   "nonequity_share_mean": 0.0004,
+   "nonequity_share_max": 0.0042,
+   "top_broker_all": 0.2081,
+   "top_broker_eq": 0.2081,
+   "coverage_all": 1.1811,
+   "coverage_eq": 1.0714,
+   "coverage_all_max": 1.2857
+  },
+  {
+   "sector": "Investment",
+   "days": 56,
+   "nonequity_share_mean": 0.0,
+   "nonequity_share_max": 0.0014,
+   "top_broker_all": 0.2736,
+   "top_broker_eq": 0.2736,
+   "coverage_all": 1.0357,
+   "coverage_eq": 1.0,
+   "coverage_all_max": 1.1429
+  },
+  {
+   "sector": "Mutual Fund",
+   "days": 56,
+   "nonequity_share_mean": 1.0,
+   "nonequity_share_max": 1.0,
+   "top_broker_all": NaN,
+   "top_broker_eq": NaN,
+   "coverage_all": 10.8393,
+   "coverage_eq": 0.0,
+   "coverage_all_max": 11.0
+  },
+  {
+   "sector": "Promoter Share",
+   "days": 56,
+   "nonequity_share_mean": 1.0,
+   "nonequity_share_max": 1.0,
+   "top_broker_all": NaN,
+   "top_broker_eq": NaN,
+   "coverage_all": 4.2857,
+   "coverage_eq": 0.0,
+   "coverage_all_max": 6.0
+  }
+ ]
+}

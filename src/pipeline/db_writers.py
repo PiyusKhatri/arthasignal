@@ -8,7 +8,7 @@ from sqlalchemy import literal_column, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from src.database.connection import get_session
-from src.database.instruments import classify, known_symbols
+from src.database.instruments import classify, known_symbols, normalize_sector
 from src.database.models import (
     Broker,
     Company,
@@ -90,6 +90,7 @@ def build_company_records(symbols: list[str]) -> list[dict[str, Any]]:
                 sector = existing_sector
 
         instrument_type = classify(symbol, company_name, instrument_type, known)
+        sector = normalize_sector(instrument_type, sector)
         records.append(
             {
                 "symbol": symbol,

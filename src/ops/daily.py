@@ -33,6 +33,7 @@ STEPS: tuple[Step, ...] = (
     Step("quarterly_capture", (PY, "-m", "src.scrapers.quarterly_capture"), 120, "soft"),
     Step("news", (PY, "-m", "src.collectors.run", "news"), 30, "soft"),
     Step("integrity", (PY, "-m", "src.backtest.price_integrity", "--live"), 30, "clean_data"),
+    Step("sectors", (PY, "-m", "src.pipeline.data_quality", "--sectors"), 10, "soft"),
     Step("league", (PY, "-m", "src.league.run", "--write-only", "--markdown-dir", "logs/league"), 45, "writer"),
     Step("avoid_writer", (PY, "-m", "src.scorecard.daily", "--write-only"), 45, "writer"),
     Step("tips", (PY, "-m", "src.tips.run", "cycle"), 30, "writer"),

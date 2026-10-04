@@ -8,6 +8,7 @@ from typing import Any, Sequence
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from src.database.instruments import equity_sector
 from src.database.models import (
     ActionType,
     Company,
@@ -777,7 +778,8 @@ def build_quant_research(session: Session, symbol: str) -> dict[str, Any] | None
 
     market = _load_index_series(session, NEPSE_INDEX_NAME)
     market_regime = build_market_regime(session)
-    sector_regime = build_sector_regime(session, company.sector, market_regime)
+    sector = equity_sector(company.instrument_type, company.sector)
+    sector_regime = build_sector_regime(session, sector, market_regime)
     sector_index = _load_index_series(session, sector_regime.get("index_name"))
 
     current_index = len(stock["closes"]) - 1
@@ -804,7 +806,7 @@ def build_quant_research(session: Session, symbol: str) -> dict[str, Any] | None
     liquidity = build_liquidity_context(session, symbol, stock, current_features)
     macro = build_macro_context(session)
     event_risk = build_event_risk(session, symbol, as_of_date)
-    fundamental = build_fundamental_context(session, symbol, company.sector)
+    fundamental = build_fundamental_context(session, symbol, sector)
 
     labeled_rows = []
     analog_result: dict[str, Any]

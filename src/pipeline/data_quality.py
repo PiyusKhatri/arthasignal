@@ -31,6 +31,10 @@ class UnresolvedPriceStepsError(RuntimeError):
     pass
 
 
+class NonEquitySectorError(RuntimeError):
+    pass
+
+
 class MissingIndexSessionsError(RuntimeError):
     pass
 
@@ -496,6 +500,29 @@ def assert_no_unresolved_price_steps(latest_date) -> None:
         )
 
 
+def _check_nonequity_equity_sector(latest_date) -> dict[str, Any]:
+    from src.database.instruments import nonequity_with_equity_sector
+
+    with get_session() as session:
+        rows = nonequity_with_equity_sector(session.connection())
+    if rows:
+        logger.error(
+            "data_quality: %d non-equity symbols carry an equity sector and would contaminate sector statistics: %s",
+            len(rows),
+            ", ".join(f"{r['symbol']} ({r['instrument_type']}, {r['sector']})" for r in rows[:20]),
+        )
+    return {"flagged": bool(rows), "count": len(rows), "symbols": [r["symbol"] for r in rows]}
+
+
+def assert_no_nonequity_equity_sector() -> None:
+    result = _check_nonequity_equity_sector(None)
+    if result["flagged"]:
+        raise NonEquitySectorError(
+            f"{result['count']} non-equity symbols carry an equity sector: " + ", ".join(result["symbols"][:20])
+            + "; run python -m src.database.fix_nonequity_sectors --apply"
+        )
+
+
 def check_daily_pipeline_health() -> dict[str, Any]:
     latest_date = _latest_price_date()
     if latest_date is None:
@@ -517,6 +544,7 @@ def check_daily_pipeline_health() -> dict[str, Any]:
         ("trading_day_ingestion_gap", _check_trading_day_ingestion_gap),
         ("benchmark_index_coverage", _check_benchmark_index_coverage),
         ("unresolved_price_steps", _check_unresolved_price_steps),
+        ("nonequity_equity_sector", _check_nonequity_equity_sector),
     ):
         try:
             results[name] = check(latest_date)
@@ -546,3 +574,23 @@ def check_daily_pipeline_health() -> dict[str, Any]:
 if __name__ == "__main__":
     assert_benchmark_index_coverage()
     print(f"Every price session has a {BENCHMARK_INDEX_NAME} row")
+
+
+def main() -> None:
+    import argparse
+    import sys
+
+    parser = argparse.ArgumentParser(description="Run one data-quality check and exit non-zero if it fails")
+    parser.add_argument("--sectors", action="store_true")
+    args = parser.parse_args()
+    if args.sectors:
+        try:
+            assert_no_nonequity_equity_sector()
+        except NonEquitySectorError as error:
+            print(f"DATA QUALITY FAILURE: {error}")
+            sys.exit(1)
+        print("sector check passed: no non-equity symbol carries an equity sector")
+
+
+if __name__ == "__main__":
+    main()

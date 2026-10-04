@@ -5,6 +5,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from src.database.instruments import equity_sector
 from src.database.models import Company
 from src.services.quant_features import build_feature_row
 from src.services.quant_model_store import load_latest_quant_model, predict_persisted_quant_model
@@ -31,7 +32,7 @@ def build_cross_sectional_prediction(
 
     stock = _load_stock_series(session, symbol)
     market = _load_index_series(session, NEPSE_INDEX_NAME)
-    sector_name = _sector_index_name(session, company.sector)
+    sector_name = _sector_index_name(session, equity_sector(company.instrument_type, company.sector))
     sector = _load_index_series(session, sector_name)
     if not stock["closes"] or not market["closes"]:
         return {
