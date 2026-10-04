@@ -415,3 +415,35 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - Dry run for 2025-01-16 (a development date): 33 avoid observations, 10 momentum calls, 10 ranker calls, 0 for the other three (timer off). Nothing written. The cron wrapper `scripts/cron/league_daily.sh` was exercised with a flock stand-in: exit 0, and exit 3 on a non-session. It is not scheduled.
 - Row-level security now also covers `league_leaderboard` and `league_runs`.
 - Tests: 10 added (`tests/test_league.py`); suite 503 passed.
+
+## Phase C - Live text collectors
+
+- Storage is `src/collectors/store.py`:
+  - `text_items` is append-only (triggers reject UPDATE, DELETE and TRUNCATE). Each row holds the source, item id, url, raw title and body, author hash, source `published_at` with its precision, our own `first_seen_at`, language, rule-based symbol mentions, content hash and raw metadata. Edits become new rows;
+  - `text_collector_runs` logs each run;
+  - for the 30-day sources (YouTube, Reddit), text sits in `text_items_ephemeral` and is purged after 30 days, and a CHECK keeps text out of the permanent row.
+- Row-level security hides `text_items` and `text_collector_runs` from the research role (verified: it sees 0 rows).
+- News collectors (`news.py`):
+  - Sharesansar latest and Merolagani news, with minute timestamps from detail pages;
+  - Arthasarokar and Bizmandu RSS, to the second;
+  - Kathmandu Post Money, to the day;
+  - 3 s or more between requests, and only new items fetched.
+- **First real run**, 2026-10-04 10:46 NPT: 56 items stored (10 + 8 + 20 + 15 + 3). A rerun stored 0. Fixed on the way: Merolagani pages without a charset were decoded as Latin-1.
+- Gap: the 35 Nepali-portal items gave 0 rule-based symbol mentions.
+- Social collectors (`social.py`), all built but not running yet:
+  - Telegram via Telethon and the official API. Off unless `ARTHASIGNAL_TELEGRAM_TERMS_ACK=1`, because Telegram's API terms forbid using the data for AI or ML development or deployment;
+  - YouTube Data API v3 (video plus comment threads, 30-day text retention);
+  - Reddit OAuth (posts and comments, 30-day text retention).
+
+  All three report `not_configured` until keys and source lists exist. No channel, video or subreddit list was invented: `config/social_sources.json` is empty.
+- Facebook, private groups and X are not collected; the reasons are in `docs/LIVE_COLLECTORS.md`, with key setup steps.
+- `docs/LLM_CLASSIFICATION_SPEC.md` and `classify_spec.py` specify the classifier:
+  - fields: symbol, role, event type, sentiment, promotion and pump signals, novelty and evidence;
+  - a JSON schema and validator;
+  - Telegram is blocked;
+  - the knowledge-time rule and an append-only `text_labels` DDL (not applied);
+  - the gold-set validation thresholds and a cost formula.
+
+  No paid API was called.
+- Cron wrapper `scripts/cron/collectors.sh` (news every 30 minutes, social hourly, purge daily), not scheduled. Exercised with a flock stand-in: social exit 5, purge exit 0. `.env.collectors` and `*.session` are gitignored. `telethon==1.45.0` was added to the requirements.
+- Tests: 8 added; suite 511 passed.
