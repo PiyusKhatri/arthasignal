@@ -664,3 +664,53 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - Tested together with m001 on a fresh restore of the pre-fix dump: m001 changed 111 then 0, m002 changed 36 then 0, the sectors check exited 0, and the restored `companies.sector` matched the laptop exactly. `docs/PROD_DEPLOY.md` Part 10 step 5b was added.
 - Fixed on the way: a miscount in my first report table, corrected from the data.
 - Tests: 4 added (`tests/test_sector_sources.py`); suite 579 passed.
+
+## Simulation phase 1 - Protocol locked before anything is built
+
+- **Rules first:** `docs/SIMULATION_PROTOCOL.md` (v1) and `config/simulation_protocol.yaml` were committed before any code (commit 702dcc0). All constants live in the config, and code reads them only through `src/simulation/protocol.py`. The config SHA-256 is `be906e7f4025aa8afc86ad7eb9a1407e517b59fd4cea4e6cc68ec43362985656`.
+- **Calls:** BUY, HOLD, WAIT, NO_BUY and SELL (exit or stay out; no short selling).
+- **Score:** −100..+100 with bands ≥ 80 / 50..79 / −49..49 / −79..−50 / ≤ −80. Tuning is allowed on learning years only; a missing pillar contributes 0 and is recorded.
+- **Horizons:** 1 month = 19 sessions, the median of `trading_calendar` 2014-07 to 2019-12 (66 months, mean 19.36). Short is 19-57 sessions, mid 57-133, long 228-285.
+- **Entry:** the next session's open, from 2018-02-18. Before that date every bar is reduced to its close, so entry is at the next close. Entries are unfilled on no trade or a locked upper circuit, and never backfilled. The earliest sell is entry + 3 sessions (settlement).
+- **Exit:** target, stop or horizon close, whichever comes first.
+  - Stop first on a same-session tie.
+  - Gaps fill at the open.
+  - No trade or a locked lower circuit delays the exit, and the delay is recorded.
+- **Costs:** the NEPSE fee schedule by date, with citations:
+  - commission tiers 1.0% (unconfirmed, before 2016-08), then 0.60-0.40%, 0.40-0.27% from 2020-12-27, and 0.36-0.24% from 2024-05-14;
+  - NPR 10 minimum commission;
+  - SEBON fee 0.015%;
+  - DP charge Rs 25 per side;
+  - CGT 5%, then 7.5%/5% from 2021-07-16.
+
+  Unconfirmed figures use conservative values and are listed.
+- **Grading:** rules for all five call types. BUY is right only on a net profit after all costs and tax, and a stop exit is always wrong. The risk control score is 100 × the reduction in worst-decile net return against holding to horizon, plus components.
+- **Targets:** accuracy ≥ 60%, and the lower bound of the edge over a same-date random baseline > 0 with week-clustered intervals, on ≥ 100 graded calls over ≥ 30 call weeks.
+- **Periods:** learning 2014-06 to 2019-12, check 2020, exams 2021-2024, and a proposed `exam_2025a` (2025-01-01 to 2025-09-29, censored at the holdout).
+- **Process:** the weekly time machine with point-in-time knowledge times per pillar; the learning loop (at most 3 changes per version); and a multiple-testing proposal (Romano-Wolf stepdown on check and exam years, PBO via CSCV on learning years, legacy counter kept for display).
+- **Exam years are not unseen:** earlier studies used prices through 2025-01-19. Only the holdout and live calls give the final verdict.
+- **Code:**
+  - `src/simulation/costs.py`: commission tiers, SEBON fee, DP charge, CGT, round trip.
+  - `src/simulation/grading.py`:
+    - grading of all five calls;
+    - entry and fill rules, target/stop/horizon exits, circuit locks and settlement;
+    - the pre-2018 close rule;
+    - the hold-to-horizon counterfactual and WAIT missed opportunities;
+    - accuracy and the risk control score.
+  - `tests/test_simulation_grading.py`: 65 tests on synthetic paths. They cover:
+    - target hit;
+    - partial target then horizon above entry (right);
+    - a gain smaller than costs (wrong);
+    - stop hit, a gap through the stop, a stop/target tie, and a stop exit above entry (still wrong);
+    - settlement;
+    - locked upper circuit and no-trade entries (unfilled, no backfill);
+    - locked lower circuit delay, no trade on the horizon day, pending;
+    - the pre-2018 close rule and a path crossing 2018-02-18;
+    - NO_BUY right/wrong/unfilled, SELL right/wrong/stop/target;
+    - HOLD recovering, not recovering, stop, tie;
+    - WAIT missed moves;
+    - long-term CGT and the risk control score.
+- **Trial table:** `python -m src.simulation.register` on the research role (`arthasignal_research`) inserted 1 row in family `simulation_protocol` (fingerprint `7fc6c9e4…eb5f`; trials total 137). A rerun inserts 0. This was the laptop database; the server needs the same command.
+- **Not done, by instruction:** no simulator, no score, no study on real data. The only real-data reads were the session-per-month count from `trading_calendar` and the trial-table write, both on the research role with no holdout dates.
+- **Open questions:** 15, in `docs/SIMULATION_PROTOCOL.md` section 14. None was decided silently; each has a config default so the grading code is concrete.
+- Suite: 644 passed.

@@ -215,7 +215,13 @@ NEPSE has no short selling, so SELL never means "go short".
 
   It then lists recurring patterns. The magnitude decomposition of `docs/ACCURACY_PROTOCOL.md` v2 is reused so that "any event in the window" does not absorb everything.
 - **Change limits:** a new version may change **at most 3 things**, each with a written reason tied to the post-mortem.
-- **Storage:** every run and every version is stored **immutably** with its config hash and code commit, and is never deleted. This protocol version is registered in `backtest_variant_trials` (family `simulation_protocol`).
+- **Storage:** every run and every version is stored **immutably** with its config hash and code commit, and is never deleted. This protocol version is registered in `backtest_variant_trials`:
+  - family `simulation_protocol`;
+  - parameters `{protocol: sim-protocol-v1, config_sha256: be906e7f…5656}`;
+  - fingerprint `7fc6c9e4…eb5f`;
+  - written by `python -m src.simulation.register` on the research role, idempotent.
+
+  Any change to the config changes the hash and needs a new version.
 
 ## 13. Multiple testing
 
