@@ -29,6 +29,7 @@ MARKET_OPEN = time(11, 0)
 LOCK_KEY = 820_260_002
 EXIT_TOO_LATE = 2
 EXIT_NO_SESSION = 3
+TRACKED_STRATEGIES = (model_v0.NAME, *model_v0.AVOID_STRATEGIES)
 
 
 def entry_deadline(signal_date: date) -> datetime:
@@ -109,7 +110,31 @@ def compute_calls(state: dict[str, Any], quarantined: Any = ()) -> pd.DataFrame:
                       "date": panel.sessions[t], "score": round(float(x), 10), "situations": sit})
         for s, x, sit in zip(picks["symbol"], picks["score"], picks["situations"])
     ]
+    picks["strategy"] = model_v0.NAME
     return picks
+
+
+def compute_avoid(state: dict[str, Any], quarantined: Any = ()) -> pd.DataFrame:
+    panel = state["panel"]
+    t = len(panel.sessions) - 1
+    model = model_v0.ModelV0(state["inputs"]["index"], state["actions"], state["mergers"])
+    hits = model.avoid_hits(panel, t)
+    hits = hits[~hits["symbol"].isin(set(quarantined))].reset_index(drop=True)
+    columns = ["symbol", "signal_date", "score", "situations", "feature_hash", "strategy"]
+    if hits.empty:
+        return pd.DataFrame(columns=columns)
+    situations = situation_matrix(state["market"], state["inputs"]["index"], state["inputs"]["rates"], state["mergers"])
+    params_hash = feature_hash(model_v0.PARAMETERS)
+    hits["signal_date"] = panel.sessions[t]
+    hits["score"] = None
+    hits["situations"] = [labels_for(situations, int(panel.row[s]), t) for s in hits["symbol"]]
+    hits["strategy"] = hits["rule"]
+    hits["feature_hash"] = [
+        feature_hash({"model": model_v0.NAME, "version": model_v0.VERSION, "parameters_hash": params_hash, "rule": rule,
+                      "symbol": s, "date": panel.sessions[t], "situations": sit})
+        for s, rule, sit in zip(hits["symbol"], hits["rule"], hits["situations"])
+    ]
+    return hits[columns]
 
 
 def write_live_calls(engine: Engine, calls: pd.DataFrame, now: datetime, schema: str = "public") -> dict[str, int]:
@@ -130,8 +155,9 @@ def write_live_calls(engine: Engine, calls: pd.DataFrame, now: datetime, schema:
                     ":h, :b, :sym, :d, NULL, :score, :sit, :c) "
                     "ON CONFLICT (strategy, model_version, symbol, signal_date) DO NOTHING RETURNING id"
                 ),
-                {"s": model_v0.NAME, "v": model_v0.VERSION, "h": row.feature_hash, "b": batch, "sym": row.symbol,
-                 "d": row.signal_date, "score": float(row.score), "sit": list(row.situations), "c": now},
+                {"s": getattr(row, "strategy", model_v0.NAME), "v": model_v0.VERSION, "h": row.feature_hash, "b": batch, "sym": row.symbol,
+                 "d": row.signal_date, "score": None if row.score is None or pd.isna(row.score) else float(row.score),
+                 "sit": list(row.situations), "c": now},
             ).first()
             inserted += int(result is not None)
     return {"attempted": int(len(calls)), "inserted": inserted}
@@ -143,19 +169,19 @@ def grade_matured(engine: Engine, state: dict[str, Any], dry_run: bool, schema: 
         calls = pd.read_sql(
             text(
                 f"SELECT c.id AS call_id, c.symbol, c.signal_date FROM {schema}.scorecard_calls c "
-                "WHERE c.mode = 'live' AND c.strategy = :s AND c.model_version = :v"
+                "WHERE c.mode = 'live' AND c.strategy = ANY(:s) AND c.model_version = :v"
             ),
             connection,
-            params={"s": model_v0.NAME, "v": model_v0.VERSION},
+            params={"s": list(TRACKED_STRATEGIES), "v": model_v0.VERSION},
         )
         done = {
             (int(a), int(b))
             for a, b in connection.execute(
                 text(
                     f"SELECT g.call_id, g.horizon FROM {schema}.scorecard_grades g JOIN {schema}.scorecard_calls c ON c.id = g.call_id "
-                    "WHERE c.mode = 'live' AND c.strategy = :s AND g.grade_version = :g"
+                    "WHERE c.mode = 'live' AND c.strategy = ANY(:s) AND g.grade_version = :g"
                 ),
-                {"s": model_v0.NAME, "g": v2.GRADE_VERSION},
+                {"s": list(TRACKED_STRATEGIES), "g": v2.GRADE_VERSION},
             )
         }
     if calls.empty:
@@ -174,11 +200,23 @@ def grade_matured(engine: Engine, state: dict[str, Any], dry_run: bool, schema: 
 
 def run(as_of: date | None, dry_run: bool, now: datetime | None = None, schema: str = "public") -> dict[str, Any]:
     from src.database.connection import engine
+    from src.database.holdout_guard import HOLDOUT_START, HoldoutQueryViolation, allow
+
+    with engine.connect() as connection:
+        latest = connection.execute(text("SELECT max(date) FROM daily_prices")).scalar_one()
+    as_of = as_of or latest
+    if as_of < HOLDOUT_START:
+        return _run(as_of, dry_run, now, schema)
+    if as_of != latest:
+        raise HoldoutQueryViolation(f"{as_of} is inside the holdout and is not the latest session ({latest}); only live operation may read it")
+    with allow("live_ledger"):
+        return _run(as_of, dry_run, now, schema)
+
+
+def _run(as_of: date, dry_run: bool, now: datetime | None, schema: str) -> dict[str, Any]:
+    from src.database.connection import engine
 
     now = now or datetime.now(tz=NPT)
-    if as_of is None:
-        with engine.connect() as connection:
-            as_of = connection.execute(text("SELECT max(date) FROM daily_prices")).scalar_one()
     report: dict[str, Any] = {"as_of": as_of.isoformat(), "now": now.isoformat(), "dry_run": dry_run,
                               "deadline": entry_deadline(as_of).isoformat()}
     if not dry_run:
@@ -191,12 +229,14 @@ def run(as_of: date | None, dry_run: bool, now: datetime | None = None, schema: 
     report["quarantine_excluded_from_calls"] = state["quarantine_excluded"]
     states = market_state_labels(state["inputs"]["index"], state["panel"].sessions)
     report["market_state"] = states.iloc[-1]
+    avoid = compute_avoid(state, quarantine)
     report["calls"] = calls[["symbol", "score", "situations", "feature_hash"]].assign(score=lambda f: f["score"].round(4)).to_dict("records")
+    report["avoid_observations"] = avoid[["strategy", "symbol", "feature_hash"]].to_dict("records")
     report["deadline_passed"] = now >= entry_deadline(as_of)
     if dry_run:
         report["write"] = "dry run: nothing written" + (" (a live write would be refused: deadline passed)" if report["deadline_passed"] else "")
     else:
-        report["write"] = write_live_calls(engine, calls, now, schema)
+        report["write"] = write_live_calls(engine, pd.concat([calls, avoid], ignore_index=True), now, schema)
     report["grading"] = grade_matured(engine, state, dry_run, schema)
     return report
 

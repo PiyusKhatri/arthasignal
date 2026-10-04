@@ -112,11 +112,14 @@ def final_evaluation(
 ) -> dict[str, Any]:
     if not model_id.strip() or not requested_by.strip() or not reason.strip():
         raise ValueError("final_evaluation requires model_id, requested_by and reason")
+    from src.database.holdout_guard import allow
+
     call_id, call_number = ledger.start_holdout_call(model_id, holdout.config, requested_by, reason)
     try:
-        variants_tried = ledger.variant_count()
-        selected = set(select(holdout.feature_rows()))
-        report = selection_report(holdout.labeled_rows(_UNSEAL), selected, holdout.config, variants_tried)
+        with allow("final_evaluation"):
+            variants_tried = ledger.variant_count()
+            selected = set(select(holdout.feature_rows()))
+            report = selection_report(holdout.labeled_rows(_UNSEAL), selected, holdout.config, variants_tried)
     except Exception:
         ledger.finish_holdout_call(call_id, STATUS_FAILED, None)
         raise

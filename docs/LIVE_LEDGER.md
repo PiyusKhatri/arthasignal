@@ -53,3 +53,23 @@ After the daily price pipeline has finished, and before 11:00 NPT the next morni
 Exit codes: 0 done, 2 too late (deadline passed; nothing written), 3 no price session for the date. Run it only against the server's own Postgres; GitHub-hosted runners cannot reach a local database.
 
 Live calls are the only evidence that counts as a production result (`docs/ACCURACY_PROTOCOL.md`). Running it on current dates necessarily reads data after 2025-09-30. That is the forward test this machine exists for, and it is separate from the frozen research holdout.
+
+## Avoid-rule observations (added 2026-10-04)
+
+Every live run also writes, before the deadline, one ledger row for every symbol on which an avoid rule fires that day:
+- strategy `model_v0_avoid_e2`: a bonus book-close ex-session in the last 20 sessions;
+- strategy `model_v0_avoid_e4`: an upper-circuit streak of 3 or more that ended in the last 20 sessions.
+
+Each row has the rule, symbol, date, situations and a feature hash, with mode `live` and no probability. These rows are graded with the buy calls (same fills, horizons and costs). Hypotheses H1 and H2 in `docs/LIVE_HYPOTHESES.md` read them inverted: an avoid observation is correct when the buy would have been wrong. Quarantined symbols are left out.
+
+A dry run for 2025-01-16 gave 10 buy calls and 34 avoid observations (31 for E2, 3 for E4).
+
+**Holdout boundary.** On a date inside the holdout, the writer refuses to run unless that date is the latest price session, which is genuine live operation. It then opens the guard with reason `live_ledger`. Any other holdout date raises `HoldoutQueryViolation` (see `docs/HOLDOUT_LOG.md`).
+
+## Daily latest-quarter capture
+
+`python -m src.scrapers.quarterly_capture` fetches the Sharesansar quarterly tab for every active equity at one request every 3 s or more. It stores a row in `quarterly_figure_captures` whenever the statement differs from every earlier capture of that symbol, and the table is append-only. Each row keeps its first `captured_at`, EPS, net worth per share, profit, reserves, equity, share capital, the full statement and its SHA-256. Every run is logged in `quarterly_capture_runs`. A dated history of EPS and balance-sheet items starts with the first run. `captured_at` is the point-in-time key, an upper bound on when the figures became public. Suggested schedule (not installed):
+
+```
+0 18 * * 0-4  cd /srv/arthasignal && .venv/bin/python -m src.scrapers.quarterly_capture >> logs/quarterly_capture.log 2>&1
+```

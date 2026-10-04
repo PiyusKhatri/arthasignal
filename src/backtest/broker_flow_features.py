@@ -35,6 +35,10 @@ class FeatureInputs:
 
 
 def floorsheet_files(root: Path = FLOORSHEET_ROOT, end: date = spec.DEVELOPMENT_END) -> list[tuple[date, Path]]:
+    from src.database.holdout_guard import HOLDOUT_START, HoldoutQueryViolation, allowed_reason
+
+    if end >= HOLDOUT_START and allowed_reason() is None:
+        raise HoldoutQueryViolation(f"floorsheet files from {HOLDOUT_START} are holdout data; end {end} is not allowed")
     found = []
     for path in root.glob("year=*/month=*/day=*.parquet"):
         match = FILE_PATTERN.search(path.as_posix())
@@ -49,7 +53,7 @@ def floorsheet_files(root: Path = FLOORSHEET_ROOT, end: date = spec.DEVELOPMENT_
 def load_database_inputs(end: date = spec.DEVELOPMENT_END) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     from sqlalchemy import text
 
-    from src.database.connection import engine
+    from src.database.holdout_guard import engine
 
     with engine.connect() as connection:
         prices = pd.read_sql(

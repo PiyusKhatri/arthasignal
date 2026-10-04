@@ -47,7 +47,7 @@ class MarketData:
 def load_market_data(end: date = spec.DEVELOPMENT_END) -> MarketData:
     from sqlalchemy import text
 
-    from src.database.connection import engine
+    from src.database.holdout_guard import engine
 
     with engine.connect() as connection:
         sessions = [
@@ -120,6 +120,7 @@ def nepse_return(nepse: Mapping[date, Bar], label: Label, entry_rule: str) -> fl
 def build_labeled_rows(
     market: MarketData,
     eligible: pd.DataFrame,
+    unresolved: Mapping[str, Sequence[date]] | None = None,
 ) -> tuple[list[Row], dict[tuple[str, date], str], dict[str, int]]:
     session_index = {day: i for i, day in enumerate(market.sessions)}
     wanted: dict[str, set[date]] = defaultdict(set)
@@ -127,7 +128,8 @@ def build_labeled_rows(
         wanted[symbol].add(day)
     rows: list[Row] = []
     entry_rules: dict[tuple[str, date], str] = {}
-    exclusions = {"no_label": 0, "corporate_action": 0, "price_discontinuity": 0, "no_price_bars": 0}
+    exclusions = {"no_label": 0, "corporate_action": 0, "price_discontinuity": 0, "no_price_bars": 0, "unresolved_step": 0}
+    unresolved = unresolved or {}
     for symbol, days in wanted.items():
         bars = market.bars.get(symbol)
         if not bars:
@@ -148,6 +150,9 @@ def build_labeled_rows(
                 continue
             if event_inside_window(jumps, day, label.exit_date):
                 exclusions["price_discontinuity"] += 1
+                continue
+            if event_inside_window(list(unresolved.get(symbol, [])), day, label.exit_date):
+                exclusions["unresolved_step"] += 1
                 continue
             i = position.get(day)
             momentum = None
@@ -320,7 +325,7 @@ def evaluate_hypothesis(daily: pd.DataFrame, family_alpha: float, ledger_alpha: 
 def _verify_registration() -> int:
     from sqlalchemy import text
 
-    from src.database.connection import engine
+    from src.database.holdout_guard import engine
 
     with engine.connect() as connection:
         registered = {
@@ -337,7 +342,7 @@ def _verify_registration() -> int:
     return total
 
 
-def run(features_path: Path = DEFAULT_FEATURES, output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
+def run(features_path: Path = DEFAULT_FEATURES, output: Path = DEFAULT_OUTPUT, corrected: bool = False) -> dict[str, Any]:
     started = time.perf_counter()
     ledger_variants = _verify_registration()
     config: HoldoutConfig = load_holdout_config(spec.CONFIG_PATH)
@@ -350,7 +355,14 @@ def run(features_path: Path = DEFAULT_FEATURES, output: Path = DEFAULT_OUTPUT) -
     market = load_market_data()
     if market.sessions[-1] > spec.DEVELOPMENT_END:
         raise SystemExit("price sessions after the development window were loaded")
-    rows, entry_rules, exclusions = build_labeled_rows(market, eligible)
+    unresolved: dict[str, list[date]] = {}
+    if corrected:
+        from src.backtest import price_integrity as pi
+
+        integrity = pi.load_inputs(spec.DEVELOPMENT_END)
+        steps = pi.detect_steps(integrity["prices"], integrity["actions"], integrity["sessions"])
+        unresolved = pi.unresolved_dates(steps)
+    rows, entry_rules, exclusions = build_labeled_rows(market, eligible, unresolved)
     logger.info("labeled %d rows in %.0fs", len(rows), time.perf_counter() - started)
 
     partition = partition_rows(rows, config)
@@ -433,8 +445,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Evaluate the pre-registered broker-flow hypotheses on the development window")
     parser.add_argument("--features", type=Path, default=DEFAULT_FEATURES)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--corrected", action="store_true")
     args = parser.parse_args()
-    report = run(args.features, args.output)
+    report = run(args.features, args.output, args.corrected)
     print(json.dumps({h: {"gates": r["gates"], "passes": r["passes"]} for h, r in report["hypotheses"].items()}, indent=2))
 
 

@@ -43,7 +43,7 @@ POWER_SAMPLE = 20000
 def _merger_symbols(inputs: dict[str, pd.DataFrame]) -> set[str]:
     from sqlalchemy import text
 
-    from src.database.connection import engine
+    from src.database.holdout_guard import engine
 
     with engine.connect() as connection:
         rows = connection.execute(text("SELECT DISTINCT new_symbol FROM symbol_history")).all()

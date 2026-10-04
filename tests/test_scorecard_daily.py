@@ -147,3 +147,45 @@ def test_quarantined_symbols_are_excluded_from_live_calls(monkeypatch) -> None:
     calls = daily.compute_calls(state, {"BBB": "2025-01-10 unresolved"})
     assert list(calls["symbol"]) == ["AAA", "CCC"]
     assert state["quarantine_excluded"] == ["BBB"]
+
+
+def test_avoid_hits_report_both_rules() -> None:
+    sessions = _sessions(date(2019, 1, 1), 320)
+    prices = _prices(sessions, 0.001)
+    up = prices["symbol"] == "S03"
+    for k, day in enumerate(sessions[290:294]):
+        mask = up & (prices["date"] == day)
+        prices.loc[mask, "close"] = 100.0 * 1.1 ** (k + 1)
+        prices.loc[mask, "high"] = prices.loc[mask, "close"]
+    later = up & prices["date"].isin(sessions[294:])
+    prices.loc[later, "close"] = 100.0 * 1.1 ** 4
+    actions = pd.DataFrame({"symbol": ["S01"], "action_date": [sessions[295]], "action_type": ["BONUS"], "ratio_or_amount": [10.0]})
+    panel = es.build_panel(prices, actions, SECTORS, sessions=sessions)
+    hits = model_v0.ModelV0(_index(prices), actions, set()).avoid_hits(panel, 300)
+    assert ("S01", model_v0.AVOID_E2) in set(zip(hits["symbol"], hits["rule"]))
+    assert set(hits["rule"]) <= set(model_v0.AVOID_STRATEGIES)
+    quiet = model_v0.ModelV0(_index(prices), NO_ACTIONS, set()).avoid_hits(panel, 300)
+    assert model_v0.AVOID_E2 not in set(quiet["rule"])
+
+
+def test_avoid_observations_are_written_with_their_rule(temp_schema) -> None:
+    from sqlalchemy import text
+
+    engine, schema = temp_schema
+    today = datetime.now(tz=daily.NPT).date()
+    now = datetime.now(tz=daily.NPT)
+    buys = _calls(today).assign(strategy=model_v0.NAME)
+    avoid = pd.DataFrame({"symbol": ["ABC"], "signal_date": [today], "score": [None], "situations": [["all"]],
+                          "feature_hash": ["c" * 64], "strategy": [model_v0.AVOID_E2]})
+    result = daily.write_live_calls(engine, pd.concat([buys, avoid], ignore_index=True), now, schema)
+    assert result == {"attempted": 3, "inserted": 3}
+    with engine.connect() as connection:
+        rows = dict(connection.execute(text(f"SELECT strategy, count(*) FROM {schema}.scorecard_calls GROUP BY 1")).all())
+    assert rows == {model_v0.NAME: 2, model_v0.AVOID_E2: 1}
+
+
+def test_holdout_dates_other_than_the_latest_session_are_refused(monkeypatch) -> None:
+    from src.database.holdout_guard import HoldoutQueryViolation
+
+    with pytest.raises(HoldoutQueryViolation):
+        daily.run(date(2025, 10, 5), dry_run=True)

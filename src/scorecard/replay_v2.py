@@ -58,8 +58,9 @@ def run(
     strategies: Sequence[Strategy] = STRATEGIES,
     output: Path = DEFAULT_OUTPUT,
     context: dict[str, Any] | None = None,
+    grade_version: str = v2.GRADE_VERSION,
 ) -> dict[str, Any]:
-    from src.database.connection import engine
+    from src.database.holdout_guard import engine
 
     started = time.perf_counter()
     apply_schema(engine)
@@ -94,6 +95,7 @@ def run(
         }
     report: dict[str, Any] = {
         "protocol": v2.PROTOCOL_VERSION,
+        "grade_version": grade_version,
         "generated_on": date.today().isoformat(),
         "sessions": len(panel.sessions),
         "last_session": panel.sessions[-1].isoformat(),
@@ -111,8 +113,8 @@ def run(
         if existing.empty:
             record_calls(engine, generate_calls(strategy, panel, context["situations"], batch_id))
             existing = _existing_calls(engine, strategy)
-        done = graded_call_ids(engine, strategy.name, strategy.version, grade_version=v2.GRADE_VERSION)
-        grades = v2.grade_calls_v2(market, cubes, existing, context["cumulative"])
+        done = graded_call_ids(engine, strategy.name, strategy.version, grade_version=grade_version)
+        grades = v2.grade_calls_v2(market, cubes, existing, context["cumulative"], grade_version)
         if done and not grades.empty:
             keys = list(zip(grades["call_id"], grades["horizon"]))
             grades = grades[[key not in done for key in keys]]
@@ -124,7 +126,7 @@ def run(
         matrix: dict[str, dict[str, Any]] = {s: {} for s in spec.SITUATIONS}
         monitors = {}
         for h in spec.HORIZONS:
-            graded = load_graded(engine, strategy.name, strategy.version, horizon=h, grade_version=v2.GRADE_VERSION)
+            graded = load_graded(engine, strategy.name, strategy.version, horizon=h, grade_version=grade_version)
             exits = graded["exit_date"].dropna()
             if (exits > spec.DEVELOPMENT_END).any():
                 raise SystemExit("a graded exit reached past the development window")
@@ -157,6 +159,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--with-model-v0", action="store_true")
     parser.add_argument("--only-model-v0", action="store_true")
+    parser.add_argument("--grade-version", default=v2.GRADE_VERSION)
     args = parser.parse_args()
     context = build_context()
     strategies: list[Strategy] = [] if args.only_model_v0 else list(STRATEGIES)
@@ -164,7 +167,7 @@ def main() -> None:
         from src.scorecard import model_v0
 
         strategies.append(model_v0.strategy(context["inputs"]["index"], context["actions"], et._merger_symbols(context["inputs"])))
-    report = run(strategies, args.output, context)
+    report = run(strategies, args.output, context, args.grade_version)
     for name, result in report["strategies"].items():
         verdicts: dict[str, int] = {}
         for row in result["matrix"].values():

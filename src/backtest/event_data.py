@@ -19,7 +19,7 @@ DEVELOPMENT_END = date(2025, 1, 19)
 
 
 def load_inputs(end: date = DEVELOPMENT_END) -> dict[str, pd.DataFrame]:
-    from src.database.connection import engine
+    from src.database.holdout_guard import engine
 
     with engine.connect() as connection:
         prices = pd.read_sql(

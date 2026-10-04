@@ -148,6 +148,22 @@ def detect_steps(
     )
 
 
+def unresolved_dates(steps: pd.DataFrame) -> dict[str, list[date]]:
+    chosen = steps[steps["kind"].isin(UNRESOLVED_KINDS)]
+    out: dict[str, list[date]] = {}
+    for symbol, group in chosen.groupby("symbol"):
+        out[symbol] = sorted(group["date"])
+    return out
+
+
+def mark_unresolved(panel: Any, prices: pd.DataFrame, actions: pd.DataFrame) -> int:
+    steps = detect_steps(prices, actions, panel.sessions)
+    mask = unresolved_mask(steps, panel.symbols, len(panel.sessions))
+    added = int((mask & ~panel.corrupt).sum())
+    panel.corrupt[mask] = True
+    return added
+
+
 def adjusted_base(previous_close: float, entries: Sequence[tuple[str, float]]) -> float:
     if not entries:
         return previous_close
@@ -265,7 +281,7 @@ def calibrate(prices: pd.DataFrame, actions: pd.DataFrame, sessions: Sequence[da
 
 def load_inputs(end: date = PRE_HOLDOUT_END) -> dict[str, Any]:
     from src.backtest.event_data import DEVELOPMENT_START
-    from src.database.connection import engine
+    from src.database.holdout_guard import engine
 
     with engine.connect() as connection:
         prices = pd.read_sql(
@@ -509,13 +525,13 @@ def main() -> None:
         raise SystemExit(f"--end may not be inside the holdout (after {PRE_HOLDOUT_END})")
     inputs = load_inputs(args.end)
     if args.resolve_recent:
-        from src.database.connection import engine
+        from src.database.holdout_guard import engine
 
         print(json.dumps(resolve_recent(inputs, args.lookback, engine), indent=2, default=str))
         return
     steps = detect_steps(inputs["prices"], inputs["actions"], inputs["sessions"])
     if args.check:
-        from src.database.connection import engine
+        from src.database.holdout_guard import engine
 
         with engine.connect() as connection:
             quarantine = load_quarantine(connection)

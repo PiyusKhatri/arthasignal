@@ -262,7 +262,9 @@ def rolling_monitor_v2(graded: pd.DataFrame, horizon: int, sessions: Sequence[da
     return monitor
 
 
-def grade_calls_v2(market: Market, cubes: Mapping[int, Cube], calls: pd.DataFrame, cumulative: Mapping[str, np.ndarray]) -> pd.DataFrame:
+def grade_calls_v2(
+    market: Market, cubes: Mapping[int, Cube], calls: pd.DataFrame, cumulative: Mapping[str, np.ndarray], grade_version: str = GRADE_VERSION
+) -> pd.DataFrame:
     from src.scorecard.grading import grade_calls
 
-    return grade_calls(market, cubes, calls, cumulative, causes_fn=failure_causes_v2, grade_version=GRADE_VERSION)
+    return grade_calls(market, cubes, calls, cumulative, causes_fn=failure_causes_v2, grade_version=grade_version)

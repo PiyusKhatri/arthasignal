@@ -75,7 +75,7 @@ def _write_files(root: Path, trades: pd.DataFrame) -> list[tuple[date, Path]]:
                 "data_quality_gap_pct": [0.0] * len(group),
             }
         ).to_parquet(folder / f"day={day.day:02d}.parquet", index=False)
-    return floorsheet_files(root, end=date(2099, 1, 1))
+    return floorsheet_files(root, end=date(2025, 1, 19))
 
 
 def _companies() -> pd.DataFrame:

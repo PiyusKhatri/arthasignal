@@ -23,6 +23,9 @@ AVOID_AFTER_BONUS_SESSIONS = 20
 AVOID_AFTER_STREAK_SESSIONS = 20
 STREAK_MIN = 3
 ABSTAIN_STATES = ("market_bear",)
+AVOID_E2 = "model_v0_avoid_e2"
+AVOID_E4 = "model_v0_avoid_e4"
+AVOID_STRATEGIES = (AVOID_E2, AVOID_E4)
 
 PARAMETERS: dict[str, Any] = {
     "momentum_lookback": MOMENTUM_LOOKBACK,
@@ -87,6 +90,21 @@ class ModelV0:
         start = panel.sessions[max(0, t - AVOID_AFTER_BONUS_SESSIONS + 1)]
         position = bisect.bisect_left(dates, start)
         return position < len(dates) and dates[position] <= panel.sessions[t]
+
+    def avoid_hits(self, panel: es.Panel, t: int) -> pd.DataFrame:
+        context = self._context(panel)
+        lo = max(0, t - AVOID_AFTER_STREAK_SESSIONS)
+        streak_recent = context["streak_end"][:, t] - (context["streak_end"][:, lo] if lo > 0 else 0) > 0
+        rows = []
+        for r in np.flatnonzero(~np.isnan(panel.close[:, t])):
+            symbol = panel.symbols[r]
+            if not spec.valid_symbol(symbol):
+                continue
+            if self._bonus_recent(symbol, panel, t):
+                rows.append((symbol, AVOID_E2))
+            if streak_recent[r]:
+                rows.append((symbol, AVOID_E4))
+        return pd.DataFrame(rows, columns=["symbol", "rule"])
 
     def select(self, panel: es.Panel, t: int) -> pd.DataFrame:
         context = self._context(panel)

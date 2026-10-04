@@ -318,7 +318,7 @@ def evaluate_market_rule(state: pd.DataFrame, nepse: np.ndarray, universe: np.nd
 def _verify_registration() -> int:
     from sqlalchemy import text
 
-    from src.database.connection import engine
+    from src.database.holdout_guard import engine
 
     with engine.connect() as connection:
         registered = {
@@ -335,7 +335,7 @@ def _verify_registration() -> int:
     return total
 
 
-def run(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
+def run(output: Path = DEFAULT_OUTPUT, corrected: bool = False) -> dict[str, Any]:
     started = time.perf_counter()
     ledger_variants = _verify_registration()
     config = load_holdout_config(CONFIG_PATH)
@@ -343,6 +343,11 @@ def run(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
     panel = load_panel(inputs)
     if panel.sessions[-1] > spec.DEVELOPMENT_END:
         raise SystemExit("panel extends past the development window")
+    marked = 0
+    if corrected:
+        from src.backtest.price_integrity import mark_unresolved
+
+        marked = mark_unresolved(panel, inputs["prices"], inputs["actions"][inputs["actions"]["action_type"].isin(["BONUS", "DIVIDEND", "RIGHT"])])
     counter = es.TestCounter(spec.MODEL_FAMILY, spec.BASE_ALPHA, planned=len(spec.HYPOTHESES))
     alpha = counter.alpha
     ledger_alpha = spec.BASE_ALPHA / ledger_variants
@@ -404,6 +409,9 @@ def run(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
         "family_alpha": alpha,
         "ledger_variants": ledger_variants,
         "ledger_alpha": ledger_alpha,
+        "corrected_unresolved_step_exclusion": corrected,
+        "unresolved_step_sessions_marked": marked,
+        "corporate_actions_loaded": int(len(inputs["actions"])),
         "hypotheses": results,
         "runtime_seconds": round(time.perf_counter() - started, 1),
     }
@@ -415,8 +423,9 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--corrected", action="store_true")
     args = parser.parse_args()
-    report = run(args.output)
+    report = run(args.output, args.corrected)
     print(json.dumps({h: {"gates": r["gates"], "passes": r["passes"]} for h, r in report["hypotheses"].items()}, indent=2))
 
 

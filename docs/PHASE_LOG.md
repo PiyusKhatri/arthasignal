@@ -290,3 +290,15 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - Validation against the 2,525 fundamentals rows: EPS equal to 0.01 for 92.8% of 181 pairs, and book value for 96.2% of 104 pairs; the differences are unexplained.
 - There is no dated EPS or balance-sheet history in text form.
 - Tests: 9 added; backend suite 476 passed.
+
+## Phase Q4 - Holdout guard, avoid observations, latest-quarter capture
+
+- **Incident:** the two WNLBP holdout rows from Phase Q1 (2025-10-08 and 2025-10-13, both at 1,138) are recorded as incident 1 in the append-only `holdout_incidents` table and in `docs/HOLDOUT_LOG.md`. They were not used.
+- **Guard:**
+  - research code now connects as the non-superuser role `arthasignal_research`. The local role is a superuser with BYPASSRLS, so row-level security could not apply to it;
+  - row-level security policies on 15 date-keyed tables hide rows dated on or after 2025-09-30 from that role. Verified: the role's latest `daily_prices` date is 2025-09-28 and it sees 0 `fundamentals` rows;
+  - the research engine raises `HoldoutQueryViolation` on any holdout date in parameters or literals, and the floorsheet file listing raises as well;
+  - only `final_evaluation()` and genuine live operation (`live_ledger`, latest session only) can open it.
+- **Avoid observations:** the live writer now writes `model_v0_avoid_e2` and `model_v0_avoid_e4` rows (rule, symbol, date, situations, feature hash) and grades them with the buy calls. A dry run for 2025-01-16 gave 10 buy calls and 34 avoid observations (31 E2, 3 E4). A holdout date other than the latest session is refused.
+- **Capture:** `src/scrapers/quarterly_capture.py` writes append-only `quarterly_figure_captures` rows (one per changed statement, with `captured_at`) and `quarterly_capture_runs`. The first full run over 312 active symbols was in progress at commit time; its result is logged below.
+- Tests: 9 added (guard, avoid hits and writes, holdout refusal, capture hash); backend suite passes.

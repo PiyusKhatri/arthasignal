@@ -67,7 +67,7 @@ def _existing_calls(engine, strategy: Strategy) -> pd.DataFrame:
 
 
 def run(output: Path = DEFAULT_OUTPUT, strategies: tuple[Strategy, ...] = STRATEGIES) -> dict[str, Any]:
-    from src.database.connection import engine
+    from src.database.holdout_guard import engine
 
     started = time.perf_counter()
     apply_schema(engine)
