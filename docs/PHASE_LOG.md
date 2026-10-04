@@ -523,3 +523,21 @@ The backfill uses the Sharesansar daily page because it is the only source that 
   - Ops dry runs: the chain list prints 9 steps in the requested order. `backfill --since 2026-09-29 --dry-run` expects 2026-09-30, 10-01 and 10-02 and finds all three missing (some may be Dashain holidays; the holiday list is empty). The health check flags stale prices and no backup. The reports render. Fixed on the way: an unreadable backup directory crashed the check, and now it is reported.
   - Nothing was run on any server.
 - Tests: 8 added (`tests/test_ops.py`); suite 551 passed.
+
+## Phase E-C - LightGBM ranker r1 and meta-labeler m1
+
+- Pre-registrations were committed and registered before any feature, label or prediction was computed: `docs/RANKER_PREREG.md` (11:57:43 NPT, 16 trials in `ranker_prereg_v1`) and `docs/META_PREREG.md` (11:57:50 NPT, separate commit, 4 trials in `meta_prereg_v1`). All 20 trials were also added to `scorecard_accuracy_v2`, so *K* = 40 × 104 = 4,160.
+- Features (`src/ranker/features.py`): 45 point-in-time features, covering price and volume, sector-relative, corporate-action proximity, the five floorsheet broker features from the read-only feature store, publication-dated earnings, and market state. Coverage is 44-100% per feature; the broker features cover 90-94%.
+- Training (`src/ranker/train.py`) ran in 437 s:
+  - targets are within-date ranks of next-open excess returns from the scorecard's grading cubes;
+  - 7 calendar-year folds with purge and a 5-session embargo (verified in every fold);
+  - a 4-point grid per horizon, selected inside each fold;
+  - top 10 eligible calls per session with at most 3 per sector, written as replay calls (15,908 per horizon) and graded.
+- **Audit:** 12 mismatches on 4 of 20 dates, all in the earnings features. The "later of the two portal dates" convention from `info_eval` depends on a future publication, so r1 is leaky. The audit was shown to catch a planted leak (206 mismatches).
+- **Results:**
+  - r1 edges: h5 +0.17, h10 +0.27, h20 −0.17 and h40 +0.75 points. All NO EVIDENCE, with excess expectancy negative at every horizon.
+  - Out-of-sample rank IC was 0.07-0.09 even within the eligible set. The model separates future laggards (rest of eligible −0.3% to −1.5% excess) and does not find winners (top 10 −0.2% to +0.3%).
+  - m1 edges: h5 +3.7, h10 +5.8, h20 +3.1 and h40 **+8.6** points. All NO EVIDENCE: penalized bounds are negative, calibration fails everywhere (Brier worse than the baseline forecast), the leak is inherited, and the kept calls are concentrated in 2021.
+- **Not ready to run live** (no live broker features, audit failure), so no challenger bot was registered. Report: `docs/RANKER_RESULTS.md`.
+- `lightgbm==4.7.0` and `scikit-learn==1.9.1` were added; both resolve as Linux Python 3.12 wheels. On macOS LightGBM needs `brew install libomp`.
+- Tests: 6 added (`tests/test_ranker.py`, including a synthetic no-look-ahead feature check).

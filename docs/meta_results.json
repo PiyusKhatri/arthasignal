@@ -1,0 +1,3265 @@
+{
+ "protocol": "accuracy-v2.1",
+ "declared_at": "2026-10-04T11:57:50+05:45",
+ "models": {
+  "5": {
+   "folds": [
+    {
+     "test": [
+      "2019-01-01",
+      "2019-12-31"
+     ],
+     "train_calls": 1994,
+     "train_last_exit": "2018-12-24",
+     "tau": 0.2415,
+     "train_win_rate": 0.2172,
+     "test_calls": 2439,
+     "kept": 650,
+     "purge_ok": true,
+     "coefficients": {
+      "score": -0.5675,
+      "score_rank": 0.0582,
+      "gap_to_11th": 0.6359,
+      "pick_rank": 0.0359,
+      "state_code": 0.0,
+      "breadth_sma50": -0.1383,
+      "nepse_ret_20": -0.3173,
+      "vol_20": 0.273,
+      "turnover_20": -0.0694,
+      "ret_20": -0.0049,
+      "e2_bonus_20": 0.0047,
+      "e4_streak_20": 0.0
+     }
+    },
+    {
+     "test": [
+      "2020-01-01",
+      "2020-12-31"
+     ],
+     "train_calls": 4434,
+     "train_last_exit": "2019-12-24",
+     "tau": 0.2589,
+     "train_win_rate": 0.2339,
+     "test_calls": 1840,
+     "kept": 455,
+     "purge_ok": true,
+     "coefficients": {
+      "score": -0.0385,
+      "score_rank": -0.1856,
+      "gap_to_11th": 0.0788,
+      "pick_rank": -0.1979,
+      "state_code": 0.0777,
+      "breadth_sma50": -0.3396,
+      "nepse_ret_20": 0.1988,
+      "vol_20": 0.1778,
+      "turnover_20": -0.0243,
+      "ret_20": 0.0392,
+      "e2_bonus_20": -0.0151,
+      "e4_streak_20": 0.0
+     }
+    },
+    {
+     "test": [
+      "2021-01-03",
+      "2021-12-29"
+     ],
+     "train_calls": 6273,
+     "train_last_exit": "2020-12-24",
+     "tau": 0.3002,
+     "train_win_rate": 0.2759,
+     "test_calls": 2390,
+     "kept": 1791,
+     "purge_ok": true,
+     "coefficients": {
+      "score": -0.0251,
+      "score_rank": 0.0189,
+      "gap_to_11th": 0.0241,
+      "pick_rank": -0.031,
+      "state_code": 0.1393,
+      "breadth_sma50": 0.2105,
+      "nepse_ret_20": -0.2495,
+      "vol_20": 0.1819,
+      "turnover_20": -0.0195,
+      "ret_20": 0.0272,
+      "e2_bonus_20": -0.026,
+      "e4_streak_20": -0.0571
+     }
+    },
+    {
+     "test": [
+      "2022-01-02",
+      "2022-12-29"
+     ],
+     "train_calls": 8663,
+     "train_last_exit": "2021-12-22",
+     "tau": 0.342,
+     "train_win_rate": 0.3021,
+     "test_calls": 2420,
+     "kept": 174,
+     "purge_ok": true,
+     "coefficients": {
+      "score": 0.1234,
+      "score_rank": -0.1277,
+      "gap_to_11th": 0.0535,
+      "pick_rank": -0.0373,
+      "state_code": 0.2362,
+      "breadth_sma50": 0.1775,
+      "nepse_ret_20": -0.1959,
+      "vol_20": 0.1562,
+      "turnover_20": 0.019,
+      "ret_20": -0.0145,
+      "e2_bonus_20": 0.0181,
+      "e4_streak_20": -0.0714
+     }
+    },
+    {
+     "test": [
+      "2023-01-01",
+      "2023-12-28"
+     ],
+     "train_calls": 11083,
+     "train_last_exit": "2022-12-21",
+     "tau": 0.3322,
+     "train_win_rate": 0.2959,
+     "test_calls": 2269,
+     "kept": 261,
+     "purge_ok": true,
+     "coefficients": {
+      "score": 0.1267,
+      "score_rank": -0.0773,
+      "gap_to_11th": 0.0265,
+      "pick_rank": -0.0097,
+      "state_code": 0.2356,
+      "breadth_sma50": 0.0761,
+      "nepse_ret_20": -0.1282,
+      "vol_20": 0.1816,
+      "turnover_20": 0.0204,
+      "ret_20": -0.0181,
+      "e2_bonus_20": 0.0437,
+      "e4_streak_20": -0.0617
+     }
+    },
+    {
+     "test": [
+      "2024-01-01",
+      "2025-01-19"
+     ],
+     "train_calls": 13353,
+     "train_last_exit": "2023-12-19",
+     "tau": 0.3216,
+     "train_win_rate": 0.2891,
+     "test_calls": 2380,
+     "kept": 1001,
+     "purge_ok": true,
+     "coefficients": {
+      "score": 0.1047,
+      "score_rank": -0.0802,
+      "gap_to_11th": 0.0649,
+      "pick_rank": 0.0187,
+      "state_code": 0.1843,
+      "breadth_sma50": 0.1142,
+      "nepse_ret_20": -0.1314,
+      "vol_20": 0.1886,
+      "turnover_20": 0.0017,
+      "ret_20": -0.0207,
+      "e2_bonus_20": 0.0367,
+      "e4_streak_20": -0.0547
+     }
+    }
+   ],
+   "evaluation": {
+    "strategy": "meta_lgbm_h5",
+    "version": "m1",
+    "calls": 4332,
+    "versions_in_family": 40,
+    "penalty_tests": 4160,
+    "cells_all": {
+     "5": {
+      "calls": 4332,
+      "graded": 4332,
+      "excluded_unresolved_steps": 0,
+      "excluded_share": 0.0,
+      "exclusion_warning": false,
+      "distinct_dates": 877,
+      "independent_windows": 191,
+      "min_windows": 40,
+      "win_rate": 0.35,
+      "baseline": 0.3128,
+      "edge": 0.0372,
+      "edge_lower_90": 0.0251,
+      "edge_lower_penalized": -0.0164,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.00562,
+       "1.0%": 0.00063,
+       "1.5%": -0.00436
+      },
+      "excess_expectancy_1pct": -0.00655,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.2252,
+       "brier_baseline_forecast": 0.1894,
+       "brier_skill": -0.1892,
+       "ece": 0.0095,
+       "mean_gap": 0.0095,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 591,
+         "stated": 0.2713,
+         "observed": 0.2589
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 2790,
+         "stated": 0.3503,
+         "observed": 0.3466
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 904,
+         "stated": 0.4372,
+         "observed": 0.4159
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 47,
+         "stated": 0.5188,
+         "observed": 0.4255
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 970,
+        "edge": -0.0212
+       },
+       {
+        "fold": 2,
+        "calls": 1933,
+        "edge": 0.0286
+       },
+       {
+        "fold": 3,
+        "calls": 280,
+        "edge": 0.1269
+       },
+       {
+        "fold": 4,
+        "calls": 1149,
+        "edge": 0.0791
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "market": 0.4215,
+       "model": 0.3008,
+       "sector": 0.2585,
+       "liquidity": 0.0114,
+       "news": 0.0064,
+       "circuit": 0.0014
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": false,
+       "folds": true,
+       "sample": true,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "10": {
+      "calls": 4311,
+      "graded": 4310,
+      "excluded_unresolved_steps": 1,
+      "excluded_share": 0.0002,
+      "exclusion_warning": false,
+      "distinct_dates": 872,
+      "independent_windows": 111,
+      "min_windows": 40,
+      "win_rate": 0.3501,
+      "baseline": 0.3191,
+      "edge": 0.031,
+      "edge_lower_90": 0.015,
+      "edge_lower_penalized": -0.0364,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.01421,
+       "1.0%": 0.00923,
+       "1.5%": 0.00424
+      },
+      "excess_expectancy_1pct": -0.00687,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.2246,
+       "brier_baseline_forecast": 0.1918,
+       "brier_skill": -0.1705,
+       "ece": 0.0093,
+       "mean_gap": 0.0093,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 590,
+         "stated": 0.2713,
+         "observed": 0.2627
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 2771,
+         "stated": 0.3502,
+         "observed": 0.341
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 902,
+         "stated": 0.4372,
+         "observed": 0.4313
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 47,
+         "stated": 0.5188,
+         "observed": 0.4255
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 969,
+        "edge": -0.0328
+       },
+       {
+        "fold": 2,
+        "calls": 1933,
+        "edge": 0.0162
+       },
+       {
+        "fold": 3,
+        "calls": 280,
+        "edge": 0.1397
+       },
+       {
+        "fold": 4,
+        "calls": 1128,
+        "edge": 0.0841
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "market": 0.432,
+       "sector": 0.2903,
+       "model": 0.2535,
+       "liquidity": 0.0096,
+       "news": 0.0086,
+       "circuit": 0.0061
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": true,
+       "sample": true,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "20": {
+      "calls": 4270,
+      "graded": 4269,
+      "excluded_unresolved_steps": 1,
+      "excluded_share": 0.0002,
+      "exclusion_warning": false,
+      "distinct_dates": 862,
+      "independent_windows": 64,
+      "min_windows": 40,
+      "win_rate": 0.4034,
+      "baseline": 0.3395,
+      "edge": 0.0638,
+      "edge_lower_90": 0.0585,
+      "edge_lower_penalized": -0.0265,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.04105,
+       "1.0%": 0.03607,
+       "1.5%": 0.03108
+      },
+      "excess_expectancy_1pct": -0.00359,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.239,
+       "brier_baseline_forecast": 0.2028,
+       "brier_skill": -0.1782,
+       "ece": 0.0455,
+       "mean_gap": 0.044,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 590,
+         "stated": 0.2713,
+         "observed": 0.3186
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 2731,
+         "stated": 0.35,
+         "observed": 0.3944
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 901,
+         "stated": 0.4373,
+         "observed": 0.4839
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 47,
+         "stated": 0.5188,
+         "observed": 0.4468
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 969,
+        "edge": -0.0184
+       },
+       {
+        "fold": 2,
+        "calls": 1933,
+        "edge": 0.0555
+       },
+       {
+        "fold": 3,
+        "calls": 280,
+        "edge": 0.1391
+       },
+       {
+        "fold": 4,
+        "calls": 1087,
+        "edge": 0.1325
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "market": 0.3926,
+       "sector": 0.3231,
+       "model": 0.245,
+       "liquidity": 0.0216,
+       "news": 0.0098,
+       "circuit": 0.0079
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": true,
+       "sample": true,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "40": {
+      "calls": 4176,
+      "graded": 4175,
+      "excluded_unresolved_steps": 1,
+      "excluded_share": 0.0002,
+      "exclusion_warning": false,
+      "distinct_dates": 842,
+      "independent_windows": 33,
+      "min_windows": 30,
+      "win_rate": 0.3308,
+      "baseline": 0.2761,
+      "edge": 0.0547,
+      "edge_lower_90": 0.0295,
+      "edge_lower_penalized": -0.0269,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.09335,
+       "1.0%": 0.08836,
+       "1.5%": 0.08338
+      },
+      "excess_expectancy_1pct": 7e-05,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.2199,
+       "brier_baseline_forecast": 0.2019,
+       "brier_skill": -0.0891,
+       "ece": 0.0284,
+       "mean_gap": 0.0284,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 590,
+         "stated": 0.2713,
+         "observed": 0.222
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 2656,
+         "stated": 0.3498,
+         "observed": 0.3366
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 882,
+         "stated": 0.4376,
+         "observed": 0.3844
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 47,
+         "stated": 0.5188,
+         "observed": 0.3617
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 969,
+        "edge": -0.0295
+       },
+       {
+        "fold": 2,
+        "calls": 1933,
+        "edge": 0.05
+       },
+       {
+        "fold": 3,
+        "calls": 280,
+        "edge": 0.0694
+       },
+       {
+        "fold": 4,
+        "calls": 993,
+        "edge": 0.142
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.3479,
+       "market": 0.3078,
+       "sector": 0.2874,
+       "liquidity": 0.0333,
+       "circuit": 0.0168,
+       "news": 0.0068
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "80": {
+      "calls": 3965,
+      "graded": 3964,
+      "excluded_unresolved_steps": 1,
+      "excluded_share": 0.0003,
+      "exclusion_warning": false,
+      "distinct_dates": 803,
+      "independent_windows": 17,
+      "min_windows": 25,
+      "win_rate": 0.3234,
+      "baseline": 0.283,
+      "edge": 0.0404,
+      "edge_lower_90": 0.002,
+      "edge_lower_penalized": -0.0741,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.17542,
+       "1.0%": 0.17043,
+       "1.5%": 0.16544
+      },
+      "excess_expectancy_1pct": 0.00685,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.218,
+       "brier_baseline_forecast": 0.2045,
+       "brier_skill": -0.0663,
+       "ece": 0.0348,
+       "mean_gap": 0.0348,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 590,
+         "stated": 0.2713,
+         "observed": 0.2441
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 2505,
+         "stated": 0.3494,
+         "observed": 0.3198
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 822,
+         "stated": 0.4383,
+         "observed": 0.3881
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 47,
+         "stated": 0.5188,
+         "observed": 0.383
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 969,
+        "edge": -0.0574
+       },
+       {
+        "fold": 2,
+        "calls": 1933,
+        "edge": 0.0571
+       },
+       {
+        "fold": 3,
+        "calls": 280,
+        "edge": 0.1231
+       },
+       {
+        "fold": 4,
+        "calls": 782,
+        "edge": 0.091
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.3658,
+       "sector": 0.3326,
+       "market": 0.2233,
+       "liquidity": 0.0414,
+       "circuit": 0.0298,
+       "news": 0.0071
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": false,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "primary": {
+     "calls": 4332,
+     "graded": 4332,
+     "excluded_unresolved_steps": 0,
+     "excluded_share": 0.0,
+     "exclusion_warning": false,
+     "distinct_dates": 877,
+     "independent_windows": 191,
+     "min_windows": 40,
+     "win_rate": 0.35,
+     "baseline": 0.3128,
+     "edge": 0.0372,
+     "edge_lower_90": 0.0251,
+     "edge_lower_penalized": -0.0164,
+     "penalty_tests": 4160,
+     "expectancy": {
+      "0.5%": 0.00562,
+      "1.0%": 0.00063,
+      "1.5%": -0.00436
+     },
+     "excess_expectancy_1pct": -0.00655,
+     "calibration": {
+      "claimed": true,
+      "brier": 0.2252,
+      "brier_baseline_forecast": 0.1894,
+      "brier_skill": -0.1892,
+      "ece": 0.0095,
+      "mean_gap": 0.0095,
+      "reliability": [
+       {
+        "bucket": "0.2-0.3",
+        "calls": 591,
+        "stated": 0.2713,
+        "observed": 0.2589
+       },
+       {
+        "bucket": "0.3-0.4",
+        "calls": 2790,
+        "stated": 0.3503,
+        "observed": 0.3466
+       },
+       {
+        "bucket": "0.4-0.5",
+        "calls": 904,
+        "stated": 0.4372,
+        "observed": 0.4159
+       },
+       {
+        "bucket": "0.5-0.6",
+        "calls": 47,
+        "stated": 0.5188,
+        "observed": 0.4255
+       }
+      ]
+     },
+     "folds": [
+      {
+       "fold": 1,
+       "calls": 970,
+       "edge": -0.0212
+      },
+      {
+       "fold": 2,
+       "calls": 1933,
+       "edge": 0.0286
+      },
+      {
+       "fold": 3,
+       "calls": 280,
+       "edge": 0.1269
+      },
+      {
+       "fold": 4,
+       "calls": 1149,
+       "edge": 0.0791
+      }
+     ],
+     "folds_positive": 3,
+     "failure_causes": {
+      "market": 0.4215,
+      "model": 0.3008,
+      "sector": 0.2585,
+      "liquidity": 0.0114,
+      "news": 0.0064,
+      "circuit": 0.0014
+     },
+     "implausible": false,
+     "gates": {
+      "edge_8_points": false,
+      "edge_lower_bound_above_zero": false,
+      "expectancy_all_costs": false,
+      "excess_expectancy_1pct": false,
+      "folds": true,
+      "sample": true,
+      "calibration": false,
+      "not_leaky": false
+     },
+     "verdict": "NO EVIDENCE"
+    }
+   }
+  },
+  "10": {
+   "folds": [
+    {
+     "test": [
+      "2019-01-01",
+      "2019-12-31"
+     ],
+     "train_calls": 1949,
+     "train_last_exit": "2018-12-24",
+     "tau": 0.2751,
+     "train_win_rate": 0.2309,
+     "test_calls": 2441,
+     "kept": 228,
+     "purge_ok": true,
+     "coefficients": {
+      "score": -0.7107,
+      "score_rank": 0.1,
+      "gap_to_11th": 0.8612,
+      "pick_rank": 0.061,
+      "state_code": 0.0,
+      "breadth_sma50": -0.2617,
+      "nepse_ret_20": -0.4128,
+      "vol_20": 0.3754,
+      "turnover_20": 0.1114,
+      "ret_20": -0.0688,
+      "e2_bonus_20": -0.064,
+      "e4_streak_20": 0.0
+     }
+    },
+    {
+     "test": [
+      "2020-01-01",
+      "2020-12-31"
+     ],
+     "train_calls": 4390,
+     "train_last_exit": "2019-12-24",
+     "tau": 0.2769,
+     "train_win_rate": 0.241,
+     "test_calls": 1838,
+     "kept": 269,
+     "purge_ok": true,
+     "coefficients": {
+      "score": 0.181,
+      "score_rank": -0.4722,
+      "gap_to_11th": 0.1419,
+      "pick_rank": -0.2585,
+      "state_code": 0.0359,
+      "breadth_sma50": -0.4523,
+      "nepse_ret_20": 0.3347,
+      "vol_20": 0.1268,
+      "turnover_20": 0.0089,
+      "ret_20": -0.0226,
+      "e2_bonus_20": -0.0977,
+      "e4_streak_20": 0.0
+     }
+    },
+    {
+     "test": [
+      "2021-01-03",
+      "2021-12-29"
+     ],
+     "train_calls": 6225,
+     "train_last_exit": "2020-12-24",
+     "tau": 0.3144,
+     "train_win_rate": 0.2933,
+     "test_calls": 2389,
+     "kept": 1982,
+     "purge_ok": true,
+     "coefficients": {
+      "score": 0.0082,
+      "score_rank": -0.1247,
+      "gap_to_11th": 0.1214,
+      "pick_rank": -0.0859,
+      "state_code": 0.1506,
+      "breadth_sma50": 0.1784,
+      "nepse_ret_20": -0.202,
+      "vol_20": 0.1283,
+      "turnover_20": -0.0836,
+      "ret_20": -0.0715,
+      "e2_bonus_20": -0.0656,
+      "e4_streak_20": 0.0
+     }
+    },
+    {
+     "test": [
+      "2022-01-02",
+      "2022-12-29"
+     ],
+     "train_calls": 8614,
+     "train_last_exit": "2021-12-22",
+     "tau": 0.3583,
+     "train_win_rate": 0.3173,
+     "test_calls": 2420,
+     "kept": 119,
+     "purge_ok": true,
+     "coefficients": {
+      "score": 0.0646,
+      "score_rank": -0.2299,
+      "gap_to_11th": 0.1801,
+      "pick_rank": -0.0693,
+      "state_code": 0.2749,
+      "breadth_sma50": 0.0855,
+      "nepse_ret_20": -0.1234,
+      "vol_20": 0.1637,
+      "turnover_20": -0.0597,
+      "ret_20": -0.0668,
+      "e2_bonus_20": -0.0563,
+      "e4_streak_20": 0.0072
+     }
+    },
+    {
+     "test": [
+      "2023-01-01",
+      "2023-12-28"
+     ],
+     "train_calls": 11034,
+     "train_last_exit": "2022-12-21",
+     "tau": 0.3432,
+     "train_win_rate": 0.3016,
+     "test_calls": 2268,
+     "kept": 109,
+     "purge_ok": true,
+     "coefficients": {
+      "score": 0.0446,
+      "score_rank": -0.2111,
+      "gap_to_11th": 0.22,
+      "pick_rank": 0.0052,
+      "state_code": 0.3361,
+      "breadth_sma50": -0.0309,
+      "nepse_ret_20": -0.0726,
+      "vol_20": 0.1752,
+      "turnover_20": -0.0374,
+      "ret_20": -0.0577,
+      "e2_bonus_20": -0.0405,
+      "e4_streak_20": 0.0056
+     }
+    },
+    {
+     "test": [
+      "2024-01-01",
+      "2025-01-19"
+     ],
+     "train_calls": 13304,
+     "train_last_exit": "2023-12-19",
+     "tau": 0.3255,
+     "train_win_rate": 0.2948,
+     "test_calls": 2330,
+     "kept": 968,
+     "purge_ok": true,
+     "coefficients": {
+      "score": 0.0611,
+      "score_rank": -0.1695,
+      "gap_to_11th": 0.1975,
+      "pick_rank": 0.0451,
+      "state_code": 0.2325,
+      "breadth_sma50": -0.0358,
+      "nepse_ret_20": -0.0051,
+      "vol_20": 0.1682,
+      "turnover_20": -0.0429,
+      "ret_20": -0.0323,
+      "e2_bonus_20": -0.0478,
+      "e4_streak_20": 0.0048
+     }
+    }
+   ],
+   "evaluation": {
+    "strategy": "meta_lgbm_h10",
+    "version": "m1",
+    "calls": 3675,
+    "versions_in_family": 40,
+    "penalty_tests": 4160,
+    "cells_all": {
+     "5": {
+      "calls": 3675,
+      "graded": 3675,
+      "excluded_unresolved_steps": 0,
+      "excluded_share": 0.0,
+      "exclusion_warning": false,
+      "distinct_dates": 720,
+      "independent_windows": 169,
+      "min_windows": 40,
+      "win_rate": 0.3654,
+      "baseline": 0.3336,
+      "edge": 0.0318,
+      "edge_lower_90": 0.0315,
+      "edge_lower_penalized": -0.02,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.009,
+       "1.0%": 0.00402,
+       "1.5%": -0.00097
+      },
+      "excess_expectancy_1pct": -0.00607,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.2328,
+       "brier_baseline_forecast": 0.196,
+       "brier_skill": -0.1877,
+       "ece": 0.0256,
+       "mean_gap": 0.0239,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 121,
+         "stated": 0.2877,
+         "observed": 0.314
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 2213,
+         "stated": 0.3581,
+         "observed": 0.3493
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 1158,
+         "stated": 0.4377,
+         "observed": 0.3964
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 181,
+         "stated": 0.5285,
+         "observed": 0.3978
+        },
+        {
+         "bucket": "0.6-0.7",
+         "calls": 2,
+         "stated": 0.6263,
+         "observed": 0.5
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 423,
+        "edge": -0.0273
+       },
+       {
+        "fold": 2,
+        "calls": 2063,
+        "edge": 0.0254
+       },
+       {
+        "fold": 3,
+        "calls": 140,
+        "edge": 0.094
+       },
+       {
+        "fold": 4,
+        "calls": 1049,
+        "edge": 0.0598
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "market": 0.3748,
+       "model": 0.3186,
+       "sector": 0.283,
+       "liquidity": 0.0107,
+       "news": 0.0086,
+       "circuit": 0.0043
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": false,
+       "folds": true,
+       "sample": true,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "10": {
+      "calls": 3675,
+      "graded": 3675,
+      "excluded_unresolved_steps": 0,
+      "excluded_share": 0.0,
+      "exclusion_warning": false,
+      "distinct_dates": 720,
+      "independent_windows": 102,
+      "min_windows": 40,
+      "win_rate": 0.3965,
+      "baseline": 0.3385,
+      "edge": 0.058,
+      "edge_lower_90": 0.0298,
+      "edge_lower_penalized": -0.0408,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.02314,
+       "1.0%": 0.01815,
+       "1.5%": 0.01317
+      },
+      "excess_expectancy_1pct": -0.00302,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.2389,
+       "brier_baseline_forecast": 0.2033,
+       "brier_skill": -0.1752,
+       "ece": 0.0181,
+       "mean_gap": 0.0071,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 121,
+         "stated": 0.2877,
+         "observed": 0.3058
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 2213,
+         "stated": 0.3581,
+         "observed": 0.3782
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 1158,
+         "stated": 0.4377,
+         "observed": 0.4344
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 181,
+         "stated": 0.5285,
+         "observed": 0.442
+        },
+        {
+         "bucket": "0.6-0.7",
+         "calls": 2,
+         "stated": 0.6263,
+         "observed": 0.0
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 423,
+        "edge": -0.0469
+       },
+       {
+        "fold": 2,
+        "calls": 2063,
+        "edge": 0.046
+       },
+       {
+        "fold": 3,
+        "calls": 140,
+        "edge": 0.1457
+       },
+       {
+        "fold": 4,
+        "calls": 1049,
+        "edge": 0.1121
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "market": 0.4125,
+       "sector": 0.2958,
+       "model": 0.2638,
+       "circuit": 0.0104,
+       "news": 0.009,
+       "liquidity": 0.0086
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": true,
+       "sample": true,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "20": {
+      "calls": 3630,
+      "graded": 3630,
+      "excluded_unresolved_steps": 0,
+      "excluded_share": 0.0,
+      "exclusion_warning": false,
+      "distinct_dates": 710,
+      "independent_windows": 57,
+      "min_windows": 40,
+      "win_rate": 0.4452,
+      "baseline": 0.357,
+      "edge": 0.0882,
+      "edge_lower_90": 0.0335,
+      "edge_lower_penalized": -0.0511,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.05412,
+       "1.0%": 0.04914,
+       "1.5%": 0.04415
+      },
+      "excess_expectancy_1pct": 0.0019,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.2475,
+       "brier_baseline_forecast": 0.2098,
+       "brier_skill": -0.1794,
+       "ece": 0.0557,
+       "mean_gap": 0.0553,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 121,
+         "stated": 0.2877,
+         "observed": 0.314
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 2169,
+         "stated": 0.3582,
+         "observed": 0.4163
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 1157,
+         "stated": 0.4377,
+         "observed": 0.5004
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 181,
+         "stated": 0.5285,
+         "observed": 0.5304
+        },
+        {
+         "bucket": "0.6-0.7",
+         "calls": 2,
+         "stated": 0.6263,
+         "observed": 0.0
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 423,
+        "edge": -0.0465
+       },
+       {
+        "fold": 2,
+        "calls": 2063,
+        "edge": 0.0846
+       },
+       {
+        "fold": 3,
+        "calls": 140,
+        "edge": 0.1151
+       },
+       {
+        "fold": 4,
+        "calls": 1004,
+        "edge": 0.1484
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "market": 0.3744,
+       "sector": 0.3277,
+       "model": 0.2656,
+       "liquidity": 0.0134,
+       "news": 0.0109,
+       "circuit": 0.0079
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": true,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "40": {
+      "calls": 3559,
+      "graded": 3559,
+      "excluded_unresolved_steps": 0,
+      "excluded_share": 0.0,
+      "exclusion_warning": false,
+      "distinct_dates": 690,
+      "independent_windows": 31,
+      "min_windows": 30,
+      "win_rate": 0.347,
+      "baseline": 0.2897,
+      "edge": 0.0573,
+      "edge_lower_90": 0.0174,
+      "edge_lower_penalized": -0.0673,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.1073,
+       "1.0%": 0.10231,
+       "1.5%": 0.09733
+      },
+      "excess_expectancy_1pct": 0.00499,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.2268,
+       "brier_baseline_forecast": 0.207,
+       "brier_skill": -0.0957,
+       "ece": 0.0429,
+       "mean_gap": 0.0432,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 121,
+         "stated": 0.2877,
+         "observed": 0.2645
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 2108,
+         "stated": 0.358,
+         "observed": 0.3264
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 1147,
+         "stated": 0.4379,
+         "observed": 0.3697
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 181,
+         "stated": 0.5285,
+         "observed": 0.5028
+        },
+        {
+         "bucket": "0.6-0.7",
+         "calls": 2,
+         "stated": 0.6263,
+         "observed": 0.0
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 423,
+        "edge": -0.0449
+       },
+       {
+        "fold": 2,
+        "calls": 2063,
+        "edge": 0.0395
+       },
+       {
+        "fold": 3,
+        "calls": 140,
+        "edge": 0.0492
+       },
+       {
+        "fold": 4,
+        "calls": 933,
+        "edge": 0.144
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.3847,
+       "market": 0.2866,
+       "sector": 0.2724,
+       "circuit": 0.0262,
+       "liquidity": 0.0241,
+       "news": 0.006
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "80": {
+      "calls": 3314,
+      "graded": 3314,
+      "excluded_unresolved_steps": 0,
+      "excluded_share": 0.0,
+      "exclusion_warning": false,
+      "distinct_dates": 650,
+      "independent_windows": 17,
+      "min_windows": 25,
+      "win_rate": 0.3455,
+      "baseline": 0.2889,
+      "edge": 0.0566,
+      "edge_lower_90": 0.0129,
+      "edge_lower_penalized": -0.0899,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.20804,
+       "1.0%": 0.20306,
+       "1.5%": 0.19807
+      },
+      "excess_expectancy_1pct": 0.02478,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.2261,
+       "brier_baseline_forecast": 0.2148,
+       "brier_skill": -0.0525,
+       "ece": 0.0457,
+       "mean_gap": 0.0459,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 121,
+         "stated": 0.2877,
+         "observed": 0.2893
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 1923,
+         "stated": 0.3583,
+         "observed": 0.3188
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 1088,
+         "stated": 0.4385,
+         "observed": 0.3713
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 180,
+         "stated": 0.5285,
+         "observed": 0.5167
+        },
+        {
+         "bucket": "0.6-0.7",
+         "calls": 2,
+         "stated": 0.6263,
+         "observed": 0.0
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 423,
+        "edge": -0.066
+       },
+       {
+        "fold": 2,
+        "calls": 2063,
+        "edge": 0.0448
+       },
+       {
+        "fold": 3,
+        "calls": 140,
+        "edge": 0.2245
+       },
+       {
+        "fold": 4,
+        "calls": 688,
+        "edge": 0.133
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.385,
+       "sector": 0.2988,
+       "market": 0.2227,
+       "circuit": 0.0498,
+       "liquidity": 0.0369,
+       "news": 0.0069
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": false,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "primary": {
+     "calls": 3675,
+     "graded": 3675,
+     "excluded_unresolved_steps": 0,
+     "excluded_share": 0.0,
+     "exclusion_warning": false,
+     "distinct_dates": 720,
+     "independent_windows": 102,
+     "min_windows": 40,
+     "win_rate": 0.3965,
+     "baseline": 0.3385,
+     "edge": 0.058,
+     "edge_lower_90": 0.0298,
+     "edge_lower_penalized": -0.0408,
+     "penalty_tests": 4160,
+     "expectancy": {
+      "0.5%": 0.02314,
+      "1.0%": 0.01815,
+      "1.5%": 0.01317
+     },
+     "excess_expectancy_1pct": -0.00302,
+     "calibration": {
+      "claimed": true,
+      "brier": 0.2389,
+      "brier_baseline_forecast": 0.2033,
+      "brier_skill": -0.1752,
+      "ece": 0.0181,
+      "mean_gap": 0.0071,
+      "reliability": [
+       {
+        "bucket": "0.2-0.3",
+        "calls": 121,
+        "stated": 0.2877,
+        "observed": 0.3058
+       },
+       {
+        "bucket": "0.3-0.4",
+        "calls": 2213,
+        "stated": 0.3581,
+        "observed": 0.3782
+       },
+       {
+        "bucket": "0.4-0.5",
+        "calls": 1158,
+        "stated": 0.4377,
+        "observed": 0.4344
+       },
+       {
+        "bucket": "0.5-0.6",
+        "calls": 181,
+        "stated": 0.5285,
+        "observed": 0.442
+       },
+       {
+        "bucket": "0.6-0.7",
+        "calls": 2,
+        "stated": 0.6263,
+        "observed": 0.0
+       }
+      ]
+     },
+     "folds": [
+      {
+       "fold": 1,
+       "calls": 423,
+       "edge": -0.0469
+      },
+      {
+       "fold": 2,
+       "calls": 2063,
+       "edge": 0.046
+      },
+      {
+       "fold": 3,
+       "calls": 140,
+       "edge": 0.1457
+      },
+      {
+       "fold": 4,
+       "calls": 1049,
+       "edge": 0.1121
+      }
+     ],
+     "folds_positive": 3,
+     "failure_causes": {
+      "market": 0.4125,
+      "sector": 0.2958,
+      "model": 0.2638,
+      "circuit": 0.0104,
+      "news": 0.009,
+      "liquidity": 0.0086
+     },
+     "implausible": false,
+     "gates": {
+      "edge_8_points": false,
+      "edge_lower_bound_above_zero": false,
+      "expectancy_all_costs": true,
+      "excess_expectancy_1pct": false,
+      "folds": true,
+      "sample": true,
+      "calibration": false,
+      "not_leaky": false
+     },
+     "verdict": "NO EVIDENCE"
+    }
+   }
+  },
+  "20": {
+   "folds": [
+    {
+     "test": [
+      "2019-01-01",
+      "2019-12-31"
+     ],
+     "train_calls": 1833,
+     "train_last_exit": "2018-12-24",
+     "tau": 0.2903,
+     "train_win_rate": 0.2291,
+     "test_calls": 2441,
+     "kept": 812,
+     "purge_ok": true,
+     "coefficients": {
+      "score": 0.1796,
+      "score_rank": -0.4457,
+      "gap_to_11th": 0.1714,
+      "pick_rank": -0.3029,
+      "state_code": 0.0,
+      "breadth_sma50": -0.7994,
+      "nepse_ret_20": 0.2797,
+      "vol_20": 0.3521,
+      "turnover_20": 0.3133,
+      "ret_20": -0.0438,
+      "e2_bonus_20": 0.0007,
+      "e4_streak_20": 0.0
+     }
+    },
+    {
+     "test": [
+      "2020-01-01",
+      "2020-12-31"
+     ],
+     "train_calls": 4280,
+     "train_last_exit": "2019-12-24",
+     "tau": 0.3289,
+     "train_win_rate": 0.264,
+     "test_calls": 1840,
+     "kept": 192,
+     "purge_ok": true,
+     "coefficients": {
+      "score": 0.8247,
+      "score_rank": -0.7322,
+      "gap_to_11th": -0.1775,
+      "pick_rank": -0.1234,
+      "state_code": 0.1652,
+      "breadth_sma50": -0.5862,
+      "nepse_ret_20": 0.3645,
+      "vol_20": 0.0585,
+      "turnover_20": 0.1508,
+      "ret_20": -0.1161,
+      "e2_bonus_20": -0.0352,
+      "e4_streak_20": 0.0
+     }
+    },
+    {
+     "test": [
+      "2021-01-03",
+      "2021-12-29"
+     ],
+     "train_calls": 6111,
+     "train_last_exit": "2020-12-24",
+     "tau": 0.3503,
+     "train_win_rate": 0.3021,
+     "test_calls": 2390,
+     "kept": 2100,
+     "purge_ok": true,
+     "coefficients": {
+      "score": 0.5261,
+      "score_rank": -0.4628,
+      "gap_to_11th": -0.0887,
+      "pick_rank": -0.0471,
+      "state_code": 0.3718,
+      "breadth_sma50": -0.0944,
+      "nepse_ret_20": -0.0431,
+      "vol_20": 0.0907,
+      "turnover_20": 0.0125,
+      "ret_20": -0.1851,
+      "e2_bonus_20": -0.0292,
+      "e4_streak_20": 0.0
+     }
+    },
+    {
+     "test": [
+      "2022-01-02",
+      "2022-12-29"
+     ],
+     "train_calls": 8501,
+     "train_last_exit": "2021-12-22",
+     "tau": 0.3853,
+     "train_win_rate": 0.3348,
+     "test_calls": 2420,
+     "kept": 184,
+     "purge_ok": true,
+     "coefficients": {
+      "score": 0.3912,
+      "score_rank": -0.4913,
+      "gap_to_11th": 0.0979,
+      "pick_rank": -0.0442,
+      "state_code": 0.4463,
+      "breadth_sma50": -0.1014,
+      "nepse_ret_20": -0.1178,
+      "vol_20": 0.1517,
+      "turnover_20": -0.0175,
+      "ret_20": -0.1402,
+      "e2_bonus_20": -0.0671,
+      "e4_streak_20": -0.0236
+     }
+    },
+    {
+     "test": [
+      "2023-01-01",
+      "2023-12-28"
+     ],
+     "train_calls": 10921,
+     "train_last_exit": "2022-12-21",
+     "tau": 0.37,
+     "train_win_rate": 0.3135,
+     "test_calls": 2270,
+     "kept": 540,
+     "purge_ok": true,
+     "coefficients": {
+      "score": 0.3552,
+      "score_rank": -0.4512,
+      "gap_to_11th": 0.1096,
+      "pick_rank": -0.0031,
+      "state_code": 0.4912,
+      "breadth_sma50": -0.2161,
+      "nepse_ret_20": -0.1013,
+      "vol_20": 0.123,
+      "turnover_20": -0.0277,
+      "ret_20": -0.1106,
+      "e2_bonus_20": -0.0708,
+      "e4_streak_20": -0.0192
+     }
+    },
+    {
+     "test": [
+      "2024-01-01",
+      "2025-01-19"
+     ],
+     "train_calls": 13190,
+     "train_last_exit": "2023-12-19",
+     "tau": 0.3511,
+     "train_win_rate": 0.3108,
+     "test_calls": 2230,
+     "kept": 1189,
+     "purge_ok": true,
+     "coefficients": {
+      "score": 0.2725,
+      "score_rank": -0.3116,
+      "gap_to_11th": 0.0487,
+      "pick_rank": -0.0104,
+      "state_code": 0.2896,
+      "breadth_sma50": -0.1806,
+      "nepse_ret_20": -0.0231,
+      "vol_20": 0.1083,
+      "turnover_20": -0.086,
+      "ret_20": -0.0625,
+      "e2_bonus_20": -0.0727,
+      "e4_streak_20": -0.0144
+     }
+    }
+   ],
+   "evaluation": {
+    "strategy": "meta_lgbm_h20",
+    "version": "m1",
+    "calls": 5017,
+    "versions_in_family": 40,
+    "penalty_tests": 4160,
+    "cells_all": {
+     "5": {
+      "calls": 5017,
+      "graded": 5017,
+      "excluded_unresolved_steps": 0,
+      "excluded_share": 0.0,
+      "exclusion_warning": false,
+      "distinct_dates": 820,
+      "independent_windows": 158,
+      "min_windows": 40,
+      "win_rate": 0.3221,
+      "baseline": 0.3232,
+      "edge": -0.0011,
+      "edge_lower_90": -0.0113,
+      "edge_lower_penalized": -0.0525,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.00484,
+       "1.0%": -0.00015,
+       "1.5%": -0.00514
+      },
+      "excess_expectancy_1pct": -0.00893,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.2347,
+       "brier_baseline_forecast": 0.1819,
+       "brier_skill": -0.2904,
+       "ece": 0.125,
+       "mean_gap": 0.125,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 48,
+         "stated": 0.2947,
+         "observed": 0.25
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 1623,
+         "stated": 0.3699,
+         "observed": 0.2754
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 2159,
+         "stated": 0.4449,
+         "observed": 0.3279
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 938,
+         "stated": 0.5407,
+         "observed": 0.3881
+        },
+        {
+         "bucket": "0.6-0.7",
+         "calls": 218,
+         "stated": 0.6357,
+         "observed": 0.3486
+        },
+        {
+         "bucket": "0.7-0.8",
+         "calls": 31,
+         "stated": 0.723,
+         "observed": 0.2903
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 917,
+        "edge": -0.0346
+       },
+       {
+        "fold": 2,
+        "calls": 2196,
+        "edge": 0.0127
+       },
+       {
+        "fold": 3,
+        "calls": 445,
+        "edge": 0.0361
+       },
+       {
+        "fold": 4,
+        "calls": 1459,
+        "edge": -0.0121
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "market": 0.3855,
+       "model": 0.3211,
+       "sector": 0.2749,
+       "liquidity": 0.0082,
+       "circuit": 0.0059,
+       "news": 0.0044
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "10": {
+      "calls": 5017,
+      "graded": 5017,
+      "excluded_unresolved_steps": 0,
+      "excluded_share": 0.0,
+      "exclusion_warning": false,
+      "distinct_dates": 820,
+      "independent_windows": 95,
+      "min_windows": 40,
+      "win_rate": 0.3323,
+      "baseline": 0.3282,
+      "edge": 0.004,
+      "edge_lower_90": 0.0005,
+      "edge_lower_penalized": -0.0603,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.01472,
+       "1.0%": 0.00972,
+       "1.5%": 0.00473
+      },
+      "excess_expectancy_1pct": -0.00759,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.2351,
+       "brier_baseline_forecast": 0.1869,
+       "brier_skill": -0.2579,
+       "ece": 0.1156,
+       "mean_gap": 0.1149,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 48,
+         "stated": 0.2947,
+         "observed": 0.3333
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 1623,
+         "stated": 0.3699,
+         "observed": 0.2803
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 2159,
+         "stated": 0.4449,
+         "observed": 0.3423
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 938,
+         "stated": 0.5407,
+         "observed": 0.3827
+        },
+        {
+         "bucket": "0.6-0.7",
+         "calls": 218,
+         "stated": 0.6357,
+         "observed": 0.4037
+        },
+        {
+         "bucket": "0.7-0.8",
+         "calls": 31,
+         "stated": 0.723,
+         "observed": 0.3226
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 917,
+        "edge": -0.0301
+       },
+       {
+        "fold": 2,
+        "calls": 2196,
+        "edge": 0.0258
+       },
+       {
+        "fold": 3,
+        "calls": 445,
+        "edge": 0.0469
+       },
+       {
+        "fold": 4,
+        "calls": 1459,
+        "edge": -0.0204
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "market": 0.3964,
+       "model": 0.2967,
+       "sector": 0.2845,
+       "liquidity": 0.0096,
+       "news": 0.0072,
+       "circuit": 0.0057
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "20": {
+      "calls": 5017,
+      "graded": 5017,
+      "excluded_unresolved_steps": 0,
+      "excluded_share": 0.0,
+      "exclusion_warning": false,
+      "distinct_dates": 820,
+      "independent_windows": 52,
+      "min_windows": 40,
+      "win_rate": 0.3819,
+      "baseline": 0.3514,
+      "edge": 0.0305,
+      "edge_lower_90": 0.0227,
+      "edge_lower_penalized": -0.036,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.03568,
+       "1.0%": 0.03069,
+       "1.5%": 0.0257
+      },
+      "excess_expectancy_1pct": -0.00724,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.2387,
+       "brier_baseline_forecast": 0.2033,
+       "brier_skill": -0.1741,
+       "ece": 0.0664,
+       "mean_gap": 0.0652,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 48,
+         "stated": 0.2947,
+         "observed": 0.3542
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 1623,
+         "stated": 0.3699,
+         "observed": 0.3296
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 2159,
+         "stated": 0.4449,
+         "observed": 0.3807
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 938,
+         "stated": 0.5407,
+         "observed": 0.4563
+        },
+        {
+         "bucket": "0.6-0.7",
+         "calls": 218,
+         "stated": 0.6357,
+         "observed": 0.422
+        },
+        {
+         "bucket": "0.7-0.8",
+         "calls": 31,
+         "stated": 0.723,
+         "observed": 0.7097
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 917,
+        "edge": -0.0198
+       },
+       {
+        "fold": 2,
+        "calls": 2196,
+        "edge": 0.0593
+       },
+       {
+        "fold": 3,
+        "calls": 445,
+        "edge": 0.0945
+       },
+       {
+        "fold": 4,
+        "calls": 1459,
+        "edge": -0.0009
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "market": 0.3431,
+       "sector": 0.3322,
+       "model": 0.296,
+       "liquidity": 0.0145,
+       "news": 0.0074,
+       "circuit": 0.0068
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "40": {
+      "calls": 4914,
+      "graded": 4914,
+      "excluded_unresolved_steps": 0,
+      "excluded_share": 0.0,
+      "exclusion_warning": false,
+      "distinct_dates": 800,
+      "independent_windows": 32,
+      "min_windows": 30,
+      "win_rate": 0.3012,
+      "baseline": 0.2892,
+      "edge": 0.012,
+      "edge_lower_90": 0.0043,
+      "edge_lower_penalized": -0.1128,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.08991,
+       "1.0%": 0.08492,
+       "1.5%": 0.07993
+      },
+      "excess_expectancy_1pct": -0.0012,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.2318,
+       "brier_baseline_forecast": 0.1987,
+       "brier_skill": -0.1666,
+       "ece": 0.1468,
+       "mean_gap": 0.1468,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 48,
+         "stated": 0.2947,
+         "observed": 0.125
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 1567,
+         "stated": 0.3698,
+         "observed": 0.2712
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 2116,
+         "stated": 0.4451,
+         "observed": 0.2958
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 934,
+         "stated": 0.5407,
+         "observed": 0.3426
+        },
+        {
+         "bucket": "0.6-0.7",
+         "calls": 218,
+         "stated": 0.6357,
+         "observed": 0.3807
+        },
+        {
+         "bucket": "0.7-0.8",
+         "calls": 31,
+         "stated": 0.723,
+         "observed": 0.6452
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 917,
+        "edge": -0.0361
+       },
+       {
+        "fold": 2,
+        "calls": 2196,
+        "edge": 0.0393
+       },
+       {
+        "fold": 3,
+        "calls": 445,
+        "edge": 0.0648
+       },
+       {
+        "fold": 4,
+        "calls": 1356,
+        "edge": -0.0169
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.3923,
+       "sector": 0.3093,
+       "market": 0.2434,
+       "liquidity": 0.0277,
+       "circuit": 0.0204,
+       "news": 0.007
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "80": {
+      "calls": 4623,
+      "graded": 4623,
+      "excluded_unresolved_steps": 0,
+      "excluded_share": 0.0,
+      "exclusion_warning": false,
+      "distinct_dates": 761,
+      "independent_windows": 17,
+      "min_windows": 25,
+      "win_rate": 0.3149,
+      "baseline": 0.2996,
+      "edge": 0.0154,
+      "edge_lower_90": -0.0526,
+      "edge_lower_penalized": -0.1922,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.19509,
+       "1.0%": 0.1901,
+       "1.5%": 0.18511
+      },
+      "excess_expectancy_1pct": 0.00295,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.2347,
+       "brier_baseline_forecast": 0.2123,
+       "brier_skill": -0.1055,
+       "ece": 0.1339,
+       "mean_gap": 0.1339,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 48,
+         "stated": 0.2947,
+         "observed": 0.1667
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 1456,
+         "stated": 0.3694,
+         "observed": 0.2885
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 1987,
+         "stated": 0.4456,
+         "observed": 0.3145
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 892,
+         "stated": 0.5406,
+         "observed": 0.3363
+        },
+        {
+         "bucket": "0.6-0.7",
+         "calls": 210,
+         "stated": 0.6355,
+         "observed": 0.3905
+        },
+        {
+         "bucket": "0.7-0.8",
+         "calls": 30,
+         "stated": 0.7236,
+         "observed": 0.7
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 917,
+        "edge": -0.0925
+       },
+       {
+        "fold": 2,
+        "calls": 2196,
+        "edge": 0.062
+       },
+       {
+        "fold": 3,
+        "calls": 445,
+        "edge": 0.1177
+       },
+       {
+        "fold": 4,
+        "calls": 1065,
+        "edge": -0.0307
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.3934,
+       "sector": 0.3742,
+       "market": 0.1323,
+       "circuit": 0.0474,
+       "liquidity": 0.0436,
+       "news": 0.0092
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "primary": {
+     "calls": 5017,
+     "graded": 5017,
+     "excluded_unresolved_steps": 0,
+     "excluded_share": 0.0,
+     "exclusion_warning": false,
+     "distinct_dates": 820,
+     "independent_windows": 52,
+     "min_windows": 40,
+     "win_rate": 0.3819,
+     "baseline": 0.3514,
+     "edge": 0.0305,
+     "edge_lower_90": 0.0227,
+     "edge_lower_penalized": -0.036,
+     "penalty_tests": 4160,
+     "expectancy": {
+      "0.5%": 0.03568,
+      "1.0%": 0.03069,
+      "1.5%": 0.0257
+     },
+     "excess_expectancy_1pct": -0.00724,
+     "calibration": {
+      "claimed": true,
+      "brier": 0.2387,
+      "brier_baseline_forecast": 0.2033,
+      "brier_skill": -0.1741,
+      "ece": 0.0664,
+      "mean_gap": 0.0652,
+      "reliability": [
+       {
+        "bucket": "0.2-0.3",
+        "calls": 48,
+        "stated": 0.2947,
+        "observed": 0.3542
+       },
+       {
+        "bucket": "0.3-0.4",
+        "calls": 1623,
+        "stated": 0.3699,
+        "observed": 0.3296
+       },
+       {
+        "bucket": "0.4-0.5",
+        "calls": 2159,
+        "stated": 0.4449,
+        "observed": 0.3807
+       },
+       {
+        "bucket": "0.5-0.6",
+        "calls": 938,
+        "stated": 0.5407,
+        "observed": 0.4563
+       },
+       {
+        "bucket": "0.6-0.7",
+        "calls": 218,
+        "stated": 0.6357,
+        "observed": 0.422
+       },
+       {
+        "bucket": "0.7-0.8",
+        "calls": 31,
+        "stated": 0.723,
+        "observed": 0.7097
+       }
+      ]
+     },
+     "folds": [
+      {
+       "fold": 1,
+       "calls": 917,
+       "edge": -0.0198
+      },
+      {
+       "fold": 2,
+       "calls": 2196,
+       "edge": 0.0593
+      },
+      {
+       "fold": 3,
+       "calls": 445,
+       "edge": 0.0945
+      },
+      {
+       "fold": 4,
+       "calls": 1459,
+       "edge": -0.0009
+      }
+     ],
+     "folds_positive": 2,
+     "failure_causes": {
+      "market": 0.3431,
+      "sector": 0.3322,
+      "model": 0.296,
+      "liquidity": 0.0145,
+      "news": 0.0074,
+      "circuit": 0.0068
+     },
+     "implausible": false,
+     "gates": {
+      "edge_8_points": false,
+      "edge_lower_bound_above_zero": false,
+      "expectancy_all_costs": true,
+      "excess_expectancy_1pct": false,
+      "folds": false,
+      "sample": true,
+      "calibration": false,
+      "not_leaky": false
+     },
+     "verdict": "NO EVIDENCE"
+    }
+   }
+  },
+  "40": {
+   "folds": [
+    {
+     "test": [
+      "2019-01-01",
+      "2019-12-31"
+     ],
+     "train_calls": 1631,
+     "train_last_exit": "2018-12-24",
+     "tau": 0.2438,
+     "train_win_rate": 0.1839,
+     "test_calls": 2415,
+     "kept": 137,
+     "purge_ok": true,
+     "coefficients": {
+      "score": -1.1151,
+      "score_rank": 0.0669,
+      "gap_to_11th": 0.5444,
+      "pick_rank": -0.2807,
+      "state_code": 0.0,
+      "breadth_sma50": -1.806,
+      "nepse_ret_20": 0.4076,
+      "vol_20": 0.1818,
+      "turnover_20": 0.1845,
+      "ret_20": -0.3071,
+      "e2_bonus_20": 0.265,
+      "e4_streak_20": 0.0
+     }
+    },
+    {
+     "test": [
+      "2020-01-01",
+      "2020-12-31"
+     ],
+     "train_calls": 4052,
+     "train_last_exit": "2019-12-24",
+     "tau": 0.2609,
+     "train_win_rate": 0.2157,
+     "test_calls": 1840,
+     "kept": 26,
+     "purge_ok": true,
+     "coefficients": {
+      "score": 0.1547,
+      "score_rank": -0.4077,
+      "gap_to_11th": 0.1103,
+      "pick_rank": -0.2426,
+      "state_code": -0.0345,
+      "breadth_sma50": -0.5728,
+      "nepse_ret_20": 0.2395,
+      "vol_20": 0.1022,
+      "turnover_20": 0.2426,
+      "ret_20": -0.0346,
+      "e2_bonus_20": 0.033,
+      "e4_streak_20": 0.0
+     }
+    },
+    {
+     "test": [
+      "2021-01-03",
+      "2021-12-29"
+     ],
+     "train_calls": 5883,
+     "train_last_exit": "2020-12-24",
+     "tau": 0.2491,
+     "train_win_rate": 0.2235,
+     "test_calls": 2390,
+     "kept": 1289,
+     "purge_ok": true,
+     "coefficients": {
+      "score": -0.0083,
+      "score_rank": -0.0803,
+      "gap_to_11th": -0.0659,
+      "pick_rank": -0.2357,
+      "state_code": 0.27,
+      "breadth_sma50": -0.0848,
+      "nepse_ret_20": -0.0942,
+      "vol_20": 0.1978,
+      "turnover_20": 0.1095,
+      "ret_20": -0.1008,
+      "e2_bonus_20": 0.0001,
+      "e4_streak_20": 0.0
+     }
+    },
+    {
+     "test": [
+      "2022-01-02",
+      "2022-12-29"
+     ],
+     "train_calls": 8273,
+     "train_last_exit": "2021-12-22",
+     "tau": 0.3171,
+     "train_win_rate": 0.2726,
+     "test_calls": 2419,
+     "kept": 131,
+     "purge_ok": true,
+     "coefficients": {
+      "score": 0.1037,
+      "score_rank": -0.3452,
+      "gap_to_11th": 0.1867,
+      "pick_rank": -0.1403,
+      "state_code": 0.4611,
+      "breadth_sma50": -0.0209,
+      "nepse_ret_20": -0.1086,
+      "vol_20": 0.241,
+      "turnover_20": -0.0731,
+      "ret_20": -0.1151,
+      "e2_bonus_20": -0.0358,
+      "e4_streak_20": 0.0109
+     }
+    },
+    {
+     "test": [
+      "2023-01-01",
+      "2023-12-28"
+     ],
+     "train_calls": 10692,
+     "train_last_exit": "2022-12-21",
+     "tau": 0.3003,
+     "train_win_rate": 0.2608,
+     "test_calls": 2270,
+     "kept": 190,
+     "purge_ok": true,
+     "coefficients": {
+      "score": 0.0616,
+      "score_rank": -0.2896,
+      "gap_to_11th": 0.1939,
+      "pick_rank": -0.1156,
+      "state_code": 0.4651,
+      "breadth_sma50": -0.1343,
+      "nepse_ret_20": -0.1066,
+      "vol_20": 0.2062,
+      "turnover_20": -0.1071,
+      "ret_20": -0.0988,
+      "e2_bonus_20": -0.0475,
+      "e4_streak_20": 0.0296
+     }
+    },
+    {
+     "test": [
+      "2024-01-01",
+      "2025-01-19"
+     ],
+     "train_calls": 12959,
+     "train_last_exit": "2023-12-19",
+     "tau": 0.2808,
+     "train_win_rate": 0.2513,
+     "test_calls": 2030,
+     "kept": 1118,
+     "purge_ok": true,
+     "coefficients": {
+      "score": 0.0782,
+      "score_rank": -0.2407,
+      "gap_to_11th": 0.1658,
+      "pick_rank": -0.0796,
+      "state_code": 0.334,
+      "breadth_sma50": -0.0889,
+      "nepse_ret_20": -0.0874,
+      "vol_20": 0.1611,
+      "turnover_20": -0.1584,
+      "ret_20": -0.0704,
+      "e2_bonus_20": -0.0391,
+      "e4_streak_20": 0.0263
+     }
+    }
+   ],
+   "evaluation": {
+    "strategy": "meta_lgbm_h40",
+    "version": "m1",
+    "calls": 2891,
+    "versions_in_family": 40,
+    "penalty_tests": 4160,
+    "cells_all": {
+     "5": {
+      "calls": 2891,
+      "graded": 2891,
+      "excluded_unresolved_steps": 0,
+      "excluded_share": 0.0,
+      "exclusion_warning": false,
+      "distinct_dates": 660,
+      "independent_windows": 142,
+      "min_windows": 40,
+      "win_rate": 0.3369,
+      "baseline": 0.3337,
+      "edge": 0.0032,
+      "edge_lower_90": -0.0235,
+      "edge_lower_penalized": -0.0776,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.00573,
+       "1.0%": 0.00073,
+       "1.5%": -0.00427
+      },
+      "excess_expectancy_1pct": -0.00961,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.2268,
+       "brier_baseline_forecast": 0.1901,
+       "brier_skill": -0.1932,
+       "ece": 0.0357,
+       "mean_gap": 0.0101,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 988,
+         "stated": 0.2774,
+         "observed": 0.3482
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 1630,
+         "stated": 0.3371,
+         "observed": 0.3307
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 251,
+         "stated": 0.434,
+         "observed": 0.3466
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 19,
+         "stated": 0.5276,
+         "observed": 0.2105
+        },
+        {
+         "bucket": "0.6-0.7",
+         "calls": 2,
+         "stated": 0.6654,
+         "observed": 0.0
+        },
+        {
+         "bucket": "0.7-0.8",
+         "calls": 1,
+         "stated": 0.7394,
+         "observed": 0.0
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 163,
+        "edge": -0.0527
+       },
+       {
+        "fold": 2,
+        "calls": 1295,
+        "edge": 0.01
+       },
+       {
+        "fold": 3,
+        "calls": 183,
+        "edge": 0.0779
+       },
+       {
+        "fold": 4,
+        "calls": 1250,
+        "edge": -0.0075
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "market": 0.3563,
+       "model": 0.3281,
+       "sector": 0.3041,
+       "circuit": 0.0057,
+       "news": 0.0031,
+       "liquidity": 0.0026
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "10": {
+      "calls": 2891,
+      "graded": 2891,
+      "excluded_unresolved_steps": 0,
+      "excluded_share": 0.0,
+      "exclusion_warning": false,
+      "distinct_dates": 660,
+      "independent_windows": 84,
+      "min_windows": 40,
+      "win_rate": 0.3829,
+      "baseline": 0.343,
+      "edge": 0.0399,
+      "edge_lower_90": 0.0041,
+      "edge_lower_penalized": -0.0648,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.02068,
+       "1.0%": 0.01568,
+       "1.5%": 0.01068
+      },
+      "excess_expectancy_1pct": -0.00688,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.2432,
+       "brier_baseline_forecast": 0.203,
+       "brier_skill": -0.1983,
+       "ece": 0.0649,
+       "mean_gap": 0.0562,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 988,
+         "stated": 0.2774,
+         "observed": 0.4069
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 1630,
+         "stated": 0.3371,
+         "observed": 0.3681
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 251,
+         "stated": 0.434,
+         "observed": 0.4024
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 19,
+         "stated": 0.5276,
+         "observed": 0.1579
+        },
+        {
+         "bucket": "0.6-0.7",
+         "calls": 2,
+         "stated": 0.6654,
+         "observed": 0.5
+        },
+        {
+         "bucket": "0.7-0.8",
+         "calls": 1,
+         "stated": 0.7394,
+         "observed": 0.0
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 163,
+        "edge": -0.0351
+       },
+       {
+        "fold": 2,
+        "calls": 1295,
+        "edge": 0.0663
+       },
+       {
+        "fold": 3,
+        "calls": 183,
+        "edge": 0.0745
+       },
+       {
+        "fold": 4,
+        "calls": 1250,
+        "edge": 0.0174
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "market": 0.3627,
+       "model": 0.3145,
+       "sector": 0.301,
+       "circuit": 0.0101,
+       "news": 0.0084,
+       "liquidity": 0.0034
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": true,
+       "sample": true,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "20": {
+      "calls": 2891,
+      "graded": 2891,
+      "excluded_unresolved_steps": 0,
+      "excluded_share": 0.0,
+      "exclusion_warning": false,
+      "distinct_dates": 660,
+      "independent_windows": 50,
+      "min_windows": 40,
+      "win_rate": 0.4293,
+      "baseline": 0.3617,
+      "edge": 0.0675,
+      "edge_lower_90": 0.0108,
+      "edge_lower_penalized": -0.0659,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.05409,
+       "1.0%": 0.04909,
+       "1.5%": 0.04409
+      },
+      "excess_expectancy_1pct": 0.00242,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.2573,
+       "brier_baseline_forecast": 0.2069,
+       "brier_skill": -0.2434,
+       "ece": 0.1054,
+       "mean_gap": 0.1025,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 988,
+         "stated": 0.2774,
+         "observed": 0.4322
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 1630,
+         "stated": 0.3371,
+         "observed": 0.4221
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 251,
+         "stated": 0.434,
+         "observed": 0.4781
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 19,
+         "stated": 0.5276,
+         "observed": 0.3158
+        },
+        {
+         "bucket": "0.6-0.7",
+         "calls": 2,
+         "stated": 0.6654,
+         "observed": 0.0
+        },
+        {
+         "bucket": "0.7-0.8",
+         "calls": 1,
+         "stated": 0.7394,
+         "observed": 0.0
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 163,
+        "edge": -0.0198
+       },
+       {
+        "fold": 2,
+        "calls": 1295,
+        "edge": 0.1048
+       },
+       {
+        "fold": 3,
+        "calls": 183,
+        "edge": 0.071
+       },
+       {
+        "fold": 4,
+        "calls": 1250,
+        "edge": 0.0398
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "sector": 0.343,
+       "market": 0.3394,
+       "model": 0.2824,
+       "circuit": 0.0164,
+       "news": 0.0097,
+       "liquidity": 0.0091
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "40": {
+      "calls": 2891,
+      "graded": 2891,
+      "excluded_unresolved_steps": 0,
+      "excluded_share": 0.0,
+      "exclusion_warning": false,
+      "distinct_dates": 660,
+      "independent_windows": 30,
+      "min_windows": 30,
+      "win_rate": 0.3812,
+      "baseline": 0.2953,
+      "edge": 0.0859,
+      "edge_lower_90": -0.0018,
+      "edge_lower_penalized": -0.0985,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.11655,
+       "1.0%": 0.11155,
+       "1.5%": 0.10655
+      },
+      "excess_expectancy_1pct": 0.02581,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.2416,
+       "brier_baseline_forecast": 0.2244,
+       "brier_skill": -0.0767,
+       "ece": 0.0573,
+       "mean_gap": 0.0544,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 988,
+         "stated": 0.2774,
+         "observed": 0.4049
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 1630,
+         "stated": 0.3371,
+         "observed": 0.3583
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 251,
+         "stated": 0.434,
+         "observed": 0.4502
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 19,
+         "stated": 0.5276,
+         "observed": 0.2632
+        },
+        {
+         "bucket": "0.6-0.7",
+         "calls": 2,
+         "stated": 0.6654,
+         "observed": 0.0
+        },
+        {
+         "bucket": "0.7-0.8",
+         "calls": 1,
+         "stated": 0.7394,
+         "observed": 0.0
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 163,
+        "edge": 0.0229
+       },
+       {
+        "fold": 2,
+        "calls": 1295,
+        "edge": 0.1102
+       },
+       {
+        "fold": 3,
+        "calls": 183,
+        "edge": 0.1507
+       },
+       {
+        "fold": 4,
+        "calls": 1250,
+        "edge": 0.0593
+       }
+      ],
+      "folds_positive": 4,
+      "failure_causes": {
+       "model": 0.412,
+       "market": 0.2756,
+       "sector": 0.2689,
+       "circuit": 0.0285,
+       "liquidity": 0.0095,
+       "news": 0.0056
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": true,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "80": {
+      "calls": 2588,
+      "graded": 2588,
+      "excluded_unresolved_steps": 0,
+      "excluded_share": 0.0,
+      "exclusion_warning": false,
+      "distinct_dates": 620,
+      "independent_windows": 17,
+      "min_windows": 25,
+      "win_rate": 0.3922,
+      "baseline": 0.3059,
+      "edge": 0.0863,
+      "edge_lower_90": -0.072,
+      "edge_lower_penalized": -0.2219,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.24078,
+       "1.0%": 0.23579,
+       "1.5%": 0.23079
+      },
+      "excess_expectancy_1pct": 0.06475,
+      "calibration": {
+       "claimed": true,
+       "brier": 0.2456,
+       "brier_baseline_forecast": 0.2389,
+       "brier_skill": -0.0279,
+       "ece": 0.0721,
+       "mean_gap": 0.0695,
+       "reliability": [
+        {
+         "bucket": "0.2-0.3",
+         "calls": 942,
+         "stated": 0.2768,
+         "observed": 0.4076
+        },
+        {
+         "bucket": "0.3-0.4",
+         "calls": 1450,
+         "stated": 0.3359,
+         "observed": 0.3759
+        },
+        {
+         "bucket": "0.4-0.5",
+         "calls": 177,
+         "stated": 0.4339,
+         "observed": 0.4576
+        },
+        {
+         "bucket": "0.5-0.6",
+         "calls": 16,
+         "stated": 0.5305,
+         "observed": 0.3125
+        },
+        {
+         "bucket": "0.6-0.7",
+         "calls": 2,
+         "stated": 0.6654,
+         "observed": 0.0
+        },
+        {
+         "bucket": "0.7-0.8",
+         "calls": 1,
+         "stated": 0.7394,
+         "observed": 0.0
+        }
+       ]
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 163,
+        "edge": -0.0831
+       },
+       {
+        "fold": 2,
+        "calls": 1295,
+        "edge": 0.1257
+       },
+       {
+        "fold": 3,
+        "calls": 183,
+        "edge": 0.2313
+       },
+       {
+        "fold": 4,
+        "calls": 947,
+        "edge": 0.0336
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.4285,
+       "sector": 0.3249,
+       "market": 0.1742,
+       "circuit": 0.0509,
+       "liquidity": 0.0191,
+       "news": 0.0025
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": true,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": false,
+       "calibration": false,
+       "not_leaky": false
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "primary": {
+     "calls": 2891,
+     "graded": 2891,
+     "excluded_unresolved_steps": 0,
+     "excluded_share": 0.0,
+     "exclusion_warning": false,
+     "distinct_dates": 660,
+     "independent_windows": 30,
+     "min_windows": 30,
+     "win_rate": 0.3812,
+     "baseline": 0.2953,
+     "edge": 0.0859,
+     "edge_lower_90": -0.0018,
+     "edge_lower_penalized": -0.0985,
+     "penalty_tests": 4160,
+     "expectancy": {
+      "0.5%": 0.11655,
+      "1.0%": 0.11155,
+      "1.5%": 0.10655
+     },
+     "excess_expectancy_1pct": 0.02581,
+     "calibration": {
+      "claimed": true,
+      "brier": 0.2416,
+      "brier_baseline_forecast": 0.2244,
+      "brier_skill": -0.0767,
+      "ece": 0.0573,
+      "mean_gap": 0.0544,
+      "reliability": [
+       {
+        "bucket": "0.2-0.3",
+        "calls": 988,
+        "stated": 0.2774,
+        "observed": 0.4049
+       },
+       {
+        "bucket": "0.3-0.4",
+        "calls": 1630,
+        "stated": 0.3371,
+        "observed": 0.3583
+       },
+       {
+        "bucket": "0.4-0.5",
+        "calls": 251,
+        "stated": 0.434,
+        "observed": 0.4502
+       },
+       {
+        "bucket": "0.5-0.6",
+        "calls": 19,
+        "stated": 0.5276,
+        "observed": 0.2632
+       },
+       {
+        "bucket": "0.6-0.7",
+        "calls": 2,
+        "stated": 0.6654,
+        "observed": 0.0
+       },
+       {
+        "bucket": "0.7-0.8",
+        "calls": 1,
+        "stated": 0.7394,
+        "observed": 0.0
+       }
+      ]
+     },
+     "folds": [
+      {
+       "fold": 1,
+       "calls": 163,
+       "edge": 0.0229
+      },
+      {
+       "fold": 2,
+       "calls": 1295,
+       "edge": 0.1102
+      },
+      {
+       "fold": 3,
+       "calls": 183,
+       "edge": 0.1507
+      },
+      {
+       "fold": 4,
+       "calls": 1250,
+       "edge": 0.0593
+      }
+     ],
+     "folds_positive": 4,
+     "failure_causes": {
+      "model": 0.412,
+      "market": 0.2756,
+      "sector": 0.2689,
+      "circuit": 0.0285,
+      "liquidity": 0.0095,
+      "news": 0.0056
+     },
+     "implausible": false,
+     "gates": {
+      "edge_8_points": true,
+      "edge_lower_bound_above_zero": false,
+      "expectancy_all_costs": true,
+      "excess_expectancy_1pct": true,
+      "folds": true,
+      "sample": true,
+      "calibration": false,
+      "not_leaky": false
+     },
+     "verdict": "NO EVIDENCE"
+    }
+   }
+  }
+ },
+ "inherits_primary_audit": {
+  "primary_leaky": true
+ }
+}

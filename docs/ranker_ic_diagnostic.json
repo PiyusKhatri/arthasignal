@@ -1,0 +1,30 @@
+{
+ "5": {
+  "eligible_rows": 188992,
+  "eligible_ic": 0.0936,
+  "top10_mean_excess_filled": 0.00223,
+  "rest_mean_excess_filled": -0.00255,
+  "top10_unfilled_share": 0.0114
+ },
+ "10": {
+  "eligible_rows": 188992,
+  "eligible_ic": 0.0958,
+  "top10_mean_excess_filled": 0.00178,
+  "rest_mean_excess_filled": -0.00453,
+  "top10_unfilled_share": 0.0171
+ },
+ "20": {
+  "eligible_rows": 188992,
+  "eligible_ic": 0.0827,
+  "top10_mean_excess_filled": -0.00222,
+  "rest_mean_excess_filled": -0.00795,
+  "top10_unfilled_share": 0.0264
+ },
+ "40": {
+  "eligible_rows": 188992,
+  "eligible_ic": 0.0662,
+  "top10_mean_excess_filled": 0.00293,
+  "rest_mean_excess_filled": -0.01463,
+  "top10_unfilled_share": 0.0432
+ }
+}

@@ -1,0 +1,2448 @@
+{
+ "protocol": "accuracy-v2.1",
+ "declared_at": "2026-10-04T11:57:43+05:45",
+ "window": [
+  "2014-06-01",
+  "2025-01-19"
+ ],
+ "audit": {
+  "dates": [
+   "2018-03-20",
+   "2018-06-17",
+   "2018-09-11",
+   "2019-07-14",
+   "2019-10-16",
+   "2021-01-03",
+   "2021-02-10",
+   "2021-03-04",
+   "2022-05-27",
+   "2022-06-10",
+   "2022-07-19",
+   "2023-01-17",
+   "2023-09-21",
+   "2023-12-17",
+   "2024-07-09",
+   "2024-07-11",
+   "2024-08-29",
+   "2024-09-12",
+   "2024-09-18",
+   "2024-11-24"
+  ],
+  "mismatches": 12,
+  "by_feature": {
+   "since_report": 4,
+   "report_count": 4,
+   "profit_positive": 3,
+   "profit_growth_yoy": 1
+  },
+  "examples": [
+   {
+    "date": "2022-07-19",
+    "symbol": "HDHPC",
+    "feature": "profit_growth_yoy",
+    "full": -2.313547372817993,
+    "truncated": -3.781818151473999
+   },
+   {
+    "date": "2022-07-19",
+    "symbol": "HDHPC",
+    "feature": "since_report",
+    "full": 215.0,
+    "truncated": 6.0
+   },
+   {
+    "date": "2022-07-19",
+    "symbol": "HDHPC",
+    "feature": "report_count",
+    "full": 5.0,
+    "truncated": 6.0
+   },
+   {
+    "date": "2024-09-12",
+    "symbol": "HDHPC",
+    "feature": "since_report",
+    "full": 85.0,
+    "truncated": 0.0
+   },
+   {
+    "date": "2024-09-12",
+    "symbol": "HDHPC",
+    "feature": "profit_positive",
+    "full": 1.0,
+    "truncated": 0.0
+   },
+   {
+    "date": "2024-09-12",
+    "symbol": "HDHPC",
+    "feature": "report_count",
+    "full": 13.0,
+    "truncated": 14.0
+   },
+   {
+    "date": "2024-09-18",
+    "symbol": "HDHPC",
+    "feature": "since_report",
+    "full": 88.0,
+    "truncated": 3.0
+   },
+   {
+    "date": "2024-09-18",
+    "symbol": "HDHPC",
+    "feature": "profit_positive",
+    "full": 1.0,
+    "truncated": 0.0
+   },
+   {
+    "date": "2024-09-18",
+    "symbol": "HDHPC",
+    "feature": "report_count",
+    "full": 13.0,
+    "truncated": 14.0
+   },
+   {
+    "date": "2024-11-24",
+    "symbol": "ULHC",
+    "feature": "since_report",
+    "full": 250.0,
+    "truncated": 3.0
+   }
+  ],
+  "leaky": true
+ },
+ "cells": 375181,
+ "models": {
+  "5": {
+   "folds": [
+    {
+     "fold": 1,
+     "test": [
+      "2018-02-18",
+      "2018-12-31"
+     ],
+     "train_rows": 65053,
+     "train_last_exit": "2018-02-07",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.0621,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.0655,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.0622,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.0592
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 1000
+     },
+     "test_ic": 0.1036,
+     "purge_ok": true
+    },
+    {
+     "fold": 2,
+     "test": [
+      "2019-01-01",
+      "2019-12-31"
+     ],
+     "train_rows": 92611,
+     "train_last_exit": "2018-12-24",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.1471,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.1401,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.1261,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.1317
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 200
+     },
+     "test_ic": 0.1506,
+     "purge_ok": true
+    },
+    {
+     "fold": 3,
+     "test": [
+      "2020-01-01",
+      "2020-12-31"
+     ],
+     "train_rows": 126948,
+     "train_last_exit": "2019-12-24",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.1609,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.1793,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.1358,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.1534
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 1000
+     },
+     "test_ic": 0.1056,
+     "purge_ok": true
+    },
+    {
+     "fold": 4,
+     "test": [
+      "2021-01-03",
+      "2021-12-29"
+     ],
+     "train_rows": 155796,
+     "train_last_exit": "2020-12-24",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.1226,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.1171,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.1037,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.1093
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 200
+     },
+     "test_ic": 0.0964,
+     "purge_ok": true
+    },
+    {
+     "fold": 5,
+     "test": [
+      "2022-01-02",
+      "2022-12-29"
+     ],
+     "train_rows": 199034,
+     "train_last_exit": "2021-12-22",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.0782,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.0735,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.0697,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.0666
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 200
+     },
+     "test_ic": 0.1051,
+     "purge_ok": true
+    },
+    {
+     "fold": 6,
+     "test": [
+      "2023-01-01",
+      "2023-12-28"
+     ],
+     "train_rows": 244769,
+     "train_last_exit": "2022-12-21",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.1252,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.1257,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.1027,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.1057
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 1000
+     },
+     "test_ic": 0.149,
+     "purge_ok": true
+    },
+    {
+     "fold": 7,
+     "test": [
+      "2024-01-01",
+      "2025-01-19"
+     ],
+     "train_rows": 294801,
+     "train_last_exit": "2023-12-19",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.1392,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.1394,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.1283,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.1311
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 1000
+     },
+     "test_ic": 0.1177,
+     "purge_ok": true
+    }
+   ],
+   "importance_top": {
+    "sector_ret_20": 0.0607,
+    "turnover_20": 0.0434,
+    "nepse_ret_20": 0.0424,
+    "market_turnover_ratio_5_60": 0.0412,
+    "log_price": 0.0403,
+    "nepse_ret_60": 0.0397,
+    "ret_1": 0.039,
+    "breadth_sma50": 0.0345,
+    "lower_hits_20": 0.0319,
+    "ret_5": 0.0313,
+    "profit_positive": 0.031,
+    "upper_hits_20": 0.0296
+   },
+   "evaluation": {
+    "strategy": "ranker_lgbm_h5",
+    "version": "r1",
+    "calls": 15908,
+    "versions_in_family": 40,
+    "penalty_tests": 4160,
+    "cells_all": {
+     "5": {
+      "calls": 15848,
+      "graded": 15842,
+      "excluded_unresolved_steps": 6,
+      "excluded_share": 0.0004,
+      "exclusion_warning": false,
+      "distinct_dates": 1586,
+      "independent_windows": 265,
+      "min_windows": 40,
+      "win_rate": 0.3019,
+      "baseline": 0.3002,
+      "edge": 0.0017,
+      "edge_lower_90": -0.0055,
+      "edge_lower_penalized": -0.0215,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.00243,
+       "1.0%": -0.00256,
+       "1.5%": -0.00755
+      },
+      "excess_expectancy_1pct": -0.00913,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3972,
+        "edge": -0.0097
+       },
+       {
+        "fold": 2,
+        "calls": 3971,
+        "edge": -0.0005
+       },
+       {
+        "fold": 3,
+        "calls": 3980,
+        "edge": 0.0222
+       },
+       {
+        "fold": 4,
+        "calls": 3919,
+        "edge": -0.0054
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "market": 0.4389,
+       "model": 0.2875,
+       "sector": 0.2523,
+       "liquidity": 0.0109,
+       "news": 0.0082,
+       "circuit": 0.0021
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "10": {
+      "calls": 15798,
+      "graded": 15784,
+      "excluded_unresolved_steps": 14,
+      "excluded_share": 0.0009,
+      "exclusion_warning": false,
+      "distinct_dates": 1581,
+      "independent_windows": 144,
+      "min_windows": 40,
+      "win_rate": 0.3054,
+      "baseline": 0.3055,
+      "edge": -0.0001,
+      "edge_lower_90": -0.0091,
+      "edge_lower_penalized": -0.0291,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.00793,
+       "1.0%": 0.00294,
+       "1.5%": -0.00205
+      },
+      "excess_expectancy_1pct": -0.01003,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3965,
+        "edge": 0.0038
+       },
+       {
+        "fold": 2,
+        "calls": 3970,
+        "edge": -0.0107
+       },
+       {
+        "fold": 3,
+        "calls": 3980,
+        "edge": 0.0228
+       },
+       {
+        "fold": 4,
+        "calls": 3869,
+        "edge": -0.0167
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "market": 0.4436,
+       "sector": 0.2778,
+       "model": 0.2498,
+       "liquidity": 0.0147,
+       "news": 0.0095,
+       "circuit": 0.0046
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "20": {
+      "calls": 15698,
+      "graded": 15666,
+      "excluded_unresolved_steps": 32,
+      "excluded_share": 0.002,
+      "exclusion_warning": false,
+      "distinct_dates": 1571,
+      "independent_windows": 75,
+      "min_windows": 40,
+      "win_rate": 0.3342,
+      "baseline": 0.3174,
+      "edge": 0.0168,
+      "edge_lower_90": 0.0026,
+      "edge_lower_penalized": -0.0278,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.02041,
+       "1.0%": 0.01542,
+       "1.5%": 0.01042
+      },
+      "excess_expectancy_1pct": -0.01085,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3955,
+        "edge": 0.0263
+       },
+       {
+        "fold": 2,
+        "calls": 3970,
+        "edge": 0.0021
+       },
+       {
+        "fold": 3,
+        "calls": 3972,
+        "edge": 0.0421
+       },
+       {
+        "fold": 4,
+        "calls": 3769,
+        "edge": -0.0042
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "market": 0.4256,
+       "sector": 0.3041,
+       "model": 0.2331,
+       "liquidity": 0.022,
+       "news": 0.0095,
+       "circuit": 0.0058
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "40": {
+      "calls": 15498,
+      "graded": 15453,
+      "excluded_unresolved_steps": 45,
+      "excluded_share": 0.0029,
+      "exclusion_warning": false,
+      "distinct_dates": 1551,
+      "independent_windows": 38,
+      "min_windows": 30,
+      "win_rate": 0.253,
+      "baseline": 0.2513,
+      "edge": 0.0017,
+      "edge_lower_90": -0.0145,
+      "edge_lower_penalized": -0.0503,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.04464,
+       "1.0%": 0.03964,
+       "1.5%": 0.03465
+      },
+      "excess_expectancy_1pct": -0.01211,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3944,
+        "edge": 0.0013
+       },
+       {
+        "fold": 2,
+        "calls": 3970,
+        "edge": -0.008
+       },
+       {
+        "fold": 3,
+        "calls": 3970,
+        "edge": 0.0294
+       },
+       {
+        "fold": 4,
+        "calls": 3569,
+        "edge": -0.0181
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "market": 0.3664,
+       "model": 0.298,
+       "sector": 0.2861,
+       "liquidity": 0.0273,
+       "circuit": 0.0127,
+       "news": 0.0094
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "80": {
+      "calls": 15098,
+      "graded": 15042,
+      "excluded_unresolved_steps": 56,
+      "excluded_share": 0.0037,
+      "exclusion_warning": false,
+      "distinct_dates": 1511,
+      "independent_windows": 19,
+      "min_windows": 25,
+      "win_rate": 0.2582,
+      "baseline": 0.2628,
+      "edge": -0.0045,
+      "edge_lower_90": -0.0267,
+      "edge_lower_penalized": -0.0778,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.09158,
+       "1.0%": 0.08659,
+       "1.5%": 0.0816
+      },
+      "excess_expectancy_1pct": -0.01487,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3938,
+        "edge": -0.0216
+       },
+       {
+        "fold": 2,
+        "calls": 3966,
+        "edge": -0.0351
+       },
+       {
+        "fold": 3,
+        "calls": 3969,
+        "edge": 0.063
+       },
+       {
+        "fold": 4,
+        "calls": 3169,
+        "edge": -0.0298
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "sector": 0.3338,
+       "model": 0.313,
+       "market": 0.2811,
+       "liquidity": 0.0394,
+       "circuit": 0.0227,
+       "news": 0.01
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "primary": {
+     "calls": 15848,
+     "graded": 15842,
+     "excluded_unresolved_steps": 6,
+     "excluded_share": 0.0004,
+     "exclusion_warning": false,
+     "distinct_dates": 1586,
+     "independent_windows": 265,
+     "min_windows": 40,
+     "win_rate": 0.3019,
+     "baseline": 0.3002,
+     "edge": 0.0017,
+     "edge_lower_90": -0.0055,
+     "edge_lower_penalized": -0.0215,
+     "penalty_tests": 4160,
+     "expectancy": {
+      "0.5%": 0.00243,
+      "1.0%": -0.00256,
+      "1.5%": -0.00755
+     },
+     "excess_expectancy_1pct": -0.00913,
+     "calibration": {
+      "claimed": false
+     },
+     "folds": [
+      {
+       "fold": 1,
+       "calls": 3972,
+       "edge": -0.0097
+      },
+      {
+       "fold": 2,
+       "calls": 3971,
+       "edge": -0.0005
+      },
+      {
+       "fold": 3,
+       "calls": 3980,
+       "edge": 0.0222
+      },
+      {
+       "fold": 4,
+       "calls": 3919,
+       "edge": -0.0054
+      }
+     ],
+     "folds_positive": 1,
+     "failure_causes": {
+      "market": 0.4389,
+      "model": 0.2875,
+      "sector": 0.2523,
+      "liquidity": 0.0109,
+      "news": 0.0082,
+      "circuit": 0.0021
+     },
+     "implausible": false,
+     "gates": {
+      "edge_8_points": false,
+      "edge_lower_bound_above_zero": false,
+      "expectancy_all_costs": false,
+      "excess_expectancy_1pct": false,
+      "folds": false,
+      "sample": true,
+      "calibration": true,
+      "not_leaky": false
+     },
+     "verdict": "NO EVIDENCE"
+    }
+   },
+   "seconds": 98
+  },
+  "10": {
+   "folds": [
+    {
+     "fold": 1,
+     "test": [
+      "2018-02-18",
+      "2018-12-31"
+     ],
+     "train_rows": 63592,
+     "train_last_exit": "2018-02-07",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.0534,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.0643,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.0525,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.0682
+     },
+     "selected": {
+      "num_leaves": 63,
+      "min_child_samples": 1000
+     },
+     "test_ic": 0.0797,
+     "purge_ok": true
+    },
+    {
+     "fold": 2,
+     "test": [
+      "2019-01-01",
+      "2019-12-31"
+     ],
+     "train_rows": 91086,
+     "train_last_exit": "2018-12-24",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.1373,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.1506,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.1035,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.1267
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 1000
+     },
+     "test_ic": 0.1958,
+     "purge_ok": true
+    },
+    {
+     "fold": 3,
+     "test": [
+      "2020-01-01",
+      "2020-12-31"
+     ],
+     "train_rows": 125135,
+     "train_last_exit": "2019-12-24",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.1657,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.1844,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.1367,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.1527
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 1000
+     },
+     "test_ic": 0.12,
+     "purge_ok": true
+    },
+    {
+     "fold": 4,
+     "test": [
+      "2021-01-03",
+      "2021-12-29"
+     ],
+     "train_rows": 153745,
+     "train_last_exit": "2020-12-24",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.146,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.1363,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.1073,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.1123
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 200
+     },
+     "test_ic": 0.0658,
+     "purge_ok": true
+    },
+    {
+     "fold": 5,
+     "test": [
+      "2022-01-02",
+      "2022-12-29"
+     ],
+     "train_rows": 196812,
+     "train_last_exit": "2021-12-22",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.0785,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.076,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.0615,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.058
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 200
+     },
+     "test_ic": 0.0869,
+     "purge_ok": true
+    },
+    {
+     "fold": 6,
+     "test": [
+      "2023-01-01",
+      "2023-12-28"
+     ],
+     "train_rows": 242304,
+     "train_last_exit": "2022-12-21",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.0952,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.1024,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.0997,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.0822
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 1000
+     },
+     "test_ic": 0.1379,
+     "purge_ok": true
+    },
+    {
+     "fold": 7,
+     "test": [
+      "2024-01-01",
+      "2025-01-19"
+     ],
+     "train_rows": 291993,
+     "train_last_exit": "2023-12-19",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.1246,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.127,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.1023,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.0998
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 1000
+     },
+     "test_ic": 0.1334,
+     "purge_ok": true
+    }
+   ],
+   "importance_top": {
+    "sector_ret_20": 0.0594,
+    "log_price": 0.0512,
+    "nepse_ret_20": 0.0496,
+    "market_turnover_ratio_5_60": 0.0399,
+    "profit_positive": 0.0397,
+    "nepse_ret_60": 0.0396,
+    "upper_hits_20": 0.0355,
+    "e2_bonus_20": 0.0335,
+    "since_right": 0.0334,
+    "traded_share_60": 0.0327,
+    "age_sessions": 0.0313,
+    "since_dividend_declaration": 0.0312
+   },
+   "evaluation": {
+    "strategy": "ranker_lgbm_h10",
+    "version": "r1",
+    "calls": 15908,
+    "versions_in_family": 40,
+    "penalty_tests": 4160,
+    "cells_all": {
+     "5": {
+      "calls": 15848,
+      "graded": 15845,
+      "excluded_unresolved_steps": 3,
+      "excluded_share": 0.0002,
+      "exclusion_warning": false,
+      "distinct_dates": 1586,
+      "independent_windows": 265,
+      "min_windows": 40,
+      "win_rate": 0.2932,
+      "baseline": 0.3002,
+      "edge": -0.007,
+      "edge_lower_90": -0.0141,
+      "edge_lower_penalized": -0.0291,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.00209,
+       "1.0%": -0.0029,
+       "1.5%": -0.00789
+      },
+      "excess_expectancy_1pct": -0.00946,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3977,
+        "edge": -0.007
+       },
+       {
+        "fold": 2,
+        "calls": 3970,
+        "edge": -0.0044
+       },
+       {
+        "fold": 3,
+        "calls": 3980,
+        "edge": 0.0043
+       },
+       {
+        "fold": 4,
+        "calls": 3918,
+        "edge": -0.0212
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "market": 0.4312,
+       "model": 0.2956,
+       "sector": 0.251,
+       "liquidity": 0.0105,
+       "news": 0.0091,
+       "circuit": 0.0026
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "10": {
+      "calls": 15798,
+      "graded": 15792,
+      "excluded_unresolved_steps": 6,
+      "excluded_share": 0.0004,
+      "exclusion_warning": false,
+      "distinct_dates": 1581,
+      "independent_windows": 144,
+      "min_windows": 40,
+      "win_rate": 0.3081,
+      "baseline": 0.3055,
+      "edge": 0.0027,
+      "edge_lower_90": -0.0078,
+      "edge_lower_penalized": -0.0302,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.00823,
+       "1.0%": 0.00324,
+       "1.5%": -0.00175
+      },
+      "excess_expectancy_1pct": -0.00972,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3976,
+        "edge": 0.0023
+       },
+       {
+        "fold": 2,
+        "calls": 3968,
+        "edge": 0.008
+       },
+       {
+        "fold": 3,
+        "calls": 3980,
+        "edge": 0.0115
+       },
+       {
+        "fold": 4,
+        "calls": 3868,
+        "edge": -0.0116
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "market": 0.4422,
+       "sector": 0.2707,
+       "model": 0.2577,
+       "liquidity": 0.0141,
+       "news": 0.0098,
+       "circuit": 0.0055
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": false,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "20": {
+      "calls": 15698,
+      "graded": 15680,
+      "excluded_unresolved_steps": 18,
+      "excluded_share": 0.0011,
+      "exclusion_warning": false,
+      "distinct_dates": 1571,
+      "independent_windows": 75,
+      "min_windows": 40,
+      "win_rate": 0.3256,
+      "baseline": 0.3173,
+      "edge": 0.0082,
+      "edge_lower_90": -0.0061,
+      "edge_lower_penalized": -0.0368,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.02007,
+       "1.0%": 0.01508,
+       "1.5%": 0.01009
+      },
+      "excess_expectancy_1pct": -0.01116,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3973,
+        "edge": 0.0237
+       },
+       {
+        "fold": 2,
+        "calls": 3968,
+        "edge": 0.0046
+       },
+       {
+        "fold": 3,
+        "calls": 3971,
+        "edge": 0.0205
+       },
+       {
+        "fold": 4,
+        "calls": 3768,
+        "edge": -0.0171
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "market": 0.4275,
+       "sector": 0.3016,
+       "model": 0.2349,
+       "liquidity": 0.0223,
+       "news": 0.0074,
+       "circuit": 0.0063
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "40": {
+      "calls": 15498,
+      "graded": 15454,
+      "excluded_unresolved_steps": 44,
+      "excluded_share": 0.0028,
+      "exclusion_warning": false,
+      "distinct_dates": 1551,
+      "independent_windows": 38,
+      "min_windows": 30,
+      "win_rate": 0.246,
+      "baseline": 0.2513,
+      "edge": -0.0054,
+      "edge_lower_90": -0.0217,
+      "edge_lower_penalized": -0.058,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.04322,
+       "1.0%": 0.03823,
+       "1.5%": 0.03324
+      },
+      "excess_expectancy_1pct": -0.01354,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3959,
+        "edge": 0.0115
+       },
+       {
+        "fold": 2,
+        "calls": 3968,
+        "edge": -0.009
+       },
+       {
+        "fold": 3,
+        "calls": 3959,
+        "edge": 0.0067
+       },
+       {
+        "fold": 4,
+        "calls": 3568,
+        "edge": -0.0334
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "market": 0.3606,
+       "model": 0.2998,
+       "sector": 0.2877,
+       "liquidity": 0.028,
+       "circuit": 0.0154,
+       "news": 0.0086
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "80": {
+      "calls": 15098,
+      "graded": 15023,
+      "excluded_unresolved_steps": 75,
+      "excluded_share": 0.005,
+      "exclusion_warning": false,
+      "distinct_dates": 1511,
+      "independent_windows": 19,
+      "min_windows": 25,
+      "win_rate": 0.2517,
+      "baseline": 0.2628,
+      "edge": -0.0111,
+      "edge_lower_90": -0.0335,
+      "edge_lower_penalized": -0.0837,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.08902,
+       "1.0%": 0.08403,
+       "1.5%": 0.07904
+      },
+      "excess_expectancy_1pct": -0.01749,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3948,
+        "edge": -0.0115
+       },
+       {
+        "fold": 2,
+        "calls": 3965,
+        "edge": -0.0408
+       },
+       {
+        "fold": 3,
+        "calls": 3942,
+        "edge": 0.0539
+       },
+       {
+        "fold": 4,
+        "calls": 3168,
+        "edge": -0.0543
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "sector": 0.3316,
+       "model": 0.3158,
+       "market": 0.2784,
+       "liquidity": 0.0392,
+       "circuit": 0.0261,
+       "news": 0.0089
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "primary": {
+     "calls": 15798,
+     "graded": 15792,
+     "excluded_unresolved_steps": 6,
+     "excluded_share": 0.0004,
+     "exclusion_warning": false,
+     "distinct_dates": 1581,
+     "independent_windows": 144,
+     "min_windows": 40,
+     "win_rate": 0.3081,
+     "baseline": 0.3055,
+     "edge": 0.0027,
+     "edge_lower_90": -0.0078,
+     "edge_lower_penalized": -0.0302,
+     "penalty_tests": 4160,
+     "expectancy": {
+      "0.5%": 0.00823,
+      "1.0%": 0.00324,
+      "1.5%": -0.00175
+     },
+     "excess_expectancy_1pct": -0.00972,
+     "calibration": {
+      "claimed": false
+     },
+     "folds": [
+      {
+       "fold": 1,
+       "calls": 3976,
+       "edge": 0.0023
+      },
+      {
+       "fold": 2,
+       "calls": 3968,
+       "edge": 0.008
+      },
+      {
+       "fold": 3,
+       "calls": 3980,
+       "edge": 0.0115
+      },
+      {
+       "fold": 4,
+       "calls": 3868,
+       "edge": -0.0116
+      }
+     ],
+     "folds_positive": 3,
+     "failure_causes": {
+      "market": 0.4422,
+      "sector": 0.2707,
+      "model": 0.2577,
+      "liquidity": 0.0141,
+      "news": 0.0098,
+      "circuit": 0.0055
+     },
+     "implausible": false,
+     "gates": {
+      "edge_8_points": false,
+      "edge_lower_bound_above_zero": false,
+      "expectancy_all_costs": false,
+      "excess_expectancy_1pct": false,
+      "folds": true,
+      "sample": true,
+      "calibration": true,
+      "not_leaky": false
+     },
+     "verdict": "NO EVIDENCE"
+    }
+   },
+   "seconds": 93
+  },
+  "20": {
+   "folds": [
+    {
+     "fold": 1,
+     "test": [
+      "2018-02-18",
+      "2018-12-31"
+     ],
+     "train_rows": 61011,
+     "train_last_exit": "2018-02-07",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.0579,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.0575,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.0454,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.0732
+     },
+     "selected": {
+      "num_leaves": 63,
+      "min_child_samples": 1000
+     },
+     "test_ic": 0.0377,
+     "purge_ok": true
+    },
+    {
+     "fold": 2,
+     "test": [
+      "2019-01-01",
+      "2019-12-31"
+     ],
+     "train_rows": 88309,
+     "train_last_exit": "2018-12-24",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.0635,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.0845,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.0163,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.0382
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 1000
+     },
+     "test_ic": 0.2336,
+     "purge_ok": true
+    },
+    {
+     "fold": 3,
+     "test": [
+      "2020-01-01",
+      "2020-12-31"
+     ],
+     "train_rows": 121892,
+     "train_last_exit": "2019-12-24",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.1265,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.2161,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.1178,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.1789
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 1000
+     },
+     "test_ic": 0.0302,
+     "purge_ok": true
+    },
+    {
+     "fold": 4,
+     "test": [
+      "2021-01-03",
+      "2021-12-29"
+     ],
+     "train_rows": 150015,
+     "train_last_exit": "2020-12-24",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.0476,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.0414,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.0322,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.0319
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 200
+     },
+     "test_ic": 0.0696,
+     "purge_ok": true
+    },
+    {
+     "fold": 5,
+     "test": [
+      "2022-01-02",
+      "2022-12-29"
+     ],
+     "train_rows": 192750,
+     "train_last_exit": "2021-12-22",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.0556,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.0478,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.0383,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.0397
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 200
+     },
+     "test_ic": 0.0346,
+     "purge_ok": true
+    },
+    {
+     "fold": 6,
+     "test": [
+      "2023-01-01",
+      "2023-12-28"
+     ],
+     "train_rows": 237877,
+     "train_last_exit": "2022-12-21",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.0979,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.1001,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.1041,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.0903
+     },
+     "selected": {
+      "num_leaves": 63,
+      "min_child_samples": 200
+     },
+     "test_ic": 0.0995,
+     "purge_ok": true
+    },
+    {
+     "fold": 7,
+     "test": [
+      "2024-01-01",
+      "2025-01-19"
+     ],
+     "train_rows": 286770,
+     "train_last_exit": "2023-12-19",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.1363,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.1271,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.1394,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.1217
+     },
+     "selected": {
+      "num_leaves": 63,
+      "min_child_samples": 200
+     },
+     "test_ic": 0.136,
+     "purge_ok": true
+    }
+   ],
+   "importance_top": {
+    "log_price": 0.0642,
+    "profit_positive": 0.0519,
+    "since_right": 0.0494,
+    "since_dividend_declaration": 0.0416,
+    "nepse_ret_60": 0.0396,
+    "nepse_ret_20": 0.0394,
+    "traded_share_60": 0.0372,
+    "e2_bonus_20": 0.0356,
+    "profit_growth_yoy": 0.0356,
+    "sector_ret_20": 0.0344,
+    "turnover_20": 0.0334,
+    "close_sma200": 0.0331
+   },
+   "evaluation": {
+    "strategy": "ranker_lgbm_h20",
+    "version": "r1",
+    "calls": 15908,
+    "versions_in_family": 40,
+    "penalty_tests": 4160,
+    "cells_all": {
+     "5": {
+      "calls": 15848,
+      "graded": 15845,
+      "excluded_unresolved_steps": 3,
+      "excluded_share": 0.0002,
+      "exclusion_warning": false,
+      "distinct_dates": 1586,
+      "independent_windows": 265,
+      "min_windows": 40,
+      "win_rate": 0.2861,
+      "baseline": 0.3002,
+      "edge": -0.0141,
+      "edge_lower_90": -0.0218,
+      "edge_lower_penalized": -0.0381,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.00147,
+       "1.0%": -0.00352,
+       "1.5%": -0.0085
+      },
+      "excess_expectancy_1pct": -0.01008,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3974,
+        "edge": -0.0142
+       },
+       {
+        "fold": 2,
+        "calls": 3971,
+        "edge": -0.0118
+       },
+       {
+        "fold": 3,
+        "calls": 3980,
+        "edge": 0.001
+       },
+       {
+        "fold": 4,
+        "calls": 3920,
+        "edge": -0.0315
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "market": 0.4314,
+       "model": 0.2902,
+       "sector": 0.2559,
+       "liquidity": 0.0117,
+       "news": 0.0073,
+       "circuit": 0.0035
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "10": {
+      "calls": 15798,
+      "graded": 15791,
+      "excluded_unresolved_steps": 7,
+      "excluded_share": 0.0004,
+      "exclusion_warning": false,
+      "distinct_dates": 1581,
+      "independent_windows": 144,
+      "min_windows": 40,
+      "win_rate": 0.2956,
+      "baseline": 0.3054,
+      "edge": -0.0098,
+      "edge_lower_90": -0.0207,
+      "edge_lower_penalized": -0.0441,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.00744,
+       "1.0%": 0.00245,
+       "1.5%": -0.00254
+      },
+      "excess_expectancy_1pct": -0.01047,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3970,
+        "edge": -0.001
+       },
+       {
+        "fold": 2,
+        "calls": 3971,
+        "edge": -0.006
+       },
+       {
+        "fold": 3,
+        "calls": 3980,
+        "edge": 0.009
+       },
+       {
+        "fold": 4,
+        "calls": 3870,
+        "edge": -0.0421
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "market": 0.4393,
+       "sector": 0.277,
+       "model": 0.2551,
+       "liquidity": 0.0138,
+       "news": 0.0103,
+       "circuit": 0.0046
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "20": {
+      "calls": 15698,
+      "graded": 15681,
+      "excluded_unresolved_steps": 17,
+      "excluded_share": 0.0011,
+      "exclusion_warning": false,
+      "distinct_dates": 1571,
+      "independent_windows": 75,
+      "min_windows": 40,
+      "win_rate": 0.3156,
+      "baseline": 0.3173,
+      "edge": -0.0017,
+      "edge_lower_90": -0.0162,
+      "edge_lower_penalized": -0.0469,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.0181,
+       "1.0%": 0.01311,
+       "1.5%": 0.00813
+      },
+      "excess_expectancy_1pct": -0.01303,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3960,
+        "edge": 0.0127
+       },
+       {
+        "fold": 2,
+        "calls": 3971,
+        "edge": -0.0002
+       },
+       {
+        "fold": 3,
+        "calls": 3980,
+        "edge": 0.0174
+       },
+       {
+        "fold": 4,
+        "calls": 3770,
+        "edge": -0.0383
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "market": 0.4199,
+       "sector": 0.3041,
+       "model": 0.2374,
+       "liquidity": 0.021,
+       "news": 0.0094,
+       "circuit": 0.0082
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "40": {
+      "calls": 15498,
+      "graded": 15458,
+      "excluded_unresolved_steps": 40,
+      "excluded_share": 0.0026,
+      "exclusion_warning": false,
+      "distinct_dates": 1551,
+      "independent_windows": 38,
+      "min_windows": 30,
+      "win_rate": 0.2418,
+      "baseline": 0.2512,
+      "edge": -0.0095,
+      "edge_lower_90": -0.0251,
+      "edge_lower_penalized": -0.0591,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.04098,
+       "1.0%": 0.03599,
+       "1.5%": 0.03101
+      },
+      "excess_expectancy_1pct": -0.01557,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3939,
+        "edge": 0.0009
+       },
+       {
+        "fold": 2,
+        "calls": 3971,
+        "edge": -0.0065
+       },
+       {
+        "fold": 3,
+        "calls": 3978,
+        "edge": 0.0199
+       },
+       {
+        "fold": 4,
+        "calls": 3570,
+        "edge": -0.0571
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "market": 0.3566,
+       "model": 0.2971,
+       "sector": 0.289,
+       "liquidity": 0.0301,
+       "circuit": 0.0157,
+       "news": 0.0115
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "80": {
+      "calls": 15098,
+      "graded": 15009,
+      "excluded_unresolved_steps": 89,
+      "excluded_share": 0.0059,
+      "exclusion_warning": false,
+      "distinct_dates": 1511,
+      "independent_windows": 19,
+      "min_windows": 25,
+      "win_rate": 0.2495,
+      "baseline": 0.2633,
+      "edge": -0.0138,
+      "edge_lower_90": -0.0398,
+      "edge_lower_penalized": -0.0959,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.08571,
+       "1.0%": 0.08072,
+       "1.5%": 0.07574
+      },
+      "excess_expectancy_1pct": -0.02123,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3909,
+        "edge": -0.0088
+       },
+       {
+        "fold": 2,
+        "calls": 3971,
+        "edge": -0.0319
+       },
+       {
+        "fold": 3,
+        "calls": 3959,
+        "edge": 0.0481
+       },
+       {
+        "fold": 4,
+        "calls": 3170,
+        "edge": -0.0747
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "sector": 0.3364,
+       "model": 0.3018,
+       "market": 0.2794,
+       "liquidity": 0.0403,
+       "circuit": 0.0315,
+       "news": 0.0106
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "primary": {
+     "calls": 15698,
+     "graded": 15681,
+     "excluded_unresolved_steps": 17,
+     "excluded_share": 0.0011,
+     "exclusion_warning": false,
+     "distinct_dates": 1571,
+     "independent_windows": 75,
+     "min_windows": 40,
+     "win_rate": 0.3156,
+     "baseline": 0.3173,
+     "edge": -0.0017,
+     "edge_lower_90": -0.0162,
+     "edge_lower_penalized": -0.0469,
+     "penalty_tests": 4160,
+     "expectancy": {
+      "0.5%": 0.0181,
+      "1.0%": 0.01311,
+      "1.5%": 0.00813
+     },
+     "excess_expectancy_1pct": -0.01303,
+     "calibration": {
+      "claimed": false
+     },
+     "folds": [
+      {
+       "fold": 1,
+       "calls": 3960,
+       "edge": 0.0127
+      },
+      {
+       "fold": 2,
+       "calls": 3971,
+       "edge": -0.0002
+      },
+      {
+       "fold": 3,
+       "calls": 3980,
+       "edge": 0.0174
+      },
+      {
+       "fold": 4,
+       "calls": 3770,
+       "edge": -0.0383
+      }
+     ],
+     "folds_positive": 2,
+     "failure_causes": {
+      "market": 0.4199,
+      "sector": 0.3041,
+      "model": 0.2374,
+      "liquidity": 0.021,
+      "news": 0.0094,
+      "circuit": 0.0082
+     },
+     "implausible": false,
+     "gates": {
+      "edge_8_points": false,
+      "edge_lower_bound_above_zero": false,
+      "expectancy_all_costs": true,
+      "excess_expectancy_1pct": false,
+      "folds": false,
+      "sample": true,
+      "calibration": true,
+      "not_leaky": false
+     },
+     "verdict": "NO EVIDENCE"
+    }
+   },
+   "seconds": 107
+  },
+  "40": {
+   "folds": [
+    {
+     "fold": 1,
+     "test": [
+      "2018-02-18",
+      "2018-12-31"
+     ],
+     "train_rows": 56687,
+     "train_last_exit": "2018-02-07",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.0436,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.0792,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.0617,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.0815
+     },
+     "selected": {
+      "num_leaves": 63,
+      "min_child_samples": 1000
+     },
+     "test_ic": 0.0044,
+     "purge_ok": true
+    },
+    {
+     "fold": 2,
+     "test": [
+      "2019-01-01",
+      "2019-12-31"
+     ],
+     "train_rows": 83875,
+     "train_last_exit": "2018-12-24",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.0052,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.0017,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.0078,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": -0.0147
+     },
+     "selected": {
+      "num_leaves": 63,
+      "min_child_samples": 200
+     },
+     "test_ic": 0.2026,
+     "purge_ok": true
+    },
+    {
+     "fold": 3,
+     "test": [
+      "2020-01-01",
+      "2020-12-31"
+     ],
+     "train_rows": 116417,
+     "train_last_exit": "2019-12-24",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.3022,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.2833,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.2587,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.2482
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 200
+     },
+     "test_ic": -0.0244,
+     "purge_ok": true
+    },
+    {
+     "fold": 4,
+     "test": [
+      "2021-01-03",
+      "2021-12-29"
+     ],
+     "train_rows": 143607,
+     "train_last_exit": "2020-12-24",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": -0.0024,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": -0.0223,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": -0.0098,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": -0.0162
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 200
+     },
+     "test_ic": 0.1067,
+     "purge_ok": true
+    },
+    {
+     "fold": 5,
+     "test": [
+      "2022-01-02",
+      "2022-12-29"
+     ],
+     "train_rows": 185691,
+     "train_last_exit": "2021-12-22",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": -0.0398,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": -0.0273,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": -0.0602,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": -0.063
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 1000
+     },
+     "test_ic": 0.0856,
+     "purge_ok": true
+    },
+    {
+     "fold": 6,
+     "test": [
+      "2023-01-01",
+      "2023-12-28"
+     ],
+     "train_rows": 230272,
+     "train_last_exit": "2022-12-21",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.1394,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.1441,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.1364,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.1406
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 1000
+     },
+     "test_ic": 0.0945,
+     "purge_ok": true
+    },
+    {
+     "fold": 7,
+     "test": [
+      "2024-01-01",
+      "2025-01-19"
+     ],
+     "train_rows": 277662,
+     "train_last_exit": "2023-12-19",
+     "inner_ic": {
+      "{\"num_leaves\": 15, \"min_child_samples\": 200}": 0.1554,
+      "{\"num_leaves\": 15, \"min_child_samples\": 1000}": 0.1689,
+      "{\"num_leaves\": 63, \"min_child_samples\": 200}": 0.1355,
+      "{\"num_leaves\": 63, \"min_child_samples\": 1000}": 0.1265
+     },
+     "selected": {
+      "num_leaves": 15,
+      "min_child_samples": 1000
+     },
+     "test_ic": 0.0892,
+     "purge_ok": true
+    }
+   ],
+   "importance_top": {
+    "log_price": 0.0892,
+    "profit_positive": 0.0664,
+    "since_dividend_declaration": 0.0617,
+    "since_right": 0.0587,
+    "profit_growth_yoy": 0.0474,
+    "nepse_ret_60": 0.0416,
+    "vol_60": 0.0414,
+    "report_count": 0.0408,
+    "close_sma200": 0.0403,
+    "traded_share_60": 0.0387,
+    "turnover_20": 0.0355,
+    "since_bonus": 0.0286
+   },
+   "evaluation": {
+    "strategy": "ranker_lgbm_h40",
+    "version": "r1",
+    "calls": 15908,
+    "versions_in_family": 40,
+    "penalty_tests": 4160,
+    "cells_all": {
+     "5": {
+      "calls": 15848,
+      "graded": 15844,
+      "excluded_unresolved_steps": 4,
+      "excluded_share": 0.0003,
+      "exclusion_warning": false,
+      "distinct_dates": 1586,
+      "independent_windows": 265,
+      "min_windows": 40,
+      "win_rate": 0.2891,
+      "baseline": 0.3002,
+      "edge": -0.0112,
+      "edge_lower_90": -0.0192,
+      "edge_lower_penalized": -0.036,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.00121,
+       "1.0%": -0.00378,
+       "1.5%": -0.00877
+      },
+      "excess_expectancy_1pct": -0.01034,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3973,
+        "edge": -0.0088
+       },
+       {
+        "fold": 2,
+        "calls": 3971,
+        "edge": -0.0065
+       },
+       {
+        "fold": 3,
+        "calls": 3980,
+        "edge": 0.0083
+       },
+       {
+        "fold": 4,
+        "calls": 3920,
+        "edge": -0.0381
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "market": 0.4266,
+       "model": 0.2896,
+       "sector": 0.2611,
+       "liquidity": 0.0115,
+       "news": 0.0079,
+       "circuit": 0.0034
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "10": {
+      "calls": 15798,
+      "graded": 15789,
+      "excluded_unresolved_steps": 9,
+      "excluded_share": 0.0006,
+      "exclusion_warning": false,
+      "distinct_dates": 1581,
+      "independent_windows": 144,
+      "min_windows": 40,
+      "win_rate": 0.3053,
+      "baseline": 0.3055,
+      "edge": -0.0003,
+      "edge_lower_90": -0.0117,
+      "edge_lower_penalized": -0.0359,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.00747,
+       "1.0%": 0.00249,
+       "1.5%": -0.0025
+      },
+      "excess_expectancy_1pct": -0.01044,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3968,
+        "edge": 0.0045
+       },
+       {
+        "fold": 2,
+        "calls": 3971,
+        "edge": 0.0139
+       },
+       {
+        "fold": 3,
+        "calls": 3980,
+        "edge": 0.0251
+       },
+       {
+        "fold": 4,
+        "calls": 3870,
+        "edge": -0.0457
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "market": 0.4361,
+       "sector": 0.2773,
+       "model": 0.2552,
+       "liquidity": 0.0139,
+       "news": 0.0111,
+       "circuit": 0.0064
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": false,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "20": {
+      "calls": 15698,
+      "graded": 15672,
+      "excluded_unresolved_steps": 26,
+      "excluded_share": 0.0017,
+      "exclusion_warning": false,
+      "distinct_dates": 1571,
+      "independent_windows": 75,
+      "min_windows": 40,
+      "win_rate": 0.3307,
+      "baseline": 0.3174,
+      "edge": 0.0133,
+      "edge_lower_90": -0.0034,
+      "edge_lower_penalized": -0.0388,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.02011,
+       "1.0%": 0.01512,
+       "1.5%": 0.01013
+      },
+      "excess_expectancy_1pct": -0.01108,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3951,
+        "edge": 0.0231
+       },
+       {
+        "fold": 2,
+        "calls": 3971,
+        "edge": 0.0159
+       },
+       {
+        "fold": 3,
+        "calls": 3980,
+        "edge": 0.0505
+       },
+       {
+        "fold": 4,
+        "calls": 3770,
+        "edge": -0.0391
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "market": 0.4198,
+       "sector": 0.3046,
+       "model": 0.2327,
+       "liquidity": 0.0211,
+       "news": 0.0116,
+       "circuit": 0.0102
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "40": {
+      "calls": 15498,
+      "graded": 15452,
+      "excluded_unresolved_steps": 46,
+      "excluded_share": 0.003,
+      "exclusion_warning": false,
+      "distinct_dates": 1551,
+      "independent_windows": 38,
+      "min_windows": 30,
+      "win_rate": 0.2589,
+      "baseline": 0.2514,
+      "edge": 0.0075,
+      "edge_lower_90": -0.0125,
+      "edge_lower_penalized": -0.0551,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.04575,
+       "1.0%": 0.04076,
+       "1.5%": 0.03577
+      },
+      "excess_expectancy_1pct": -0.01099,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3932,
+        "edge": 0.0102
+       },
+       {
+        "fold": 2,
+        "calls": 3971,
+        "edge": 0.0207
+       },
+       {
+        "fold": 3,
+        "calls": 3979,
+        "edge": 0.0322
+       },
+       {
+        "fold": 4,
+        "calls": 3570,
+        "edge": -0.0378
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "market": 0.3578,
+       "model": 0.3134,
+       "sector": 0.2746,
+       "liquidity": 0.0221,
+       "circuit": 0.0187,
+       "news": 0.0134
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "80": {
+      "calls": 15098,
+      "graded": 15010,
+      "excluded_unresolved_steps": 88,
+      "excluded_share": 0.0058,
+      "exclusion_warning": false,
+      "distinct_dates": 1511,
+      "independent_windows": 19,
+      "min_windows": 25,
+      "win_rate": 0.2556,
+      "baseline": 0.2633,
+      "edge": -0.0077,
+      "edge_lower_90": -0.0393,
+      "edge_lower_penalized": -0.1063,
+      "penalty_tests": 4160,
+      "expectancy": {
+       "0.5%": 0.09655,
+       "1.0%": 0.09156,
+       "1.5%": 0.08657
+      },
+      "excess_expectancy_1pct": -0.01051,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 3893,
+        "edge": -0.0196
+       },
+       {
+        "fold": 2,
+        "calls": 3971,
+        "edge": -0.0148
+       },
+       {
+        "fold": 3,
+        "calls": 3976,
+        "edge": 0.0655
+       },
+       {
+        "fold": 4,
+        "calls": 3170,
+        "edge": -0.0759
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "sector": 0.3333,
+       "model": 0.3223,
+       "market": 0.2755,
+       "circuit": 0.0313,
+       "liquidity": 0.0286,
+       "news": 0.009
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": false
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "primary": {
+     "calls": 15498,
+     "graded": 15452,
+     "excluded_unresolved_steps": 46,
+     "excluded_share": 0.003,
+     "exclusion_warning": false,
+     "distinct_dates": 1551,
+     "independent_windows": 38,
+     "min_windows": 30,
+     "win_rate": 0.2589,
+     "baseline": 0.2514,
+     "edge": 0.0075,
+     "edge_lower_90": -0.0125,
+     "edge_lower_penalized": -0.0551,
+     "penalty_tests": 4160,
+     "expectancy": {
+      "0.5%": 0.04575,
+      "1.0%": 0.04076,
+      "1.5%": 0.03577
+     },
+     "excess_expectancy_1pct": -0.01099,
+     "calibration": {
+      "claimed": false
+     },
+     "folds": [
+      {
+       "fold": 1,
+       "calls": 3932,
+       "edge": 0.0102
+      },
+      {
+       "fold": 2,
+       "calls": 3971,
+       "edge": 0.0207
+      },
+      {
+       "fold": 3,
+       "calls": 3979,
+       "edge": 0.0322
+      },
+      {
+       "fold": 4,
+       "calls": 3570,
+       "edge": -0.0378
+      }
+     ],
+     "folds_positive": 3,
+     "failure_causes": {
+      "market": 0.3578,
+      "model": 0.3134,
+      "sector": 0.2746,
+      "liquidity": 0.0221,
+      "circuit": 0.0187,
+      "news": 0.0134
+     },
+     "implausible": false,
+     "gates": {
+      "edge_8_points": false,
+      "edge_lower_bound_above_zero": false,
+      "expectancy_all_costs": true,
+      "excess_expectancy_1pct": false,
+      "folds": true,
+      "sample": true,
+      "calibration": true,
+      "not_leaky": false
+     },
+     "verdict": "NO EVIDENCE"
+    }
+   },
+   "seconds": 95
+  }
+ },
+ "runtime_seconds": 437
+}
