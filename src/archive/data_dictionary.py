@@ -35,6 +35,7 @@ QUERIES = {
     "announcement_events agm": "SELECT extract(year FROM published_date)::int y, count(*) n FROM announcement_events WHERE event_type = 'agm' GROUP BY 1",
     "announcement_events right_share_issue": "SELECT extract(year FROM published_date)::int y, count(*) n FROM announcement_events WHERE event_type = 'right_share_issue' GROUP BY 1",
     "announcement_events book_close": "SELECT extract(year FROM published_date)::int y, count(*) n FROM announcement_events WHERE event_type = 'book_close' GROUP BY 1",
+    "dividend_proposals_pit (knowledge-dated)": "SELECT extract(year FROM knowledge_date)::int y, count(*) n FROM dividend_proposals_pit GROUP BY 1",
     "company_event_records agm (meeting-dated)": "SELECT extract(year FROM reference_date)::int y, count(*) n FROM company_event_records WHERE record_type = 'agm' GROUP BY 1",
     "company_event_records dividend": "SELECT extract(year FROM reference_date)::int y, count(*) n FROM company_event_records WHERE record_type = 'dividend' GROUP BY 1",
     "news_articles sharesansar": "SELECT extract(year FROM published_at AT TIME ZONE 'Asia/Kathmandu')::int y, count(*) n FROM news_articles GROUP BY 1",
@@ -85,6 +86,10 @@ def file_coverage() -> dict[str, dict[str, Any]]:
     return out
 
 
+def write_doc(coverage: dict[str, Any], intro: str, outro: str) -> None:
+    (ROOT / "docs" / "DATA_DICTIONARY.md").write_text(intro + render(coverage) + outro)
+
+
 def main() -> None:
     from src.database.holdout_guard import research_engine
 
@@ -101,7 +106,7 @@ if __name__ == "__main__":
 
 FIELDS = [
     ("technical", "close, high, low (equities)", "daily_prices.close (equity symbol-days)", "daily_prices (Sharesansar session pages, NEPSE API live)",
-     "known at the session close (15:00); used from the next session", "2014-2016 lows/highs before 2018-02-18 are stored values of unknown quality; 18 sector-less equities fixed to 9",
+     "known at the session close (15:00); used from the next session", "highs and lows before 2018-02-18 are stored values of unknown quality; 9 equities still have no sector",
      "tests/test_holdout_guard.py, tests/test_backtest_leakage_guard.py"),
     ("technical", "real open (equities)", "daily_prices.open real (equity symbol-days with open <> previous close)", "daily_prices",
      "session close", "before 2018-02-18 the stored open equals the previous close; protocol uses floorsheet-derived opens instead", "tests/test_floorsheet_ohlc.py"),
@@ -119,21 +124,21 @@ FIELDS = [
      "Sharesansar announcements (Merolagani index for dates)", "earliest item-verified source date, next session (docs/POINT_IN_TIME.md)",
      "headline rounded to 2-3 significant digits; group vs standalone basis varies", "tests/test_knowledge_time.py, src/ranker/leak_audit.py"),
     ("fundamentals", "report images for OCR", "archive_documents report images", "Sharesansar announcement attachments",
-     "announcement date (image upload timestamp kept)", "collection running; images only, no text PDFs", "tests/test_archive_holdout.py"),
+     "announcement date (image upload timestamp kept)", "collection running newest first; 2014-2022 only a sample so far; images only", "tests/test_archive_holdout.py"),
     ("fundamentals", "EPS, net worth, reserves, NPL, CAR from reports", "report_field_values accepted", "OCR of report images",
-     "announcement date of the report", "not extracted yet; engine accuracy too low (docs/OCR_COMPARISON.md)", "tests/test_archive_holdout.py"),
+     "announcement date of the report", "no field passes the 90% accuracy gate; all values flagged (docs/OCR_COMPARISON.md)", "tests/test_archive_holdout.py"),
     ("corporate_events", "dividend declarations (Sharesansar table)", "dividend_declarations (announcement-dated)", "Sharesansar dividend table",
      "announcement_date; 8.3% are after their own book close (late, not early)", "starts 2018", "tests/test_holdout_guard.py"),
-    ("corporate_events", "dividend proposals from AGM records", "company_event_records agm (meeting-dated)", "Sharesansar AGM table + AGM announcements",
-     "earlier of AGM announcement and book close (dividend_proposals_pit)", "collection running", "tests/test_archive_holdout.py"),
+    ("corporate_events", "dividend proposals from AGM records", "dividend_proposals_pit (knowledge-dated)", "Sharesansar AGM table + AGM announcements",
+     "earlier of AGM announcement and book close (dividend_proposals_pit)", "only AGMs whose agenda states percentages", "tests/test_archive_holdout.py"),
     ("corporate_events", "AGM announcements", "announcement_events agm", "Sharesansar company announcements", "announcement date",
-     "collection running", "tests/test_archive_holdout.py"),
+     "9 symbols have no Sharesansar page", "tests/test_archive_holdout.py"),
     ("corporate_events", "right share announcements", "announcement_events right_share_issue", "Sharesansar company announcements", "announcement date",
      "ratio parsed only when in the title", "tests/test_archive_holdout.py"),
     ("corporate_events", "book close / ex dates", "corporate_actions (ex/book-close dated)", "corporate_actions", "action date is an event date, not a knowledge date",
      "announcement timing comes from announcements", "tests/test_holdout_guard.py"),
     ("news", "Sharesansar news archive", "news_articles sharesansar", "Sharesansar news (category latest)", "published minute (Nepal time), next session",
-     "collection running backward from 2025-09-30", "tests/test_archive_holdout.py"),
+     "collection running backward from 2025-09-30; only 2025 so far", "tests/test_archive_holdout.py"),
     ("news", "symbol mentions", "news_articles with a symbol mention", "company names and tickers", "article publication time",
      "name aliases only for distinctive names", "tests/test_archive_parsers.py"),
     ("news", "live text capture", "text_items (live news capture)", "live collectors since 2026", "first_seen_at", "all rows are holdout-era", "tests/test_holdout_guard.py"),
@@ -142,7 +147,7 @@ FIELDS = [
     ("market_state", "NRB policy rates, CRR, SLR, CD/CCD, margin rules", "policy_events NRB", "NRB monetary policy documents",
      "announcement date (pre-2020 dates from secondary sources, unconfirmed)", "2017/18 and 2019/20 announcement dates missing", "tests/test_archive_holdout.py"),
     ("historical_sentiment", "NRB macro (T-bill, rates, margin loan growth)", "sentiment NRB macro (observations)", "NRB Current Macroeconomic and Financial Situation",
-     "NRB listing upload date", "no demat-account counts in these reports", "tests/test_archive_parsers.py"),
+     "NRB listing upload date", "no demat-account counts; 2024-2025 reports use new wording and gave no values; margin lending only as growth", "tests/test_archive_parsers.py"),
     ("historical_sentiment", "IPO/right oversubscription", "sentiment issue_oversubscription (observations)", "Sharesansar news headlines",
      "headline publication time", "grows with the news archive", "tests/test_archive_parsers.py"),
 ]
