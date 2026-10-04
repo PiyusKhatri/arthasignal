@@ -313,3 +313,21 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - **Broker flow:** H1-H5 all still fail with near-identical excess returns (−0.54% to −1.30%). The corrected run excludes 103 more windows for unresolved steps.
 - **Matrix:** regraded as `accuracy-v2-pi2` (160,478 new grades). Window exclusions fell by about a quarter (623 → 459 at 5 sessions, 16,395 → 11,796 at 240). Still 0 PASS, 38 NO EVIDENCE and 66 INSUFFICIENT SAMPLE, with no verdict changes and a largest edge change of 1.2 points.
 - **No earlier conclusion changes.**
+
+## Phase Q6 - Earnings-information hypotheses pre-registered
+
+- `docs/INFO_PREREG.md` and `src/scorecard/info_spec.py` were declared at 2026-10-04 09:41:54 Nepal time, before any outcome was computed.
+- Six long hypotheses on publication-dated data:
+  - I1 and I2: YoY net-profit growth in the top quartile, at 20 and 40 sessions;
+  - I3: profit turnaround at 20;
+  - I4: non-decreasing dividend declaration at 10;
+  - I5: bonus announcement to book close at 10;
+  - I6: banks' YoY top quartile at 20.
+- Knowledge session is the first session after publication, with entry at the next open. The window is 2014-06-01 to 2025-01-19, and the gate is protocol v2 with *K* = 624.
+- Registered in `backtest_variant_trials`, family `info_prereg_v1`, ids 82-87. Fingerprints:
+  - I1: 777db8d3590c73e3…
+  - I2: 03d39b5e580ae802…
+  - I3: 8e9caa7cf07d9975…
+  - I4: dae73235b4d4fa87…
+  - I5: ffe7d5ebbc9f3496…
+  - I6: 18c63f65e96499ec…
