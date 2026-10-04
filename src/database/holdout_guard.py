@@ -38,6 +38,8 @@ PROTECTED_COLUMNS: dict[str, str] = {
     "quarterly_report_figures": "published_date",
     "dividend_declarations": "announcement_date",
     "quarterly_figure_captures": "captured_at",
+    "league_leaderboard": "as_of",
+    "league_runs": "as_of",
 }
 
 _allowed: ContextVar[str | None] = ContextVar("holdout_allowed", default=None)
