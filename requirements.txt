@@ -21,3 +21,5 @@ xgboost==3.4.0
 pyarrow
 duckdb==1.5.6
 telethon==1.45.0
+lightgbm==4.7.0
+scikit-learn==1.9.1
