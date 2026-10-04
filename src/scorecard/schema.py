@@ -150,7 +150,7 @@ CREATE TRIGGER scorecard_grades_no_truncate BEFORE TRUNCATE ON {schema}.scorecar
 """
 
 
-def apply_schema(engine: Engine, schema: str = "public") -> None:
+def apply_schema(engine: Engine, schema: str = "public", calendar: bool = True) -> None:
     statement = DDL.format(schema=schema)
     raw = engine.raw_connection()
     try:
@@ -159,7 +159,8 @@ def apply_schema(engine: Engine, schema: str = "public") -> None:
         raw.commit()
     finally:
         raw.close()
-    sync_calendar(engine, schema)
+    if calendar:
+        sync_calendar(engine, schema)
 
 
 def sync_calendar(engine: Engine, schema: str = "public", path: str | None = None) -> int:

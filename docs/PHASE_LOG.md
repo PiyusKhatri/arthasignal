@@ -562,3 +562,23 @@ The backfill uses the Sharesansar daily page because it is the only source that 
   - **The full suite against that cluster, as the non-superuser app role with the research login only through `.pgpass`: 561 passed, 0 skipped.** A test user row created by the auth integration test appeared in the scram cluster, confirming the suite ran there.
   - The scratch cluster and its passwords were deleted afterwards.
 - `docs/PROD_DEPLOY.md`: the research-login step now explains the no-password URL, the `.pgpass` host-matching and permission rules, the optional `RESEARCH_DATABASE_URL`, and the two error messages to expect.
+
+## Sector data-quality fix
+
+- **111 non-equity rows carried an equity sector:** 34 mutual funds and 77 debentures (for example CSY, H8020, SIGS2, LSH12 and NICFC as "Commercial Banks"). They have 33,969 development-window price rows. They were relabelled "Mutual Fund" and "Debenture" (`docs/sector_fix_companies.json`), and the company upsert now normalizes them so the API cannot bring the sponsor sector back.
+- **Inventory (`docs/SECTOR_FIX.md` §2):**
+  - all research and scorecard sector computations (grading sector median, v2 failure causes, event sector benchmarks, ranker sector features, league sector cap, the matrix) read the Equity-only panel (`event_data.py:28`), so funds never entered them;
+  - unfiltered app paths: `market_pulse._load_floorsheet_by_sector`, and the per-symbol sector regime, index and baseline in `build_quant_research`, `quant_cross_sectional` and `stock_intelligence` (reachable for any symbol through `/intelligence/{symbol}`);
+  - `api/stocks.py` was already Equity-only (defensive change).
+- **Impact (floorsheet Parquet, 56 sessions to 2025-01-19):** Commercial Banks broker "coverage" averaged 311% (max 384%) instead of 100%, so the reliability flag was always on. The top broker's share was overstated by 1.65 points. Funds and debentures were up to 30.7% of the sector's floorsheet turnover on a day.
+- **Fixes:** an Equity filter on the floorsheet query, `equity_sector()` for per-symbol context, and the loud check `nonequity_equity_sector` (raises in `run_all_daily`; `python -m src.pipeline.data_quality --sectors` exits 1 and is a new production chain step). Verified: exit 1 before the data fix, exit 0 after.
+- **Found on the way:** the research replay tried to write the v2.1 calendar rules through the research role, and the holdout guard blocked it. Research callers now skip the calendar sync.
+- **Reruns on the corrected universe** (Equity after the promoter-share reclassification; funds were never in it):
+  - event study: E2 and E4 still pass, E1 still fails at −0.03%;
+  - broker flow: H1-H5 still fail (labelled rows 301,272 → 298,260);
+  - earnings: I1-I6 unchanged in verdict, edges moving by 0.02-0.48 points;
+  - v0 matrix as v0.1 replay: still 0 PASS / 38 / 66, no verdict changes, largest edge change 0.9 points.
+
+  `new_listing` at 40 is +8.89 with a plain bound of +2.06 and a penalized bound of −7.01 at *K* = 4,264. **No earlier conclusion changes.**
+- Still open: 51 Equity symbols without a sector are pooled as "unknown" in the scorecard's sector median.
+- Tests: 6 added (`tests/test_sector_universe.py`).

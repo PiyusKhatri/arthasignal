@@ -1,0 +1,6753 @@
+{
+ "protocol": "accuracy-v2.1",
+ "grade_version": "accuracy-v2",
+ "generated_on": "2026-10-04",
+ "sessions": 2435,
+ "last_session": "2025-01-19",
+ "excluded_invalid_symbols": [
+  "",
+  "NICAD 85/8",
+  "NIFRAUR85/"
+ ],
+ "unresolved_step_sessions": 117,
+ "strategy_versions_in_family": 41,
+ "supportable_horizons": {
+  "5": {
+   "independent_windows": 405,
+   "minimum": 40,
+   "can_ever_support_a_claim": true
+  },
+  "10": {
+   "independent_windows": 221,
+   "minimum": 40,
+   "can_ever_support_a_claim": true
+  },
+  "20": {
+   "independent_windows": 115,
+   "minimum": 40,
+   "can_ever_support_a_claim": true
+  },
+  "40": {
+   "independent_windows": 59,
+   "minimum": 30,
+   "can_ever_support_a_claim": true
+  },
+  "80": {
+   "independent_windows": 30,
+   "minimum": 25,
+   "can_ever_support_a_claim": true
+  },
+  "120": {
+   "independent_windows": 20,
+   "minimum": 25,
+   "can_ever_support_a_claim": false
+  },
+  "160": {
+   "independent_windows": 15,
+   "minimum": 25,
+   "can_ever_support_a_claim": false
+  },
+  "240": {
+   "independent_windows": 10,
+   "minimum": 25,
+   "can_ever_support_a_claim": false
+  }
+ },
+ "universe": {
+  "5": {
+   "windows": 403753,
+   "excluded_unresolved_steps": 416,
+   "excluded_share": 0.001,
+   "mean_baseline_share": 0.2936
+  },
+  "10": {
+   "windows": 402539,
+   "excluded_unresolved_steps": 723,
+   "excluded_share": 0.0018,
+   "mean_baseline_share": 0.2989
+  },
+  "20": {
+   "windows": 400107,
+   "excluded_unresolved_steps": 1266,
+   "excluded_share": 0.0032,
+   "mean_baseline_share": 0.3026
+  },
+  "40": {
+   "windows": 395230,
+   "excluded_unresolved_steps": 2355,
+   "excluded_share": 0.006,
+   "mean_baseline_share": 0.2344
+  },
+  "80": {
+   "windows": 385473,
+   "excluded_unresolved_steps": 4362,
+   "excluded_share": 0.0113,
+   "mean_baseline_share": 0.2439
+  },
+  "120": {
+   "windows": 375752,
+   "excluded_unresolved_steps": 6183,
+   "excluded_share": 0.0165,
+   "mean_baseline_share": 0.2452
+  },
+  "160": {
+   "windows": 365900,
+   "excluded_unresolved_steps": 7750,
+   "excluded_share": 0.0212,
+   "mean_baseline_share": 0.3614
+  },
+  "240": {
+   "windows": 346229,
+   "excluded_unresolved_steps": 10651,
+   "excluded_share": 0.0308,
+   "mean_baseline_share": 0.3546
+  }
+ },
+ "strategies": {
+  "model_v0": {
+   "version": "v0.1",
+   "calls": 20865,
+   "grades_inserted_now": 159871,
+   "audit": {
+    "strategy": "model_v0",
+    "version": "v0.1",
+    "dates_checked": 40,
+    "mismatched_dates": 0,
+    "first_mismatches": [],
+    "leaky": false
+   },
+   "matrix": {
+    "all": {
+     "5": {
+      "calls": 20805,
+      "graded": 20750,
+      "excluded_unresolved_steps": 55,
+      "excluded_share": 0.0026,
+      "exclusion_warning": false,
+      "distinct_dates": 1616,
+      "independent_windows": 280,
+      "min_windows": 40,
+      "win_rate": 0.3287,
+      "baseline": 0.3058,
+      "edge": 0.0229,
+      "edge_lower_90": 0.0099,
+      "edge_lower_penalized": -0.0092,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.01726,
+       "1.0%": 0.01253,
+       "1.5%": 0.00779
+      },
+      "excess_expectancy_1pct": 0.00401,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 6672,
+        "edge": -0.0114
+       },
+       {
+        "fold": 2,
+        "calls": 3311,
+        "edge": 0.0375
+       },
+       {
+        "fold": 3,
+        "calls": 5800,
+        "edge": 0.0342
+       },
+       {
+        "fold": 4,
+        "calls": 4967,
+        "edge": 0.046
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.3835,
+       "market": 0.2409,
+       "sector": 0.1765,
+       "liquidity": 0.1515,
+       "circuit": 0.0253,
+       "news": 0.0224
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "10": {
+      "calls": 20755,
+      "graded": 20674,
+      "excluded_unresolved_steps": 81,
+      "excluded_share": 0.0039,
+      "exclusion_warning": false,
+      "distinct_dates": 1611,
+      "independent_windows": 158,
+      "min_windows": 40,
+      "win_rate": 0.3334,
+      "baseline": 0.311,
+      "edge": 0.0224,
+      "edge_lower_90": 0.01,
+      "edge_lower_penalized": -0.0175,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.03325,
+       "1.0%": 0.02852,
+       "1.5%": 0.02379
+      },
+      "excess_expectancy_1pct": 0.01358,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 6660,
+        "edge": -0.0142
+       },
+       {
+        "fold": 2,
+        "calls": 3305,
+        "edge": 0.0355
+       },
+       {
+        "fold": 3,
+        "calls": 5792,
+        "edge": 0.0425
+       },
+       {
+        "fold": 4,
+        "calls": 4917,
+        "edge": 0.0395
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.3564,
+       "market": 0.2407,
+       "sector": 0.1869,
+       "liquidity": 0.1638,
+       "circuit": 0.0335,
+       "news": 0.0186
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "20": {
+      "calls": 20655,
+      "graded": 20521,
+      "excluded_unresolved_steps": 134,
+      "excluded_share": 0.0065,
+      "exclusion_warning": false,
+      "distinct_dates": 1601,
+      "independent_windows": 84,
+      "min_windows": 40,
+      "win_rate": 0.3289,
+      "baseline": 0.3081,
+      "edge": 0.0208,
+      "edge_lower_90": 0.0093,
+      "edge_lower_penalized": -0.0249,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.05638,
+       "1.0%": 0.05165,
+       "1.5%": 0.04692
+      },
+      "excess_expectancy_1pct": 0.02616,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 6636,
+        "edge": -0.0047
+       },
+       {
+        "fold": 2,
+        "calls": 3303,
+        "edge": 0.0455
+       },
+       {
+        "fold": 3,
+        "calls": 5765,
+        "edge": 0.0343
+       },
+       {
+        "fold": 4,
+        "calls": 4817,
+        "edge": 0.0229
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.3139,
+       "market": 0.2559,
+       "sector": 0.199,
+       "liquidity": 0.1789,
+       "circuit": 0.0392,
+       "news": 0.0131
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "40": {
+      "calls": 20455,
+      "graded": 20216,
+      "excluded_unresolved_steps": 239,
+      "excluded_share": 0.0117,
+      "exclusion_warning": false,
+      "distinct_dates": 1581,
+      "independent_windows": 48,
+      "min_windows": 30,
+      "win_rate": 0.2546,
+      "baseline": 0.2347,
+      "edge": 0.0199,
+      "edge_lower_90": 0.004,
+      "edge_lower_penalized": -0.0271,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.08789,
+       "1.0%": 0.08316,
+       "1.5%": 0.07844
+      },
+      "excess_expectancy_1pct": 0.03656,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 6602,
+        "edge": 0.014
+       },
+       {
+        "fold": 2,
+        "calls": 3277,
+        "edge": 0.0472
+       },
+       {
+        "fold": 3,
+        "calls": 5720,
+        "edge": 0.0088
+       },
+       {
+        "fold": 4,
+        "calls": 4617,
+        "edge": 0.0225
+       }
+      ],
+      "folds_positive": 4,
+      "failure_causes": {
+       "model": 0.3201,
+       "market": 0.2571,
+       "liquidity": 0.1815,
+       "sector": 0.1697,
+       "circuit": 0.0589,
+       "news": 0.0128
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "80": {
+      "calls": 20055,
+      "graded": 19618,
+      "excluded_unresolved_steps": 437,
+      "excluded_share": 0.0218,
+      "exclusion_warning": false,
+      "distinct_dates": 1541,
+      "independent_windows": 25,
+      "min_windows": 25,
+      "win_rate": 0.2584,
+      "baseline": 0.2495,
+      "edge": 0.0089,
+      "edge_lower_90": -0.0136,
+      "edge_lower_penalized": -0.0506,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.15411,
+       "1.0%": 0.14939,
+       "1.5%": 0.14467
+      },
+      "excess_expectancy_1pct": 0.03304,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 6473,
+        "edge": 0.0128
+       },
+       {
+        "fold": 2,
+        "calls": 3255,
+        "edge": 0.0611
+       },
+       {
+        "fold": 3,
+        "calls": 5674,
+        "edge": -0.0111
+       },
+       {
+        "fold": 4,
+        "calls": 4216,
+        "edge": -0.0104
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.3062,
+       "market": 0.2188,
+       "liquidity": 0.2062,
+       "sector": 0.1918,
+       "circuit": 0.0693,
+       "news": 0.0077
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "120": {
+      "calls": 19655,
+      "graded": 19080,
+      "excluded_unresolved_steps": 575,
+      "excluded_share": 0.0293,
+      "exclusion_warning": false,
+      "distinct_dates": 1501,
+      "independent_windows": 17,
+      "min_windows": 25,
+      "win_rate": 0.2681,
+      "baseline": 0.256,
+      "edge": 0.0122,
+      "edge_lower_90": -0.0078,
+      "edge_lower_penalized": -0.0411,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.2434,
+       "1.0%": 0.23869,
+       "1.5%": 0.23398
+      },
+      "excess_expectancy_1pct": 0.04104,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 6374,
+        "edge": 0.0046
+       },
+       {
+        "fold": 2,
+        "calls": 3235,
+        "edge": 0.0524
+       },
+       {
+        "fold": 3,
+        "calls": 5664,
+        "edge": -0.0001
+       },
+       {
+        "fold": 4,
+        "calls": 3807,
+        "edge": 0.0089
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.2818,
+       "liquidity": 0.2349,
+       "sector": 0.2211,
+       "market": 0.18,
+       "circuit": 0.0768,
+       "news": 0.0054
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "160": {
+      "calls": 19269,
+      "graded": 18555,
+      "excluded_unresolved_steps": 714,
+      "excluded_share": 0.0371,
+      "exclusion_warning": false,
+      "distinct_dates": 1465,
+      "independent_windows": 13,
+      "min_windows": 25,
+      "win_rate": 0.33,
+      "baseline": 0.3424,
+      "edge": -0.0124,
+      "edge_lower_90": -0.0219,
+      "edge_lower_penalized": -0.0532,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.29468,
+       "1.0%": 0.28998,
+       "1.5%": 0.28527
+      },
+      "excess_expectancy_1pct": 0.03729,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 6299,
+        "edge": -0.0191
+       },
+       {
+        "fold": 2,
+        "calls": 3191,
+        "edge": 0.0003
+       },
+       {
+        "fold": 3,
+        "calls": 5648,
+        "edge": -0.0024
+       },
+       {
+        "fold": 4,
+        "calls": 3417,
+        "edge": -0.0285
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "liquidity": 0.2919,
+       "sector": 0.2556,
+       "model": 0.236,
+       "market": 0.1538,
+       "circuit": 0.0599,
+       "news": 0.0028
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "240": {
+      "calls": 18222,
+      "graded": 17311,
+      "excluded_unresolved_steps": 911,
+      "excluded_share": 0.05,
+      "exclusion_warning": false,
+      "distinct_dates": 1386,
+      "independent_windows": 10,
+      "min_windows": 25,
+      "win_rate": 0.336,
+      "baseline": 0.34,
+      "edge": -0.004,
+      "edge_lower_90": -0.0485,
+      "edge_lower_penalized": -0.1368,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.42826,
+       "1.0%": 0.42358,
+       "1.5%": 0.4189
+      },
+      "excess_expectancy_1pct": 0.05922,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 6172,
+        "edge": -0.0089
+       },
+       {
+        "fold": 2,
+        "calls": 3133,
+        "edge": -0.0577
+       },
+       {
+        "fold": 3,
+        "calls": 5647,
+        "edge": 0.0067
+       },
+       {
+        "fold": 4,
+        "calls": 2359,
+        "edge": 0.0543
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "liquidity": 0.3339,
+       "sector": 0.2461,
+       "model": 0.1739,
+       "market": 0.1739,
+       "circuit": 0.0705,
+       "news": 0.0017
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "market_bull": {
+     "5": {
+      "calls": 7794,
+      "graded": 7775,
+      "excluded_unresolved_steps": 19,
+      "excluded_share": 0.0024,
+      "exclusion_warning": false,
+      "distinct_dates": 604,
+      "independent_windows": 129,
+      "min_windows": 40,
+      "win_rate": 0.3105,
+      "baseline": 0.2787,
+      "edge": 0.0318,
+      "edge_lower_90": 0.0149,
+      "edge_lower_penalized": -0.0162,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.00941,
+       "1.0%": 0.00463,
+       "1.5%": -0.00014
+      },
+      "excess_expectancy_1pct": 0.0019,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1952,
+        "edge": 0.009
+       },
+       {
+        "fold": 2,
+        "calls": 1960,
+        "edge": 0.0555
+       },
+       {
+        "fold": 3,
+        "calls": 1474,
+        "edge": 0.0261
+       },
+       {
+        "fold": 4,
+        "calls": 2389,
+        "edge": 0.0345
+       }
+      ],
+      "folds_positive": 4,
+      "failure_causes": {
+       "model": 0.3807,
+       "market": 0.2861,
+       "sector": 0.1544,
+       "liquidity": 0.127,
+       "circuit": 0.0276,
+       "news": 0.0241
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "10": {
+      "calls": 7744,
+      "graded": 7717,
+      "excluded_unresolved_steps": 27,
+      "excluded_share": 0.0035,
+      "exclusion_warning": false,
+      "distinct_dates": 599,
+      "independent_windows": 82,
+      "min_windows": 40,
+      "win_rate": 0.3119,
+      "baseline": 0.2806,
+      "edge": 0.0313,
+      "edge_lower_90": 0.0031,
+      "edge_lower_penalized": -0.0319,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.019,
+       "1.0%": 0.01422,
+       "1.5%": 0.00945
+      },
+      "excess_expectancy_1pct": 0.00892,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1948,
+        "edge": 0.012
+       },
+       {
+        "fold": 2,
+        "calls": 1959,
+        "edge": 0.0459
+       },
+       {
+        "fold": 3,
+        "calls": 1471,
+        "edge": 0.0235
+       },
+       {
+        "fold": 4,
+        "calls": 2339,
+        "edge": 0.04
+       }
+      ],
+      "folds_positive": 4,
+      "failure_causes": {
+       "model": 0.3416,
+       "market": 0.3043,
+       "sector": 0.1591,
+       "liquidity": 0.1379,
+       "circuit": 0.0399,
+       "news": 0.0171
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "20": {
+      "calls": 7644,
+      "graded": 7613,
+      "excluded_unresolved_steps": 31,
+      "excluded_share": 0.0041,
+      "exclusion_warning": false,
+      "distinct_dates": 589,
+      "independent_windows": 45,
+      "min_windows": 40,
+      "win_rate": 0.3084,
+      "baseline": 0.2826,
+      "edge": 0.0258,
+      "edge_lower_90": 0.0008,
+      "edge_lower_penalized": -0.0407,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.03044,
+       "1.0%": 0.02567,
+       "1.5%": 0.0209
+      },
+      "excess_expectancy_1pct": 0.01316,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1945,
+        "edge": 0.0312
+       },
+       {
+        "fold": 2,
+        "calls": 1959,
+        "edge": 0.049
+       },
+       {
+        "fold": 3,
+        "calls": 1470,
+        "edge": 0.0264
+       },
+       {
+        "fold": 4,
+        "calls": 2239,
+        "edge": 0.0004
+       }
+      ],
+      "folds_positive": 4,
+      "failure_causes": {
+       "market": 0.321,
+       "model": 0.2976,
+       "sector": 0.181,
+       "liquidity": 0.1478,
+       "circuit": 0.0412,
+       "news": 0.0114
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "40": {
+      "calls": 7454,
+      "graded": 7404,
+      "excluded_unresolved_steps": 50,
+      "excluded_share": 0.0067,
+      "exclusion_warning": false,
+      "distinct_dates": 570,
+      "independent_windows": 31,
+      "min_windows": 30,
+      "win_rate": 0.2466,
+      "baseline": 0.2295,
+      "edge": 0.0172,
+      "edge_lower_90": -0.018,
+      "edge_lower_penalized": -0.0626,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.06713,
+       "1.0%": 0.06237,
+       "1.5%": 0.0576
+      },
+      "excess_expectancy_1pct": 0.01689,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1937,
+        "edge": 0.039
+       },
+       {
+        "fold": 2,
+        "calls": 1958,
+        "edge": 0.0515
+       },
+       {
+        "fold": 3,
+        "calls": 1460,
+        "edge": 0.0104
+       },
+       {
+        "fold": 4,
+        "calls": 2049,
+        "edge": -0.0315
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.3261,
+       "market": 0.2867,
+       "sector": 0.1685,
+       "liquidity": 0.1554,
+       "circuit": 0.0536,
+       "news": 0.0097
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "80": {
+      "calls": 7194,
+      "graded": 7113,
+      "excluded_unresolved_steps": 81,
+      "excluded_share": 0.0113,
+      "exclusion_warning": false,
+      "distinct_dates": 544,
+      "independent_windows": 17,
+      "min_windows": 25,
+      "win_rate": 0.2734,
+      "baseline": 0.2546,
+      "edge": 0.0189,
+      "edge_lower_90": -0.0196,
+      "edge_lower_penalized": -0.0816,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.14702,
+       "1.0%": 0.14227,
+       "1.5%": 0.13751
+      },
+      "excess_expectancy_1pct": 0.01928,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1927,
+        "edge": 0.058
+       },
+       {
+        "fold": 2,
+        "calls": 1947,
+        "edge": 0.0565
+       },
+       {
+        "fold": 3,
+        "calls": 1450,
+        "edge": -0.0289
+       },
+       {
+        "fold": 4,
+        "calls": 1789,
+        "edge": -0.0254
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.3117,
+       "market": 0.2574,
+       "liquidity": 0.1821,
+       "sector": 0.1784,
+       "circuit": 0.0617,
+       "news": 0.0087
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "120": {
+      "calls": 7104,
+      "graded": 6984,
+      "excluded_unresolved_steps": 120,
+      "excluded_share": 0.0169,
+      "exclusion_warning": false,
+      "distinct_dates": 535,
+      "independent_windows": 15,
+      "min_windows": 25,
+      "win_rate": 0.2947,
+      "baseline": 0.2694,
+      "edge": 0.0253,
+      "edge_lower_90": -0.01,
+      "edge_lower_penalized": -0.0724,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.30642,
+       "1.0%": 0.30167,
+       "1.5%": 0.29692
+      },
+      "excess_expectancy_1pct": 0.04825,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1898,
+        "edge": 0.0409
+       },
+       {
+        "fold": 2,
+        "calls": 1941,
+        "edge": 0.0605
+       },
+       {
+        "fold": 3,
+        "calls": 1446,
+        "edge": 0.0134
+       },
+       {
+        "fold": 4,
+        "calls": 1699,
+        "edge": -0.0224
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.3015,
+       "sector": 0.2201,
+       "market": 0.2109,
+       "liquidity": 0.1991,
+       "circuit": 0.0601,
+       "news": 0.0083
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "160": {
+      "calls": 6740,
+      "graded": 6563,
+      "excluded_unresolved_steps": 177,
+      "excluded_share": 0.0263,
+      "exclusion_warning": false,
+      "distinct_dates": 501,
+      "independent_windows": 10,
+      "min_windows": 25,
+      "win_rate": 0.3562,
+      "baseline": 0.3509,
+      "edge": 0.0054,
+      "edge_lower_90": -0.0398,
+      "edge_lower_penalized": -0.0954,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.38405,
+       "1.0%": 0.37931,
+       "1.5%": 0.37458
+      },
+      "excess_expectancy_1pct": 0.04409,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1874,
+        "edge": 0.0428
+       },
+       {
+        "fold": 2,
+        "calls": 1916,
+        "edge": 0.0091
+       },
+       {
+        "fold": 3,
+        "calls": 1438,
+        "edge": 0.0088
+       },
+       {
+        "fold": 4,
+        "calls": 1335,
+        "edge": -0.0561
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "sector": 0.2663,
+       "model": 0.2596,
+       "liquidity": 0.2561,
+       "market": 0.1725,
+       "circuit": 0.0419,
+       "news": 0.0036
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "240": {
+      "calls": 6094,
+      "graded": 5819,
+      "excluded_unresolved_steps": 275,
+      "excluded_share": 0.0451,
+      "exclusion_warning": false,
+      "distinct_dates": 454,
+      "independent_windows": 9,
+      "min_windows": 25,
+      "win_rate": 0.3233,
+      "baseline": 0.3303,
+      "edge": -0.0071,
+      "edge_lower_90": -0.0972,
+      "edge_lower_penalized": -0.1849,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.53214,
+       "1.0%": 0.52743,
+       "1.5%": 0.52273
+      },
+      "excess_expectancy_1pct": 0.0302,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1809,
+        "edge": 0.0233
+       },
+       {
+        "fold": 2,
+        "calls": 1883,
+        "edge": -0.0619
+       },
+       {
+        "fold": 3,
+        "calls": 1438,
+        "edge": 0.0123
+       },
+       {
+        "fold": 4,
+        "calls": 689,
+        "edge": 0.0227
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "liquidity": 0.2895,
+       "sector": 0.2712,
+       "market": 0.1943,
+       "model": 0.1823,
+       "circuit": 0.0615,
+       "news": 0.0013
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "market_sideways": {
+     "5": {
+      "calls": 5228,
+      "graded": 5216,
+      "excluded_unresolved_steps": 12,
+      "excluded_share": 0.0023,
+      "exclusion_warning": false,
+      "distinct_dates": 394,
+      "independent_windows": 92,
+      "min_windows": 40,
+      "win_rate": 0.3209,
+      "baseline": 0.3033,
+      "edge": 0.0176,
+      "edge_lower_90": -0.0074,
+      "edge_lower_penalized": -0.0429,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.01936,
+       "1.0%": 0.01458,
+       "1.5%": 0.0098
+      },
+      "excess_expectancy_1pct": 0.00644,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 621,
+        "edge": -0.0927
+       },
+       {
+        "fold": 2,
+        "calls": 1351,
+        "edge": 0.0114
+       },
+       {
+        "fold": 3,
+        "calls": 1126,
+        "edge": -0.0
+       },
+       {
+        "fold": 4,
+        "calls": 2118,
+        "edge": 0.0633
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.3922,
+       "market": 0.2676,
+       "sector": 0.1765,
+       "liquidity": 0.1146,
+       "news": 0.0291,
+       "circuit": 0.02
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "10": {
+      "calls": 5228,
+      "graded": 5211,
+      "excluded_unresolved_steps": 17,
+      "excluded_share": 0.0033,
+      "exclusion_warning": false,
+      "distinct_dates": 394,
+      "independent_windows": 61,
+      "min_windows": 40,
+      "win_rate": 0.3393,
+      "baseline": 0.3107,
+      "edge": 0.0285,
+      "edge_lower_90": -0.0066,
+      "edge_lower_penalized": -0.0592,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.03558,
+       "1.0%": 0.0308,
+       "1.5%": 0.02602
+      },
+      "excess_expectancy_1pct": 0.01957,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 621,
+        "edge": -0.0721
+       },
+       {
+        "fold": 2,
+        "calls": 1346,
+        "edge": 0.0204
+       },
+       {
+        "fold": 3,
+        "calls": 1126,
+        "edge": 0.0436
+       },
+       {
+        "fold": 4,
+        "calls": 2118,
+        "edge": 0.0553
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.3805,
+       "market": 0.2538,
+       "sector": 0.1949,
+       "liquidity": 0.1194,
+       "news": 0.027,
+       "circuit": 0.0244
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "20": {
+      "calls": 5228,
+      "graded": 5201,
+      "excluded_unresolved_steps": 27,
+      "excluded_share": 0.0052,
+      "exclusion_warning": false,
+      "distinct_dates": 394,
+      "independent_windows": 36,
+      "min_windows": 40,
+      "win_rate": 0.3386,
+      "baseline": 0.2967,
+      "edge": 0.0419,
+      "edge_lower_90": -0.0097,
+      "edge_lower_penalized": -0.0769,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.05051,
+       "1.0%": 0.04574,
+       "1.5%": 0.04096
+      },
+      "excess_expectancy_1pct": 0.03602,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 614,
+        "edge": -0.0324
+       },
+       {
+        "fold": 2,
+        "calls": 1344,
+        "edge": 0.0403
+       },
+       {
+        "fold": 3,
+        "calls": 1125,
+        "edge": 0.0477
+       },
+       {
+        "fold": 4,
+        "calls": 2118,
+        "edge": 0.0612
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.3154,
+       "market": 0.2942,
+       "sector": 0.2015,
+       "liquidity": 0.134,
+       "circuit": 0.0355,
+       "news": 0.0195
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "40": {
+      "calls": 5228,
+      "graded": 5155,
+      "excluded_unresolved_steps": 73,
+      "excluded_share": 0.014,
+      "exclusion_warning": false,
+      "distinct_dates": 394,
+      "independent_windows": 28,
+      "min_windows": 30,
+      "win_rate": 0.264,
+      "baseline": 0.2161,
+      "edge": 0.0479,
+      "edge_lower_90": -0.011,
+      "edge_lower_penalized": -0.0606,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.05675,
+       "1.0%": 0.05197,
+       "1.5%": 0.0472
+      },
+      "excess_expectancy_1pct": 0.06207,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 599,
+        "edge": 0.0107
+       },
+       {
+        "fold": 2,
+        "calls": 1319,
+        "edge": 0.0408
+       },
+       {
+        "fold": 3,
+        "calls": 1119,
+        "edge": 0.0132
+       },
+       {
+        "fold": 4,
+        "calls": 2118,
+        "edge": 0.0812
+       }
+      ],
+      "folds_positive": 4,
+      "failure_causes": {
+       "market": 0.3651,
+       "model": 0.2905,
+       "sector": 0.1447,
+       "liquidity": 0.122,
+       "circuit": 0.053,
+       "news": 0.0248
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "80": {
+      "calls": 5228,
+      "graded": 5119,
+      "excluded_unresolved_steps": 109,
+      "excluded_share": 0.0208,
+      "exclusion_warning": false,
+      "distinct_dates": 394,
+      "independent_windows": 17,
+      "min_windows": 25,
+      "win_rate": 0.2551,
+      "baseline": 0.2429,
+      "edge": 0.0122,
+      "edge_lower_90": -0.0265,
+      "edge_lower_penalized": -0.0823,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.10897,
+       "1.0%": 0.1042,
+       "1.5%": 0.09942
+      },
+      "excess_expectancy_1pct": 0.06437,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 599,
+        "edge": -0.0348
+       },
+       {
+        "fold": 2,
+        "calls": 1308,
+        "edge": 0.0681
+       },
+       {
+        "fold": 3,
+        "calls": 1095,
+        "edge": -0.0504
+       },
+       {
+        "fold": 4,
+        "calls": 2117,
+        "edge": 0.0234
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "market": 0.2832,
+       "model": 0.2707,
+       "sector": 0.2182,
+       "liquidity": 0.1456,
+       "circuit": 0.0726,
+       "news": 0.0097
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "120": {
+      "calls": 5228,
+      "graded": 5069,
+      "excluded_unresolved_steps": 159,
+      "excluded_share": 0.0304,
+      "exclusion_warning": false,
+      "distinct_dates": 394,
+      "independent_windows": 13,
+      "min_windows": 25,
+      "win_rate": 0.2592,
+      "baseline": 0.2386,
+      "edge": 0.0206,
+      "edge_lower_90": -0.0153,
+      "edge_lower_penalized": -0.0667,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.14368,
+       "1.0%": 0.13891,
+       "1.5%": 0.13414
+      },
+      "excess_expectancy_1pct": 0.07119,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 578,
+        "edge": -0.0256
+       },
+       {
+        "fold": 2,
+        "calls": 1294,
+        "edge": 0.0404
+       },
+       {
+        "fold": 3,
+        "calls": 1089,
+        "edge": -0.0042
+       },
+       {
+        "fold": 4,
+        "calls": 2108,
+        "edge": 0.0341
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "sector": 0.2652,
+       "model": 0.2434,
+       "market": 0.2407,
+       "liquidity": 0.1784,
+       "circuit": 0.0631,
+       "news": 0.0091
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "160": {
+      "calls": 5206,
+      "graded": 5009,
+      "excluded_unresolved_steps": 197,
+      "excluded_share": 0.0378,
+      "exclusion_warning": false,
+      "distinct_dates": 392,
+      "independent_windows": 10,
+      "min_windows": 25,
+      "win_rate": 0.3426,
+      "baseline": 0.3659,
+      "edge": -0.0233,
+      "edge_lower_90": -0.042,
+      "edge_lower_penalized": -0.098,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.18286,
+       "1.0%": 0.17809,
+       "1.5%": 0.17332
+      },
+      "excess_expectancy_1pct": 0.08449,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 564,
+        "edge": -0.0347
+       },
+       {
+        "fold": 2,
+        "calls": 1275,
+        "edge": -0.0128
+       },
+       {
+        "fold": 3,
+        "calls": 1088,
+        "edge": -0.0537
+       },
+       {
+        "fold": 4,
+        "calls": 2082,
+        "edge": -0.0108
+       }
+      ],
+      "folds_positive": 0,
+      "failure_causes": {
+       "market": 0.2627,
+       "sector": 0.2551,
+       "model": 0.2162,
+       "liquidity": 0.1947,
+       "circuit": 0.0662,
+       "news": 0.0052
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "240": {
+      "calls": 4805,
+      "graded": 4571,
+      "excluded_unresolved_steps": 234,
+      "excluded_share": 0.0487,
+      "exclusion_warning": false,
+      "distinct_dates": 360,
+      "independent_windows": 10,
+      "min_windows": 25,
+      "win_rate": 0.3752,
+      "baseline": 0.3778,
+      "edge": -0.0026,
+      "edge_lower_90": -0.0453,
+      "edge_lower_penalized": -0.1429,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.34181,
+       "1.0%": 0.33706,
+       "1.5%": 0.33232
+      },
+      "excess_expectancy_1pct": 0.11076,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 563,
+        "edge": 0.0121
+       },
+       {
+        "fold": 2,
+        "calls": 1250,
+        "edge": -0.0513
+       },
+       {
+        "fold": 3,
+        "calls": 1088,
+        "edge": -0.0617
+       },
+       {
+        "fold": 4,
+        "calls": 1670,
+        "edge": 0.0674
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "market": 0.2623,
+       "sector": 0.2511,
+       "liquidity": 0.2353,
+       "model": 0.1877,
+       "circuit": 0.0627,
+       "news": 0.0011
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "market_overheated": {
+     "5": {
+      "calls": 5505,
+      "graded": 5496,
+      "excluded_unresolved_steps": 9,
+      "excluded_share": 0.0016,
+      "exclusion_warning": false,
+      "distinct_dates": 439,
+      "independent_windows": 83,
+      "min_windows": 40,
+      "win_rate": 0.3894,
+      "baseline": 0.3624,
+      "edge": 0.0269,
+      "edge_lower_90": 0.0068,
+      "edge_lower_penalized": -0.0312,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.02865,
+       "1.0%": 0.0238,
+       "1.5%": 0.01895
+      },
+      "excess_expectancy_1pct": 0.00621,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1836,
+        "edge": -0.013
+       },
+       {
+        "fold": 2,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 3,
+        "calls": 3200,
+        "edge": 0.05
+       },
+       {
+        "fold": 4,
+        "calls": 460,
+        "edge": 0.0258
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.4201,
+       "sector": 0.2533,
+       "market": 0.1844,
+       "liquidity": 0.0903,
+       "circuit": 0.034,
+       "news": 0.0179
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "10": {
+      "calls": 5505,
+      "graded": 5491,
+      "excluded_unresolved_steps": 14,
+      "excluded_share": 0.0025,
+      "exclusion_warning": false,
+      "distinct_dates": 439,
+      "independent_windows": 48,
+      "min_windows": 40,
+      "win_rate": 0.3877,
+      "baseline": 0.3722,
+      "edge": 0.0155,
+      "edge_lower_90": -0.0167,
+      "edge_lower_penalized": -0.0697,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.05731,
+       "1.0%": 0.05246,
+       "1.5%": 0.04761
+      },
+      "excess_expectancy_1pct": 0.01849,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1836,
+        "edge": -0.0331
+       },
+       {
+        "fold": 2,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 3,
+        "calls": 3195,
+        "edge": 0.0509
+       },
+       {
+        "fold": 4,
+        "calls": 460,
+        "edge": -0.0358
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "model": 0.3998,
+       "sector": 0.2698,
+       "market": 0.1752,
+       "liquidity": 0.0996,
+       "circuit": 0.0393,
+       "news": 0.0164
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "20": {
+      "calls": 5505,
+      "graded": 5466,
+      "excluded_unresolved_steps": 39,
+      "excluded_share": 0.0071,
+      "exclusion_warning": false,
+      "distinct_dates": 439,
+      "independent_windows": 29,
+      "min_windows": 40,
+      "win_rate": 0.3816,
+      "baseline": 0.3806,
+      "edge": 0.001,
+      "edge_lower_90": -0.0438,
+      "edge_lower_penalized": -0.1116,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.10821,
+       "1.0%": 0.10336,
+       "1.5%": 0.0985
+      },
+      "excess_expectancy_1pct": 0.03863,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1836,
+        "edge": -0.0434
+       },
+       {
+        "fold": 2,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 3,
+        "calls": 3170,
+        "edge": 0.0333
+       },
+       {
+        "fold": 4,
+        "calls": 460,
+        "edge": -0.0441
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "model": 0.3896,
+       "sector": 0.2734,
+       "market": 0.163,
+       "liquidity": 0.1148,
+       "circuit": 0.0473,
+       "news": 0.0118
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "40": {
+      "calls": 5495,
+      "graded": 5423,
+      "excluded_unresolved_steps": 72,
+      "excluded_share": 0.0131,
+      "exclusion_warning": false,
+      "distinct_dates": 438,
+      "independent_windows": 18,
+      "min_windows": 30,
+      "win_rate": 0.2738,
+      "baseline": 0.284,
+      "edge": -0.0101,
+      "edge_lower_90": -0.0292,
+      "edge_lower_penalized": -0.0703,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.16053,
+       "1.0%": 0.15568,
+       "1.5%": 0.15083
+      },
+      "excess_expectancy_1pct": 0.04107,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1832,
+        "edge": -0.0393
+       },
+       {
+        "fold": 2,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 3,
+        "calls": 3141,
+        "edge": 0.0065
+       },
+       {
+        "fold": 4,
+        "calls": 450,
+        "edge": -0.0076
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "model": 0.4012,
+       "sector": 0.2278,
+       "market": 0.1643,
+       "liquidity": 0.1191,
+       "circuit": 0.0787,
+       "news": 0.0089
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "80": {
+      "calls": 5355,
+      "graded": 5228,
+      "excluded_unresolved_steps": 127,
+      "excluded_share": 0.0237,
+      "exclusion_warning": false,
+      "distinct_dates": 424,
+      "independent_windows": 11,
+      "min_windows": 25,
+      "win_rate": 0.2708,
+      "baseline": 0.2679,
+      "edge": 0.0029,
+      "edge_lower_90": -0.0599,
+      "edge_lower_penalized": -0.1423,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.24305,
+       "1.0%": 0.2382,
+       "1.5%": 0.23336
+      },
+      "excess_expectancy_1pct": 0.02556,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1789,
+        "edge": 0.0162
+       },
+       {
+        "fold": 2,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 3,
+        "calls": 3129,
+        "edge": 0.011
+       },
+       {
+        "fold": 4,
+        "calls": 310,
+        "edge": -0.1545
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.3799,
+       "sector": 0.2162,
+       "market": 0.1729,
+       "liquidity": 0.1482,
+       "circuit": 0.0761,
+       "news": 0.0068
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "120": {
+      "calls": 5045,
+      "graded": 4891,
+      "excluded_unresolved_steps": 154,
+      "excluded_share": 0.0305,
+      "exclusion_warning": false,
+      "distinct_dates": 393,
+      "independent_windows": 6,
+      "min_windows": 25,
+      "win_rate": 0.2631,
+      "baseline": 0.2543,
+      "edge": 0.0088,
+      "edge_lower_90": -0.021,
+      "edge_lower_penalized": -0.0903,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.31613,
+       "1.0%": 0.3113,
+       "1.5%": 0.30646
+      },
+      "excess_expectancy_1pct": 0.01195,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1762,
+        "edge": 0.0332
+       },
+       {
+        "fold": 2,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 3,
+        "calls": 3129,
+        "edge": -0.0049
+       },
+       {
+        "fold": 4,
+        "calls": 0,
+        "edge": null
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "model": 0.3285,
+       "sector": 0.2309,
+       "liquidity": 0.177,
+       "market": 0.1559,
+       "circuit": 0.1074,
+       "news": 0.0003
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "160": {
+      "calls": 5045,
+      "graded": 4847,
+      "excluded_unresolved_steps": 198,
+      "excluded_share": 0.0392,
+      "exclusion_warning": false,
+      "distinct_dates": 393,
+      "independent_windows": 6,
+      "min_windows": 25,
+      "win_rate": 0.3412,
+      "baseline": 0.3387,
+      "edge": 0.0025,
+      "edge_lower_90": -0.0167,
+      "edge_lower_penalized": -0.0675,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.36226,
+       "1.0%": 0.35742,
+       "1.5%": 0.35259
+      },
+      "excess_expectancy_1pct": -0.00505,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1725,
+        "edge": -0.0115
+       },
+       {
+        "fold": 2,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 3,
+        "calls": 3122,
+        "edge": 0.0102
+       },
+       {
+        "fold": 4,
+        "calls": 0,
+        "edge": null
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "sector": 0.3267,
+       "model": 0.2759,
+       "liquidity": 0.239,
+       "market": 0.098,
+       "circuit": 0.0598,
+       "news": 0.0006
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "240": {
+      "calls": 5045,
+      "graded": 4830,
+      "excluded_unresolved_steps": 215,
+      "excluded_share": 0.0426,
+      "exclusion_warning": false,
+      "distinct_dates": 393,
+      "independent_windows": 4,
+      "min_windows": 25,
+      "win_rate": 0.3663,
+      "baseline": 0.3388,
+      "edge": 0.0274,
+      "edge_lower_90": -0.0221,
+      "edge_lower_penalized": -0.2028,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.43587,
+       "1.0%": 0.43104,
+       "1.5%": 0.42621
+      },
+      "excess_expectancy_1pct": 0.06386,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1709,
+        "edge": 0.0266
+       },
+       {
+        "fold": 2,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 3,
+        "calls": 3121,
+        "edge": 0.0279
+       },
+       {
+        "fold": 4,
+        "calls": 0,
+        "edge": null
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "sector": 0.2878,
+       "liquidity": 0.2751,
+       "model": 0.1908,
+       "market": 0.1584,
+       "circuit": 0.0843,
+       "news": 0.0036
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "market_bear": {
+     "5": {
+      "calls": 0,
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "10": {
+      "calls": 0,
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "20": {
+      "calls": 0,
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "40": {
+      "calls": 0,
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "80": {
+      "calls": 0,
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "120": {
+      "calls": 0,
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "160": {
+      "calls": 0,
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "240": {
+      "calls": 0,
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "pre_book_close": {
+     "5": {
+      "calls": 1225,
+      "graded": 1196,
+      "excluded_unresolved_steps": 29,
+      "excluded_share": 0.0237,
+      "exclusion_warning": false,
+      "distinct_dates": 716,
+      "independent_windows": 187,
+      "min_windows": 40,
+      "win_rate": 0.3604,
+      "baseline": 0.2969,
+      "edge": 0.0635,
+      "edge_lower_90": 0.0063,
+      "edge_lower_penalized": -0.0574,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.02066,
+       "1.0%": 0.01597,
+       "1.5%": 0.01128
+      },
+      "excess_expectancy_1pct": 0.00737,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 635,
+        "edge": 0.0857
+       },
+       {
+        "fold": 2,
+        "calls": 149,
+        "edge": 0.0682
+       },
+       {
+        "fold": 3,
+        "calls": 304,
+        "edge": 0.0178
+       },
+       {
+        "fold": 4,
+        "calls": 108,
+        "edge": 0.0552
+       }
+      ],
+      "folds_positive": 4,
+      "failure_causes": {
+       "liquidity": 0.2732,
+       "model": 0.2719,
+       "market": 0.2314,
+       "sector": 0.1373,
+       "circuit": 0.0523,
+       "news": 0.034
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "10": {
+      "calls": 1225,
+      "graded": 1184,
+      "excluded_unresolved_steps": 41,
+      "excluded_share": 0.0335,
+      "exclusion_warning": false,
+      "distinct_dates": 711,
+      "independent_windows": 117,
+      "min_windows": 40,
+      "win_rate": 0.364,
+      "baseline": 0.311,
+      "edge": 0.053,
+      "edge_lower_90": -0.0203,
+      "edge_lower_penalized": -0.1003,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.02853,
+       "1.0%": 0.02385,
+       "1.5%": 0.01917
+      },
+      "excess_expectancy_1pct": 0.00673,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 631,
+        "edge": 0.0659
+       },
+       {
+        "fold": 2,
+        "calls": 149,
+        "edge": 0.1648
+       },
+       {
+        "fold": 3,
+        "calls": 296,
+        "edge": -0.0335
+       },
+       {
+        "fold": 4,
+        "calls": 108,
+        "edge": 0.061
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "liquidity": 0.2961,
+       "model": 0.2762,
+       "market": 0.1806,
+       "sector": 0.1487,
+       "circuit": 0.0757,
+       "news": 0.0226
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "20": {
+      "calls": 1222,
+      "graded": 1172,
+      "excluded_unresolved_steps": 50,
+      "excluded_share": 0.0409,
+      "exclusion_warning": false,
+      "distinct_dates": 704,
+      "independent_windows": 71,
+      "min_windows": 40,
+      "win_rate": 0.3413,
+      "baseline": 0.3069,
+      "edge": 0.0344,
+      "edge_lower_90": -0.0332,
+      "edge_lower_penalized": -0.1308,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.03673,
+       "1.0%": 0.03205,
+       "1.5%": 0.02737
+      },
+      "excess_expectancy_1pct": -0.00561,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 628,
+        "edge": 0.0616
+       },
+       {
+        "fold": 2,
+        "calls": 149,
+        "edge": 0.2421
+       },
+       {
+        "fold": 3,
+        "calls": 290,
+        "edge": -0.1164
+       },
+       {
+        "fold": 4,
+        "calls": 105,
+        "edge": -0.0067
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.2966,
+       "liquidity": 0.2552,
+       "sector": 0.1917,
+       "market": 0.1671,
+       "circuit": 0.0687,
+       "news": 0.0207
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "40": {
+      "calls": 1214,
+      "graded": 1164,
+      "excluded_unresolved_steps": 50,
+      "excluded_share": 0.0412,
+      "exclusion_warning": false,
+      "distinct_dates": 696,
+      "independent_windows": 45,
+      "min_windows": 30,
+      "win_rate": 0.2268,
+      "baseline": 0.231,
+      "edge": -0.0041,
+      "edge_lower_90": -0.0636,
+      "edge_lower_penalized": -0.1625,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.05113,
+       "1.0%": 0.04645,
+       "1.5%": 0.04177
+      },
+      "excess_expectancy_1pct": -0.01463,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 628,
+        "edge": -0.0131
+       },
+       {
+        "fold": 2,
+        "calls": 149,
+        "edge": 0.2136
+       },
+       {
+        "fold": 3,
+        "calls": 290,
+        "edge": -0.0654
+       },
+       {
+        "fold": 4,
+        "calls": 97,
+        "edge": -0.0975
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "model": 0.3389,
+       "liquidity": 0.2478,
+       "market": 0.2067,
+       "sector": 0.1344,
+       "circuit": 0.0622,
+       "news": 0.01
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "80": {
+      "calls": 1203,
+      "graded": 1153,
+      "excluded_unresolved_steps": 50,
+      "excluded_share": 0.0416,
+      "exclusion_warning": false,
+      "distinct_dates": 686,
+      "independent_windows": 23,
+      "min_windows": 25,
+      "win_rate": 0.242,
+      "baseline": 0.2469,
+      "edge": -0.0049,
+      "edge_lower_90": -0.0985,
+      "edge_lower_penalized": -0.212,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.13534,
+       "1.0%": 0.13066,
+       "1.5%": 0.12599
+      },
+      "excess_expectancy_1pct": -0.01363,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 628,
+        "edge": 0.0188
+       },
+       {
+        "fold": 2,
+        "calls": 149,
+        "edge": 0.1768
+       },
+       {
+        "fold": 3,
+        "calls": 290,
+        "edge": -0.1073
+       },
+       {
+        "fold": 4,
+        "calls": 86,
+        "edge": -0.1473
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.3101,
+       "liquidity": 0.254,
+       "sector": 0.1922,
+       "market": 0.1911,
+       "circuit": 0.0481,
+       "news": 0.0046
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "120": {
+      "calls": 1203,
+      "graded": 1153,
+      "excluded_unresolved_steps": 50,
+      "excluded_share": 0.0416,
+      "exclusion_warning": false,
+      "distinct_dates": 686,
+      "independent_windows": 16,
+      "min_windows": 25,
+      "win_rate": 0.2749,
+      "baseline": 0.2481,
+      "edge": 0.0269,
+      "edge_lower_90": -0.0437,
+      "edge_lower_penalized": -0.1429,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.2221,
+       "1.0%": 0.21743,
+       "1.5%": 0.21275
+      },
+      "excess_expectancy_1pct": -0.01397,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 628,
+        "edge": 0.061
+       },
+       {
+        "fold": 2,
+        "calls": 149,
+        "edge": 0.1879
+       },
+       {
+        "fold": 3,
+        "calls": 290,
+        "edge": -0.0922
+       },
+       {
+        "fold": 4,
+        "calls": 86,
+        "edge": -0.0996
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.311,
+       "liquidity": 0.2608,
+       "sector": 0.1914,
+       "market": 0.1651,
+       "circuit": 0.061,
+       "news": 0.0108
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "160": {
+      "calls": 1203,
+      "graded": 1146,
+      "excluded_unresolved_steps": 57,
+      "excluded_share": 0.0474,
+      "exclusion_warning": false,
+      "distinct_dates": 685,
+      "independent_windows": 12,
+      "min_windows": 25,
+      "win_rate": 0.2644,
+      "baseline": 0.3304,
+      "edge": -0.066,
+      "edge_lower_90": -0.1586,
+      "edge_lower_penalized": -0.2698,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.24849,
+       "1.0%": 0.24382,
+       "1.5%": 0.23914
+      },
+      "excess_expectancy_1pct": -0.04088,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 622,
+        "edge": -0.0232
+       },
+       {
+        "fold": 2,
+        "calls": 148,
+        "edge": 0.1317
+       },
+       {
+        "fold": 3,
+        "calls": 290,
+        "edge": -0.2331
+       },
+       {
+        "fold": 4,
+        "calls": 86,
+        "edge": -0.1532
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "liquidity": 0.2883,
+       "sector": 0.2337,
+       "model": 0.2147,
+       "market": 0.1862,
+       "circuit": 0.0712,
+       "news": 0.0059
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "240": {
+      "calls": 1182,
+      "graded": 1111,
+      "excluded_unresolved_steps": 71,
+      "excluded_share": 0.0601,
+      "exclusion_warning": false,
+      "distinct_dates": 658,
+      "independent_windows": 10,
+      "min_windows": 25,
+      "win_rate": 0.2394,
+      "baseline": 0.3105,
+      "edge": -0.0711,
+      "edge_lower_90": -0.1091,
+      "edge_lower_penalized": -0.2512,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.31277,
+       "1.0%": 0.30811,
+       "1.5%": 0.30345
+      },
+      "excess_expectancy_1pct": 0.01103,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 613,
+        "edge": -0.046
+       },
+       {
+        "fold": 2,
+        "calls": 143,
+        "edge": 0.0315
+       },
+       {
+        "fold": 3,
+        "calls": 290,
+        "edge": -0.1786
+       },
+       {
+        "fold": 4,
+        "calls": 65,
+        "edge": -0.053
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "liquidity": 0.3408,
+       "sector": 0.2047,
+       "market": 0.1917,
+       "model": 0.187,
+       "circuit": 0.0698,
+       "news": 0.0059
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "post_book_close": {
+     "5": {
+      "calls": 274,
+      "graded": 270,
+      "excluded_unresolved_steps": 4,
+      "excluded_share": 0.0146,
+      "exclusion_warning": false,
+      "distinct_dates": 225,
+      "independent_windows": 73,
+      "min_windows": 40,
+      "win_rate": 0.237,
+      "baseline": 0.2893,
+      "edge": -0.0523,
+      "edge_lower_90": -0.1047,
+      "edge_lower_penalized": -0.2082,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": -0.01375,
+       "1.0%": -0.01838,
+       "1.5%": -0.02301
+      },
+      "excess_expectancy_1pct": -0.02321,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 133,
+        "edge": -0.0384
+       },
+       {
+        "fold": 2,
+        "calls": 82,
+        "edge": -0.0471
+       },
+       {
+        "fold": 3,
+        "calls": 36,
+        "edge": -0.0783
+       },
+       {
+        "fold": 4,
+        "calls": 19,
+        "edge": -0.1232
+       }
+      ],
+      "folds_positive": 0,
+      "failure_causes": {
+       "model": 0.4078,
+       "market": 0.2087,
+       "liquidity": 0.2039,
+       "sector": 0.1408,
+       "news": 0.0388
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "10": {
+      "calls": 274,
+      "graded": 270,
+      "excluded_unresolved_steps": 4,
+      "excluded_share": 0.0146,
+      "exclusion_warning": false,
+      "distinct_dates": 225,
+      "independent_windows": 55,
+      "min_windows": 40,
+      "win_rate": 0.2667,
+      "baseline": 0.2901,
+      "edge": -0.0234,
+      "edge_lower_90": -0.0987,
+      "edge_lower_penalized": -0.2265,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": -0.01106,
+       "1.0%": -0.01569,
+       "1.5%": -0.02032
+      },
+      "excess_expectancy_1pct": -0.02474,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 133,
+        "edge": 0.0738
+       },
+       {
+        "fold": 2,
+        "calls": 82,
+        "edge": -0.0722
+       },
+       {
+        "fold": 3,
+        "calls": 36,
+        "edge": -0.2086
+       },
+       {
+        "fold": 4,
+        "calls": 19,
+        "edge": -0.1424
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "model": 0.3687,
+       "market": 0.2121,
+       "liquidity": 0.2071,
+       "sector": 0.197,
+       "news": 0.0152
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "20": {
+      "calls": 274,
+      "graded": 270,
+      "excluded_unresolved_steps": 4,
+      "excluded_share": 0.0146,
+      "exclusion_warning": false,
+      "distinct_dates": 225,
+      "independent_windows": 38,
+      "min_windows": 40,
+      "win_rate": 0.3037,
+      "baseline": 0.2854,
+      "edge": 0.0183,
+      "edge_lower_90": -0.0919,
+      "edge_lower_penalized": -0.2207,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.01775,
+       "1.0%": 0.01312,
+       "1.5%": 0.00849
+      },
+      "excess_expectancy_1pct": 0.0008,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 133,
+        "edge": 0.0542
+       },
+       {
+        "fold": 2,
+        "calls": 82,
+        "edge": 0.0631
+       },
+       {
+        "fold": 3,
+        "calls": 36,
+        "edge": -0.0637
+       },
+       {
+        "fold": 4,
+        "calls": 19,
+        "edge": -0.2714
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.3457,
+       "liquidity": 0.2553,
+       "market": 0.234,
+       "sector": 0.1383,
+       "news": 0.0266
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "40": {
+      "calls": 270,
+      "graded": 266,
+      "excluded_unresolved_steps": 4,
+      "excluded_share": 0.0148,
+      "exclusion_warning": false,
+      "distinct_dates": 221,
+      "independent_windows": 31,
+      "min_windows": 30,
+      "win_rate": 0.2293,
+      "baseline": 0.2013,
+      "edge": 0.028,
+      "edge_lower_90": -0.1096,
+      "edge_lower_penalized": -0.249,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.03438,
+       "1.0%": 0.02976,
+       "1.5%": 0.02514
+      },
+      "excess_expectancy_1pct": 0.03152,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 133,
+        "edge": -0.0069
+       },
+       {
+        "fold": 2,
+        "calls": 82,
+        "edge": 0.116
+       },
+       {
+        "fold": 3,
+        "calls": 36,
+        "edge": 0.0921
+       },
+       {
+        "fold": 4,
+        "calls": 15,
+        "edge": -0.297
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "market": 0.322,
+       "model": 0.2829,
+       "liquidity": 0.2439,
+       "sector": 0.0878,
+       "circuit": 0.039,
+       "news": 0.0244
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "80": {
+      "calls": 264,
+      "graded": 260,
+      "excluded_unresolved_steps": 4,
+      "excluded_share": 0.0152,
+      "exclusion_warning": false,
+      "distinct_dates": 215,
+      "independent_windows": 20,
+      "min_windows": 25,
+      "win_rate": 0.15,
+      "baseline": 0.171,
+      "edge": -0.021,
+      "edge_lower_90": -0.1407,
+      "edge_lower_penalized": -0.3118,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.02237,
+       "1.0%": 0.01775,
+       "1.5%": 0.01314
+      },
+      "excess_expectancy_1pct": 0.03608,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 133,
+        "edge": -0.0646
+       },
+       {
+        "fold": 2,
+        "calls": 82,
+        "edge": 0.1119
+       },
+       {
+        "fold": 3,
+        "calls": 36,
+        "edge": -0.1402
+       },
+       {
+        "fold": 4,
+        "calls": 9,
+        "edge": -0.111
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "market": 0.3846,
+       "liquidity": 0.2851,
+       "model": 0.267,
+       "sector": 0.0498,
+       "circuit": 0.009,
+       "news": 0.0045
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "120": {
+      "calls": 264,
+      "graded": 260,
+      "excluded_unresolved_steps": 4,
+      "excluded_share": 0.0152,
+      "exclusion_warning": false,
+      "distinct_dates": 215,
+      "independent_windows": 15,
+      "min_windows": 25,
+      "win_rate": 0.2077,
+      "baseline": 0.19,
+      "edge": 0.0177,
+      "edge_lower_90": -0.0573,
+      "edge_lower_penalized": -0.2839,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.07687,
+       "1.0%": 0.07226,
+       "1.5%": 0.06764
+      },
+      "excess_expectancy_1pct": 0.03786,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 133,
+        "edge": -0.0601
+       },
+       {
+        "fold": 2,
+        "calls": 82,
+        "edge": 0.1853
+       },
+       {
+        "fold": 3,
+        "calls": 36,
+        "edge": -0.1191
+       },
+       {
+        "fold": 4,
+        "calls": 9,
+        "edge": 0.1873
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "liquidity": 0.335,
+       "market": 0.2573,
+       "model": 0.2427,
+       "sector": 0.0728,
+       "news": 0.0485,
+       "circuit": 0.0437
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "160": {
+      "calls": 264,
+      "graded": 260,
+      "excluded_unresolved_steps": 4,
+      "excluded_share": 0.0152,
+      "exclusion_warning": false,
+      "distinct_dates": 215,
+      "independent_windows": 11,
+      "min_windows": 25,
+      "win_rate": 0.2962,
+      "baseline": 0.3431,
+      "edge": -0.0469,
+      "edge_lower_90": -0.131,
+      "edge_lower_penalized": -0.2837,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.08044,
+       "1.0%": 0.07582,
+       "1.5%": 0.07121
+      },
+      "excess_expectancy_1pct": -0.01842,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 133,
+        "edge": 0.0099
+       },
+       {
+        "fold": 2,
+        "calls": 82,
+        "edge": -0.0485
+       },
+       {
+        "fold": 3,
+        "calls": 36,
+        "edge": -0.2381
+       },
+       {
+        "fold": 4,
+        "calls": 9,
+        "edge": -0.1076
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "liquidity": 0.3497,
+       "market": 0.2896,
+       "model": 0.2186,
+       "sector": 0.1093,
+       "circuit": 0.0328
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "240": {
+      "calls": 257,
+      "graded": 243,
+      "excluded_unresolved_steps": 14,
+      "excluded_share": 0.0545,
+      "exclusion_warning": false,
+      "distinct_dates": 198,
+      "independent_windows": 10,
+      "min_windows": 25,
+      "win_rate": 0.2058,
+      "baseline": 0.3286,
+      "edge": -0.1229,
+      "edge_lower_90": -0.147,
+      "edge_lower_penalized": -0.5086,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.15542,
+       "1.0%": 0.15083,
+       "1.5%": 0.14624
+      },
+      "excess_expectancy_1pct": -0.02797,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 133,
+        "edge": -0.0933
+       },
+       {
+        "fold": 2,
+        "calls": 72,
+        "edge": -0.1078
+       },
+       {
+        "fold": 3,
+        "calls": 36,
+        "edge": -0.305
+       },
+       {
+        "fold": 4,
+        "calls": 2,
+        "edge": 0.6467
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "market": 0.3472,
+       "liquidity": 0.3368,
+       "model": 0.1658,
+       "circuit": 0.0881,
+       "sector": 0.0622
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "new_listing": {
+     "5": {
+      "calls": 4645,
+      "graded": 4643,
+      "excluded_unresolved_steps": 2,
+      "excluded_share": 0.0004,
+      "exclusion_warning": false,
+      "distinct_dates": 1374,
+      "independent_windows": 245,
+      "min_windows": 40,
+      "win_rate": 0.3554,
+      "baseline": 0.3002,
+      "edge": 0.0552,
+      "edge_lower_90": 0.0126,
+      "edge_lower_penalized": -0.0277,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.04442,
+       "1.0%": 0.03971,
+       "1.5%": 0.035
+      },
+      "excess_expectancy_1pct": 0.03251,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1188,
+        "edge": -0.0063
+       },
+       {
+        "fold": 2,
+        "calls": 946,
+        "edge": 0.0677
+       },
+       {
+        "fold": 3,
+        "calls": 1452,
+        "edge": 0.0716
+       },
+       {
+        "fold": 4,
+        "calls": 1057,
+        "edge": 0.0905
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.4247,
+       "market": 0.2355,
+       "sector": 0.1711,
+       "liquidity": 0.1544,
+       "circuit": 0.012,
+       "news": 0.0023
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "10": {
+      "calls": 4645,
+      "graded": 4643,
+      "excluded_unresolved_steps": 2,
+      "excluded_share": 0.0004,
+      "exclusion_warning": false,
+      "distinct_dates": 1374,
+      "independent_windows": 141,
+      "min_windows": 40,
+      "win_rate": 0.3498,
+      "baseline": 0.3023,
+      "edge": 0.0474,
+      "edge_lower_90": -0.0013,
+      "edge_lower_penalized": -0.06,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.07979,
+       "1.0%": 0.07508,
+       "1.5%": 0.07037
+      },
+      "excess_expectancy_1pct": 0.06267,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1188,
+        "edge": -0.0177
+       },
+       {
+        "fold": 2,
+        "calls": 946,
+        "edge": 0.0638
+       },
+       {
+        "fold": 3,
+        "calls": 1452,
+        "edge": 0.0688
+       },
+       {
+        "fold": 4,
+        "calls": 1057,
+        "edge": 0.0766
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.4131,
+       "market": 0.2226,
+       "sector": 0.1845,
+       "liquidity": 0.161,
+       "circuit": 0.0169,
+       "news": 0.002
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "20": {
+      "calls": 4645,
+      "graded": 4643,
+      "excluded_unresolved_steps": 2,
+      "excluded_share": 0.0004,
+      "exclusion_warning": false,
+      "distinct_dates": 1374,
+      "independent_windows": 76,
+      "min_windows": 40,
+      "win_rate": 0.347,
+      "baseline": 0.2989,
+      "edge": 0.048,
+      "edge_lower_90": 0.0005,
+      "edge_lower_penalized": -0.077,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.1336,
+       "1.0%": 0.12889,
+       "1.5%": 0.12417
+      },
+      "excess_expectancy_1pct": 0.1082,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1188,
+        "edge": -0.005
+       },
+       {
+        "fold": 2,
+        "calls": 946,
+        "edge": 0.0816
+       },
+       {
+        "fold": 3,
+        "calls": 1452,
+        "edge": 0.0842
+       },
+       {
+        "fold": 4,
+        "calls": 1057,
+        "edge": 0.0279
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.3852,
+       "market": 0.2411,
+       "sector": 0.1834,
+       "liquidity": 0.1692,
+       "circuit": 0.0178,
+       "news": 0.0033
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "40": {
+      "calls": 4645,
+      "graded": 4643,
+      "excluded_unresolved_steps": 2,
+      "excluded_share": 0.0004,
+      "exclusion_warning": false,
+      "distinct_dates": 1374,
+      "independent_windows": 46,
+      "min_windows": 30,
+      "win_rate": 0.3129,
+      "baseline": 0.2241,
+      "edge": 0.0889,
+      "edge_lower_90": 0.0206,
+      "edge_lower_penalized": -0.0701,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.18145,
+       "1.0%": 0.17674,
+       "1.5%": 0.17203
+      },
+      "excess_expectancy_1pct": 0.13879,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1188,
+        "edge": 0.0451
+       },
+       {
+        "fold": 2,
+        "calls": 946,
+        "edge": 0.1245
+       },
+       {
+        "fold": 3,
+        "calls": 1452,
+        "edge": 0.1023
+       },
+       {
+        "fold": 4,
+        "calls": 1057,
+        "edge": 0.0877
+       }
+      ],
+      "folds_positive": 4,
+      "failure_causes": {
+       "model": 0.3878,
+       "market": 0.2433,
+       "liquidity": 0.1759,
+       "sector": 0.1665,
+       "circuit": 0.0229,
+       "news": 0.0038
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": true,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "80": {
+      "calls": 4645,
+      "graded": 4560,
+      "excluded_unresolved_steps": 85,
+      "excluded_share": 0.0183,
+      "exclusion_warning": false,
+      "distinct_dates": 1358,
+      "independent_windows": 24,
+      "min_windows": 25,
+      "win_rate": 0.3053,
+      "baseline": 0.2431,
+      "edge": 0.0622,
+      "edge_lower_90": -0.0281,
+      "edge_lower_penalized": -0.1281,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.24503,
+       "1.0%": 0.24032,
+       "1.5%": 0.23562
+      },
+      "excess_expectancy_1pct": 0.13928,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1121,
+        "edge": 0.0358
+       },
+       {
+        "fold": 2,
+        "calls": 946,
+        "edge": 0.0436
+       },
+       {
+        "fold": 3,
+        "calls": 1436,
+        "edge": 0.072
+       },
+       {
+        "fold": 4,
+        "calls": 1057,
+        "edge": 0.0934
+       }
+      ],
+      "folds_positive": 4,
+      "failure_causes": {
+       "model": 0.3078,
+       "market": 0.2396,
+       "sector": 0.1982,
+       "liquidity": 0.1903,
+       "circuit": 0.0619,
+       "news": 0.0022
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "120": {
+      "calls": 4645,
+      "graded": 4528,
+      "excluded_unresolved_steps": 117,
+      "excluded_share": 0.0252,
+      "exclusion_warning": false,
+      "distinct_dates": 1352,
+      "independent_windows": 17,
+      "min_windows": 25,
+      "win_rate": 0.3045,
+      "baseline": 0.2545,
+      "edge": 0.05,
+      "edge_lower_90": -0.051,
+      "edge_lower_penalized": -0.154,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.33111,
+       "1.0%": 0.3264,
+       "1.5%": 0.3217
+      },
+      "excess_expectancy_1pct": 0.13752,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1095,
+        "edge": -0.0158
+       },
+       {
+        "fold": 2,
+        "calls": 946,
+        "edge": 0.0213
+       },
+       {
+        "fold": 3,
+        "calls": 1430,
+        "edge": 0.0858
+       },
+       {
+        "fold": 4,
+        "calls": 1057,
+        "edge": 0.0954
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.2909,
+       "sector": 0.2464,
+       "liquidity": 0.2004,
+       "market": 0.1896,
+       "circuit": 0.0721,
+       "news": 0.0006
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "160": {
+      "calls": 4619,
+      "graded": 4497,
+      "excluded_unresolved_steps": 122,
+      "excluded_share": 0.0264,
+      "exclusion_warning": false,
+      "distinct_dates": 1326,
+      "independent_windows": 13,
+      "min_windows": 25,
+      "win_rate": 0.316,
+      "baseline": 0.3486,
+      "edge": -0.0326,
+      "edge_lower_90": -0.1358,
+      "edge_lower_penalized": -0.2544,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.34744,
+       "1.0%": 0.34274,
+       "1.5%": 0.33804
+      },
+      "excess_expectancy_1pct": 0.09661,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1090,
+        "edge": -0.1508
+       },
+       {
+        "fold": 2,
+        "calls": 946,
+        "edge": -0.0562
+       },
+       {
+        "fold": 3,
+        "calls": 1430,
+        "edge": 0.0302
+       },
+       {
+        "fold": 4,
+        "calls": 1031,
+        "edge": 0.0269
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "sector": 0.2838,
+       "model": 0.2666,
+       "liquidity": 0.2445,
+       "market": 0.1645,
+       "circuit": 0.04,
+       "news": 0.0007
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "240": {
+      "calls": 4362,
+      "graded": 4240,
+      "excluded_unresolved_steps": 122,
+      "excluded_share": 0.028,
+      "exclusion_warning": false,
+      "distinct_dates": 1262,
+      "independent_windows": 10,
+      "min_windows": 25,
+      "win_rate": 0.3276,
+      "baseline": 0.3459,
+      "edge": -0.0184,
+      "edge_lower_90": -0.1114,
+      "edge_lower_penalized": -0.267,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.46072,
+       "1.0%": 0.45603,
+       "1.5%": 0.45135
+      },
+      "excess_expectancy_1pct": 0.13025,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 1090,
+        "edge": -0.1309
+       },
+       {
+        "fold": 2,
+        "calls": 946,
+        "edge": -0.1317
+       },
+       {
+        "fold": 3,
+        "calls": 1430,
+        "edge": 0.03
+       },
+       {
+        "fold": 4,
+        "calls": 774,
+        "edge": 0.1892
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "liquidity": 0.3206,
+       "model": 0.2108,
+       "sector": 0.2101,
+       "market": 0.1799,
+       "circuit": 0.0782,
+       "news": 0.0004
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "post_upper_circuit": {
+     "5": {
+      "calls": 2092,
+      "graded": 2091,
+      "excluded_unresolved_steps": 1,
+      "excluded_share": 0.0005,
+      "exclusion_warning": false,
+      "distinct_dates": 1044,
+      "independent_windows": 227,
+      "min_windows": 40,
+      "win_rate": 0.3788,
+      "baseline": 0.3201,
+      "edge": 0.0586,
+      "edge_lower_90": 0.0003,
+      "edge_lower_penalized": -0.0509,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.02053,
+       "1.0%": 0.01566,
+       "1.5%": 0.0108
+      },
+      "excess_expectancy_1pct": 0.00558,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 552,
+        "edge": -0.0175
+       },
+       {
+        "fold": 2,
+        "calls": 293,
+        "edge": 0.1098
+       },
+       {
+        "fold": 3,
+        "calls": 791,
+        "edge": 0.074
+       },
+       {
+        "fold": 4,
+        "calls": 455,
+        "edge": 0.0913
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.4103,
+       "sector": 0.2055,
+       "market": 0.1855,
+       "liquidity": 0.1062,
+       "circuit": 0.0531,
+       "news": 0.0393
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "10": {
+      "calls": 2092,
+      "graded": 2091,
+      "excluded_unresolved_steps": 1,
+      "excluded_share": 0.0005,
+      "exclusion_warning": false,
+      "distinct_dates": 1044,
+      "independent_windows": 134,
+      "min_windows": 40,
+      "win_rate": 0.3788,
+      "baseline": 0.328,
+      "edge": 0.0507,
+      "edge_lower_90": -0.0046,
+      "edge_lower_penalized": -0.0693,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.04383,
+       "1.0%": 0.03897,
+       "1.5%": 0.0341
+      },
+      "excess_expectancy_1pct": 0.02038,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 552,
+        "edge": -0.0307
+       },
+       {
+        "fold": 2,
+        "calls": 293,
+        "edge": 0.1421
+       },
+       {
+        "fold": 3,
+        "calls": 791,
+        "edge": 0.0606
+       },
+       {
+        "fold": 4,
+        "calls": 455,
+        "edge": 0.0736
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.4003,
+       "market": 0.1963,
+       "sector": 0.1955,
+       "liquidity": 0.1139,
+       "circuit": 0.0608,
+       "news": 0.0331
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "20": {
+      "calls": 2092,
+      "graded": 2090,
+      "excluded_unresolved_steps": 2,
+      "excluded_share": 0.001,
+      "exclusion_warning": false,
+      "distinct_dates": 1044,
+      "independent_windows": 79,
+      "min_windows": 40,
+      "win_rate": 0.3756,
+      "baseline": 0.3307,
+      "edge": 0.0448,
+      "edge_lower_90": 0.0024,
+      "edge_lower_penalized": -0.076,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.07686,
+       "1.0%": 0.072,
+       "1.5%": 0.06713
+      },
+      "excess_expectancy_1pct": 0.03927,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 552,
+        "edge": -0.0048
+       },
+       {
+        "fold": 2,
+        "calls": 293,
+        "edge": 0.0875
+       },
+       {
+        "fold": 3,
+        "calls": 790,
+        "edge": 0.0644
+       },
+       {
+        "fold": 4,
+        "calls": 455,
+        "edge": 0.0437
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.3724,
+       "market": 0.2184,
+       "sector": 0.1908,
+       "liquidity": 0.1272,
+       "circuit": 0.0728,
+       "news": 0.0184
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "40": {
+      "calls": 2076,
+      "graded": 2056,
+      "excluded_unresolved_steps": 20,
+      "excluded_share": 0.0096,
+      "exclusion_warning": false,
+      "distinct_dates": 1030,
+      "independent_windows": 45,
+      "min_windows": 30,
+      "win_rate": 0.3157,
+      "baseline": 0.2712,
+      "edge": 0.0444,
+      "edge_lower_90": -0.0087,
+      "edge_lower_penalized": -0.0816,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.12856,
+       "1.0%": 0.12369,
+       "1.5%": 0.11883
+      },
+      "excess_expectancy_1pct": 0.03831,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 551,
+        "edge": 0.0541
+       },
+       {
+        "fold": 2,
+        "calls": 285,
+        "edge": 0.1041
+       },
+       {
+        "fold": 3,
+        "calls": 781,
+        "edge": 0.0323
+       },
+       {
+        "fold": 4,
+        "calls": 439,
+        "edge": 0.015
+       }
+      ],
+      "folds_positive": 4,
+      "failure_causes": {
+       "model": 0.393,
+       "sector": 0.1869,
+       "market": 0.1699,
+       "liquidity": 0.1372,
+       "circuit": 0.0974,
+       "news": 0.0156
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "80": {
+      "calls": 2012,
+      "graded": 1968,
+      "excluded_unresolved_steps": 44,
+      "excluded_share": 0.0219,
+      "exclusion_warning": false,
+      "distinct_dates": 1000,
+      "independent_windows": 23,
+      "min_windows": 25,
+      "win_rate": 0.2942,
+      "baseline": 0.2659,
+      "edge": 0.0283,
+      "edge_lower_90": -0.0041,
+      "edge_lower_penalized": -0.0959,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.18576,
+       "1.0%": 0.1809,
+       "1.5%": 0.17604
+      },
+      "excess_expectancy_1pct": 0.01093,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 535,
+        "edge": -0.0012
+       },
+       {
+        "fold": 2,
+        "calls": 277,
+        "edge": 0.1317
+       },
+       {
+        "fold": 3,
+        "calls": 781,
+        "edge": 0.0264
+       },
+       {
+        "fold": 4,
+        "calls": 375,
+        "edge": -0.0019
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.3729,
+       "market": 0.1929,
+       "sector": 0.1843,
+       "liquidity": 0.1555,
+       "circuit": 0.0842,
+       "news": 0.0101
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "120": {
+      "calls": 1964,
+      "graded": 1888,
+      "excluded_unresolved_steps": 76,
+      "excluded_share": 0.0387,
+      "exclusion_warning": false,
+      "distinct_dates": 961,
+      "independent_windows": 17,
+      "min_windows": 25,
+      "win_rate": 0.2839,
+      "baseline": 0.2662,
+      "edge": 0.0177,
+      "edge_lower_90": -0.0552,
+      "edge_lower_penalized": -0.1466,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.27648,
+       "1.0%": 0.27162,
+       "1.5%": 0.26677
+      },
+      "excess_expectancy_1pct": 0.01719,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 503,
+        "edge": -0.0334
+       },
+       {
+        "fold": 2,
+        "calls": 277,
+        "edge": 0.0903
+       },
+       {
+        "fold": 3,
+        "calls": 781,
+        "edge": 0.0374
+       },
+       {
+        "fold": 4,
+        "calls": 327,
+        "edge": -0.0122
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.3595,
+       "market": 0.196,
+       "sector": 0.1797,
+       "liquidity": 0.1731,
+       "circuit": 0.0895,
+       "news": 0.0022
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "160": {
+      "calls": 1901,
+      "graded": 1801,
+      "excluded_unresolved_steps": 100,
+      "excluded_share": 0.0526,
+      "exclusion_warning": false,
+      "distinct_dates": 925,
+      "independent_windows": 12,
+      "min_windows": 25,
+      "win_rate": 0.4175,
+      "baseline": 0.3458,
+      "edge": 0.0718,
+      "edge_lower_90": -0.0393,
+      "edge_lower_penalized": -0.178,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.3935,
+       "1.0%": 0.38865,
+       "1.5%": 0.38381
+      },
+      "excess_expectancy_1pct": 0.04993,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 489,
+        "edge": 0.0382
+       },
+       {
+        "fold": 2,
+        "calls": 267,
+        "edge": 0.0893
+       },
+       {
+        "fold": 3,
+        "calls": 781,
+        "edge": 0.1144
+       },
+       {
+        "fold": 4,
+        "calls": 264,
+        "edge": -0.0099
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.2688,
+       "liquidity": 0.2669,
+       "sector": 0.2183,
+       "market": 0.1687,
+       "circuit": 0.0705,
+       "news": 0.0067
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "240": {
+      "calls": 1801,
+      "graded": 1689,
+      "excluded_unresolved_steps": 112,
+      "excluded_share": 0.0622,
+      "exclusion_warning": false,
+      "distinct_dates": 857,
+      "independent_windows": 10,
+      "min_windows": 25,
+      "win_rate": 0.4405,
+      "baseline": 0.3382,
+      "edge": 0.1023,
+      "edge_lower_90": -0.0122,
+      "edge_lower_penalized": -0.1736,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.46045,
+       "1.0%": 0.45561,
+       "1.5%": 0.45078
+      },
+      "excess_expectancy_1pct": 0.0813,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 487,
+        "edge": 0.0293
+       },
+       {
+        "fold": 2,
+        "calls": 257,
+        "edge": 0.1059
+       },
+       {
+        "fold": 3,
+        "calls": 781,
+        "edge": 0.1578
+       },
+       {
+        "fold": 4,
+        "calls": 164,
+        "edge": 0.0489
+       }
+      ],
+      "folds_positive": 4,
+      "failure_causes": {
+       "liquidity": 0.3048,
+       "sector": 0.2212,
+       "model": 0.2095,
+       "market": 0.2042,
+       "circuit": 0.0593,
+       "news": 0.0011
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": true,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "post_lower_circuit": {
+     "5": {
+      "calls": 624,
+      "graded": 624,
+      "excluded_unresolved_steps": 0,
+      "excluded_share": 0.0,
+      "exclusion_warning": false,
+      "distinct_dates": 457,
+      "independent_windows": 149,
+      "min_windows": 40,
+      "win_rate": 0.3029,
+      "baseline": 0.3087,
+      "edge": -0.0058,
+      "edge_lower_90": -0.0596,
+      "edge_lower_penalized": -0.1325,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": -0.00211,
+       "1.0%": -0.00694,
+       "1.5%": -0.01177
+      },
+      "excess_expectancy_1pct": -0.01534,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 151,
+        "edge": -0.0433
+       },
+       {
+        "fold": 2,
+        "calls": 80,
+        "edge": 0.0229
+       },
+       {
+        "fold": 3,
+        "calls": 200,
+        "edge": 0.0866
+       },
+       {
+        "fold": 4,
+        "calls": 193,
+        "edge": -0.084
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.4276,
+       "market": 0.1862,
+       "sector": 0.1678,
+       "liquidity": 0.1011,
+       "circuit": 0.0736,
+       "news": 0.0437
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "10": {
+      "calls": 617,
+      "graded": 617,
+      "excluded_unresolved_steps": 0,
+      "excluded_share": 0.0,
+      "exclusion_warning": false,
+      "distinct_dates": 454,
+      "independent_windows": 101,
+      "min_windows": 40,
+      "win_rate": 0.269,
+      "baseline": 0.3013,
+      "edge": -0.0322,
+      "edge_lower_90": -0.0785,
+      "edge_lower_penalized": -0.1655,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": -0.01295,
+       "1.0%": -0.01778,
+       "1.5%": -0.02261
+      },
+      "excess_expectancy_1pct": -0.02874,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 151,
+        "edge": -0.0246
+       },
+       {
+        "fold": 2,
+        "calls": 80,
+        "edge": -0.0221
+       },
+       {
+        "fold": 3,
+        "calls": 200,
+        "edge": 0.0704
+       },
+       {
+        "fold": 4,
+        "calls": 186,
+        "edge": -0.1532
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "model": 0.4058,
+       "sector": 0.1818,
+       "market": 0.1641,
+       "liquidity": 0.1086,
+       "circuit": 0.1086,
+       "news": 0.031
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "20": {
+      "calls": 615,
+      "graded": 610,
+      "excluded_unresolved_steps": 5,
+      "excluded_share": 0.0081,
+      "exclusion_warning": false,
+      "distinct_dates": 452,
+      "independent_windows": 68,
+      "min_windows": 40,
+      "win_rate": 0.2541,
+      "baseline": 0.3095,
+      "edge": -0.0554,
+      "edge_lower_90": -0.1184,
+      "edge_lower_penalized": -0.1945,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": -0.01714,
+       "1.0%": -0.02197,
+       "1.5%": -0.0268
+      },
+      "excess_expectancy_1pct": -0.04399,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 151,
+        "edge": -0.057
+       },
+       {
+        "fold": 2,
+        "calls": 80,
+        "edge": 0.0531
+       },
+       {
+        "fold": 3,
+        "calls": 195,
+        "edge": 0.0271
+       },
+       {
+        "fold": 4,
+        "calls": 184,
+        "edge": -0.1886
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.4154,
+       "market": 0.1714,
+       "sector": 0.156,
+       "liquidity": 0.1231,
+       "circuit": 0.1121,
+       "news": 0.022
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "40": {
+      "calls": 600,
+      "graded": 593,
+      "excluded_unresolved_steps": 7,
+      "excluded_share": 0.0117,
+      "exclusion_warning": false,
+      "distinct_dates": 438,
+      "independent_windows": 42,
+      "min_windows": 30,
+      "win_rate": 0.1939,
+      "baseline": 0.2687,
+      "edge": -0.0748,
+      "edge_lower_90": -0.1216,
+      "edge_lower_penalized": -0.2156,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.02807,
+       "1.0%": 0.02325,
+       "1.5%": 0.01843
+      },
+      "excess_expectancy_1pct": -0.05469,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 151,
+        "edge": -0.0286
+       },
+       {
+        "fold": 2,
+        "calls": 80,
+        "edge": 0.0087
+       },
+       {
+        "fold": 3,
+        "calls": 193,
+        "edge": -0.0456
+       },
+       {
+        "fold": 4,
+        "calls": 169,
+        "edge": -0.1889
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "model": 0.4561,
+       "circuit": 0.1527,
+       "market": 0.1402,
+       "sector": 0.1172,
+       "liquidity": 0.1025,
+       "news": 0.0314
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "80": {
+      "calls": 565,
+      "graded": 556,
+      "excluded_unresolved_steps": 9,
+      "excluded_share": 0.0159,
+      "exclusion_warning": false,
+      "distinct_dates": 412,
+      "independent_windows": 23,
+      "min_windows": 25,
+      "win_rate": 0.1637,
+      "baseline": 0.2676,
+      "edge": -0.1039,
+      "edge_lower_90": -0.1429,
+      "edge_lower_penalized": -0.2311,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.07037,
+       "1.0%": 0.06556,
+       "1.5%": 0.06075
+      },
+      "excess_expectancy_1pct": -0.08863,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 151,
+        "edge": -0.0591
+       },
+       {
+        "fold": 2,
+        "calls": 80,
+        "edge": 0.0203
+       },
+       {
+        "fold": 3,
+        "calls": 191,
+        "edge": -0.1382
+       },
+       {
+        "fold": 4,
+        "calls": 134,
+        "edge": -0.1796
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "model": 0.4409,
+       "market": 0.1548,
+       "liquidity": 0.1548,
+       "sector": 0.1376,
+       "circuit": 0.0946,
+       "news": 0.0172
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "120": {
+      "calls": 538,
+      "graded": 529,
+      "excluded_unresolved_steps": 9,
+      "excluded_share": 0.0167,
+      "exclusion_warning": false,
+      "distinct_dates": 392,
+      "independent_windows": 17,
+      "min_windows": 25,
+      "win_rate": 0.1512,
+      "baseline": 0.2549,
+      "edge": -0.1037,
+      "edge_lower_90": -0.1552,
+      "edge_lower_penalized": -0.2607,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.14036,
+       "1.0%": 0.13556,
+       "1.5%": 0.13076
+      },
+      "excess_expectancy_1pct": -0.11057,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 151,
+        "edge": -0.0797
+       },
+       {
+        "fold": 2,
+        "calls": 80,
+        "edge": 0.0192
+       },
+       {
+        "fold": 3,
+        "calls": 191,
+        "edge": -0.1107
+       },
+       {
+        "fold": 4,
+        "calls": 107,
+        "edge": -0.2171
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "model": 0.4098,
+       "liquidity": 0.2116,
+       "market": 0.1559,
+       "sector": 0.1269,
+       "circuit": 0.0846,
+       "news": 0.0111
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "160": {
+      "calls": 516,
+      "graded": 498,
+      "excluded_unresolved_steps": 18,
+      "excluded_share": 0.0349,
+      "exclusion_warning": false,
+      "distinct_dates": 366,
+      "independent_windows": 13,
+      "min_windows": 25,
+      "win_rate": 0.2671,
+      "baseline": 0.3603,
+      "edge": -0.0932,
+      "edge_lower_90": -0.1885,
+      "edge_lower_penalized": -0.3291,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.24853,
+       "1.0%": 0.24374,
+       "1.5%": 0.23895
+      },
+      "excess_expectancy_1pct": -0.12651,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 147,
+        "edge": 0.0142
+       },
+       {
+        "fold": 2,
+        "calls": 75,
+        "edge": -0.2229
+       },
+       {
+        "fold": 3,
+        "calls": 191,
+        "edge": -0.1326
+       },
+       {
+        "fold": 4,
+        "calls": 85,
+        "edge": -0.0761
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "model": 0.3699,
+       "liquidity": 0.2,
+       "market": 0.1945,
+       "sector": 0.1726,
+       "circuit": 0.063
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "240": {
+      "calls": 477,
+      "graded": 453,
+      "excluded_unresolved_steps": 24,
+      "excluded_share": 0.0503,
+      "exclusion_warning": false,
+      "distinct_dates": 330,
+      "independent_windows": 10,
+      "min_windows": 25,
+      "win_rate": 0.3223,
+      "baseline": 0.3446,
+      "edge": -0.0223,
+      "edge_lower_90": -0.1286,
+      "edge_lower_penalized": -0.3024,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.56282,
+       "1.0%": 0.55805,
+       "1.5%": 0.55328
+      },
+      "excess_expectancy_1pct": 0.02432,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 147,
+        "edge": -0.0014
+       },
+       {
+        "fold": 2,
+        "calls": 69,
+        "edge": -0.2665
+       },
+       {
+        "fold": 3,
+        "calls": 191,
+        "edge": -0.0066
+       },
+       {
+        "fold": 4,
+        "calls": 46,
+        "edge": 0.2124
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "liquidity": 0.2736,
+       "model": 0.2182,
+       "market": 0.215,
+       "sector": 0.1889,
+       "circuit": 0.1042
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "volume_anomaly": {
+     "5": {
+      "calls": 3280,
+      "graded": 3265,
+      "excluded_unresolved_steps": 15,
+      "excluded_share": 0.0046,
+      "exclusion_warning": false,
+      "distinct_dates": 1129,
+      "independent_windows": 256,
+      "min_windows": 40,
+      "win_rate": 0.3764,
+      "baseline": 0.3235,
+      "edge": 0.0529,
+      "edge_lower_90": -0.0242,
+      "edge_lower_penalized": -0.0645,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.00905,
+       "1.0%": 0.0041,
+       "1.5%": -0.00085
+      },
+      "excess_expectancy_1pct": -0.00707,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 725,
+        "edge": 0.0373
+       },
+       {
+        "fold": 2,
+        "calls": 526,
+        "edge": 0.0077
+       },
+       {
+        "fold": 3,
+        "calls": 931,
+        "edge": 0.0782
+       },
+       {
+        "fold": 4,
+        "calls": 1083,
+        "edge": 0.0637
+       }
+      ],
+      "folds_positive": 4,
+      "failure_causes": {
+       "model": 0.3689,
+       "market": 0.2156,
+       "sector": 0.2097,
+       "news": 0.0987,
+       "liquidity": 0.0599,
+       "circuit": 0.0472
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": false,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "10": {
+      "calls": 3265,
+      "graded": 3247,
+      "excluded_unresolved_steps": 18,
+      "excluded_share": 0.0055,
+      "exclusion_warning": false,
+      "distinct_dates": 1124,
+      "independent_windows": 151,
+      "min_windows": 40,
+      "win_rate": 0.381,
+      "baseline": 0.3379,
+      "edge": 0.043,
+      "edge_lower_90": -0.027,
+      "edge_lower_penalized": -0.0772,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.01957,
+       "1.0%": 0.01462,
+       "1.5%": 0.00968
+      },
+      "excess_expectancy_1pct": -0.00529,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 724,
+        "edge": 0.0121
+       },
+       {
+        "fold": 2,
+        "calls": 526,
+        "edge": 0.0092
+       },
+       {
+        "fold": 3,
+        "calls": 929,
+        "edge": 0.0899
+       },
+       {
+        "fold": 4,
+        "calls": 1068,
+        "edge": 0.0399
+       }
+      ],
+      "folds_positive": 4,
+      "failure_causes": {
+       "model": 0.3781,
+       "market": 0.2154,
+       "sector": 0.2045,
+       "liquidity": 0.0766,
+       "news": 0.0756,
+       "circuit": 0.0498
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "20": {
+      "calls": 3248,
+      "graded": 3226,
+      "excluded_unresolved_steps": 22,
+      "excluded_share": 0.0068,
+      "exclusion_warning": false,
+      "distinct_dates": 1115,
+      "independent_windows": 82,
+      "min_windows": 40,
+      "win_rate": 0.3819,
+      "baseline": 0.3358,
+      "edge": 0.0461,
+      "edge_lower_90": -0.0317,
+      "edge_lower_penalized": -0.092,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.03661,
+       "1.0%": 0.03166,
+       "1.5%": 0.02672
+      },
+      "excess_expectancy_1pct": -0.00267,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 724,
+        "edge": 0.0076
+       },
+       {
+        "fold": 2,
+        "calls": 526,
+        "edge": 0.0054
+       },
+       {
+        "fold": 3,
+        "calls": 925,
+        "edge": 0.0776
+       },
+       {
+        "fold": 4,
+        "calls": 1051,
+        "edge": 0.0653
+       }
+      ],
+      "folds_positive": 4,
+      "failure_causes": {
+       "model": 0.339,
+       "market": 0.2598,
+       "sector": 0.2061,
+       "liquidity": 0.0853,
+       "circuit": 0.0602,
+       "news": 0.0496
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "40": {
+      "calls": 3211,
+      "graded": 3166,
+      "excluded_unresolved_steps": 45,
+      "excluded_share": 0.014,
+      "exclusion_warning": false,
+      "distinct_dates": 1097,
+      "independent_windows": 47,
+      "min_windows": 30,
+      "win_rate": 0.2678,
+      "baseline": 0.2578,
+      "edge": 0.0101,
+      "edge_lower_90": -0.0032,
+      "edge_lower_penalized": -0.0633,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.06738,
+       "1.0%": 0.06243,
+       "1.5%": 0.05749
+      },
+      "excess_expectancy_1pct": -0.00238,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 722,
+        "edge": 0.0718
+       },
+       {
+        "fold": 2,
+        "calls": 522,
+        "edge": -0.0372
+       },
+       {
+        "fold": 3,
+        "calls": 908,
+        "edge": -0.0068
+       },
+       {
+        "fold": 4,
+        "calls": 1014,
+        "edge": 0.0056
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.3576,
+       "market": 0.2718,
+       "sector": 0.1475,
+       "liquidity": 0.1009,
+       "circuit": 0.0889,
+       "news": 0.0332
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "80": {
+      "calls": 3187,
+      "graded": 3107,
+      "excluded_unresolved_steps": 80,
+      "excluded_share": 0.0251,
+      "exclusion_warning": false,
+      "distinct_dates": 1079,
+      "independent_windows": 25,
+      "min_windows": 25,
+      "win_rate": 0.2559,
+      "baseline": 0.2709,
+      "edge": -0.015,
+      "edge_lower_90": -0.0124,
+      "edge_lower_penalized": -0.0943,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.11758,
+       "1.0%": 0.11263,
+       "1.5%": 0.10769
+      },
+      "excess_expectancy_1pct": -0.03136,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 709,
+        "edge": 0.1023
+       },
+       {
+        "fold": 2,
+        "calls": 511,
+        "edge": -0.0014
+       },
+       {
+        "fold": 3,
+        "calls": 897,
+        "edge": -0.0475
+       },
+       {
+        "fold": 4,
+        "calls": 990,
+        "edge": -0.0766
+       }
+      ],
+      "folds_positive": 1,
+      "failure_causes": {
+       "model": 0.3711,
+       "market": 0.2137,
+       "sector": 0.1769,
+       "liquidity": 0.1133,
+       "circuit": 0.1034,
+       "news": 0.0216
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "120": {
+      "calls": 3017,
+      "graded": 2929,
+      "excluded_unresolved_steps": 88,
+      "excluded_share": 0.0292,
+      "exclusion_warning": false,
+      "distinct_dates": 1044,
+      "independent_windows": 17,
+      "min_windows": 25,
+      "win_rate": 0.2789,
+      "baseline": 0.2778,
+      "edge": 0.0011,
+      "edge_lower_90": -0.0234,
+      "edge_lower_penalized": -0.0756,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.23569,
+       "1.0%": 0.23075,
+       "1.5%": 0.2258
+      },
+      "excess_expectancy_1pct": -0.02302,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 705,
+        "edge": 0.0854
+       },
+       {
+        "fold": 2,
+        "calls": 507,
+        "edge": 0.0362
+       },
+       {
+        "fold": 3,
+        "calls": 897,
+        "edge": -0.0403
+       },
+       {
+        "fold": 4,
+        "calls": 820,
+        "edge": -0.0477
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.3736,
+       "sector": 0.2131,
+       "market": 0.1619,
+       "liquidity": 0.1411,
+       "circuit": 0.1013,
+       "news": 0.009
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": false,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "160": {
+      "calls": 2885,
+      "graded": 2773,
+      "excluded_unresolved_steps": 112,
+      "excluded_share": 0.0388,
+      "exclusion_warning": false,
+      "distinct_dates": 1005,
+      "independent_windows": 13,
+      "min_windows": 25,
+      "win_rate": 0.3797,
+      "baseline": 0.3532,
+      "edge": 0.0265,
+      "edge_lower_90": -0.041,
+      "edge_lower_penalized": -0.1231,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.36147,
+       "1.0%": 0.35653,
+       "1.5%": 0.3516
+      },
+      "excess_expectancy_1pct": 0.0005,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 698,
+        "edge": 0.0658
+       },
+       {
+        "fold": 2,
+        "calls": 492,
+        "edge": -0.0138
+       },
+       {
+        "fold": 3,
+        "calls": 895,
+        "edge": 0.1061
+       },
+       {
+        "fold": 4,
+        "calls": 688,
+        "edge": -0.0881
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.3087,
+       "sector": 0.2517,
+       "liquidity": 0.1919,
+       "market": 0.1401,
+       "circuit": 0.0965,
+       "news": 0.011
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "240": {
+      "calls": 2590,
+      "graded": 2452,
+      "excluded_unresolved_steps": 138,
+      "excluded_share": 0.0533,
+      "exclusion_warning": false,
+      "distinct_dates": 927,
+      "independent_windows": 10,
+      "min_windows": 25,
+      "win_rate": 0.4078,
+      "baseline": 0.3501,
+      "edge": 0.0577,
+      "edge_lower_90": -0.0284,
+      "edge_lower_penalized": -0.1346,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.59916,
+       "1.0%": 0.59423,
+       "1.5%": 0.5893
+      },
+      "excess_expectancy_1pct": 0.10159,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 679,
+        "edge": 0.0396
+       },
+       {
+        "fold": 2,
+        "calls": 486,
+        "edge": -0.039
+       },
+       {
+        "fold": 3,
+        "calls": 895,
+        "edge": 0.1549
+       },
+       {
+        "fold": 4,
+        "calls": 392,
+        "edge": -0.013
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "sector": 0.2975,
+       "liquidity": 0.2404,
+       "model": 0.2204,
+       "market": 0.1467,
+       "circuit": 0.0916,
+       "news": 0.0034
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "rate_rising": {
+     "5": {
+      "calls": 1608,
+      "graded": 1600,
+      "excluded_unresolved_steps": 8,
+      "excluded_share": 0.005,
+      "exclusion_warning": false,
+      "distinct_dates": 116,
+      "independent_windows": 24,
+      "min_windows": 40,
+      "win_rate": 0.3,
+      "baseline": 0.2625,
+      "edge": 0.0375,
+      "edge_lower_90": 0.0207,
+      "edge_lower_penalized": -0.0397,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": -0.00258,
+       "1.0%": -0.00743,
+       "1.5%": -0.01229
+      },
+      "excess_expectancy_1pct": -0.00446,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 2,
+        "calls": 1048,
+        "edge": 0.0327
+       },
+       {
+        "fold": 3,
+        "calls": 282,
+        "edge": 0.0332
+       },
+       {
+        "fold": 4,
+        "calls": 270,
+        "edge": 0.0608
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.4241,
+       "market": 0.2938,
+       "sector": 0.1518,
+       "liquidity": 0.0723,
+       "news": 0.0429,
+       "circuit": 0.0152
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": false,
+       "folds": true,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "10": {
+      "calls": 1608,
+      "graded": 1597,
+      "excluded_unresolved_steps": 11,
+      "excluded_share": 0.0068,
+      "exclusion_warning": false,
+      "distinct_dates": 116,
+      "independent_windows": 15,
+      "min_windows": 40,
+      "win_rate": 0.2918,
+      "baseline": 0.2556,
+      "edge": 0.0362,
+      "edge_lower_90": 0.0317,
+      "edge_lower_penalized": -0.0549,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.00085,
+       "1.0%": -0.004,
+       "1.5%": -0.00886
+      },
+      "excess_expectancy_1pct": 0.00284,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 2,
+        "calls": 1048,
+        "edge": 0.0088
+       },
+       {
+        "fold": 3,
+        "calls": 279,
+        "edge": 0.0987
+       },
+       {
+        "fold": 4,
+        "calls": 270,
+        "edge": 0.0778
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.3714,
+       "market": 0.3466,
+       "sector": 0.153,
+       "liquidity": 0.0725,
+       "news": 0.038,
+       "circuit": 0.0186
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "20": {
+      "calls": 1608,
+      "graded": 1597,
+      "excluded_unresolved_steps": 11,
+      "excluded_share": 0.0068,
+      "exclusion_warning": false,
+      "distinct_dates": 116,
+      "independent_windows": 9,
+      "min_windows": 40,
+      "win_rate": 0.2874,
+      "baseline": 0.2514,
+      "edge": 0.036,
+      "edge_lower_90": 0.0145,
+      "edge_lower_penalized": -0.0557,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.00665,
+       "1.0%": 0.00179,
+       "1.5%": -0.00306
+      },
+      "excess_expectancy_1pct": 0.00839,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 2,
+        "calls": 1048,
+        "edge": 0.0064
+       },
+       {
+        "fold": 3,
+        "calls": 279,
+        "edge": 0.1173
+       },
+       {
+        "fold": 4,
+        "calls": 270,
+        "edge": 0.0669
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "market": 0.3972,
+       "model": 0.3067,
+       "sector": 0.1547,
+       "liquidity": 0.0879,
+       "news": 0.0325,
+       "circuit": 0.0211
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": false,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "40": {
+      "calls": 1608,
+      "graded": 1597,
+      "excluded_unresolved_steps": 11,
+      "excluded_share": 0.0068,
+      "exclusion_warning": false,
+      "distinct_dates": 116,
+      "independent_windows": 6,
+      "min_windows": 30,
+      "win_rate": 0.2217,
+      "baseline": 0.1758,
+      "edge": 0.0459,
+      "edge_lower_90": 0.0351,
+      "edge_lower_penalized": -0.0353,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.02808,
+       "1.0%": 0.02322,
+       "1.5%": 0.01837
+      },
+      "excess_expectancy_1pct": 0.02198,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 2,
+        "calls": 1048,
+        "edge": 0.0251
+       },
+       {
+        "fold": 3,
+        "calls": 279,
+        "edge": 0.1107
+       },
+       {
+        "fold": 4,
+        "calls": 270,
+        "edge": 0.0595
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "market": 0.3572,
+       "model": 0.3105,
+       "sector": 0.1866,
+       "liquidity": 0.115,
+       "circuit": 0.0209,
+       "news": 0.0097
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "80": {
+      "calls": 1608,
+      "graded": 1597,
+      "excluded_unresolved_steps": 11,
+      "excluded_share": 0.0068,
+      "exclusion_warning": false,
+      "distinct_dates": 116,
+      "independent_windows": 5,
+      "min_windows": 25,
+      "win_rate": 0.2561,
+      "baseline": 0.2226,
+      "edge": 0.0335,
+      "edge_lower_90": -0.023,
+      "edge_lower_penalized": -0.0944,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.05852,
+       "1.0%": 0.05367,
+       "1.5%": 0.04882
+      },
+      "excess_expectancy_1pct": 0.01767,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 2,
+        "calls": 1048,
+        "edge": 0.0526
+       },
+       {
+        "fold": 3,
+        "calls": 279,
+        "edge": 0.0349
+       },
+       {
+        "fold": 4,
+        "calls": 270,
+        "edge": -0.042
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.3022,
+       "market": 0.2635,
+       "sector": 0.2298,
+       "liquidity": 0.1372,
+       "circuit": 0.0505,
+       "news": 0.0168
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "120": {
+      "calls": 1608,
+      "graded": 1579,
+      "excluded_unresolved_steps": 29,
+      "excluded_share": 0.018,
+      "exclusion_warning": false,
+      "distinct_dates": 116,
+      "independent_windows": 4,
+      "min_windows": 25,
+      "win_rate": 0.2711,
+      "baseline": 0.2276,
+      "edge": 0.0434,
+      "edge_lower_90": 0.0008,
+      "edge_lower_penalized": -0.1214,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.20031,
+       "1.0%": 0.19546,
+       "1.5%": 0.19061
+      },
+      "excess_expectancy_1pct": 0.03753,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 2,
+        "calls": 1030,
+        "edge": 0.066
+       },
+       {
+        "fold": 3,
+        "calls": 279,
+        "edge": 0.0238
+       },
+       {
+        "fold": 4,
+        "calls": 270,
+        "edge": -0.0222
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "sector": 0.305,
+       "model": 0.298,
+       "market": 0.1842,
+       "liquidity": 0.1651,
+       "circuit": 0.0391,
+       "news": 0.0087
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "160": {
+      "calls": 1608,
+      "graded": 1563,
+      "excluded_unresolved_steps": 45,
+      "excluded_share": 0.028,
+      "exclusion_warning": false,
+      "distinct_dates": 116,
+      "independent_windows": 4,
+      "min_windows": 25,
+      "win_rate": 0.3621,
+      "baseline": 0.3591,
+      "edge": 0.003,
+      "edge_lower_90": -0.0686,
+      "edge_lower_penalized": -0.2082,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.24636,
+       "1.0%": 0.24151,
+       "1.5%": 0.23666
+      },
+      "excess_expectancy_1pct": 0.00092,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 2,
+        "calls": 1014,
+        "edge": 0.0215
+       },
+       {
+        "fold": 3,
+        "calls": 279,
+        "edge": 0.0816
+       },
+       {
+        "fold": 4,
+        "calls": 270,
+        "edge": -0.1475
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "sector": 0.3831,
+       "model": 0.329,
+       "liquidity": 0.1926,
+       "market": 0.0652,
+       "circuit": 0.0281,
+       "news": 0.002
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "240": {
+      "calls": 1608,
+      "graded": 1562,
+      "excluded_unresolved_steps": 46,
+      "excluded_share": 0.0286,
+      "exclusion_warning": false,
+      "distinct_dates": 116,
+      "independent_windows": 3,
+      "min_windows": 25,
+      "win_rate": 0.3624,
+      "baseline": 0.3636,
+      "edge": -0.0012,
+      "edge_lower_90": -0.0352,
+      "edge_lower_penalized": -0.1772,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.63046,
+       "1.0%": 0.62561,
+       "1.5%": 0.62076
+      },
+      "excess_expectancy_1pct": 0.01103,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 2,
+        "calls": 1014,
+        "edge": -0.043
+       },
+       {
+        "fold": 3,
+        "calls": 279,
+        "edge": 0.0386
+       },
+       {
+        "fold": 4,
+        "calls": 269,
+        "edge": 0.1151
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "sector": 0.4177,
+       "model": 0.2731,
+       "liquidity": 0.1857,
+       "circuit": 0.1044,
+       "market": 0.0171,
+       "news": 0.002
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    },
+    "rate_falling": {
+     "5": {
+      "calls": 3954,
+      "graded": 3951,
+      "excluded_unresolved_steps": 3,
+      "excluded_share": 0.0008,
+      "exclusion_warning": false,
+      "distinct_dates": 293,
+      "independent_windows": 58,
+      "min_windows": 40,
+      "win_rate": 0.3991,
+      "baseline": 0.3371,
+      "edge": 0.062,
+      "edge_lower_90": 0.0335,
+      "edge_lower_penalized": -0.0119,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.02722,
+       "1.0%": 0.0223,
+       "1.5%": 0.01738
+      },
+      "excess_expectancy_1pct": 0.01008,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 2,
+        "calls": 563,
+        "edge": 0.0592
+       },
+       {
+        "fold": 3,
+        "calls": 1475,
+        "edge": 0.0383
+       },
+       {
+        "fold": 4,
+        "calls": 1913,
+        "edge": 0.0812
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.4473,
+       "sector": 0.2224,
+       "market": 0.2144,
+       "liquidity": 0.0472,
+       "news": 0.0375,
+       "circuit": 0.0312
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": true,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "NO EVIDENCE"
+     },
+     "10": {
+      "calls": 3954,
+      "graded": 3950,
+      "excluded_unresolved_steps": 4,
+      "excluded_share": 0.001,
+      "exclusion_warning": false,
+      "distinct_dates": 293,
+      "independent_windows": 33,
+      "min_windows": 40,
+      "win_rate": 0.3959,
+      "baseline": 0.347,
+      "edge": 0.0489,
+      "edge_lower_90": 0.0258,
+      "edge_lower_penalized": -0.0308,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.04589,
+       "1.0%": 0.04097,
+       "1.5%": 0.03605
+      },
+      "excess_expectancy_1pct": 0.02207,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 2,
+        "calls": 562,
+        "edge": 0.0649
+       },
+       {
+        "fold": 3,
+        "calls": 1475,
+        "edge": 0.0011
+       },
+       {
+        "fold": 4,
+        "calls": 1913,
+        "edge": 0.0811
+       }
+      ],
+      "folds_positive": 3,
+      "failure_causes": {
+       "model": 0.4225,
+       "sector": 0.2372,
+       "market": 0.223,
+       "liquidity": 0.0503,
+       "circuit": 0.0352,
+       "news": 0.0319
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": true,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "20": {
+      "calls": 3954,
+      "graded": 3941,
+      "excluded_unresolved_steps": 13,
+      "excluded_share": 0.0033,
+      "exclusion_warning": false,
+      "distinct_dates": 293,
+      "independent_windows": 22,
+      "min_windows": 40,
+      "win_rate": 0.3834,
+      "baseline": 0.3529,
+      "edge": 0.0305,
+      "edge_lower_90": 0.0068,
+      "edge_lower_penalized": -0.062,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.05861,
+       "1.0%": 0.05369,
+       "1.5%": 0.04877
+      },
+      "excess_expectancy_1pct": 0.02797,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 2,
+        "calls": 562,
+        "edge": 0.0857
+       },
+       {
+        "fold": 3,
+        "calls": 1466,
+        "edge": -0.0202
+       },
+       {
+        "fold": 4,
+        "calls": 1913,
+        "edge": 0.0531
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.3823,
+       "sector": 0.2753,
+       "market": 0.2136,
+       "liquidity": 0.0572,
+       "circuit": 0.0514,
+       "news": 0.0202
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "40": {
+      "calls": 3954,
+      "graded": 3901,
+      "excluded_unresolved_steps": 53,
+      "excluded_share": 0.0134,
+      "exclusion_warning": false,
+      "distinct_dates": 293,
+      "independent_windows": 13,
+      "min_windows": 30,
+      "win_rate": 0.2971,
+      "baseline": 0.2922,
+      "edge": 0.0049,
+      "edge_lower_90": -0.0127,
+      "edge_lower_penalized": -0.0759,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.11733,
+       "1.0%": 0.11241,
+       "1.5%": 0.10749
+      },
+      "excess_expectancy_1pct": 0.04695,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 2,
+        "calls": 547,
+        "edge": 0.0136
+       },
+       {
+        "fold": 3,
+        "calls": 1441,
+        "edge": -0.0585
+       },
+       {
+        "fold": 4,
+        "calls": 1913,
+        "edge": 0.0503
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.4238,
+       "sector": 0.26,
+       "market": 0.1612,
+       "circuit": 0.0813,
+       "liquidity": 0.0529,
+       "news": 0.0208
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "80": {
+      "calls": 3954,
+      "graded": 3884,
+      "excluded_unresolved_steps": 70,
+      "excluded_share": 0.0177,
+      "exclusion_warning": false,
+      "distinct_dates": 293,
+      "independent_windows": 9,
+      "min_windows": 25,
+      "win_rate": 0.3141,
+      "baseline": 0.3154,
+      "edge": -0.0013,
+      "edge_lower_90": -0.0128,
+      "edge_lower_penalized": -0.096,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.25195,
+       "1.0%": 0.24703,
+       "1.5%": 0.24211
+      },
+      "excess_expectancy_1pct": 0.03506,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 2,
+        "calls": 545,
+        "edge": 0.0887
+       },
+       {
+        "fold": 3,
+        "calls": 1427,
+        "edge": -0.0904
+       },
+       {
+        "fold": 4,
+        "calls": 1912,
+        "edge": 0.0396
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.4193,
+       "sector": 0.2793,
+       "market": 0.1152,
+       "circuit": 0.1017,
+       "liquidity": 0.0773,
+       "news": 0.0071
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "120": {
+      "calls": 3954,
+      "graded": 3873,
+      "excluded_unresolved_steps": 81,
+      "excluded_share": 0.0205,
+      "exclusion_warning": false,
+      "distinct_dates": 293,
+      "independent_windows": 7,
+      "min_windows": 25,
+      "win_rate": 0.3447,
+      "baseline": 0.3274,
+      "edge": 0.0173,
+      "edge_lower_90": -0.0123,
+      "edge_lower_penalized": -0.1358,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.41282,
+       "1.0%": 0.4079,
+       "1.5%": 0.40298
+      },
+      "excess_expectancy_1pct": 0.05911,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 2,
+        "calls": 545,
+        "edge": 0.0861
+       },
+       {
+        "fold": 3,
+        "calls": 1423,
+        "edge": -0.0492
+       },
+       {
+        "fold": 4,
+        "calls": 1905,
+        "edge": 0.0474
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.4307,
+       "sector": 0.2675,
+       "circuit": 0.106,
+       "market": 0.1052,
+       "liquidity": 0.0823,
+       "news": 0.0083
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "160": {
+      "calls": 3954,
+      "graded": 3837,
+      "excluded_unresolved_steps": 117,
+      "excluded_share": 0.0296,
+      "exclusion_warning": false,
+      "distinct_dates": 293,
+      "independent_windows": 6,
+      "min_windows": 25,
+      "win_rate": 0.4206,
+      "baseline": 0.386,
+      "edge": 0.0346,
+      "edge_lower_90": -0.0427,
+      "edge_lower_penalized": -0.1702,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 0.62288,
+       "1.0%": 0.61795,
+       "1.5%": 0.61303
+      },
+      "excess_expectancy_1pct": 0.10127,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 2,
+        "calls": 527,
+        "edge": -0.0256
+       },
+       {
+        "fold": 3,
+        "calls": 1409,
+        "edge": 0.0371
+       },
+       {
+        "fold": 4,
+        "calls": 1901,
+        "edge": 0.0495
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "model": 0.4022,
+       "sector": 0.2803,
+       "market": 0.1089,
+       "liquidity": 0.1026,
+       "circuit": 0.0981,
+       "news": 0.0081
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     },
+     "240": {
+      "calls": 2939,
+      "graded": 2810,
+      "excluded_unresolved_steps": 129,
+      "excluded_share": 0.0439,
+      "exclusion_warning": false,
+      "distinct_dates": 217,
+      "independent_windows": 5,
+      "min_windows": 25,
+      "win_rate": 0.4491,
+      "baseline": 0.3731,
+      "edge": 0.076,
+      "edge_lower_90": 0.0054,
+      "edge_lower_penalized": -0.1214,
+      "penalty_tests": 4264,
+      "expectancy": {
+       "0.5%": 1.02689,
+       "1.0%": 1.02199,
+       "1.5%": 1.0171
+      },
+      "excess_expectancy_1pct": 0.18649,
+      "calibration": {
+       "claimed": false
+      },
+      "folds": [
+       {
+        "fold": 1,
+        "calls": 0,
+        "edge": null
+       },
+       {
+        "fold": 2,
+        "calls": 515,
+        "edge": -0.0379
+       },
+       {
+        "fold": 3,
+        "calls": 1409,
+        "edge": 0.0894
+       },
+       {
+        "fold": 4,
+        "calls": 886,
+        "edge": 0.121
+       }
+      ],
+      "folds_positive": 2,
+      "failure_causes": {
+       "sector": 0.3714,
+       "model": 0.2319,
+       "market": 0.1557,
+       "liquidity": 0.155,
+       "circuit": 0.084,
+       "news": 0.0019
+      },
+      "implausible": false,
+      "gates": {
+       "edge_8_points": false,
+       "edge_lower_bound_above_zero": false,
+       "expectancy_all_costs": true,
+       "excess_expectancy_1pct": true,
+       "folds": false,
+       "sample": false,
+       "calibration": true,
+       "not_leaky": true
+      },
+      "verdict": "INSUFFICIENT SAMPLE"
+     }
+    }
+   },
+   "monitoring": {
+    "5": {
+     "points": 116,
+     "suspend_points": 88,
+     "kill_brier_points": 0,
+     "kill_edge_points": 68
+    },
+    "10": {
+     "points": 116,
+     "suspend_points": 81,
+     "kill_brier_points": 0,
+     "kill_edge_points": 71
+    },
+    "20": {
+     "points": 116,
+     "suspend_points": 60,
+     "kill_brier_points": 0,
+     "kill_edge_points": 50
+    },
+    "40": {
+     "points": 116,
+     "suspend_points": 76,
+     "kill_brier_points": 0,
+     "kill_edge_points": 67
+    },
+    "80": {
+     "points": 116,
+     "suspend_points": 77,
+     "kill_brier_points": 0,
+     "kill_edge_points": 69
+    },
+    "120": {
+     "points": 114,
+     "suspend_points": 84,
+     "kill_brier_points": 0,
+     "kill_edge_points": 79
+    },
+    "160": {
+     "points": 112,
+     "suspend_points": 87,
+     "kill_brier_points": 0,
+     "kill_edge_points": 84
+    },
+    "240": {
+     "points": 108,
+     "suspend_points": 84,
+     "kill_brier_points": 0,
+     "kill_edge_points": 80
+    }
+   }
+  }
+ },
+ "runtime_seconds": 51.0
+}

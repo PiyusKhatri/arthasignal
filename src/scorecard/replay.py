@@ -70,7 +70,7 @@ def run(output: Path = DEFAULT_OUTPUT, strategies: tuple[Strategy, ...] = STRATE
     from src.database.holdout_guard import engine
 
     started = time.perf_counter()
-    apply_schema(engine)
+    apply_schema(engine, calendar=False)
     inputs = load_inputs(spec.DEVELOPMENT_END)
     invalid = sorted({s for s in inputs["prices"]["symbol"].unique() if not spec.valid_symbol(s)})
     inputs["prices"] = inputs["prices"][inputs["prices"]["symbol"].map(spec.valid_symbol)]

@@ -1,0 +1,759 @@
+{
+ "protocol": "info-prereg-v1",
+ "gate_protocol": "accuracy-v2.1",
+ "grade_version": "info-v1",
+ "generated_on": "2026-10-04",
+ "sessions": 2435,
+ "first_session": "2014-06-01",
+ "last_session": "2025-01-19",
+ "versions_in_family": 6,
+ "penalty_tests": 624,
+ "inputs": {
+  "reports_with_net_profit": 10380,
+  "reports_with_merolagani_date": 8472,
+  "reports_later_date_from_merolagani": 2481,
+  "reports_with_growth": 6629,
+  "declarations": 847,
+  "first_declaration": "2018-06-24"
+ },
+ "audit": {
+  "dates_checked": 40,
+  "mismatches": {
+   "I5": 3
+  },
+  "leaky": [
+   "I5"
+  ]
+ },
+ "hypotheses": {
+  "I1": {
+   "name": "yoy_profit_growth_top_quartile_20",
+   "horizon": 20,
+   "events": 1620,
+   "events_per_year": {
+    "2014": 64,
+    "2015": 144,
+    "2016": 156,
+    "2017": 130,
+    "2018": 152,
+    "2019": 125,
+    "2020": 97,
+    "2021": 216,
+    "2022": 114,
+    "2023": 153,
+    "2024": 269
+   },
+   "graded_per_year": {
+    "2014": 64,
+    "2015": 143,
+    "2016": 156,
+    "2017": 130,
+    "2018": 151,
+    "2019": 124,
+    "2020": 97,
+    "2021": 216,
+    "2022": 114,
+    "2023": 153,
+    "2024": 269
+   },
+   "calls": 1620,
+   "graded": 1617,
+   "excluded_unresolved_steps": 3,
+   "excluded_share": 0.0019,
+   "exclusion_warning": false,
+   "distinct_dates": 546,
+   "independent_windows": 88,
+   "min_windows": 40,
+   "win_rate": 0.2202,
+   "baseline": 0.2866,
+   "edge": -0.0665,
+   "edge_lower_90": -0.0979,
+   "edge_lower_penalized": -0.154,
+   "penalty_tests": 624,
+   "expectancy": {
+    "0.5%": 0.00357,
+    "1.0%": -0.0003,
+    "1.5%": -0.00418
+   },
+   "excess_expectancy_1pct": -0.00925,
+   "calibration": {
+    "claimed": false
+   },
+   "folds": [
+    {
+     "fold": 1,
+     "calls": 393,
+     "edge": -0.111
+    },
+    {
+     "fold": 2,
+     "calls": 338,
+     "edge": -0.029
+    },
+    {
+     "fold": 3,
+     "calls": 403,
+     "edge": -0.1294
+    },
+    {
+     "fold": 4,
+     "calls": 483,
+     "edge": -0.004
+    }
+   ],
+   "folds_positive": 0,
+   "failure_causes": {
+    "liquidity": 0.337,
+    "market": 0.3188,
+    "model": 0.1705,
+    "sector": 0.1602,
+    "circuit": 0.0087,
+    "news": 0.0048
+   },
+   "implausible": false,
+   "gates": {
+    "edge_8_points": false,
+    "edge_lower_bound_above_zero": false,
+    "expectancy_all_costs": false,
+    "excess_expectancy_1pct": false,
+    "folds": false,
+    "sample": true,
+    "calibration": true,
+    "not_leaky": true
+   },
+   "verdict": "NO EVIDENCE"
+  },
+  "I2": {
+   "name": "yoy_profit_growth_top_quartile_40",
+   "horizon": 40,
+   "events": 1620,
+   "events_per_year": {
+    "2014": 64,
+    "2015": 144,
+    "2016": 156,
+    "2017": 130,
+    "2018": 152,
+    "2019": 125,
+    "2020": 97,
+    "2021": 216,
+    "2022": 114,
+    "2023": 153,
+    "2024": 269
+   },
+   "graded_per_year": {
+    "2014": 64,
+    "2015": 143,
+    "2016": 155,
+    "2017": 129,
+    "2018": 151,
+    "2019": 124,
+    "2020": 97,
+    "2021": 216,
+    "2022": 114,
+    "2023": 152,
+    "2024": 234
+   },
+   "calls": 1585,
+   "graded": 1579,
+   "excluded_unresolved_steps": 6,
+   "excluded_share": 0.0038,
+   "exclusion_warning": false,
+   "distinct_dates": 543,
+   "independent_windows": 56,
+   "min_windows": 30,
+   "win_rate": 0.1773,
+   "baseline": 0.2388,
+   "edge": -0.0615,
+   "edge_lower_90": -0.093,
+   "edge_lower_penalized": -0.1305,
+   "penalty_tests": 624,
+   "expectancy": {
+    "0.5%": 0.02604,
+    "1.0%": 0.02219,
+    "1.5%": 0.01834
+   },
+   "excess_expectancy_1pct": -0.01182,
+   "calibration": {
+    "claimed": false
+   },
+   "folds": [
+    {
+     "fold": 1,
+     "calls": 391,
+     "edge": -0.0975
+    },
+    {
+     "fold": 2,
+     "calls": 338,
+     "edge": -0.0683
+    },
+    {
+     "fold": 3,
+     "calls": 403,
+     "edge": -0.0835
+    },
+    {
+     "fold": 4,
+     "calls": 447,
+     "edge": -0.005
+    }
+   ],
+   "folds_positive": 0,
+   "failure_causes": {
+    "liquidity": 0.3426,
+    "market": 0.2502,
+    "model": 0.2132,
+    "sector": 0.1678,
+    "circuit": 0.0146,
+    "news": 0.0115
+   },
+   "implausible": false,
+   "gates": {
+    "edge_8_points": false,
+    "edge_lower_bound_above_zero": false,
+    "expectancy_all_costs": true,
+    "excess_expectancy_1pct": false,
+    "folds": false,
+    "sample": true,
+    "calibration": true,
+    "not_leaky": true
+   },
+   "verdict": "NO EVIDENCE"
+  },
+  "I3": {
+   "name": "profit_turnaround_20",
+   "horizon": 20,
+   "events": 265,
+   "events_per_year": {
+    "2014": 20,
+    "2015": 39,
+    "2016": 15,
+    "2017": 15,
+    "2018": 23,
+    "2019": 16,
+    "2020": 8,
+    "2021": 24,
+    "2022": 22,
+    "2023": 30,
+    "2024": 53
+   },
+   "graded_per_year": {
+    "2014": 20,
+    "2015": 39,
+    "2016": 15,
+    "2017": 15,
+    "2018": 23,
+    "2019": 16,
+    "2020": 8,
+    "2021": 24,
+    "2022": 22,
+    "2023": 30,
+    "2024": 53
+   },
+   "calls": 265,
+   "graded": 265,
+   "excluded_unresolved_steps": 0,
+   "excluded_share": 0.0,
+   "exclusion_warning": false,
+   "distinct_dates": 180,
+   "independent_windows": 67,
+   "min_windows": 40,
+   "win_rate": 0.2151,
+   "baseline": 0.2844,
+   "edge": -0.0693,
+   "edge_lower_90": -0.1022,
+   "edge_lower_penalized": -0.1978,
+   "penalty_tests": 624,
+   "expectancy": {
+    "0.5%": 0.00715,
+    "1.0%": 0.00362,
+    "1.5%": 0.0001
+   },
+   "excess_expectancy_1pct": -0.00182,
+   "calibration": {
+    "claimed": false
+   },
+   "folds": [
+    {
+     "fold": 1,
+     "calls": 77,
+     "edge": -0.1578
+    },
+    {
+     "fold": 2,
+     "calls": 44,
+     "edge": -0.1658
+    },
+    {
+     "fold": 3,
+     "calls": 50,
+     "edge": -0.0525
+    },
+    {
+     "fold": 4,
+     "calls": 94,
+     "edge": 0.0395
+    }
+   ],
+   "folds_positive": 1,
+   "failure_causes": {
+    "liquidity": 0.4279,
+    "market": 0.2596,
+    "model": 0.1923,
+    "sector": 0.1058,
+    "circuit": 0.0144
+   },
+   "implausible": false,
+   "gates": {
+    "edge_8_points": false,
+    "edge_lower_bound_above_zero": false,
+    "expectancy_all_costs": true,
+    "excess_expectancy_1pct": false,
+    "folds": false,
+    "sample": true,
+    "calibration": true,
+    "not_leaky": true
+   },
+   "verdict": "NO EVIDENCE"
+  },
+  "I4": {
+   "name": "dividend_declaration_non_decreasing_10",
+   "horizon": 10,
+   "events": 307,
+   "events_per_year": {
+    "2018": 1,
+    "2019": 42,
+    "2020": 67,
+    "2021": 84,
+    "2022": 42,
+    "2023": 32,
+    "2024": 38,
+    "2025": 1
+   },
+   "graded_per_year": {
+    "2018": 1,
+    "2019": 41,
+    "2020": 67,
+    "2021": 84,
+    "2022": 42,
+    "2023": 32,
+    "2024": 38
+   },
+   "calls": 306,
+   "graded": 305,
+   "excluded_unresolved_steps": 1,
+   "excluded_share": 0.0033,
+   "exclusion_warning": false,
+   "distinct_dates": 211,
+   "independent_windows": 74,
+   "min_windows": 40,
+   "win_rate": 0.2525,
+   "baseline": 0.3268,
+   "edge": -0.0743,
+   "edge_lower_90": -0.0936,
+   "edge_lower_penalized": -0.1765,
+   "penalty_tests": 624,
+   "expectancy": {
+    "0.5%": 0.00032,
+    "1.0%": -0.00427,
+    "1.5%": -0.00886
+   },
+   "excess_expectancy_1pct": -0.01944,
+   "calibration": {
+    "claimed": false
+   },
+   "folds": [
+    {
+     "fold": 1,
+     "calls": 0,
+     "edge": null
+    },
+    {
+     "fold": 2,
+     "calls": 6,
+     "edge": 0.0953
+    },
+    {
+     "fold": 3,
+     "calls": 199,
+     "edge": -0.111
+    },
+    {
+     "fold": 4,
+     "calls": 100,
+     "edge": -0.0115
+    }
+   ],
+   "folds_positive": 1,
+   "failure_causes": {
+    "market": 0.3158,
+    "model": 0.3026,
+    "sector": 0.2237,
+    "liquidity": 0.1228,
+    "circuit": 0.0175,
+    "news": 0.0175
+   },
+   "implausible": false,
+   "gates": {
+    "edge_8_points": false,
+    "edge_lower_bound_above_zero": false,
+    "expectancy_all_costs": false,
+    "excess_expectancy_1pct": false,
+    "folds": false,
+    "sample": true,
+    "calibration": true,
+    "not_leaky": true
+   },
+   "verdict": "NO EVIDENCE"
+  },
+  "I5": {
+   "name": "bonus_announcement_to_book_close_10",
+   "horizon": 10,
+   "events": 346,
+   "events_per_year": {
+    "2018": 1,
+    "2019": 3,
+    "2020": 52,
+    "2021": 119,
+    "2022": 63,
+    "2023": 65,
+    "2024": 43
+   },
+   "graded_per_year": {
+    "2018": 1,
+    "2019": 3,
+    "2020": 52,
+    "2021": 119,
+    "2022": 63,
+    "2023": 65,
+    "2024": 43
+   },
+   "calls": 346,
+   "graded": 346,
+   "excluded_unresolved_steps": 0,
+   "excluded_share": 0.0,
+   "exclusion_warning": false,
+   "distinct_dates": 248,
+   "independent_windows": 79,
+   "min_windows": 40,
+   "win_rate": 0.2052,
+   "baseline": 0.3134,
+   "edge": -0.1082,
+   "edge_lower_90": -0.1335,
+   "edge_lower_penalized": -0.2094,
+   "penalty_tests": 624,
+   "expectancy": {
+    "0.5%": -0.00882,
+    "1.0%": -0.01346,
+    "1.5%": -0.0181
+   },
+   "excess_expectancy_1pct": -0.02385,
+   "calibration": {
+    "claimed": false
+   },
+   "folds": [
+    {
+     "fold": 1,
+     "calls": 0,
+     "edge": null
+    },
+    {
+     "fold": 2,
+     "calls": 2,
+     "edge": -0.1426
+    },
+    {
+     "fold": 3,
+     "calls": 192,
+     "edge": -0.0937
+    },
+    {
+     "fold": 4,
+     "calls": 152,
+     "edge": -0.1262
+    }
+   ],
+   "folds_positive": 0,
+   "failure_causes": {
+    "market": 0.3527,
+    "model": 0.2945,
+    "sector": 0.2291,
+    "liquidity": 0.0909,
+    "news": 0.0218,
+    "circuit": 0.0109
+   },
+   "implausible": false,
+   "gates": {
+    "edge_8_points": false,
+    "edge_lower_bound_above_zero": false,
+    "expectancy_all_costs": false,
+    "excess_expectancy_1pct": false,
+    "folds": false,
+    "sample": true,
+    "calibration": true,
+    "not_leaky": false
+   },
+   "verdict": "NO EVIDENCE"
+  },
+  "I6": {
+   "name": "bank_yoy_profit_growth_top_quartile_20",
+   "horizon": 20,
+   "events": 130,
+   "events_per_year": {
+    "2014": 7,
+    "2015": 15,
+    "2016": 19,
+    "2017": 7,
+    "2018": 30,
+    "2019": 13,
+    "2021": 2,
+    "2022": 8,
+    "2023": 16,
+    "2024": 13
+   },
+   "graded_per_year": {
+    "2014": 7,
+    "2015": 15,
+    "2016": 19,
+    "2017": 7,
+    "2018": 30,
+    "2019": 13,
+    "2021": 2,
+    "2022": 8,
+    "2023": 16,
+    "2024": 13
+   },
+   "calls": 130,
+   "graded": 130,
+   "excluded_unresolved_steps": 0,
+   "excluded_share": 0.0,
+   "exclusion_warning": false,
+   "distinct_dates": 71,
+   "independent_windows": 38,
+   "min_windows": 40,
+   "win_rate": 0.2923,
+   "baseline": 0.2675,
+   "edge": 0.0248,
+   "edge_lower_90": -0.1,
+   "edge_lower_penalized": -0.2066,
+   "penalty_tests": 624,
+   "expectancy": {
+    "0.5%": -0.00409,
+    "1.0%": -0.00875,
+    "1.5%": -0.0134
+   },
+   "excess_expectancy_1pct": -0.00848,
+   "calibration": {
+    "claimed": false
+   },
+   "folds": [
+    {
+     "fold": 1,
+     "calls": 42,
+     "edge": 0.0025
+    },
+    {
+     "fold": 2,
+     "calls": 49,
+     "edge": 0.1406
+    },
+    {
+     "fold": 3,
+     "calls": 4,
+     "edge": -0.1998
+    },
+    {
+     "fold": 4,
+     "calls": 35,
+     "edge": -0.0849
+    }
+   ],
+   "folds_positive": 2,
+   "failure_causes": {
+    "market": 0.4674,
+    "sector": 0.2283,
+    "model": 0.1957,
+    "liquidity": 0.0978,
+    "circuit": 0.0109
+   },
+   "implausible": false,
+   "gates": {
+    "edge_8_points": false,
+    "edge_lower_bound_above_zero": false,
+    "expectancy_all_costs": false,
+    "excess_expectancy_1pct": false,
+    "folds": false,
+    "sample": false,
+    "calibration": true,
+    "not_leaky": true
+   },
+   "verdict": "INSUFFICIENT SAMPLE"
+  }
+ },
+ "diagnostics": {
+  "all_reports_20": {
+   "horizon": 20,
+   "events": 6629,
+   "events_per_year": {
+    "2014": 305,
+    "2015": 630,
+    "2016": 620,
+    "2017": 568,
+    "2018": 600,
+    "2019": 435,
+    "2020": 463,
+    "2021": 717,
+    "2022": 745,
+    "2023": 724,
+    "2024": 822
+   },
+   "calls": 6629,
+   "graded": 6620,
+   "excluded_unresolved_steps": 9,
+   "excluded_share": 0.0014,
+   "exclusion_warning": false,
+   "distinct_dates": 929,
+   "independent_windows": 114,
+   "min_windows": 40,
+   "win_rate": 0.2166,
+   "baseline": 0.2741,
+   "edge": -0.0575,
+   "edge_lower_90": -0.1127,
+   "edge_lower_penalized": -0.155,
+   "penalty_tests": 624,
+   "expectancy": {
+    "0.5%": -0.00226,
+    "1.0%": -0.00629,
+    "1.5%": -0.01031
+   },
+   "excess_expectancy_1pct": -0.01129,
+   "calibration": {
+    "claimed": false
+   },
+   "folds": [
+    {
+     "fold": 1,
+     "calls": 1618,
+     "edge": -0.1157
+    },
+    {
+     "fold": 2,
+     "calls": 1361,
+     "edge": -0.0343
+    },
+    {
+     "fold": 3,
+     "calls": 1721,
+     "edge": -0.0687
+    },
+    {
+     "fold": 4,
+     "calls": 1920,
+     "edge": -0.0149
+    }
+   ],
+   "folds_positive": 0,
+   "failure_causes": {
+    "market": 0.3546,
+    "liquidity": 0.2958,
+    "model": 0.1782,
+    "sector": 0.1539,
+    "circuit": 0.0091,
+    "news": 0.0085
+   },
+   "implausible": false,
+   "gates": {
+    "edge_8_points": false,
+    "edge_lower_bound_above_zero": false,
+    "expectancy_all_costs": false,
+    "excess_expectancy_1pct": false,
+    "folds": false,
+    "sample": true,
+    "calibration": true,
+    "not_leaky": true
+   },
+   "verdict": "NO EVIDENCE"
+  },
+  "all_declarations_10": {
+   "horizon": 10,
+   "events": 842,
+   "events_per_year": {
+    "2018": 81,
+    "2019": 114,
+    "2020": 153,
+    "2021": 157,
+    "2022": 110,
+    "2023": 118,
+    "2024": 106,
+    "2025": 3
+   },
+   "calls": 839,
+   "graded": 832,
+   "excluded_unresolved_steps": 7,
+   "excluded_share": 0.0083,
+   "exclusion_warning": false,
+   "distinct_dates": 472,
+   "independent_windows": 119,
+   "min_windows": 40,
+   "win_rate": 0.2512,
+   "baseline": 0.3293,
+   "edge": -0.0781,
+   "edge_lower_90": -0.0993,
+   "edge_lower_penalized": -0.1515,
+   "penalty_tests": 624,
+   "expectancy": {
+    "0.5%": 0.00381,
+    "1.0%": -0.00077,
+    "1.5%": -0.00536
+   },
+   "excess_expectancy_1pct": -0.01982,
+   "calibration": {
+    "claimed": false
+   },
+   "folds": [
+    {
+     "fold": 1,
+     "calls": 0,
+     "edge": null
+    },
+    {
+     "fold": 2,
+     "calls": 129,
+     "edge": -0.0832
+    },
+    {
+     "fold": 3,
+     "calls": 392,
+     "edge": -0.0832
+    },
+    {
+     "fold": 4,
+     "calls": 311,
+     "edge": -0.0696
+    }
+   ],
+   "folds_positive": 0,
+   "failure_causes": {
+    "market": 0.2841,
+    "model": 0.2777,
+    "sector": 0.2472,
+    "liquidity": 0.1429,
+    "news": 0.0257,
+    "circuit": 0.0225
+   },
+   "implausible": false,
+   "gates": {
+    "edge_8_points": false,
+    "edge_lower_bound_above_zero": false,
+    "expectancy_all_costs": false,
+    "excess_expectancy_1pct": false,
+    "folds": false,
+    "sample": true,
+    "calibration": true,
+    "not_leaky": true
+   },
+   "verdict": "NO EVIDENCE"
+  }
+ },
+ "runtime_seconds": 10.8
+}

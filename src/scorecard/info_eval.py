@@ -167,14 +167,15 @@ def lookahead_audit(reports: pd.DataFrame, declarations: pd.DataFrame, sessions:
     return {"dates_checked": len(sample), "mismatches": {k: len(v) for k, v in mismatches.items()}, "leaky": sorted(mismatches)}
 
 
-def to_calls(events: pd.DataFrame, name: str, sessions: Sequence[date], panel: Any, situations: Any, batch: str) -> pd.DataFrame:
+def to_calls(events: pd.DataFrame, name: str, sessions: Sequence[date], panel: Any, situations: Any, batch: str,
+             model_version: str = MODEL_VERSION) -> pd.DataFrame:
     frame = pd.DataFrame({"symbol": events["symbol"].to_numpy(), "t": events["t"].to_numpy(dtype=int)})
     frame["signal_date"] = [sessions[t] for t in frame["t"]]
     frame["score"] = events["growth"].to_numpy(dtype=float) if "growth" in events else np.nan
     frame["situations"] = [labels_for(situations, int(panel.row[s]), int(t)) for s, t in zip(frame["symbol"], frame["t"])]
     frame["mode"] = "replay"
     frame["strategy"] = name
-    frame["model_version"] = MODEL_VERSION
+    frame["model_version"] = model_version
     frame["batch_id"] = batch
     frame["probability"] = None
     frame["feature_hash"] = [feature_hash({"strategy": name, "symbol": s, "date": d}) for s, d in zip(frame["symbol"], frame["signal_date"])]
@@ -185,7 +186,7 @@ def per_year(frame: pd.DataFrame, column: str = "signal_date") -> dict[int, int]
     return {int(y): int(n) for y, n in pd.to_datetime(frame[column]).dt.year.value_counts().sort_index().items()}
 
 
-def run(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
+def run(output: Path = DEFAULT_OUTPUT, model_version: str = MODEL_VERSION) -> dict[str, Any]:
     from src.database.holdout_guard import engine
 
     started = time.perf_counter()
@@ -234,23 +235,23 @@ def run(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
         with engine.connect() as connection:
             existing = pd.read_sql(
                 text("SELECT id AS call_id, symbol, signal_date FROM scorecard_calls WHERE strategy = :s AND model_version = :v"),
-                connection, params={"s": name, "v": MODEL_VERSION},
+                connection, params={"s": name, "v": model_version},
             )
         if existing.empty and len(frame):
-            record_calls(engine, to_calls(frame, name, sessions, panel, context["situations"], batch))
+            record_calls(engine, to_calls(frame, name, sessions, panel, context["situations"], batch, model_version))
             with engine.connect() as connection:
                 existing = pd.read_sql(
                     text("SELECT id AS call_id, symbol, signal_date FROM scorecard_calls WHERE strategy = :s AND model_version = :v"),
-                    connection, params={"s": name, "v": MODEL_VERSION},
+                    connection, params={"s": name, "v": model_version},
                 )
-        done = graded_call_ids(engine, name, MODEL_VERSION, grade_version=info_spec.GRADE_VERSION)
+        done = graded_call_ids(engine, name, model_version, grade_version=info_spec.GRADE_VERSION)
         if not existing.empty:
             grades = v2.grade_calls_v2(market, {horizon: cubes[horizon]}, existing, context["cumulative"], info_spec.GRADE_VERSION)
             if done and not grades.empty:
                 grades = grades[[(c, h) not in done for c, h in zip(grades["call_id"], grades["horizon"])]]
             if not grades.empty:
                 record_grades(engine, grades)
-        graded = load_graded(engine, name, MODEL_VERSION, horizon=horizon, grade_version=info_spec.GRADE_VERSION)
+        graded = load_graded(engine, name, model_version, horizon=horizon, grade_version=info_spec.GRADE_VERSION)
         if (graded["exit_date"].dropna() > info_spec.DEVELOPMENT_END).any():
             raise SystemExit("a graded exit reached past the development window")
         cell = v2.cell_metrics_v2(graded, horizon, session_index, len(sessions), tests, hypothesis_id in audit["leaky"])
@@ -281,8 +282,9 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     parser = argparse.ArgumentParser(description="Run the pre-registered earnings-information hypotheses on the development window")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--model-version", default=MODEL_VERSION)
     args = parser.parse_args()
-    report = run(args.output)
+    report = run(args.output, args.model_version)
     for hypothesis_id, cell in report["hypotheses"].items():
         print(hypothesis_id, cell["name"], cell.get("verdict"), "edge", cell.get("edge"), "calls", cell.get("calls"))
 

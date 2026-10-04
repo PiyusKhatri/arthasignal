@@ -63,7 +63,7 @@ def run(
     from src.database.holdout_guard import engine
 
     started = time.perf_counter()
-    apply_schema(engine)
+    apply_schema(engine, calendar=False)
     context = context or build_context()
     panel, market, cubes = context["panel"], context["market"], context["cubes"]
     ledger = DatabaseLedger()
