@@ -79,3 +79,26 @@ def test_ocr_parser_handles_nepali_digits_slash_decimals_and_ytd():
     english = "Rs in '000\nParticulars This Quarter Up to This Quarter (YTD)\nProfit/(Loss) for the Period 155,172 436,007 114,936 285,384"
     out = ocr_eval.extract(english)
     assert out["unit"] == 1000.0 and out["net_profit"] == 436007
+
+
+def test_nrb_macro_extraction_and_period():
+    from src.archive import nrb_macro
+
+    raw = ("The weighted average 91 -day Treasury bills rate increased to 5.50 percent in the eleventh month. "
+           "Weighted average deposit rate and len ding rate of commercial banks stood at 6.64 percent and 12.20 percent respectively. "
+           "The average base rate of commercial banks decreased to 9.48 percent. margin nature loan decreased 2.5 percent and hire")
+    got = {k: v[0] for k, v in nrb_macro.extract(raw).items()}
+    assert got == {"nrb_tbill_91d_rate": 5.5, "nrb_wavg_deposit_rate": 6.64, "nrb_wavg_lending_rate": 12.2,
+                   "nrb_base_rate_commercial": 9.48, "nrb_margin_loan_growth": -2.5}
+    assert nrb_macro.period_end("Situation - English (Based on Eleven Months Data of 2018/19)") == date(2019, 6, 15)
+    assert nrb_macro.period_end("Situation (Based on Five Months Data of 2020/21)") == date(2020, 12, 15)
+
+
+def test_event_classifier_v2():
+    from src.archive import corporate_events as ce
+
+    assert ce.classify("Bishal Bazar Company Limited has posted a net profit of Rs 56.24 million and published its final quarter company analysis") == "quarterly_report"
+    assert ce.classify("ICFC Finance Limited has deposited 17% Bonus Share for the fiscal year 2072/73 in respective demat account.") == "dividend_distribution"
+    assert ce.classify("XYZ Bank has proposed 10% bonus shares and 0.53% cash dividend") == "dividend_proposal"
+    assert ce.classify("Nabil Bank Limited has published a notice regarding new interest rate") == "interest_rate_notice"
+    assert ce.numbers("proposed 10% bonus shares and 0.53% cash dividend for FY 2081/82") == {"cash_pct": 0.53, "bonus_pct": 10.0, "right_ratio": None, "fiscal_year": "2081/82"}

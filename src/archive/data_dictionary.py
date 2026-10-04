@@ -97,3 +97,72 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+FIELDS = [
+    ("technical", "close, high, low (equities)", "daily_prices.close (equity symbol-days)", "daily_prices (Sharesansar session pages, NEPSE API live)",
+     "known at the session close (15:00); used from the next session", "2014-2016 lows/highs before 2018-02-18 are stored values of unknown quality; 18 sector-less equities fixed to 9",
+     "tests/test_holdout_guard.py, tests/test_backtest_leakage_guard.py"),
+    ("technical", "real open (equities)", "daily_prices.open real (equity symbol-days with open <> previous close)", "daily_prices",
+     "session close", "before 2018-02-18 the stored open equals the previous close; protocol uses floorsheet-derived opens instead", "tests/test_floorsheet_ohlc.py"),
+    ("technical", "floorsheet-derived open/high/low", "floorsheet-derived OHLC bars (symbol-days)", "Merolagani floorsheet Parquet (board lots, quantity >= 10)",
+     "session close", "1-2% missing pages in 2015-2018; files end 2025-01-19; source terms flagged", "tests/test_floorsheet_ohlc.py"),
+    ("technical", "indicators (RSI, SMA, Bollinger, ...)", "technical_signals (symbol-days)", "computed from daily_prices", "session close",
+     "recomputed on full history 2026-09; weekly/monthly rows stale", "tests/test_indicators_golden.py and other golden tests"),
+    ("volume", "volume, turnover (equities)", "daily_prices.turnover (equity symbol-days)", "daily_prices", "session close", "none known on traded days",
+     "tests/test_holdout_guard.py"),
+    ("floorsheet_broker", "broker-flow H1-H5", "broker-flow features H1-H5 (eligible symbol-days)", "floorsheet Parquet via src/backtest/broker_flow_features.py",
+     "after the session close", "files end 2025-01-19 (VM backfill not merged); Merolagani terms flagged", "tests/test_broker_flow_leakage.py"),
+    ("floorsheet_broker", "floorsheet files", "floorsheet parquet (session files)", "Merolagani floorsheet", "after the session close",
+     "2025 has 13 files; 2025-01-20 to 2026-08-30 hole", "tests/test_holdout_guard.py (file listing refuses holdout dates)"),
+    ("fundamentals", "quarterly report publication + net profit headline", "quarterly_report_announcements net_profit headline",
+     "Sharesansar announcements (Merolagani index for dates)", "earliest item-verified source date, next session (docs/POINT_IN_TIME.md)",
+     "headline rounded to 2-3 significant digits; group vs standalone basis varies", "tests/test_knowledge_time.py, src/ranker/leak_audit.py"),
+    ("fundamentals", "report images for OCR", "archive_documents report images", "Sharesansar announcement attachments",
+     "announcement date (image upload timestamp kept)", "collection running; images only, no text PDFs", "tests/test_archive_holdout.py"),
+    ("fundamentals", "EPS, net worth, reserves, NPL, CAR from reports", "report_field_values accepted", "OCR of report images",
+     "announcement date of the report", "not extracted yet; engine accuracy too low (docs/OCR_COMPARISON.md)", "tests/test_archive_holdout.py"),
+    ("corporate_events", "dividend declarations (Sharesansar table)", "dividend_declarations (announcement-dated)", "Sharesansar dividend table",
+     "announcement_date; 8.3% are after their own book close (late, not early)", "starts 2018", "tests/test_holdout_guard.py"),
+    ("corporate_events", "dividend proposals from AGM records", "company_event_records agm (meeting-dated)", "Sharesansar AGM table + AGM announcements",
+     "earlier of AGM announcement and book close (dividend_proposals_pit)", "collection running", "tests/test_archive_holdout.py"),
+    ("corporate_events", "AGM announcements", "announcement_events agm", "Sharesansar company announcements", "announcement date",
+     "collection running", "tests/test_archive_holdout.py"),
+    ("corporate_events", "right share announcements", "announcement_events right_share_issue", "Sharesansar company announcements", "announcement date",
+     "ratio parsed only when in the title", "tests/test_archive_holdout.py"),
+    ("corporate_events", "book close / ex dates", "corporate_actions (ex/book-close dated)", "corporate_actions", "action date is an event date, not a knowledge date",
+     "announcement timing comes from announcements", "tests/test_holdout_guard.py"),
+    ("news", "Sharesansar news archive", "news_articles sharesansar", "Sharesansar news (category latest)", "published minute (Nepal time), next session",
+     "collection running backward from 2025-09-30", "tests/test_archive_holdout.py"),
+    ("news", "symbol mentions", "news_articles with a symbol mention", "company names and tickers", "article publication time",
+     "name aliases only for distinctive names", "tests/test_archive_parsers.py"),
+    ("news", "live text capture", "text_items (live news capture)", "live collectors since 2026", "first_seen_at", "all rows are holdout-era", "tests/test_holdout_guard.py"),
+    ("market_state", "NEPSE index", "market_index NEPSE (sessions)", "Sharesansar/Merolagani index history", "session close", "none known", "tests/test_index_session_dates.py"),
+    ("market_state", "turnover, breadth series", "sentiment market_breadth (sessions)", "daily_prices", "session close", "none known", "tests/test_archive_holdout.py"),
+    ("market_state", "NRB policy rates, CRR, SLR, CD/CCD, margin rules", "policy_events NRB", "NRB monetary policy documents",
+     "announcement date (pre-2020 dates from secondary sources, unconfirmed)", "2017/18 and 2019/20 announcement dates missing", "tests/test_archive_holdout.py"),
+    ("historical_sentiment", "NRB macro (T-bill, rates, margin loan growth)", "sentiment NRB macro (observations)", "NRB Current Macroeconomic and Financial Situation",
+     "NRB listing upload date", "no demat-account counts in these reports", "tests/test_archive_parsers.py"),
+    ("historical_sentiment", "IPO/right oversubscription", "sentiment issue_oversubscription (observations)", "Sharesansar news headlines",
+     "headline publication time", "grows with the news archive", "tests/test_archive_parsers.py"),
+]
+
+
+def render(coverage: dict[str, Any]) -> str:
+    merged = {**coverage["database"], **coverage["files"]}
+    pillars: dict[str, tuple[list[str], list[str]]] = {}
+    for pillar, field, key, source, rule, gaps, test in FIELDS:
+        data = merged.get(key, {})
+        counts = data.get("by_year", {})
+        first = data.get("first_year_with_rows")
+        fields, years = pillars.setdefault(pillar, ([], []))
+        fields.append(f"| {field} | {source} | {first if first else 'none yet'} | {rule} | {gaps} | {test} |")
+        years.append(f"| {field} | " + " | ".join(f"{counts.get(str(y), 0):,}" for y in YEARS) + " |")
+    parts = []
+    for pillar, (fields, years) in pillars.items():
+        parts.append(
+            f"### {pillar}\n\n| Field | Source | First year with rows | Point-in-time rule | Known gaps | Leak test |\n|---|---|---|---|---|---|\n"
+            + "\n".join(fields)
+            + "\n\nRows per year (research role, before 2025-09-30):\n\n| Field | " + " | ".join(str(y) for y in YEARS) + " |\n|---|" + "---:|" * len(YEARS) + "\n"
+            + "\n".join(years))
+    return "\n\n".join(parts)
