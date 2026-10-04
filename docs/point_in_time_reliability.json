@@ -1,0 +1,240 @@
+{
+ "rules": {
+  "ml_window": 100,
+  "backdate_days": 7,
+  "quarter_end_tolerance": 3,
+  "reliable_backdate_share": 0.05
+ },
+ "sharesansar": {
+  "rows": 12101,
+  "with_creation_date_in_slug": 4669,
+  "shown_date_equals_creation": 0.9766545298779182,
+  "shown_date_earlier_than_creation_by_more_than_1_day": 0.019704433497536946,
+  "worst_backdating_days": 273,
+  "before_quarter_end": 0.000909015783819519,
+  "by_year": {
+   "2011": {
+    "rows": 560,
+    "slugged": 0,
+    "backdated_share": null,
+    "before_quarter_end": 0.0
+   },
+   "2012": {
+    "rows": 746,
+    "slugged": 0,
+    "backdated_share": null,
+    "before_quarter_end": 0.0
+   },
+   "2013": {
+    "rows": 787,
+    "slugged": 0,
+    "backdated_share": null,
+    "before_quarter_end": 0.0
+   },
+   "2014": {
+    "rows": 791,
+    "slugged": 1,
+    "backdated_share": 0.0,
+    "before_quarter_end": 0.0
+   },
+   "2015": {
+    "rows": 928,
+    "slugged": 4,
+    "backdated_share": 0.0,
+    "before_quarter_end": 0.0
+   },
+   "2016": {
+    "rows": 783,
+    "slugged": 4,
+    "backdated_share": 0.0,
+    "before_quarter_end": 0.002554278416347382
+   },
+   "2017": {
+    "rows": 707,
+    "slugged": 4,
+    "backdated_share": 0.0,
+    "before_quarter_end": 0.009900990099009901
+   },
+   "2018": {
+    "rows": 758,
+    "slugged": 4,
+    "backdated_share": 0.0,
+    "before_quarter_end": 0.0
+   },
+   "2019": {
+    "rows": 810,
+    "slugged": 4,
+    "backdated_share": 0.0,
+    "before_quarter_end": 0.0012345679012345679
+   },
+   "2020": {
+    "rows": 795,
+    "slugged": 212,
+    "backdated_share": 0.018867924528301886,
+    "before_quarter_end": 0.0012578616352201257
+   },
+   "2021": {
+    "rows": 850,
+    "slugged": 850,
+    "backdated_share": 0.02,
+    "before_quarter_end": 0.0
+   },
+   "2022": {
+    "rows": 881,
+    "slugged": 881,
+    "backdated_share": 0.009080590238365494,
+    "before_quarter_end": 0.0
+   },
+   "2023": {
+    "rows": 942,
+    "slugged": 942,
+    "backdated_share": 0.04670912951167728,
+    "before_quarter_end": 0.0
+   },
+   "2024": {
+    "rows": 1009,
+    "slugged": 1009,
+    "backdated_share": 0.01288404360753221,
+    "before_quarter_end": 0.0
+   },
+   "2025": {
+    "rows": 754,
+    "slugged": 754,
+    "backdated_share": 0.007957559681697613,
+    "before_quarter_end": 0.0
+   }
+  }
+ },
+ "merolagani": {
+  "rows": 10653,
+  "backdated_against_previous_ids": 0.06336243311743171,
+  "before_quarter_end": 0.0014080540692762602,
+  "by_year": {
+   "2009": {
+    "rows": 19,
+    "backdated_share": 1.0,
+    "before_quarter_end": 0.0
+   },
+   "2010": {
+    "rows": 105,
+    "backdated_share": 1.0,
+    "before_quarter_end": 0.0380952380952381
+   },
+   "2011": {
+    "rows": 181,
+    "backdated_share": 1.0,
+    "before_quarter_end": 0.0
+   },
+   "2012": {
+    "rows": 229,
+    "backdated_share": 0.7379912663755459,
+    "before_quarter_end": 0.013100436681222707
+   },
+   "2013": {
+    "rows": 296,
+    "backdated_share": 0.07432432432432433,
+    "before_quarter_end": 0.006756756756756757
+   },
+   "2014": {
+    "rows": 512,
+    "backdated_share": 0.033203125,
+    "before_quarter_end": 0.0
+   },
+   "2015": {
+    "rows": 684,
+    "backdated_share": 0.04532163742690058,
+    "before_quarter_end": 0.0029239766081871343
+   },
+   "2016": {
+    "rows": 765,
+    "backdated_share": 0.00522875816993464,
+    "before_quarter_end": 0.00130718954248366
+   },
+   "2017": {
+    "rows": 701,
+    "backdated_share": 0.008559201141226819,
+    "before_quarter_end": 0.0014265335235378032
+   },
+   "2018": {
+    "rows": 745,
+    "backdated_share": 0.006711409395973154,
+    "before_quarter_end": 0.0
+   },
+   "2019": {
+    "rows": 865,
+    "backdated_share": 0.021965317919075144,
+    "before_quarter_end": 0.0023121387283236996
+   },
+   "2020": {
+    "rows": 858,
+    "backdated_share": 0.054778554778554776,
+    "before_quarter_end": 0.0
+   },
+   "2021": {
+    "rows": 902,
+    "backdated_share": 0.02771618625277162,
+    "before_quarter_end": 0.0
+   },
+   "2022": {
+    "rows": 927,
+    "backdated_share": 0.015102481121898598,
+    "before_quarter_end": 0.0
+   },
+   "2023": {
+    "rows": 1000,
+    "backdated_share": 0.007,
+    "before_quarter_end": 0.0
+   },
+   "2024": {
+    "rows": 1069,
+    "backdated_share": 0.0037418147801683817,
+    "before_quarter_end": 0.0
+   },
+   "2025": {
+    "rows": 795,
+    "backdated_share": 0.0,
+    "before_quarter_end": 0.0
+   }
+  }
+ },
+ "cross_source": {
+  "matched_reports": 9558,
+  "same_day": 0.6247122829043733,
+  "within_1_day": 0.8913998744507219,
+  "within_7_days": 0.9143126177024482,
+  "sharesansar_earlier_by_more_than_1_day": 151,
+  "merolagani_earlier_by_more_than_1_day": 887,
+  "sharesansar_earlier_and_slug_confirms": 20,
+  "sharesansar_earlier_and_slug_contradicts": 20,
+  "sharesansar_earlier_without_slug": 111,
+  "merolagani_earlier_and_id_order_confirms": 571,
+  "merolagani_earlier_and_id_order_contradicts": 316,
+  "gap_days_percentiles": {
+   "1": -2.0,
+   "5": -1.0,
+   "25": -1.0,
+   "50": 0.0,
+   "75": 0.0,
+   "95": 26.0,
+   "99": 34.0
+  }
+ },
+ "nepse_notices": {
+  "status": "not measured",
+  "reason": "nepalstock.com notice API answers 401 'UNAUTHORIZED ACCESS'; access control is not bypassed"
+ },
+ "verdict": {
+  "sharesansar": "reliable",
+  "merolagani": "not reliable as shown; used only as max(shown date, median date of the previous 100 IDs)",
+  "rule": "knowledge date = earliest date among item-verified sources; known from the first session strictly after it"
+ },
+ "effect_on_reports_with_net_profit": {
+  "reports": 11109,
+  "earlier_than_sharesansar_date": 733,
+  "same_as_sharesansar_date": 10340,
+  "later_than_sharesansar_date": 36,
+  "median_days_earlier_when_earlier": 18.0,
+  "dropped_no_verified_date": 13
+ },
+ "end": "2025-09-29"
+}

@@ -12,6 +12,7 @@ import pandas as pd
 from src.backtest import event_study as es
 from src.backtest import event_tables as et
 from src.ranker import spec
+from src.backtest.knowledge_time import truncate_reports
 from src.scorecard.situations import market_state_labels, rate_labels
 
 BROKER_STORE = Path("~/Desktop/arthasignal-ai/derived/broker_flow/features.parquet").expanduser()
@@ -34,9 +35,7 @@ def truncate(inputs: Mapping[str, Any], extras: Mapping[str, pd.DataFrame], day:
     cut["sessions"] = inputs["sessions"][inputs["sessions"]["date"] <= day]
     cut["actions"] = inputs["actions"][inputs["actions"]["action_date"] <= day]
     cut["index"] = inputs["index"][inputs["index"]["date"] <= day]
-    reports = extras["reports"][extras["reports"]["published_date"] <= day].copy()
-    reports["ml_date"] = [m if pd.notna(m) and m <= day else None for m in reports["ml_date"]]
-    reports["available_date"] = [max(a, b) if b is not None else a for a, b in zip(reports["published_date"], reports["ml_date"])]
+    reports = truncate_reports(extras["reports"], day)
     declarations = extras["declarations"][extras["declarations"]["announcement_date"] <= day]
     broker = extras["broker"][extras["broker"]["date"] <= day]
     return cut, {"reports": reports, "declarations": declarations, "broker": broker}

@@ -77,7 +77,7 @@ def test_feature_compute_has_no_lookahead_on_synthetic_data() -> None:
     inputs = {"prices": prices, "sessions": pd.DataFrame({"date": sessions}), "actions": actions, "index": index,
               "rates": pd.DataFrame(columns=["fiscal_year", "month", "treasury_bill_rate"]),
               "companies": pd.DataFrame({"symbol": [f"S{k:02d}" for k in range(12)], "sector": ["A", "B"] * 6})}
-    extras = {"reports": pd.DataFrame(columns=["symbol", "fiscal_year", "quarter", "net_profit", "published_date", "ml_date", "available_date"]),
+    extras = {"reports": pd.DataFrame(columns=["symbol", "fiscal_year", "quarter", "net_profit", "published_date", "ss_date", "ml_date", "available_date"]),
               "declarations": pd.DataFrame({"symbol": ["S02"], "announcement_date": [sessions[260]], "bonus": [12.0]}),
               "broker": pd.DataFrame({"symbol": ["S03"], "date": [sessions[270]], "h1": [0.5], "h2": [0.1], "h3": [0.2], "h4": [0.3], "h5": [0.4]})}
     sectors = dict(zip(inputs["companies"]["symbol"], inputs["companies"]["sector"]))

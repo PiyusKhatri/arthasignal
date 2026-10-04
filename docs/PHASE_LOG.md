@@ -807,3 +807,21 @@ The backfill uses the Sharesansar daily page because it is the only source that 
   - **Existing code that still fetches Merolagani:** `src/collectors/news.py` (live news timer), `src/scrapers/quarterly_reports_collector.py`, `fundamentals_scraper.py`, `market_data.py`, `merolagani_scraper.py`, `sector_sources.py`, `symbols.py` and `eps_reconciliation.py`. This is flagged for the owner's decision.
   - **Sharesansar:** its Terms & Conditions page has no anti-automation clause, and its robots.txt allows everything.
 - `pypdf` added to `requirements.txt`. Tests: 5 added (`tests/test_instrument_fixes.py`) and 3 assertions in `tests/test_price_session_backfill.py`.
+
+## Data phase B - Point-in-time rule for every information source
+
+- **New rule** (`docs/POINT_IN_TIME.md`, `src/backtest/knowledge_time.py`): information is usable from the first session strictly after the earliest date among sources whose date for that item passes verification. Every check uses only the row and rows its source created earlier, so the rule is stable when the data are cut at any date.
+- **Reliability, measured on stored rows** published to 2025-09-29 (research role):
+  - **Sharesansar:** the slug creation date equals the shown date on 97.7% of 4,669 slugged rows. 1.97% are back-dated by more than 1 day (worst 273). 0.09% are dated before the quarter they report.
+  - **Merolagani:** 6.3% of rows are more than 7 days before the median of the previous 100 IDs (100% in 2009-2011 and 74% in 2012, from bulk-loaded quarter-end dates; 0.5-5.5% from 2016). 0.14% are before quarter end.
+  - **Between the two** (9,558 reports): 62.5% same day, 89.1% within 1 day. When Merolagani is earlier by more than 1 day (887), its ID order confirms 571 and contradicts 316.
+  - **NEPSE notices:** not measurable, because the notice API answers 401 and is not bypassed.
+- **Verification:**
+  - Sharesansar uses max(shown, slug date).
+  - Merolagani uses max(shown, median of the previous 100 IDs' dates).
+  - Either is rejected when dated before its quarter end.
+- **Effect** on 11,109 net-profit reports: 10,340 unchanged, 733 known earlier (median 18 days), 36 later, 13 dropped.
+- **Wiring:** `info_eval.load_reports` and the ranker's `truncate` now use the new rule.
+- **Leak audit rerun** (`python -m src.ranker.leak_audit`, research role, 41 s, the same 20 seeded dates): **0 mismatches** (r1 with the old rule had 12). Output: `docs/ranker_leak_audit_pit.json`.
+- **Dividend announcement dates** (Sharesansar table): 74 of 890 are later than their own book-close date. They are late, never early, but not a true first-public date; Phase D adds announcement-dated events.
+- **Tests:** 6 in `tests/test_knowledge_time.py`, including one showing the old later-of rule changes under truncation and the new one does not. The ranker fixture gained `ss_date`.

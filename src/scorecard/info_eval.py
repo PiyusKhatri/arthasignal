@@ -36,31 +36,9 @@ def prior_fiscal_year(fiscal_year: str) -> str | None:
 
 
 def load_reports(engine: Any, end: date) -> pd.DataFrame:
-    with engine.connect() as connection:
-        ss = pd.read_sql(
-            text(
-                "SELECT symbol, fiscal_year, quarter, net_profit::float AS net_profit, published_date FROM quarterly_report_announcements "
-                "WHERE source = 'sharesansar' AND NOT is_correction AND net_profit IS NOT NULL AND symbol IS NOT NULL "
-                "AND fiscal_year IS NOT NULL AND quarter IS NOT NULL AND published_date <= :e"
-            ),
-            connection,
-            params={"e": end},
-        )
-        ml = pd.read_sql(
-            text(
-                "SELECT resolved_symbol AS symbol, fiscal_year, quarter, min(published_date) AS ml_date "
-                "FROM quarterly_report_announcements_resolved WHERE source = 'merolagani' AND NOT is_correction "
-                "AND resolved_symbol IS NOT NULL AND fiscal_year IS NOT NULL AND quarter IS NOT NULL AND published_date <= :e "
-                "GROUP BY 1, 2, 3"
-            ),
-            connection,
-            params={"e": end},
-        )
-    keys = ["symbol", "fiscal_year", "quarter"]
-    ss = ss.sort_values("published_date").drop_duplicates(keys, keep="first")
-    merged = ss.merge(ml, on=keys, how="left")
-    merged["available_date"] = [max(a, b) if pd.notna(b) else a for a, b in zip(merged["published_date"], merged["ml_date"])]
-    return merged.reset_index(drop=True)
+    from src.backtest.knowledge_time import load_reports as knowledge_reports
+
+    return knowledge_reports(engine, end)
 
 
 def load_declarations(engine: Any, end: date) -> pd.DataFrame:
