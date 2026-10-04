@@ -1,0 +1,104 @@
+{
+ "method": "read from the report image by eye, with crops where the print was small; net profit on the basis the Sharesansar headline uses",
+ "labels": [
+  {
+   "sha256": "932672bd9eb18a9c16cfdd8ddf1a5ba7272a38ed80098429e533c8a57284fe3b",
+   "symbol": "SANIMA",
+   "published_date": "2017-07-25",
+   "net_profit": 1329381000,
+   "eps": 18.85,
+   "book_value": 131.32,
+   "note": "group column; bank 1,300,158 thousand; headline basis group"
+  },
+  {
+   "sha256": "6ae5c0bdcd474c4a72b66a9d2ea2509303f73de1653e712401bca59a92c7daea",
+   "symbol": "NMB",
+   "published_date": "2014-08-04",
+   "net_profit": 433717000,
+   "eps": 20.5,
+   "book_value": 141.71,
+   "note": "group column; bank 410,060 thousand; headline basis group"
+  },
+  {
+   "sha256": "8ac2295e9d303b45d7ff5899a40ef17269c555d3002542a822ace2e335368688",
+   "symbol": "BSBL",
+   "published_date": "2015-05-05",
+   "net_profit": 86567000,
+   "eps": 27.49,
+   "book_value": 135.06,
+   "note": "EPS and net worth per share from the Nepali disclosure"
+  },
+  {
+   "sha256": "7df25da74e4320b7f6d82d8a0c20019451d8eaaa1991557182e8b6ce1621678f",
+   "symbol": "SEWA",
+   "published_date": "2017-02-01",
+   "net_profit": 77285730,
+   "eps": 30.52,
+   "book_value": 136.61,
+   "note": "EPS annualized, Nepali disclosure"
+  },
+  {
+   "sha256": "9648c2464f3e4c5818b271969521a3c1259e01207f043ba93c9b9fbf17cd7e41",
+   "symbol": "NIDC",
+   "published_date": "2017-05-09",
+   "net_profit": 198394970,
+   "eps": 63.62,
+   "book_value": 881.71,
+   "note": "EPS annualized, Nepali disclosure"
+  },
+  {
+   "sha256": "84170607a63c0bebb222cb48283e715c5ac3b5d177f4a650767eb7ef4f4af7d3",
+   "symbol": "MBL",
+   "published_date": "2019-01-18",
+   "net_profit": 781378000,
+   "eps": 19.4,
+   "book_value": 128.21,
+   "note": "basic EPS; net worth per share from the Nepali disclosure"
+  },
+  {
+   "sha256": "638dcdda334e457e8551786a6fa42eeb8ba58689ee72c1415f1d9d4f6a947af5",
+   "symbol": "JBBL",
+   "published_date": "2020-05-13",
+   "net_profit": 436007002,
+   "eps": 16.63,
+   "book_value": 126.38,
+   "note": "amounts in NPR; net profit is year to date, this-quarter column is 155,172,364"
+  },
+  {
+   "sha256": "b88d80e6fa16aba28602d3988a417e755ac811659d8301e05e02934624ffbfe3",
+   "symbol": "NABIL",
+   "published_date": "2025-04-20",
+   "net_profit": 5051419000,
+   "eps": 25.05,
+   "book_value": 226.36,
+   "note": "bank year-to-date column; group 5,206,466 thousand and group EPS 25.82"
+  },
+  {
+   "sha256": "f075afd9c5b6643c552ef176fd440e25532ec3f1a96c7471f6a707968facbaa6",
+   "symbol": "HDL",
+   "published_date": "2022-08-14",
+   "net_profit": 1055291794,
+   "eps": 69.5,
+   "book_value": 187.22,
+   "note": "amounts in NPR, manufacturing format"
+  },
+  {
+   "sha256": "2df2c8b2f092881d6ed3fe8875caacc7fc566edd1c9061f220b7030a1379bf5b",
+   "symbol": "RMDC",
+   "published_date": "2021-11-01",
+   "net_profit": 262422710,
+   "eps": 101.5,
+   "book_value": 294.37,
+   "note": "Nepali decimals written with a slash (रु.१०१/५०)"
+  },
+  {
+   "sha256": "2be1cfe7e0d9bb3253bbcc6bad0f8a5cac103854e66e9511e66ae4d656c320d9",
+   "symbol": "PRIN",
+   "published_date": "2024-02-12",
+   "net_profit": 108612124,
+   "eps": 15.79,
+   "book_value": 201.0,
+   "note": "insurance format; year-to-date column"
+  }
+ ]
+}

@@ -1,0 +1,641 @@
+[
+ {
+  "sha256": "ae9d23f93f2e4830dd0fdb6c22549055c188475aff8ad28a9a64d720bf5bd3ad",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/ae/ae9d23f93f2e4830dd0fdb6c22549055c188475aff8ad28a9a64d720bf5bd3ad.jpg",
+  "symbol": "KAFIL",
+  "published_date": "2014-01-26",
+  "fiscal_year": "2070/2071",
+  "quarter": 2,
+  "headline_net_profit": 18530000.0
+ },
+ {
+  "sha256": "be1d2a0d849d43995074a2b7c47c3b8d53ab3fa6e6545788fd3466266c5f246e",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/be/be1d2a0d849d43995074a2b7c47c3b8d53ab3fa6e6545788fd3466266c5f246e.jpg",
+  "symbol": "PFLBS",
+  "published_date": "2014-02-17",
+  "fiscal_year": "2070/2071",
+  "quarter": 2,
+  "headline_net_profit": 7930000.0
+ },
+ {
+  "sha256": "4681b89cfe1575c8d3a5a1f7d4ca7f28d40f48181f682e41ce4fabe02d5d2238",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/46/4681b89cfe1575c8d3a5a1f7d4ca7f28d40f48181f682e41ce4fabe02d5d2238.jpg",
+  "symbol": "SFL",
+  "published_date": "2014-02-20",
+  "fiscal_year": "2070/2071",
+  "quarter": 2,
+  "headline_net_profit": 8280000.0
+ },
+ {
+  "sha256": "58277fbf048da454350f77400329849c82ed0b41fc691c711fd0bf0696705b35",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/58/58277fbf048da454350f77400329849c82ed0b41fc691c711fd0bf0696705b35.jpg",
+  "symbol": "NABB",
+  "published_date": "2014-05-11",
+  "fiscal_year": "2070/2071",
+  "quarter": 3,
+  "headline_net_profit": 1360000.0
+ },
+ {
+  "sha256": "6ae5c0bdcd474c4a72b66a9d2ea2509303f73de1653e712401bca59a92c7daea",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/6a/6ae5c0bdcd474c4a72b66a9d2ea2509303f73de1653e712401bca59a92c7daea.jpg",
+  "symbol": "NMB",
+  "published_date": "2014-08-04",
+  "fiscal_year": "2070/2071",
+  "quarter": 4,
+  "headline_net_profit": 433710000.0
+ },
+ {
+  "sha256": "94817bfaf3487bb0a4316373afb2ce7df2def37cecc431c667221415161fde66",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/94/94817bfaf3487bb0a4316373afb2ce7df2def37cecc431c667221415161fde66.jpg",
+  "symbol": "SLBBL",
+  "published_date": "2014-11-02",
+  "fiscal_year": "2071/2072",
+  "quarter": 1,
+  "headline_net_profit": 2790000.0
+ },
+ {
+  "sha256": "37b61e63aadc7c4b880a332bc2a02ad47e21482203b3d55c625186b0f839917a",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/37/37b61e63aadc7c4b880a332bc2a02ad47e21482203b3d55c625186b0f839917a.jpg",
+  "symbol": "CDBL",
+  "published_date": "2015-03-10",
+  "fiscal_year": "2071/2072",
+  "quarter": 2,
+  "headline_net_profit": 55910000.0
+ },
+ {
+  "sha256": "8ac2295e9d303b45d7ff5899a40ef17269c555d3002542a822ace2e335368688",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/8a/8ac2295e9d303b45d7ff5899a40ef17269c555d3002542a822ace2e335368688.jpg",
+  "symbol": "BSBL",
+  "published_date": "2015-05-05",
+  "fiscal_year": "2071/2072",
+  "quarter": 3,
+  "headline_net_profit": 86560000.0
+ },
+ {
+  "sha256": "e2403783f1f6f96f52fb98c828eb655684d90ad9511f8baa4fac0aeeaa235ff9",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/e2/e2403783f1f6f96f52fb98c828eb655684d90ad9511f8baa4fac0aeeaa235ff9.jpg",
+  "symbol": "LLBS",
+  "published_date": "2015-08-03",
+  "fiscal_year": "2071/2072",
+  "quarter": 4,
+  "headline_net_profit": 16430000.0
+ },
+ {
+  "sha256": "97c12526954df08756dd582b8071306e77dd641a2f235d2243c609ba63caa79b",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/97/97c12526954df08756dd582b8071306e77dd641a2f235d2243c609ba63caa79b.jpg",
+  "symbol": "MFL",
+  "published_date": "2015-08-10",
+  "fiscal_year": "2071/2072",
+  "quarter": 4,
+  "headline_net_profit": 87010000.0
+ },
+ {
+  "sha256": "b2186146029e2d18486c59112e51328b0df3ff08428a2ade25be960930ff8a8c",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/b2/b2186146029e2d18486c59112e51328b0df3ff08428a2ade25be960930ff8a8c.jpg",
+  "symbol": "OHL",
+  "published_date": "2015-08-15",
+  "fiscal_year": "2071/2072",
+  "quarter": 4,
+  "headline_net_profit": 198500000.0
+ },
+ {
+  "sha256": "9ca36da1ef8e456dc6299b5c35ba07cb1b1b8a8c33280759f9a7fcec2709df92",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/9c/9ca36da1ef8e456dc6299b5c35ba07cb1b1b8a8c33280759f9a7fcec2709df92.jpg",
+  "symbol": "PRIN",
+  "published_date": "2015-08-16",
+  "fiscal_year": "2071/2072",
+  "quarter": 4,
+  "headline_net_profit": 50390000.0
+ },
+ {
+  "sha256": "500fc84d26ae38cde4214c69c091400518a46d20fa848b0dd34010f76760407f",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/50/500fc84d26ae38cde4214c69c091400518a46d20fa848b0dd34010f76760407f.jpg",
+  "symbol": "HDL",
+  "published_date": "2016-02-10",
+  "fiscal_year": "2072/2073",
+  "quarter": 2,
+  "headline_net_profit": -52800000.0
+ },
+ {
+  "sha256": "fba44dfad724846e9f35d1ffd6bc86e395e844e7981eee743e4366f0f73cb4ca",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/fb/fba44dfad724846e9f35d1ffd6bc86e395e844e7981eee743e4366f0f73cb4ca.jpg",
+  "symbol": "ADBL",
+  "published_date": "2016-02-11",
+  "fiscal_year": "2072/2073",
+  "quarter": 2,
+  "headline_net_profit": 387520000.0
+ },
+ {
+  "sha256": "303bb68296f27fe0f19a1f52cf77c8621009382c994588de4d69866b66a7a43f",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/30/303bb68296f27fe0f19a1f52cf77c8621009382c994588de4d69866b66a7a43f.jpg",
+  "symbol": "UFIL",
+  "published_date": "2016-04-23",
+  "fiscal_year": "2072/2073",
+  "quarter": 3,
+  "headline_net_profit": 33340000.0
+ },
+ {
+  "sha256": "51c484fb6ffb89cb818123e7f82fc89ce7f6b5dd90891c03426cc8219e07ea63",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/51/51c484fb6ffb89cb818123e7f82fc89ce7f6b5dd90891c03426cc8219e07ea63.jpg",
+  "symbol": "EFL",
+  "published_date": "2016-04-27",
+  "fiscal_year": "2072/2073",
+  "quarter": 3,
+  "headline_net_profit": 11910000.0
+ },
+ {
+  "sha256": "5a83fc7331036cff29cf9a0182a7b6d26c32135bfedf51ba3b24c050e2f3be43",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/5a/5a83fc7331036cff29cf9a0182a7b6d26c32135bfedf51ba3b24c050e2f3be43.jpg",
+  "symbol": "UNL",
+  "published_date": "2016-08-15",
+  "fiscal_year": "2072/2073",
+  "quarter": 4,
+  "headline_net_profit": 1040000000.0
+ },
+ {
+  "sha256": "7df25da74e4320b7f6d82d8a0c20019451d8eaaa1991557182e8b6ce1621678f",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/7d/7df25da74e4320b7f6d82d8a0c20019451d8eaaa1991557182e8b6ce1621678f.jpg",
+  "symbol": "SEWA",
+  "published_date": "2017-02-01",
+  "fiscal_year": "2073/2074",
+  "quarter": 2,
+  "headline_net_profit": 77280000.0
+ },
+ {
+  "sha256": "3e56a013d3e647f9f5ca39739a8edb3bea857c4ff545e878ae29c0c2d6877dbd",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/3e/3e56a013d3e647f9f5ca39739a8edb3bea857c4ff545e878ae29c0c2d6877dbd.jpg",
+  "symbol": "SAJHA",
+  "published_date": "2017-02-08",
+  "fiscal_year": "2073/2074",
+  "quarter": 2,
+  "headline_net_profit": 12080000.0
+ },
+ {
+  "sha256": "e609a52adb8b05ee8b8cf5d8edb2e55cc1266120e558b3276f44696aaf9ae69c",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/e6/e609a52adb8b05ee8b8cf5d8edb2e55cc1266120e558b3276f44696aaf9ae69c.jpg",
+  "symbol": "BFC",
+  "published_date": "2017-05-04",
+  "fiscal_year": "2073/2074",
+  "quarter": 3,
+  "headline_net_profit": -25000000.0
+ },
+ {
+  "sha256": "9648c2464f3e4c5818b271969521a3c1259e01207f043ba93c9b9fbf17cd7e41",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/96/9648c2464f3e4c5818b271969521a3c1259e01207f043ba93c9b9fbf17cd7e41.jpg",
+  "symbol": "NIDC",
+  "published_date": "2017-05-09",
+  "fiscal_year": "2073/2074",
+  "quarter": 3,
+  "headline_net_profit": 198390000.0
+ },
+ {
+  "sha256": "932672bd9eb18a9c16cfdd8ddf1a5ba7272a38ed80098429e533c8a57284fe3b",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/93/932672bd9eb18a9c16cfdd8ddf1a5ba7272a38ed80098429e533c8a57284fe3b.jpg",
+  "symbol": "SANIMA",
+  "published_date": "2017-07-25",
+  "fiscal_year": "2073/2074",
+  "quarter": 4,
+  "headline_net_profit": 1320000000.0
+ },
+ {
+  "sha256": "76e7dbceeb15a302e323c5dffe626c2f75051e0cf3f311e1d6109c95e5efee81",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/76/76e7dbceeb15a302e323c5dffe626c2f75051e0cf3f311e1d6109c95e5efee81.jpg",
+  "symbol": "UMB",
+  "published_date": "2017-11-15",
+  "fiscal_year": "2074/2075",
+  "quarter": 1,
+  "headline_net_profit": 4510000.0
+ },
+ {
+  "sha256": "8c24712216b0cd817d78c7c0be8ab507c4a61ed5fe91f12590977c5fd4c5e839",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/8c/8c24712216b0cd817d78c7c0be8ab507c4a61ed5fe91f12590977c5fd4c5e839.jpg",
+  "symbol": "FMDBL",
+  "published_date": "2018-01-15",
+  "fiscal_year": "2074/2075",
+  "quarter": 2,
+  "headline_net_profit": 47690000.0
+ },
+ {
+  "sha256": "387aa872fb332fc06db4479b59aa4d5dca57561e6a3db9bc979598cecb0a4dd5",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/38/387aa872fb332fc06db4479b59aa4d5dca57561e6a3db9bc979598cecb0a4dd5.jpg",
+  "symbol": "RHPC",
+  "published_date": "2018-02-05",
+  "fiscal_year": "2074/2075",
+  "quarter": 2,
+  "headline_net_profit": 9080000.0
+ },
+ {
+  "sha256": "6a12d7e9797a5b7770a6840e35cf3c71f6ecdb51a0c4bfb9e6e02e1941e86526",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/6a/6a12d7e9797a5b7770a6840e35cf3c71f6ecdb51a0c4bfb9e6e02e1941e86526.jpg",
+  "symbol": "SKBBL",
+  "published_date": "2018-02-10",
+  "fiscal_year": "2074/2075",
+  "quarter": 2,
+  "headline_net_profit": 171550000.0
+ },
+ {
+  "sha256": "d02b0c4ee707462870a1ec8440e2b6180a2185cb71c2d0929215f69b8a9c7057",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/d0/d02b0c4ee707462870a1ec8440e2b6180a2185cb71c2d0929215f69b8a9c7057.jpg",
+  "symbol": "FOWAD",
+  "published_date": "2018-02-11",
+  "fiscal_year": "2074/2075",
+  "quarter": 2,
+  "headline_net_profit": 145440000.0
+ },
+ {
+  "sha256": "79fb85c914609c6193e8d6e36c7e5aae6dd2ad1d95ef3cf5bccbd2fe810a60f3",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/79/79fb85c914609c6193e8d6e36c7e5aae6dd2ad1d95ef3cf5bccbd2fe810a60f3.jpg",
+  "symbol": "DBBL",
+  "published_date": "2018-04-27",
+  "fiscal_year": "2074/2075",
+  "quarter": 3,
+  "headline_net_profit": 202360000.0
+ },
+ {
+  "sha256": "fa18cb18d6d350ea0dd11e18f74b3888752d5618767b841390714c128ccf6352",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/fa/fa18cb18d6d350ea0dd11e18f74b3888752d5618767b841390714c128ccf6352.jpg",
+  "symbol": "EIC",
+  "published_date": "2018-11-16",
+  "fiscal_year": "2075/2076",
+  "quarter": 1,
+  "headline_net_profit": 4610000.0
+ },
+ {
+  "sha256": "84170607a63c0bebb222cb48283e715c5ac3b5d177f4a650767eb7ef4f4af7d3",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/84/84170607a63c0bebb222cb48283e715c5ac3b5d177f4a650767eb7ef4f4af7d3.jpg",
+  "symbol": "MBL",
+  "published_date": "2019-01-18",
+  "fiscal_year": "2075/2076",
+  "quarter": 2,
+  "headline_net_profit": 781370000.0
+ },
+ {
+  "sha256": "1eac863f46a5362add7237737f4e69d780a363ec880959d3c69dfd702aa671b7",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/1e/1eac863f46a5362add7237737f4e69d780a363ec880959d3c69dfd702aa671b7.jpg",
+  "symbol": "SMFBS",
+  "published_date": "2019-05-02",
+  "fiscal_year": "2075/2076",
+  "quarter": 3,
+  "headline_net_profit": 14470000.0
+ },
+ {
+  "sha256": "1533cb947b1e91a6354d35a99c7ca3f6a15f8e260ab1cd17d5f3b9591a70b5b8",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/15/1533cb947b1e91a6354d35a99c7ca3f6a15f8e260ab1cd17d5f3b9591a70b5b8.jpg",
+  "symbol": "WOMI",
+  "published_date": "2019-10-25",
+  "fiscal_year": "2076/2077",
+  "quarter": 1,
+  "headline_net_profit": 18390000.0
+ },
+ {
+  "sha256": "4734fccc62d501e75838a4b03a997d21f60f642e4afdb70aed530f8a602f074d",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/47/4734fccc62d501e75838a4b03a997d21f60f642e4afdb70aed530f8a602f074d.jpg",
+  "symbol": "KMFL",
+  "published_date": "2019-11-10",
+  "fiscal_year": "2076/2077",
+  "quarter": 1,
+  "headline_net_profit": 3590000.0
+ },
+ {
+  "sha256": "d766f1c7d6250009046564bf447dd9c63d75bcb18b990106f6efa86c54f049ea",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/d7/d766f1c7d6250009046564bf447dd9c63d75bcb18b990106f6efa86c54f049ea.jpg",
+  "symbol": "JBNL",
+  "published_date": "2019-11-11",
+  "fiscal_year": "2076/2077",
+  "quarter": 1,
+  "headline_net_profit": 366920000.0
+ },
+ {
+  "sha256": "72f025db767564236880bd7701dbf8b7d93f0066ddf50eeedcaca74889f5a680",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/72/72f025db767564236880bd7701dbf8b7d93f0066ddf50eeedcaca74889f5a680.jpg",
+  "symbol": "DDBL",
+  "published_date": "2019-11-13",
+  "fiscal_year": "2076/2077",
+  "quarter": 1,
+  "headline_net_profit": 95880000.0
+ },
+ {
+  "sha256": "d0a63b929ebedfd52271029273ed69e8fefe9b55bd31b4127b4e4b941aec9970",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/d0/d0a63b929ebedfd52271029273ed69e8fefe9b55bd31b4127b4e4b941aec9970.jpg",
+  "symbol": "PFL",
+  "published_date": "2020-01-31",
+  "fiscal_year": "2076/2077",
+  "quarter": 2,
+  "headline_net_profit": 56480000.0
+ },
+ {
+  "sha256": "d5283be2c20085e17868ef48188b93311816809a69b72ea627051f50771c160e",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/d5/d5283be2c20085e17868ef48188b93311816809a69b72ea627051f50771c160e.jpg",
+  "symbol": "NAGRO",
+  "published_date": "2020-02-11",
+  "fiscal_year": "2076/2077",
+  "quarter": 2,
+  "headline_net_profit": 6410000.0
+ },
+ {
+  "sha256": "b6231c4dec7aab06fd8c0f00d0c41395b659e4c960a5c63ecf222a301a11808c",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/b6/b6231c4dec7aab06fd8c0f00d0c41395b659e4c960a5c63ecf222a301a11808c.jpg",
+  "symbol": "SLBSL",
+  "published_date": "2020-05-08",
+  "fiscal_year": "2076/2077",
+  "quarter": 3,
+  "headline_net_profit": 20650000.0
+ },
+ {
+  "sha256": "638dcdda334e457e8551786a6fa42eeb8ba58689ee72c1415f1d9d4f6a947af5",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/63/638dcdda334e457e8551786a6fa42eeb8ba58689ee72c1415f1d9d4f6a947af5.jpg",
+  "symbol": "JBBL",
+  "published_date": "2020-05-13",
+  "fiscal_year": "2076/2077",
+  "quarter": 3,
+  "headline_net_profit": 436000000.0
+ },
+ {
+  "sha256": "d385862a5b34a5029cefcb16e7b96b57e94850c97c8fadfda6c563290c8a803c",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/d3/d385862a5b34a5029cefcb16e7b96b57e94850c97c8fadfda6c563290c8a803c.jpg",
+  "symbol": "FOWAD",
+  "published_date": "2020-05-14",
+  "fiscal_year": "2076/2077",
+  "quarter": 3,
+  "headline_net_profit": 217610000.0
+ },
+ {
+  "sha256": "4cc1544a5fcdbcc68e5f881406655ba134ad9407c8d2cda2bf6184da9b5efae5",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/4c/4cc1544a5fcdbcc68e5f881406655ba134ad9407c8d2cda2bf6184da9b5efae5.jpg",
+  "symbol": "SANIMA",
+  "published_date": "2020-08-14",
+  "fiscal_year": "2076/2077",
+  "quarter": 4,
+  "headline_net_profit": 1700000000.0
+ },
+ {
+  "sha256": "989c406ea5d2518dbee022c764a15b839880e5bd352cd0e5612ac76283df9e15",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/98/989c406ea5d2518dbee022c764a15b839880e5bd352cd0e5612ac76283df9e15.jpg",
+  "symbol": "SABSL",
+  "published_date": "2021-02-10",
+  "fiscal_year": "2077/2078",
+  "quarter": 2,
+  "headline_net_profit": 30430000.0
+ },
+ {
+  "sha256": "38695762e830be40daba86126fd8ab72da330a1b6f759e724cf1189ac00f93cb",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/38/38695762e830be40daba86126fd8ab72da330a1b6f759e724cf1189ac00f93cb.jpg",
+  "symbol": "HIDCL",
+  "published_date": "2021-02-12",
+  "fiscal_year": "2077/2078",
+  "quarter": 2,
+  "headline_net_profit": 428310000.0
+ },
+ {
+  "sha256": "5e1ca3d31d5580308f9fe239278d6ad328286b9e354034457acc3b9920ae2464",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/5e/5e1ca3d31d5580308f9fe239278d6ad328286b9e354034457acc3b9920ae2464.jpg",
+  "symbol": "LLBS",
+  "published_date": "2021-04-26",
+  "fiscal_year": "2077/2078",
+  "quarter": 3,
+  "headline_net_profit": 157680000.0
+ },
+ {
+  "sha256": "69911975117ad7c4d4f09234d872bd2b79823178d6f2814f71eb9d8e62c929a8",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/69/69911975117ad7c4d4f09234d872bd2b79823178d6f2814f71eb9d8e62c929a8.jpg",
+  "symbol": "BFC",
+  "published_date": "2021-10-24",
+  "fiscal_year": "2078/2079",
+  "quarter": 1,
+  "headline_net_profit": 121160000.0
+ },
+ {
+  "sha256": "2df2c8b2f092881d6ed3fe8875caacc7fc566edd1c9061f220b7030a1379bf5b",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/2d/2df2c8b2f092881d6ed3fe8875caacc7fc566edd1c9061f220b7030a1379bf5b.jpg",
+  "symbol": "RMDC",
+  "published_date": "2021-11-01",
+  "fiscal_year": "2078/2079",
+  "quarter": 1,
+  "headline_net_profit": 262420000.0
+ },
+ {
+  "sha256": "b67c86e8a4d2312c16041b469fb3b8a35d9921ae2d9dad97988dda0b72d3cb71",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/b6/b67c86e8a4d2312c16041b469fb3b8a35d9921ae2d9dad97988dda0b72d3cb71.jpg",
+  "symbol": "ACLBSL",
+  "published_date": "2021-11-15",
+  "fiscal_year": "2078/2079",
+  "quarter": 1,
+  "headline_net_profit": 14770000.0
+ },
+ {
+  "sha256": "05298b2200a5e3cb406c7454bce96c44811c8e0fb0a4dace90d4934fd912f38c",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/05/05298b2200a5e3cb406c7454bce96c44811c8e0fb0a4dace90d4934fd912f38c.jpg",
+  "symbol": "NICL",
+  "published_date": "2022-05-12",
+  "fiscal_year": "2078/2079",
+  "quarter": 3,
+  "headline_net_profit": 179460000.0
+ },
+ {
+  "sha256": "b638c944855320a5b0cb9e73a7f07d7d975da5c124e278d7b20c4d39f67bd6d1",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/b6/b638c944855320a5b0cb9e73a7f07d7d975da5c124e278d7b20c4d39f67bd6d1.jpg",
+  "symbol": "ADLB",
+  "published_date": "2022-08-08",
+  "fiscal_year": "2078/2079",
+  "quarter": 4,
+  "headline_net_profit": 6890000.0
+ },
+ {
+  "sha256": "f075afd9c5b6643c552ef176fd440e25532ec3f1a96c7471f6a707968facbaa6",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/f0/f075afd9c5b6643c552ef176fd440e25532ec3f1a96c7471f6a707968facbaa6.jpg",
+  "symbol": "HDL",
+  "published_date": "2022-08-14",
+  "fiscal_year": "2078/2079",
+  "quarter": 4,
+  "headline_net_profit": 1050000000.0
+ },
+ {
+  "sha256": "e3ce1b6f791ac11fb53d85f052cb9bbbd252a40c1342b1e30a801213f3504d57",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/e3/e3ce1b6f791ac11fb53d85f052cb9bbbd252a40c1342b1e30a801213f3504d57.jpg",
+  "symbol": "RHPL",
+  "published_date": "2022-08-15",
+  "fiscal_year": "2078/2079",
+  "quarter": 4,
+  "headline_net_profit": -52340000.0
+ },
+ {
+  "sha256": "700835f1e01a228eae9a67dc937445538f539d746c7b9156e012ec393221d4c1",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/70/700835f1e01a228eae9a67dc937445538f539d746c7b9156e012ec393221d4c1.jpg",
+  "symbol": "CYCL",
+  "published_date": "2022-11-06",
+  "fiscal_year": "2079/2080",
+  "quarter": 1,
+  "headline_net_profit": 15130000.0
+ },
+ {
+  "sha256": "a52a3ac9905d680ddd24f70f06f5ae79e9e30269971c8f67a5321539c0d0f342",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/a5/a52a3ac9905d680ddd24f70f06f5ae79e9e30269971c8f67a5321539c0d0f342.jpg",
+  "symbol": "BNL",
+  "published_date": "2022-11-15",
+  "fiscal_year": "2079/2080",
+  "quarter": 1,
+  "headline_net_profit": 401500000.0
+ },
+ {
+  "sha256": "319b01e8facdfc9c150cce3f99a0354e2bf49657bfe2d1915bd59007bb9c7d7e",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/31/319b01e8facdfc9c150cce3f99a0354e2bf49657bfe2d1915bd59007bb9c7d7e.jpg",
+  "symbol": "BHPL",
+  "published_date": "2023-02-13",
+  "fiscal_year": "2079/2080",
+  "quarter": 2,
+  "headline_net_profit": -5560000.0
+ },
+ {
+  "sha256": "c357487772b4389a229498145f2e51616721423fa41ad7cdec844ac31e29a631",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/c3/c357487772b4389a229498145f2e51616721423fa41ad7cdec844ac31e29a631.jpg",
+  "symbol": "NIFRA",
+  "published_date": "2023-04-19",
+  "fiscal_year": "2079/2080",
+  "quarter": 3,
+  "headline_net_profit": 1160000000.0
+ },
+ {
+  "sha256": "2fa7059ab1aa7c564d91684fbf83c9661cde2a677bdeb3448f244c7ced184f43",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/2f/2fa7059ab1aa7c564d91684fbf83c9661cde2a677bdeb3448f244c7ced184f43.jpg",
+  "symbol": "SAMAJ",
+  "published_date": "2023-06-06",
+  "fiscal_year": "2079/2080",
+  "quarter": 2,
+  "headline_net_profit": 3070000.0
+ },
+ {
+  "sha256": "6690a8a9ffb600bc61e5739e4596a93a93f8afe4fe361d29a351de7ec07f94fc",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/66/6690a8a9ffb600bc61e5739e4596a93a93f8afe4fe361d29a351de7ec07f94fc.jpg",
+  "symbol": "MKHC",
+  "published_date": "2023-08-15",
+  "fiscal_year": "2079/2080",
+  "quarter": 4,
+  "headline_net_profit": -19540000.0
+ },
+ {
+  "sha256": "db727bd238f16589fcce605f1b736ef0bdde03d639d1fc9d2ec877a3eb264aca",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/db/db727bd238f16589fcce605f1b736ef0bdde03d639d1fc9d2ec877a3eb264aca.jpg",
+  "symbol": "SMB",
+  "published_date": "2023-11-03",
+  "fiscal_year": "2080/2081",
+  "quarter": 1,
+  "headline_net_profit": 1590000.0
+ },
+ {
+  "sha256": "b01ad1e1a2d47b95baeb3b72a58eba113a1e9b3327ffa143c6c01f7eb12779fa",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/b0/b01ad1e1a2d47b95baeb3b72a58eba113a1e9b3327ffa143c6c01f7eb12779fa.jpg",
+  "symbol": "MHNL",
+  "published_date": "2023-11-10",
+  "fiscal_year": "2080/2081",
+  "quarter": 1,
+  "headline_net_profit": 15910000.0
+ },
+ {
+  "sha256": "a799c7d1f8d1b27291f74a967226e7bce9d3e58091edb925fdff0278f2c995e3",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/a7/a799c7d1f8d1b27291f74a967226e7bce9d3e58091edb925fdff0278f2c995e3.png",
+  "symbol": "SMHL",
+  "published_date": "2024-02-10",
+  "fiscal_year": "2080/2081",
+  "quarter": 2,
+  "headline_net_profit": 147290000.0
+ },
+ {
+  "sha256": "2be1cfe7e0d9bb3253bbcc6bad0f8a5cac103854e66e9511e66ae4d656c320d9",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/2b/2be1cfe7e0d9bb3253bbcc6bad0f8a5cac103854e66e9511e66ae4d656c320d9.jpg",
+  "symbol": "PRIN",
+  "published_date": "2024-02-12",
+  "fiscal_year": "2080/2081",
+  "quarter": 2,
+  "headline_net_profit": 108610000.0
+ },
+ {
+  "sha256": "f968b8378771252f7cbf5d5c75b20d02cbcf4b2404197f75f3bfa556240e7a8b",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/f9/f968b8378771252f7cbf5d5c75b20d02cbcf4b2404197f75f3bfa556240e7a8b.jpg",
+  "symbol": "CKHL",
+  "published_date": "2024-05-27",
+  "fiscal_year": "2080/2081",
+  "quarter": 3,
+  "headline_net_profit": -1240000.0
+ },
+ {
+  "sha256": "8a44c860439275087f9c871529f772eb160f2343bb34c40cbfaa1c09762194c7",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/8a/8a44c860439275087f9c871529f772eb160f2343bb34c40cbfaa1c09762194c7.jpg",
+  "symbol": "ALICL",
+  "published_date": "2024-08-14",
+  "fiscal_year": "2080/2081",
+  "quarter": 4,
+  "headline_net_profit": 328590000.0
+ },
+ {
+  "sha256": "4ab62b2581500957df506698670befdf7ba5d4d1735727af17574cc657b3f674",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/4a/4ab62b2581500957df506698670befdf7ba5d4d1735727af17574cc657b3f674.jpg",
+  "symbol": "NESDO",
+  "published_date": "2024-08-14",
+  "fiscal_year": "2080/2081",
+  "quarter": 4,
+  "headline_net_profit": 67860000.0
+ },
+ {
+  "sha256": "9ee580064c03df30771baedb44938225123c835dbe8095ed5192285a51a8d6bc",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/9e/9ee580064c03df30771baedb44938225123c835dbe8095ed5192285a51a8d6bc.jpg",
+  "symbol": "SHPC",
+  "published_date": "2024-11-14",
+  "fiscal_year": "2081/2082",
+  "quarter": 1,
+  "headline_net_profit": 202010000.0
+ },
+ {
+  "sha256": "4bd037634bf526cb641597b2082c936bd6a153f40b725d42b4d4200db73b0808",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/4b/4bd037634bf526cb641597b2082c936bd6a153f40b725d42b4d4200db73b0808.jpg",
+  "symbol": "ILBS",
+  "published_date": "2025-01-29",
+  "fiscal_year": "2081/2082",
+  "quarter": 2,
+  "headline_net_profit": -94620000.0
+ },
+ {
+  "sha256": "ee395e74d2e6d46c353e5c328088d5a83e120b58dc1f775fb61a884bd93d7e61",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/ee/ee395e74d2e6d46c353e5c328088d5a83e120b58dc1f775fb61a884bd93d7e61.jpg",
+  "symbol": "HRL",
+  "published_date": "2025-02-12",
+  "fiscal_year": "2081/2082",
+  "quarter": 2,
+  "headline_net_profit": 616960000.0
+ },
+ {
+  "sha256": "dff62998eccf538ee41c30d92ca27d43f2677f234fd185df55ac4ccc2962cf4d",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/df/dff62998eccf538ee41c30d92ca27d43f2677f234fd185df55ac4ccc2962cf4d.jpg",
+  "symbol": "GBIME",
+  "published_date": "2025-04-20",
+  "fiscal_year": "2081/2082",
+  "quarter": 3,
+  "headline_net_profit": 4530000000.0
+ },
+ {
+  "sha256": "b88d80e6fa16aba28602d3988a417e755ac811659d8301e05e02934624ffbfe3",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/b8/b88d80e6fa16aba28602d3988a417e755ac811659d8301e05e02934624ffbfe3.jpg",
+  "symbol": "NABIL",
+  "published_date": "2025-04-20",
+  "fiscal_year": "2081/2082",
+  "quarter": 3,
+  "headline_net_profit": 5050000000.0
+ },
+ {
+  "sha256": "593019c941ec5069bb05430be0ced0edd787a8ce1a447cf7b627ca143916aa2f",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/59/593019c941ec5069bb05430be0ced0edd787a8ce1a447cf7b627ca143916aa2f.jpg",
+  "symbol": "OHL",
+  "published_date": "2025-05-11",
+  "fiscal_year": "2081/2082",
+  "quarter": 3,
+  "headline_net_profit": 44750000.0
+ },
+ {
+  "sha256": "26b74c8484e484f869172b292c21915b95cb85d3decf6ed05cecc0a7f6fdb722",
+  "path": "/Users/arpanabhandari/Desktop/arthasignal-ai/raw/archive/sharesansar_reports/26/26b74c8484e484f869172b292c21915b95cb85d3decf6ed05cecc0a7f6fdb722.jpg",
+  "symbol": "GFCL",
+  "published_date": "2025-08-17",
+  "fiscal_year": "2081/2082",
+  "quarter": 4,
+  "headline_net_profit": 5110000.0
+ }
+]

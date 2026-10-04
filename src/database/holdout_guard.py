@@ -46,6 +46,14 @@ PROTECTED_COLUMNS: dict[str, str] = {
     "public_tips": "knowledge_at",
     "public_tip_events": "recorded_at",
     "tip_leaderboard": "as_of",
+    "corporate_announcements": "published_date",
+    "archive_documents": "published_date",
+    "news_articles": "published_at",
+    "news_symbol_mentions": "published_at",
+    "report_field_values": "published_date",
+    "policy_events": "announced_date",
+    "sentiment_observations": "published_date",
+    "company_event_records": "reference_date",
 }
 
 _allowed: ContextVar[str | None] = ContextVar("holdout_allowed", default=None)

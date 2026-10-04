@@ -825,3 +825,25 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - **Leak audit rerun** (`python -m src.ranker.leak_audit`, research role, 41 s, the same 20 seeded dates): **0 mismatches** (r1 with the old rule had 12). Output: `docs/ranker_leak_audit_pit.json`.
 - **Dividend announcement dates** (Sharesansar table): 74 of 890 are later than their own book-close date. They are late, never early, but not a true first-public date; Phase D adds announcement-dated events.
 - **Tests:** 6 in `tests/test_knowledge_time.py`, including one showing the old later-of rule changes under truncation and the new one does not. The ranker fixture gained `ss_date`.
+
+## Data phases C-F - Collection infrastructure (in progress)
+
+- **Polite client** (`src/archive/polite.py`):
+  - checks robots.txt;
+  - enforces one request per 3 s per host across all processes through a file lock (floor 2 s);
+  - retries 8 times with backoff up to 5 minutes, which rides out network outages.
+- **Raw store** (`schema.store_raw`): files are addressed by SHA-256 under `~/Desktop/arthasignal-ai/raw/archive/` and never overwritten.
+- **New tables** (`src/archive/schema.py`, `python -m src.archive.schema`): `corporate_announcements`, `company_event_records`, `archive_documents`, `news_articles`, `news_symbol_mentions`, `report_field_values`, `policy_events`, `sentiment_observations`, plus `archive_progress` for resume state.
+  - **Append-only:** each table rejects UPDATE and DELETE in a trigger.
+  - **Holdout:** each carries the holdout row-level-security policy on its date column, registered in `holdout_guard.PROTECTED_COLUMNS`.
+  - **Tests** (`tests/test_archive_holdout.py`, 11): every policy exists and is forced; for each table, a pre-holdout row and a holdout row are inserted in a rolled-back transaction, and under the research role only the old row is visible. Append-only behaviour and the raw store are also tested.
+- **Terms:** Sharesansar's Terms & Conditions have no clause against automated collection, and its robots.txt allows everything. NRB and CDSC robots allow everything. Merolagani is excluded (phase A).
+- **Running in the background** (resumable, logs in `logs/`; coverage is reported when each finishes):
+  - `sharesansar_company`: announcements, AGM and dividend tables per company (phase D);
+  - `sharesansar_news`: the news archive, walking back from 2025-09-30 (phase E);
+  - `report_documents`: quarterly-report images (phase C);
+  - `nrb_documents`: monetary-policy documents (115 PDFs stored) and the monthly macroeconomic reports (phase D/F).
+- **Policy events:** 36 rows loaded from `docs/policy_events.json` (34 NRB measures plus 2 trading rules), each with an evidence sentence and an announcement-date basis. Dates before 2020 are from secondary sources and are marked unconfirmed.
+- **Market series** (phase F, `python -m src.archive.sentiment_series market`): turnover, symbols traded, advances, declines, unchanged and breadth for 2,594 sessions, 2014-06-01 to 2025-09-28 (15,563 rows), dated by session close.
+- **OCR sample** (phase C): 72 sampled reports (6 per year, 2014-2025) gave 71 images; one page is a 404. 11 gold labels were read from the images (`docs/ocr/gold_labels.json`). The engine comparison is still running.
+- Suite: 706 passed.

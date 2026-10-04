@@ -17,3 +17,4 @@ logs/
 .env.collectors
 *.session
 *.session-journal
+.venv-ocr/
