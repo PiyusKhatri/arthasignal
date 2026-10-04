@@ -582,3 +582,21 @@ The backfill uses the Sharesansar daily page because it is the only source that 
   `new_listing` at 40 is +8.89 with a plain bound of +2.06 and a penalized bound of −7.01 at *K* = 4,264. **No earlier conclusion changes.**
 - Still open: 51 Equity symbols without a sector are pooled as "unknown" in the scorecard's sector median.
 - Tests: 6 added (`tests/test_sector_universe.py`).
+
+## Readiness 1 - Sector relabel migration for the restored server
+
+- `deploy/migrations/m001_nonequity_sector_relabel.py`: an idempotent relabel of non-equity instruments that carry one of the 12 equity sectors (Mutual Funds → "Mutual Fund", Non-Convertible Debentures → "Debenture").
+  - The sector list is frozen in the file.
+  - It runs in one transaction under an advisory lock, prints before and after counts, and has a dry run.
+  - It logs to `ops_migration_runs` only when it changes rows, and exits 1 if anything is left.
+- Tested on a scratch restore of the 11:41 dump (taken before the 13:02 sector fix, so `companies` matches the server's 12:22 dump):
+  - the sectors check exited 1 with 111;
+  - the dry run wrote nothing;
+  - the first run applied 111 (34 + 77), with after = 0;
+  - the second run reported "already fixed: nothing to do", 0 rows, no log row;
+  - the sectors check then exited 0;
+  - the labels of all 354 non-equity rows are identical to the laptop's fix;
+  - on the laptop (already fixed) it changed nothing and did not even create its log table.
+
+  Scratch database dropped.
+- `docs/PROD_DEPLOY.md` Part 10 gives the exact server commands: backup, `git pull`, packages, units, the check (expect exit 1), the migration (dry run, real, repeat) and the check (expect exit 0). It also fixes a wrong `~/.local/bin/uv` path in the update command.

@@ -261,7 +261,7 @@ sudo ls -lh /var/backups/arthasignal/
 | Resume the writers before the deadline | `sudo systemctl start arthasignal-daily-resume.service` |
 | A price step failed the integrity check | Read `logs/daily/<date>/integrity.json`. Either the corporate action is missing (record it) or the symbol needs a quarantine row (`price_quarantine`). Then resume the writers before 11:00 on the next session day |
 | Add a NEPSE holiday | Edit `config/nepse_calendar.json` on your laptop, commit and push, then `cd /srv/arthasignal/app && sudo -u arthasignal git pull` |
-| Update the code | `cd /srv/arthasignal/app && sudo -u arthasignal git pull && sudo -u arthasignal ~/.local/bin/uv pip install --python .venv/bin/python -r requirements.txt && sudo bash deploy/scripts/install_units.sh` |
+| Update the code | `cd /srv/arthasignal/app && sudo -u arthasignal git pull && sudo -u arthasignal /srv/arthasignal/.local/bin/uv pip install --python .venv/bin/python -r requirements.txt && sudo bash deploy/scripts/install_units.sh (always spell out `/srv/arthasignal/.local/bin/uv`: `~` would expand to your own home, not the service user's)` |
 | Pause everything | `sudo systemctl stop 'arthasignal-*.timer'` (start again with `install_units.sh`) |
 
 **Restoring a backup** (on any machine that has your private key):
@@ -270,6 +270,59 @@ sudo ls -lh /var/backups/arthasignal/
 age -d -i ~/arthasignal-backup-key.txt arthasignal_YYYYMMDD_HHMMSS.dump.age | tar -xf -
 pg_restore --dbname <empty_database> --no-owner db.dump
 ```
+
+## Part 10: Updating a server restored before 2026-10-04 13:02 (do this before Monday 2026-10-05 15:35)
+
+A server restored from a dump taken before the sector fix has two problems:
+- **111 mutual funds and debentures still carry their sponsor bank's equity sector**, for example CSY as "Commercial Banks";
+- it runs older code, without the research-URL fix (12:39), the sector fix and the `sectors` chain step (13:02), or the rehearsal mode.
+
+Run these on the server, in order. Every command is safe to repeat.
+
+```bash
+cd /srv/arthasignal/app
+RUN='sudo -u arthasignal bash -lc'
+ENV='cd /srv/arthasignal/app && set -a && . ./.env && set +a &&'
+
+# 1. Take a backup first
+sudo systemctl start arthasignal-backup.service && sudo ls -lh /var/backups/arthasignal | tail -2
+
+# 2. New code and packages (lightgbm and scikit-learn were added)
+sudo -u arthasignal git pull
+sudo -u arthasignal /srv/arthasignal/.local/bin/uv pip install --python .venv/bin/python -r requirements.txt
+sudo bash deploy/scripts/install_units.sh
+
+# 3. Look first: the sectors check should FAIL (exit 1) on an unfixed database
+$RUN "$ENV .venv/bin/python -m src.pipeline.data_quality --sectors"; echo "exit $?"
+
+# 4. Migration: dry run, then for real
+$RUN "$ENV .venv/bin/python deploy/migrations/m001_nonequity_sector_relabel.py --dry-run"
+$RUN "$ENV .venv/bin/python deploy/migrations/m001_nonequity_sector_relabel.py"; echo "exit $?"
+
+# 5. Run it again: it must say "already fixed: nothing to do" and change 0 rows
+$RUN "$ENV .venv/bin/python deploy/migrations/m001_nonequity_sector_relabel.py"; echo "exit $?"
+
+# 6. The sectors check must now pass with exit 0
+$RUN "$ENV .venv/bin/python -m src.pipeline.data_quality --sectors"; echo "exit $?"
+```
+
+What to expect (this was tested on a scratch restore of the pre-fix dump of 11:41 on 2026-10-04):
+
+| Step | Expected output |
+| --- | --- |
+| 3 | `DATA QUALITY FAILURE: 111 non-equity symbols carry an equity sector: C30MF, CSY, …`, exit 1 |
+| 4 (dry run) | `"status": "dry run: nothing written"`, before 111 |
+| 4 (real) | `"status": "applied"`, `"rows_changed": 111` (Mutual Funds 34, Non-Convertible Debentures 77), after 0, exit 0 |
+| 5 | `"status": "already fixed: nothing to do"`, `"rows_changed": 0`, exit 0 |
+| 6 | `sector check passed: no non-equity symbol carries an equity sector`, exit 0 |
+
+The migration:
+- runs in one transaction under an advisory lock;
+- prints the before and after counts by instrument type and sector;
+- logs a row in `ops_migration_runs` only when it changes something;
+- exits 1 if anything is still mislabelled afterwards.
+
+If step 6 does not print exit 0, **do not** let Monday's chain run: `sudo systemctl stop arthasignal-daily.timer`, and send me the output of steps 3-6.
 
 ## Security checklist
 
