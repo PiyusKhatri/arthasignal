@@ -1,6 +1,8 @@
 protocol:
-  version: sim-protocol-v1
+  version: sim-protocol-v1.1
   locked_on: "2026-10-04"
+  previous: {version: sim-protocol-v1, config_sha256: be906e7f4025aa8afc86ad7eb9a1407e517b59fd4cea4e6cc68ec43362985656, commit: 702dcc0}
+  owner_decisions: all 15 open questions of v1, decided 2026-10-04
   document: docs/SIMULATION_PROTOCOL.md
   trial_family: simulation_protocol
   holdout_start: "2025-09-30"
@@ -43,7 +45,8 @@ horizons:
   classes:
     short: {min_months: 1, max_months: 3, min_sessions: 19, max_sessions: 57}
     mid: {min_months: 3, max_months: 7, min_sessions: 57, max_sessions: 133}
-    long: {min_months: 12, max_months: 15, min_sessions: 228, max_sessions: 285}
+    long: {min_months: 7, max_months: 15, min_sessions: 133, max_sessions: 285}
+  gaps: none
   holding_counted_from: entry session is holding session 1
 
 calendar:
@@ -52,14 +55,22 @@ calendar:
     - {effective_from: "2014-01-01", weekdays: [Sun, Mon, Tue, Wed, Thu]}
     - {effective_from: "2026-04-08", weekdays: [Mon, Tue, Wed, Thu, Fri]}
   real_open_start: "2018-02-18"
-  before_real_open: bar is reduced to its close (open, high and low are replaced by the close)
+  before_real_open: bar is reduced to its close (open, high and low are replaced by the close) unless floorsheet_ohlc allows a derived field
 
 entry:
   session: next session after the call date
   price: open of the entry session, or its close before real_open_start
   backfill: false
   unfilled_when: [no_trade, locked_upper_circuit]
-  settlement_sessions_before_sell: 3
+  settlement:
+    schedules:
+      - {effective_from: "2014-01-01", sessions_before_sell: 3, cycle: T+3}
+    t_plus_2:
+      status: start date not confirmed from an official source; T+3 is used until it is
+      candidate_start: "2021-01-24"
+      evidence: SEBON approved the T+2 amendment of the Securities Transactions Clearing and Settlement Regulations 2069 in January 2021 and left the start to a CDSC notice (secondary reports); Sharesansar reported a planned start of Magh 11 2077; CDSC states today that settlement runs T+2
+      sources: ["https://www.investopaper.com/news/sebon-approves-t2-clearing-settlement-system/", "https://www.sharesansar.com/newsdetail/t2-system-to-be-implemented-from-magh-11-2021-01-15", "https://cdsc.com.np/cmsettlementprocedure"]
+      on_confirmation: add a schedule row with sessions_before_sell 2 from the official start date, with its citation, in a new protocol version
 
 circuit:
   limits:
@@ -76,9 +87,20 @@ exit:
   no_trade_on_exit: next session with a trade, at its open, delay recorded
   locked_lower_circuit_on_exit: next session that is not locked, at its open, delay recorded
   target_stop_rule: chosen per stock and situation by a rule fitted on learning years only, frozen per version, locked on each call when it is made
+  sell_call_exit: a SELL on a symbol with an open BUY closes that BUY at the open of the first session after the SELL call date at which a sell is allowed, unless its stop, target or horizon comes first
+
+target_stop:
+  candidates:
+    - {family: atr_multiple, stop: entry minus k times ATR(14) at the call date, target: entry plus m times ATR(14) at the call date}
+    - {family: swing_levels, stop: just below the most recent swing low before the call date, target: the most recent swing high above entry before the call date}
+  compared_on: [learning]
+  selection: higher learning-year BUY accuracy edge over the same-date baseline, then higher risk control score, among candidates with PBO at most 0.5
+  frozen_before: [check, exam]
+  stop_required: [BUY, HOLD]
 
 costs:
   notional_npr: 100000
+  notional_status: decided by the owner in v1.1
   shares: floor of notional over entry price, at least 1
   minimum_commission_npr: 10
   commission_schedules:
@@ -109,24 +131,25 @@ costs:
         - {up_to: null, rate: 0.0027}
     - effective_from: "2024-05-14"
       confirmed: true
-      sources: ["https://www.sharesansar.com/newsdetail/sebon-to-enact-revised-commission-rates-for-stockbrokers-implementation-begins-today-2024-05-14", "https://www.investopaper.com/news/stock-broker-commission-nepal/"]
+      note: tiers 1, 2 and 4 agree across sources; tier 3 is reported as 0.31 or 0.306 percent and tier 5 as 0.24 or 0.243 percent; the higher reading is used
+      sources: ["https://www.sharesansar.com/newsdetail/sebon-to-enact-revised-commission-rates-for-stockbrokers-implementation-begins-today-2024-05-14", "https://www.sharesansar.com/newsdetail/sebon-announces-10-reduction-in-stockbrokers-commission-rates-effective-jestha-01-2024-05-07", "https://www.investopaper.com/news/stock-broker-commission-nepal/"]
       tiers:
         - {up_to: 50000, rate: 0.0036}
         - {up_to: 500000, rate: 0.0033}
         - {up_to: 2000000, rate: 0.0031}
         - {up_to: 10000000, rate: 0.0027}
-        - {up_to: null, rate: 0.0024}
+        - {up_to: null, rate: 0.00243}
   sebon_fee:
     rate: 0.00015
     sides: both
     confirmed: false
-    note: 0.015 percent is confirmed for the current schedule; a 10 percent SEBON fee cut was announced in October 2023 without a published new rate, and the rate before 2020 was not found; 0.015 percent is kept throughout as the conservative value
-    sources: ["https://kharchapatra.com/blog/nepse-share-trading-costs-nepal", "https://eng.merolagani.com/NewsDetail.aspx?newsID=96273"]
+    note: the SEBON board decided on 2023-10-18 to cut the fee by 10 percent, which Sharesansar reports as 0.014 percent pending Ministry of Finance approval; no effective date or official circular was found, nor the rate before 2020; 0.015 percent is kept throughout as the conservative value
+    sources: ["https://kharchapatra.com/blog/nepse-share-trading-costs-nepal", "https://eng.merolagani.com/NewsDetail.aspx?newsID=96273", "https://www.sharesansar.com/newsdetail/sebon-announces-major-amendments-to-brokerage-commissions-and-regulations-2023-10-19"]
   dp_charge:
     npr_per_scrip_per_side: 25
     sides: both
     confirmed: false
-    note: Rs 25 per company per settlement is confirmed for the current schedule; sources disagree on whether the buy side pays it and earlier amounts were not found; charged on both sides throughout as the conservative value
+    note: Rs 25 per company per settlement is confirmed for the current schedule; sources disagree on whether the buy side pays it, the CDSC settlement procedure page does not say, and earlier amounts were not found; charged on both sides throughout as the conservative value
     sources: ["https://kharchapatra.com/blog/nepse-share-trading-costs-nepal", "https://ssl.com.np/trading-commission-and-fees"]
   capital_gains_tax:
     investor: resident natural person
@@ -141,19 +164,23 @@ costs:
 grading:
   BUY:
     right_when: net profit after all costs and tax is above zero
+    net_zero: wrong
     stop_exit: wrong
+    sell_call_exit: graded on its net like a horizon exit
     unfilled: wrong
   SELL:
-    reference: close on the call date
-    right_when: price at exit is below the reference
-    costs: none
+    reference: entry price of the system's simulated position when it holds one, otherwise the close on the call date
+    shares: the position's shares when it holds one, otherwise floor of notional over the reference, at least 1
+    right_when: shares times the exit price is below shares times the reference minus the holder's sell-side costs (commission, SEBON fee and DP charge on shares times the reference at the rates in force on the call date)
+    costs: holder's sell-side costs
     unfilled: not applicable
   NO_BUY:
     counterfactual: buy at the next open held to horizon end with no target or stop
     right_when: counterfactual net profit after all costs and tax is below zero
+    net_zero: wrong
     unfilled: not graded, counted
   HOLD:
-    reference: close on the call date
+    reference: entry price of the system's simulated position when it holds one, otherwise the close on the call date
     right_when: a close at or above the reference within the horizon before any stop
     stop_exit: wrong
     no_recovery: wrong
@@ -161,6 +188,13 @@ grading:
     graded: false
     missed_buy: a buy at the next open held to horizon end would have made a net profit
     missed_sell: the close at horizon end is below the reference
+
+open_calls:
+  per_symbol: 1
+  open_types: [BUY, HOLD, NO_BUY, SELL]
+  open_until: the call's exit, or its last holding session when it has no exit
+  sell_closes_buy: true
+  refused_call: not issued, counted as blocked
 
 risk_control:
   calls: filled BUY calls with a resolved exit
@@ -189,11 +223,18 @@ periods:
     - {name: exam_2022, start: "2022-01-01", end: "2022-12-31", runs_per_version: 1}
     - {name: exam_2023, start: "2023-01-01", end: "2023-12-31", runs_per_version: 1}
     - {name: exam_2024, start: "2024-01-01", end: "2024-12-31", runs_per_version: 1}
-  pre_holdout: {name: exam_2025a, start: "2025-01-01", end: "2025-09-29", runs_per_version: 1, status: proposed}
+    - {name: exam_2025, start: "2025-01-01", end: "2025-09-29", runs_per_version: 1}
   exam_order: strict
   outcome_prices_until: "2025-09-29"
-  censor_when_path_reaches_holdout: true
+  holdout_reaching_calls: ungraded
+  sealed_grades:
+    - {call_period: exam_2024, horizon_class: long, prices_from: "2025-01-01", hidden_until_run: exam_2025}
   earlier_studies_used_data_through: "2025-01-19"
+
+reporting:
+  per_year_classes: [short, mid]
+  pooled_only_classes: [long]
+  pooled_over: [exam_2021, exam_2022, exam_2023, exam_2024, exam_2025]
 
 time_machine:
   step: week
@@ -208,9 +249,34 @@ learning_loop:
   storage: immutable, keyed by config sha256, never deleted
 
 multiple_testing:
-  recommended: romano_wolf_stepdown
+  check_and_exam: romano_wolf_stepdown
+  statistic: studentized accuracy minus baseline
   bootstrap: stationary block bootstrap over call weeks
+  mean_block_length: horizon in weeks
   bootstrap_reps: 10000
   family_alpha: 0.05
-  diagnostics: [pbo_cscv_learning, deflated_accuracy_note]
+  learning: pbo_cscv
+  cscv_blocks: 16
+  max_pbo_to_freeze: 0.5
   legacy_counter_reported: true
+  legacy_counter_decides_pass: false
+
+floorsheet_ohlc:
+  applies_before: "2018-02-18"
+  source: ~/Desktop/arthasignal-ai/raw/floorsheet, read-only
+  open: first trade by contract number
+  high: highest trade price
+  low: lowest trade price
+  min_quantity: 10
+  min_quantity_note: trades of fewer than 10 units (odd lots) are left out; this was added after the first verification run with all trades, whose lows were below the published low on most mismatches, and both runs are reported
+  storage: ~/Desktop/arthasignal-ai/derived/floorsheet_ohlc/bars.parquet with source floorsheet_derived; daily_prices is never changed
+  verification: {start: "2018-02-18", end: "2025-01-19"}
+  acceptance:
+    exact_min: 0.90
+    within_1pct_min: 0.98
+    page_drop_share: 0.02
+    page_drop_within_1pct_min: 0.97
+    scopes: whole window and 15-digit contract numbers
+  result: docs/floorsheet_ohlc_verification.json; board lots, 341,745 symbol-days, exact / within 1 percent open 99.5 / 99.8, high 99.8 / 99.9, low 99.8 / 99.9; 15-digit contract numbers open 95.9 / 99.2, high 99.8 / 99.9, low 99.9 / 99.9; every field passes every check with 2 percent of pages dropped; all trades fails for open (15-digit within 1 percent 97.4) and low (within 1 percent 95.3)
+  use: {open: true, high: true, low: true}
+  bar_rule: before applies_before, a bar whose source is floorsheet_derived keeps the fields in use, with high raised and low lowered to the published close when needed; any other bar is reduced to its close

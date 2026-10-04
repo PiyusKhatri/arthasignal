@@ -714,3 +714,39 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - **Not done, by instruction:** no simulator, no score, no study on real data. The only real-data reads were the session-per-month count from `trading_calendar` and the trial-table write, both on the research role with no holdout dates.
 - **Open questions:** 15, in `docs/SIMULATION_PROTOCOL.md` section 14. None was decided silently; each has a config default so the grading code is concrete.
 - Suite: 644 passed.
+
+## Simulation phase 2 - Protocol v1.1: the owner's decisions
+
+- **Version:** `sim-protocol-v1.1` replaces v1 (kept in git history at 702dcc0). Config SHA-256 `d495721a14f38485aa56335ce367bc0f519e34bfb7a22f0e099b38f4a5233b20`. The changelog with all 15 decisions is in `docs/SIMULATION_PROTOCOL.md` section 15.
+- **Rules changed in code:**
+  - **Stops:** BUY and HOLD must carry a stop.
+  - **Horizons:** long is 7-15 months (133-285 sessions).
+  - **Settlement:** the lag is read by entry date (T+3 throughout until T+2's official start is confirmed).
+  - **SELL grading:** includes the holder's sell-side costs. The HOLD and SELL reference is the system's own entry price when it holds a position.
+  - **Open calls:** one open call per stock (`OpenCalls`), and a SELL can close an open BUY (`sell_after`, exit reason `sell_call`).
+  - **Holdout:** calls that would reach 2025-09-30 are `ungraded` (`reaches_holdout`), and a holdout bar in a path is refused.
+  - **Sealed grades:** 2024 long grades that use 2025 prices are hidden until `exam_2025` has run (`hidden`).
+  - **Rounding:** `round_score`, halves away from zero.
+  - **Commission:** the 2024 tier 5 is now 0.243% (the higher published reading).
+- **Floorsheet OHLC before 2018-02-18** (`src/simulation/floorsheet_ohlc.py`):
+  - **Inputs:** read-only floorsheet files dated 2014-06-01 to 2025-01-19, and `daily_prices` on the research role over the same dates.
+  - **Thresholds,** fixed before the first run: exact ≥ 90%, within 1% ≥ 98%, and within 1% ≥ 97% with 2% of pages dropped. Each holds over the whole window and on 15-digit contract numbers.
+  - **First run, all trades,** 341,979 symbol-days, exact / within 1%: open 98.4 / 99.1, high 99.2 / 99.6, low 91.1 / 95.3. Open fails on 15-digit numbers (within 1% 97.4) and low fails everywhere.
+  - **Why the low failed:** the derived low was below the published low on 99.7% of low mismatches. Leaving out odd lots (fewer than 10 units) fixed it.
+  - **Board lots,** 341,745 symbol-days: open 99.5 / 99.8, high 99.8 / 99.9, low 99.8 / 99.9. On 15-digit numbers: open 95.9 / 99.2, high 99.8 / 99.9, low 99.9 / 99.9. Every check passes with page drops.
+  - **The board-lot rule came after the first run;** both runs are in `docs/floorsheet_ohlc_verification.json`, and the owner is asked to confirm it (Q16).
+  - **Contract order:** contract numbers are unique per symbol-day with the session date as prefix, and no symbol-day spans two segments. The last board-lot trade equals the published close on 99.7% of symbol-days, and the stored close before 2018-02-18 on 99.0%. A random trade equals the open on only 16.9%.
+  - **Missing trades:** at 1-2% and > 2% file gaps, the open matches exactly 96.9% and 96.3% of the time (99.6% below 1%).
+  - **Derived bars:** 440,185 rows (98,173 before 2018-02-18) in `~/Desktop/arthasignal-ai/derived/floorsheet_ohlc/bars.parquet` with `source = floorsheet_derived`. `daily_prices` is untouched.
+- **Fees:** SEBON and NEPSE official pages were searched and no circular stating the unconfirmed figures was found. Still unconfirmed:
+  - commission before 2016-08 and the 2016-2020 tier split;
+  - the SEBON fee after the October 2023 cut (0.014% reported, not found in force) and before 2020;
+  - whether buyers pay the DP charge, and older DP amounts;
+  - the 2026 CGT rates;
+  - the T+2 start date.
+
+  The documents to obtain are listed in Q21.
+- **Trial table:** `python -m src.simulation.register` on the research role inserted 1 row (family `simulation_protocol`, fingerprint `a2e192bd…57f4`; family 2, trials 138). A rerun inserted 0. The server command is in `docs/PROD_DEPLOY.md` Part 11.
+- **New open questions:** Q16-Q21 in `docs/SIMULATION_PROTOCOL.md` section 14.
+- **Not done, by instruction:** no simulator, no score, no study on real data beyond the floorsheet OHLC verification. Nothing was read from the holdout.
+- **Tests:** 24 in `tests/test_simulation_grading.py` and 3 in `tests/test_floorsheet_ohlc.py`. Suite: 671 passed.

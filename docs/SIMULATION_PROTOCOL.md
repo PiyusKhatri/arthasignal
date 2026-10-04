@@ -1,8 +1,10 @@
-# Simulation protocol v1
+# Simulation protocol v1.1
 
-- **Version:** `sim-protocol-v1`, locked 2026-10-04.
+- **Version:** `sim-protocol-v1.1`, locked 2026-10-04. It replaces `sim-protocol-v1` (commit 702dcc0, config SHA-256 `be906e7f…5656`), which stays in git history. The owner decided all 15 open questions of v1; the changelog is section 15.
 - **Constants:** every number and rule below lives in `config/simulation_protocol.yaml`. Code reads rules only from that file (`src/simulation/protocol.py`), and the SHA-256 of the file bytes is the protocol's identity. If the doc and the config disagree, the config is what runs, and the disagreement is a bug to fix in a new version.
-- **Scope:** this phase locks the rules and implements only call grading and costs (`src/simulation/grading.py`, `src/simulation/costs.py`), tested on synthetic price paths. Nothing was built yet: no simulator, no score, and no study run on real data. The only real-data reads were a count of trading sessions per month from `trading_calendar` (section 3) and a check of the trial table, both on the research role.
+- **Scope:** this phase locks the rules and implements only call grading and costs (`src/simulation/grading.py`, `src/simulation/costs.py`), tested on synthetic price paths. Nothing was built yet: no simulator, no score, and no study run on real data. The real-data reads were:
+  - in v1, a count of trading sessions per month from `trading_calendar` (section 3) and a check of the trial table;
+  - in v1.1, the floorsheet OHLC verification (section 4a): floorsheet Parquet files dated 2014-06-01 to 2025-01-19, and `daily_prices` over the same dates on the research role.
 - **Holdout:** the holdout (2025-09-30 onward) is never read by this protocol. Every development rule caps prices at 2025-09-29.
 
 **Earlier studies have already seen the exam years.** The event study, broker-flow study, information study, ranker, model v0 matrix and the price-integrity work all used prices through 2025-01-19. So 2021-2024 are **not fully unseen**: the owner and the code have seen what happened in those years. Exam-year results are therefore evidence of consistency, not proof. **The final verdict comes only from the untouched holdout (2025-09-30 onward) and from live calls.**
@@ -52,25 +54,69 @@ NEPSE has no short selling, so SELL never means "go short".
 |---|---|---|
 | short | 1-3 | 19 to 57 |
 | mid | 3-7 | 57 to 133 |
-| long | 12-15 | 228 to 285 |
+| long | 7-15 | 133 to 285 |
 
 - **Each call carries** its horizon class and a maximum holding period in sessions inside the class range. The entry session is holding session 1.
-- **Not covered:** 7 to 12 months is covered by no class (open question Q3).
+- **No gap:** the classes meet at 57 and 133 sessions (decision 3).
 
 ## 4. Entry
 
 - **Real opens:** entry is at the **open of the first session after the call date** (from 2018-02-18).
 - **Before 2018-02-18:**
   - **The problem:** the stored open equals the previous close on 98.7-99.6% of rows every month (`docs/PHASE_LOG.md`, data survey), so it is not a price anyone could trade at.
-  - **The rule:** every bar dated before 2018-02-18 is **reduced to its close** (open, high and low are replaced by the close). Entry is therefore at the **close of the next session**.
-  - **Why this rule:**
-    - It is the first real traded price strictly after the call.
-    - It uses nothing from the call date beyond the close the call was made on.
-    - It matches the rule already used in the event, broker-flow and information studies.
-    - Reducing high and low too means targets and stops before 2018-02-18 are checked on closes only. That is slightly pessimistic for targets and optimistic for stops, but it never uses an intraday price whose reliability has not been established (open question Q8).
+  - **The rule (decision 8):** before 2018-02-18 the open, high and low come from the floorsheet (section 4a), and the close stays the stored close.
+    - **Open:** the first board-lot trade by contract number.
+    - **High and low:** the highest and lowest board-lot trade price, widened to the close when needed.
+    - **Entry** is at that derived open of the next session.
+  - **Fallback:** a bar with no derived values is reduced to its close (open, high and low replaced by the close), as in v1.
+  - **Storage:** the derived bars live only in `~/Desktop/arthasignal-ai/derived/floorsheet_ohlc/bars.parquet`, flagged `source = floorsheet_derived`. `daily_prices` is never changed.
 - **No fill:** there is no fill when the entry session has **no trade**, or is **locked at the upper circuit**. Locked means high = low and the close is within 0.5 point of the limit move from the previous close (10% limit, 15% from 2026-04-20, as in `src/backtest/event_study.py`).
 - **No backfill:** an unfilled call is recorded as `unfilled` and never moved to a later session.
-- **Settlement:** a bought stock cannot be sold before it settles. The first session at which a sell is allowed is entry session + **3**. This is conservative: the settlement cycle moved from T+3 to T+2 at some point, and the date was not confirmed (Q5).
+- **Settlement (decision 5):** a bought stock cannot be sold before it settles. The first session at which a sell is allowed is entry session + **3** (T+3).
+  - **T+2 start date:** not confirmed from an official source, so T+3 stays in force for every date.
+  - **What was found:**
+    - SEBON approved the T+2 amendment of the Securities Transactions Clearing and Settlement Regulations 2069 in January 2021 and left the start to a CDSC notice ([Investopaper, 2021-01-10](https://www.investopaper.com/news/sebon-approves-t2-clearing-settlement-system/)).
+    - Sharesansar reported a planned start of Magh 11, 2077, i.e. 2021-01-24 ([Sharesansar, 2021-01-15](https://www.sharesansar.com/newsdetail/t2-system-to-be-implemented-from-magh-11-2021-01-15)).
+    - CDSC's own page says only that settlement "runs in a T+2 cycle" today, with no start date ([CDSC](https://cdsc.com.np/cmsettlementprocedure)).
+  - **Once confirmed:** the official start date goes in a new version as a schedule row with 2 sessions, with its citation. The code already reads the lag by entry date (`Protocol.settlement_sessions`).
+
+## 4a. Floorsheet OHLC verification (decision 8)
+
+- **Code and output:** `python -m src.simulation.floorsheet_ohlc verify` writes `docs/floorsheet_ohlc_verification.json`, and `build` writes the derived bars. Both open only floorsheet files dated 2014-06-01 to 2025-01-19 (read-only) and refuse any end date in the holdout. `daily_prices` is read on the research role.
+- **Window:** 2018-02-18 to 2025-01-19, where real OHLC is published.
+  - 1,615 floorsheet files and 354,703 published symbol-days (796 more files before 2018-02-18 for the close check and the build).
+  - 341,979 matched symbol-days with all trades; 341,745 with board lots only.
+- **Acceptance thresholds,** fixed before the first run. A field is used only if all of these hold:
+  - **Exact match** (within 0.5 paisa) on ≥ 90% of symbol-days;
+  - **within 1%** on ≥ 98%;
+  - **within 1% on ≥ 97%** after dropping a random 2% of floorsheet pages (3 seeds), which mimics the 1-2% of missing pages in 2015-2018.
+
+  Each check is applied over the whole window and separately on the 15-digit contract numbers (2018-02-18 to 2018-11-05), the format used before 2018.
+
+| Definition | Field | Exact | Within 1% | 15-digit exact / within 1% | Worst 2%-page-drop within 1% (all / 15-digit) | Passes |
+|---|---|---|---|---|---|---|
+| All trades (first run) | open | 98.4% | 99.1% | 93.1% / **97.4%** | 98.3% / **96.6%** | no |
+| | high | 99.2% | 99.6% | 98.9% / 99.5% | 99.2% / 98.8% | yes |
+| | low | 91.1% | **95.3%** | 92.5% / **95.6%** | **95.1%** / **95.3%** | no |
+| Board lots, quantity ≥ 10 (used) | open | 99.5% | 99.8% | 95.9% / 99.2% | 99.0% / 98.3% | yes |
+| | high | 99.8% | 99.9% | 99.8% / 99.9% | 99.4% / 99.2% | yes |
+| | low | 99.8% | 99.9% | 99.9% / 99.9% | 99.6% / 99.5% | yes |
+
+- **The board-lot rule was added after the first run, and both runs are reported.**
+  - **What the first run showed:** with all trades, 99.7% of low mismatches had a derived low below the published one.
+  - **The check:** in June 2024, dropping trades of fewer than 10 units (odd lots) raised the low match from 84.2% to 100% exact.
+  - **Conclusion:** the published OHLC leaves odd lots out. Odd lots are 0% of floorsheet trades in 2014-2016, 1.4% in 2017 and 1.7% in 2018.
+- **Contract numbers give trade order:**
+  - **Numbers:** they are unique within each symbol-day (0 duplicates), and their first 8 digits equal the session date on every symbol-day.
+  - **One segment per symbol-day:** from 2018-11-06 the number is 16 digits with a 2-digit segment, and no symbol-day spans two segments.
+  - **Last trade against the published close:** with board lots, the last trade by contract number equals the published close on 99.7% of symbol-days (99.9% in the 15-digit period). Before 2018-02-18 it equals the stored close on 99.0% (99.3% within 1%) of 97,694 symbol-days.
+  - **Against chance:** a randomly chosen trade of the day equals the published open on only 16.9% of symbol-days, so the contract order carries real information.
+- **Effect of the missing trades:**
+  - **By gap size:** symbol-days whose file reports a 1-2% or > 2% gap match the open exactly 96.9% and 96.3% of the time with board lots, against 99.6% at gaps below 1%. High and low stay ≥ 98.7%.
+  - **Random page drops:** dropping 2% of pages lowers the open's within-1% rate by about 1 point in the 15-digit period, and it stays above the threshold.
+  - **Before 2018:** the missing trades mean a derived open is the first *recorded* board-lot trade. When the first page is missing, the open can be a later trade; that is the main error left in the estimate.
+- **Decision:** with board lots, open, high and low all pass every check, so all three are used before 2018-02-18 (`floorsheet_ohlc.use` in the config). With all trades, open and low would have failed. **The owner should confirm the board-lot definition (Q16).**
+- **Derived bars:** 440,185 symbol-days from 2014-06-02 to 2025-01-19, of which 98,173 are before 2018-02-18. Only bars before 2018-02-18 are used.
 
 ## 5. Exit (BUY, and the counterfactual buys used for NO_BUY, WAIT and risk control)
 
@@ -79,14 +125,26 @@ NEPSE has no short selling, so SELL never means "go short".
 - **Both touched in one session:** the **stop is assumed first**, which is conservative.
 - **Horizon end:** the close of the last holding session.
 - **No trade, or locked at the lower circuit, when an exit is due:** the exit moves to the open of the next session that trades and is not locked down. The delay is recorded. If the path ends first, the call stays `pending` and is not graded.
-- **Target and stop:**
-  - chosen by the system per stock and situation, by a rule fitted on learning years only and frozen with the version;
-  - each call's target and stop are written and locked when the call is made;
-  - this phase does not define the rule (Q1).
+- **Target and stop (decision 1):**
+  - **Candidates:** two rule families, both compared on learning years only. The winner is frozen with the version before any check or exam run.
+    - **Volatility:** stop = entry − *k* × ATR(14) and target = entry + *m* × ATR(14), using ATR at the call date.
+    - **Swing levels:** stop just below the most recent swing low before the call date, and target at the most recent swing high above entry.
+  - **Selection:** the higher learning-year BUY edge over the same-date baseline wins, then the higher risk control score. Only candidates with PBO ≤ 0.5 qualify (new question Q17).
+  - **Every BUY and HOLD must carry a stop.** The grader refuses either one without a stop.
+  - Each call's target and stop are written and locked when the call is made.
+- **A SELL closing an open BUY (decision 12):** the BUY exits at the open of the first session after the SELL call date at which a sell is allowed (`sell_call`). A stop or target reached first still wins, and so does an open that gaps through the stop. The exit is graded on its net like a horizon exit.
+
+## 5a. Open calls (decision 12)
+
+- **One open call per stock at a time.**
+  - **What holds the slot:** a BUY, HOLD, NO_BUY or SELL is open from its call date until its exit, or until its last holding session when it has no exit.
+  - **Blocked calls:** while a stock has an open call, any new call on it is not issued and is counted as blocked. The one exception is a SELL, which may close an open BUY.
+  - **WAIT never holds the slot,** because it carries no graded claim (Q18).
+- **Code:** `OpenCalls` in `src/simulation/grading.py`.
 
 ## 6. Costs (`src/simulation/costs.py`)
 
-- **Trade size:** a fixed notional of **NPR 100,000** per call, in whole shares (floor of notional / entry price, at least 1). Commission tiers depend on the traded amount, so a size must be assumed (Q4).
+- **Trade size:** a fixed notional of **NPR 100,000** per call (decision 4), in whole shares (floor of notional / entry price, at least 1).
 - **Per side:** broker commission at the tier rate for the whole amount (minimum NPR 10), plus the SEBON fee, plus the DP charge.
 - **Capital gains tax:** the CGT rate times the positive net gain after both sides' costs. Short-term or long-term is set by calendar days held (> 365 is long).
 
@@ -95,10 +153,10 @@ NEPSE has no short selling, so SELL never means "go short".
 | Commission before 2016-08-01 | flat 1.00% | **Not confirmed.** Sources give only "0.7-1 percent" before the July 2016 cut ([Kathmandu Post 2019](https://kathmandupost.com/money/2019/10/05/securities-board-of-nepal-mulls-lowering-stockbrokers-commissions)). Conservative top of the range; the exact July 2016 date was not found, so the old rate is kept to 2016-07-31 |
 | Commission 2016-08-01 to 2020-12-26 | 0.60 / 0.55 / 0.50 / 0.45 / 0.40% for ≤ 50k / ≤ 5 lakh / ≤ 20 lakh / ≤ 1 crore / above | **Partly confirmed.** The 0.60-0.40 range is confirmed ([Himalayan Times 2020-12-27](https://thehimalayantimes.com/business/brokers-commission-slashed-by-33-per-cent-from-today)); the Kathmandu Post gives three tiers (0.6/0.5/0.4). The higher reading per tier is used |
 | Commission 2020-12-27 to 2024-05-13 | 0.40 / 0.37 / 0.34 / 0.30 / 0.27% | Confirmed ([Himalayan Times](https://thehimalayantimes.com/business/brokers-commission-slashed-by-33-per-cent-from-today), [myRepublica](https://myrepublica.nagariknetwork.com/news/commission-for-brokerage-service-reduced-by-up-to-60-percent/)) |
-| Commission from 2024-05-14 | 0.36 / 0.33 / 0.31 / 0.27 / 0.24% | Confirmed ([Sharesansar](https://www.sharesansar.com/newsdetail/sebon-to-enact-revised-commission-rates-for-stockbrokers-implementation-begins-today-2024-05-14), [Investopaper](https://www.investopaper.com/news/stock-broker-commission-nepal/)) |
+| Commission from 2024-05-14 | 0.36 / 0.33 / 0.31 / 0.27 / 0.243% | Tiers 1, 2 and 4 confirmed ([Sharesansar](https://www.sharesansar.com/newsdetail/sebon-to-enact-revised-commission-rates-for-stockbrokers-implementation-begins-today-2024-05-14), [Investopaper](https://www.investopaper.com/news/stock-broker-commission-nepal/)). [Sharesansar 2024-05-07](https://www.sharesansar.com/newsdetail/sebon-announces-10-reduction-in-stockbrokers-commission-rates-effective-jestha-01-2024-05-07) gives tier 3 as 0.306% and tier 5 as 0.243%. The higher reading is used, so tier 5 rose from 0.24% in v1 to 0.243% |
 | Minimum commission | NPR 10 per side | Current figure, secondary source ([Kharchapatra](https://kharchapatra.com/blog/nepse-share-trading-costs-nepal)); applied throughout |
-| SEBON fee | 0.015% per side | Confirmed for the current schedule. A 10% cut was announced in October 2023 ([Merolagani](https://eng.merolagani.com/NewsDetail.aspx?newsID=96273)) with no published new rate, and the rate before 2020 was not found. **0.015% is kept throughout (conservative)** |
-| DP charge | NPR 25 per scrip per side | Rs 25 per company per settlement is confirmed for today. Sources disagree on whether the buy side pays it, and older amounts were not found. **Charged on both sides throughout (conservative)** |
+| SEBON fee | 0.015% per side | **Not confirmed after October 2023, and not found before 2020.** The SEBON board decided on 2023-10-18 to cut it by 10% ([Merolagani](https://eng.merolagani.com/NewsDetail.aspx?newsID=96273)). [Sharesansar](https://www.sharesansar.com/newsdetail/sebon-announces-major-amendments-to-brokerage-commissions-and-regulations-2023-10-19) reports the new rate as 0.014%, pending Ministry of Finance approval; no circular or effective date was found. **0.015% is kept throughout (conservative)** |
+| DP charge | NPR 25 per scrip per side | Rs 25 per company per settlement is confirmed for today. **Not confirmed** whether the buy side pays it: sources disagree, and the [CDSC settlement page](https://cdsc.com.np/cmsettlementprocedure) is silent. Older amounts were not found. **Charged on both sides throughout (conservative)** |
 | CGT to 2021-07-15 | 5% | Section 95A, Income Tax Act, as amended by Finance Act 2068 ([KBC](https://www.kbc-ca.com.np/_uploads/capital-gain-tax.pdf)); "previously only 5%" ([NBSM budget note 2078/79](https://www.nbsm.com.np/uploads/large/1622709726242738.pdf)) |
 | CGT 2021-07-16 to 2026-07-16 | 7.5% held ≤ 365 days, 5% longer | Confirmed (NBSM budget note 2078/79) |
 | CGT 2026-07-17 to 2026-09-21 | 10% / 7.5% | Secondary sources only; not confirmed |
@@ -106,18 +164,28 @@ NEPSE has no short selling, so SELL never means "go short".
 
 - **Examples at NPR 100,000:** a round trip costs about **1.06% plus CGT** before 2016-08 and about **0.71% plus CGT** from 2024-05.
 - **Rates that only affect live calls:** the two 2026 CGT rows only touch live calls; they are recorded so the cost model stays one schedule.
+- **Search for official circulars (decision 14):**
+  - **Where:** sebon.gov.np (the circulars page and the 2015/16 annual report) and NEPSE.
+  - **Found:** nothing that states any of the unconfirmed figures. The SEBON circulars page lists only recent circulars by addressee, and the 2015/16 annual report says only that a downward revision of brokerage commission was sent to the Ministry of Finance.
+  - **Status:** every unconfirmed row keeps its conservative value and its `confirmed: false` flag. The documents to look for are listed in section 14.
+- **Code:** `costs.sell_costs(shares, price, day)` gives the sell side alone, used for SELL grading.
 
 ## 7. Grading (`src/simulation/grading.py`)
 
 - **The headline metric is call accuracy** = right calls / graded calls.
-- **Statuses:** every call gets one of `graded`, `unfilled`, `pending` (path ends before resolution) or `ungraded` (WAIT, and unfilled NO_BUY).
+- **Statuses:** every call gets one of:
+  - `graded`;
+  - `unfilled`, for a BUY, which is counted wrong;
+  - `pending`, when the path ends before resolution;
+  - `ungraded`, for WAIT, for an unfilled NO_BUY, and for `reaches_holdout`.
+- **Reference price (decision 10):** for HOLD and SELL it is the system's own entry price when it holds a simulated position (`Call.position_entry_price`, `position_shares`; `position_call` builds it from the BUY's outcome). Otherwise it is the close on the call date.
 
 | Call | Right when | Wrong when |
 |---|---|---|
-| **BUY** | Net profit after commission, SEBON fee, DP charges and CGT is **> 0**. Exiting above entry without reaching the target is right | Net ≤ 0 (a 1-rupee net loss is wrong); any **stop-loss exit** is wrong even if it happens to be above entry; **unfilled** is wrong (counted in accuracy, as in the earlier accuracy protocols; Q2) |
-| **SELL** | Price at exit (target, stop or horizon close) is **below the close on the call date** | At or above it. No costs (no position is opened) |
-| **NO_BUY** | A buy at the next open held to horizon end (no target, no stop) would have **lost money** after all costs and tax (net < 0) | Net ≥ 0. If that buy could not fill, NO_BUY is `ungraded` and counted (Q2) |
-| **HOLD** | A **close at or above the reference** (close on the call date) within the horizon, before any stop | Stop touched first (low at or below the stop; same-session ties go to the stop), or the horizon ends below the reference |
+| **BUY** | Net profit after commission, SEBON fee, DP charges and CGT is **> 0**. Exiting above entry without reaching the target is right, and so is an exit forced by a SELL call with net > 0 | Net ≤ 0, so **net exactly 0 is wrong** (decision 11) and a 1-rupee net loss is wrong. Any **stop-loss exit** is wrong, even above entry. **Unfilled** (locked upper circuit or no trade) is wrong and counted in accuracy (decision 2) |
+| **SELL** | shares × exit price < shares × reference − the holder's **sell-side costs** (commission, SEBON fee, DP charge on shares × reference, at the rates in force on the call date; decision 15). The exit price is the target, stop or horizon close. Shares are the position's, or NPR 100,000 / reference | Otherwise. At NPR 100,000 from 2024-05 the price must fall by more than 0.37% |
+| **NO_BUY** | A buy at the next open held to horizon end (no target, no stop) would have **lost money** after all costs and tax (net < 0) | Net ≥ 0, so **net exactly 0 is wrong** (decision 11). If that buy could not fill, NO_BUY is `ungraded` and counted |
+| **HOLD** | A **close at or above the reference** within the horizon, before any stop | Stop touched first (low at or below the stop; same-session ties go to the stop), or the horizon ends below the reference |
 | **WAIT** | Not graded | - |
 
 - **Missed opportunities on WAIT:**
@@ -125,6 +193,11 @@ NEPSE has no short selling, so SELL never means "go short".
   - **missed SELL:** the close at horizon end is below the reference.
 
   Both are reported per period.
+- **Holdout (decision 7):** a call whose holding path would reach 2025-09-30 or later is `ungraded` with reason `reaches_holdout`, and is counted but never graded.
+  - **Holding path:** its last holding session lies past the last development session, or an exit delay pushes it there.
+  - **In code:** `grade(..., sessions_before_holdout=n)`, where *n* is the number of calendar sessions after the call date up to 2025-09-29.
+  - **Guard:** the grader also refuses any path bar dated in the holdout.
+- **Sealed 2024 long grades (decision 7):** the grade of a long call made in 2024 is hidden until `exam_2025` has run when its outcome uses a price from 2025 or later, either at its exit or at the hold-to-horizon counterfactual. In code: `hidden(outcome, completed_runs)`.
 
 ## 8. Risk control score (separate from accuracy)
 
@@ -153,7 +226,9 @@ NEPSE has no short selling, so SELL never means "go short".
 - **Why 100 calls and 30 weeks:**
   - At 60% accuracy, 100 independent calls give a binomial standard error of 4.9 points, so a 95% interval of about ±10 points. Fewer cannot separate 60% from a coin.
   - Cluster-robust intervals are unreliable with fewer than about 30-50 clusters (Cameron & Miller 2015). A year has about 48-50 weekly steps, so 30 weeks means the system called in at least 60% of the weeks.
-  - **Long horizons are an exception:** a long call's 228-285-session path covers more than a year, so one exam year holds less than one independent long window. Long-horizon results per year are descriptive only (Q6).
+  - **Long horizons (decision 6):** a long call's 133-285-session path can span more than one exam year.
+    - **Long calls** are judged only on the **pooled exam years** (2021-2025 together, after the last exam has run). Their per-year figures are descriptive only.
+    - **Short and mid** are judged per year and also reported pooled.
 - **Always reported:**
   - accuracy, baseline and edge per **call type**, per **horizon class** and per **score band**; breakdown cells with < 30 graded calls are marked insufficient;
   - **calibration**: accuracy per score bucket (80-89, 90-100, 50-64, 65-79, and the mirrored negative buckets), with the check "do +85 calls succeed more often than +55 calls";
@@ -166,15 +241,13 @@ NEPSE has no short selling, so SELL never means "go short".
 |---|---|---|
 | Learning | 2014-06-01 to 2019-12-31 | Unlimited |
 | Check | 2020 | One run per frozen version |
-| Exam | 2021, 2022, 2023, 2024, strictly in that order | Exactly one run per frozen version per year |
-| Pre-holdout (proposed) | 2025-01-01 to 2025-09-29 as `exam_2025a` | One run per frozen version, after 2024 |
+| Exam | 2021, 2022, 2023, 2024, then 2025-01-01 to 2025-09-29 (`exam_2025`), strictly in that order | Exactly one run per frozen version per year |
 | Holdout | 2025-09-30 onward | Final verdict only |
 
 - **No back-testing on the same year:** a lesson learned from an exam year can only be judged on a **later** year. A version created after seeing exam 2022 may be run on 2023 and later, never on 2022 or earlier exam years.
-- **2025-01 to 2025-09-29:**
-  - **Proposal:** treat it as the last exam (`exam_2025a`). It is the least-seen development window: no earlier study used prices after 2025-01-19.
-  - **The catch:** any call whose path would reach 2025-09-30 is **censored** (not graded, counted). Outcomes may use prices after a period's end, but never past 2025-09-29.
-  - **What that costs:** this censors most long-horizon calls made after about 2024-08 and nearly all mid and long calls in 2025 (Q7).
+- **2025-01 to 2025-09-29 is the last exam, `exam_2025` (decision 7).** It is the least-seen development window: no earlier study used prices after 2025-01-19.
+  - **Holdout-reaching calls:** any call whose holding path would reach 2025-09-30 is left **ungraded** and counted. Outcomes may use prices after a period's end, but never past 2025-09-29. Most long calls made after about 2024-08 and nearly all mid and long calls in 2025 are lost this way.
+  - **Sealed grades:** 2024 long-call grades that depend on 2025 prices stay hidden until `exam_2025` has run (section 7).
 
 ## 11. Weekly time machine and point-in-time rules
 
@@ -217,9 +290,9 @@ NEPSE has no short selling, so SELL never means "go short".
 - **Change limits:** a new version may change **at most 3 things**, each with a written reason tied to the post-mortem.
 - **Storage:** every run and every version is stored **immutably** with its config hash and code commit, and is never deleted. This protocol version is registered in `backtest_variant_trials`:
   - family `simulation_protocol`;
-  - parameters `{protocol: sim-protocol-v1, config_sha256: be906e7f…5656}`;
-  - fingerprint `7fc6c9e4…eb5f`;
-  - written by `python -m src.simulation.register` on the research role, idempotent.
+  - v1: parameters `{protocol: sim-protocol-v1, config_sha256: be906e7f…5656}`, fingerprint `7fc6c9e4…eb5f`;
+  - v1.1: parameters `{protocol: sim-protocol-v1.1, config_sha256: d495721a…3b20}`, fingerprint `a2e192bd…57f4`;
+  - each was written by `python -m src.simulation.register` on the research role, idempotent. The server command is in `docs/PROD_DEPLOY.md` Part 11.
 
   Any change to the config changes the hash and needs a new version.
 
@@ -239,7 +312,7 @@ NEPSE has no short selling, so SELL never means "go short".
 | PBO via CSCV (Bailey, Borwein, López de Prado & Zhu 2017) | Probability that the in-sample best configuration ranks below the median out of sample, across combinatorial splits | **Good learning-year diagnostic**: learning runs are unlimited, and PBO measures whether the tuning is fitting noise |
 | Benjamini-Hochberg FDR (1995); haircuts (Harvey, Liu & Zhu 2016) | Controls false discoveries rather than any false claim | Too lenient for a headline claim to users |
 
-- **Recommendation (owner to approve, Q9):**
+- **Decision (decision 9, approved as recommended):** the global penalty counter is still printed but no longer decides a pass.
   1. **Learning years:** no multiplicity correction, since nothing there is a claim. Report PBO (CSCV, 16 time blocks) over all versions tried. A version whose PBO > 0.5 should not be frozen.
   2. **Check and each exam year:** a Romano-Wolf stepdown over the frozen versions run on that year.
      - **Statistic:** studentized (accuracy − baseline).
@@ -263,31 +336,39 @@ NEPSE has no short selling, so SELL never means "go short".
 
 ## 14. Open questions for the owner
 
-Each item below has a default in the config so the code is concrete. **None is decided**; each needs the owner's answer before the simulator is built.
+v1's 15 questions are decided (section 15). These are new or still open:
 
-1. **Target and stop rule.** What family should the frozen per-stock rule come from? Options: ATR multiples, recent swing levels, volatility percentiles. Must every BUY and HOLD carry a stop?
-2. **Unfilled calls.**
-   - **BUY:** an unfilled BUY (no trade, or locked upper circuit) is counted **wrong** by default, as in earlier protocols. Should it instead be excluded and reported?
-   - **NO_BUY:** an unfilled NO_BUY is ungraded by default.
-3. **The gap between mid and long.** No class covers 7 to 12 months. Should one be added, or the long class widened to 7-15 months?
-4. **Notional trade size.** NPR 100,000 per call is the default. It sets the commission tier and the weight of the fixed Rs 25 DP charge.
-5. **Settlement lag.** The earliest sell is entry + 3 sessions throughout (T+3, conservative). Should T+2 apply from its official start date once that is confirmed?
-6. **Long horizons within one exam year.** Should long-horizon accuracy be judged only on pooled exam years? One year holds less than one independent long window.
-7. **2025-01 to 2025-09-29.**
-   - Should it be the last exam (`exam_2025a`) as proposed?
-   - Should calls whose path reaches the holdout be censored? That is the default, and it removes most 2025 mid and long calls.
-   - Separately: outcomes of 2024 long calls use 2025 prices, which the post-mortem would then see before `exam_2025a`. Should those grades be sealed until `exam_2025a` has run?
-8. **Pre-2018 intraday prices.** The default reduces every bar before 2018-02-18 to its close. Should stops and targets use the stored high and low there once their reliability is checked?
-9. **Multiple-testing method.** Approve Romano-Wolf stepdown on check and exam years plus PBO on learning years, with the global counter kept only for display?
-10. **SELL and HOLD reference price.** The default is the close on the call date. Should a holder's actual entry price be used when known?
-11. **NO_BUY at exactly zero.** NO_BUY is right only on a net loss (< 0), so a net of exactly 0 makes both BUY and NO_BUY wrong. Keep this?
-12. **Overlapping calls.** May a symbol receive a new call while an earlier call on it is still open? Proposed: no, apart from SELL closing an open BUY.
-13. **Score rounding.** Scores between bands (for example 79.5) need a rule. Proposed: round to the nearest integer, halves away from zero.
-14. **Fee figures that could not be confirmed.**
-    - **Commission:** the pre-July-2016 tiers and the exact 2016 effective date.
-    - **SEBON fee:** whether it was cut after October 2023, and its level before 2020.
-    - **DP charge:** whether the buy side pays it, and older amounts.
-    - **CGT:** the 2026 rates.
+16. **Board-lot definition for derived OHLC.** The floorsheet open, high and low pass only when odd lots (fewer than 10 units) are left out, a rule added after the first verification run (section 4a). Confirm it, or keep pre-2018 bars at the close.
+17. **Target/stop selection criterion.** The comparison metric on learning years is set by default to the BUY edge over baseline, then the risk control score, among candidates with PBO ≤ 0.5. Confirm it. The *k*, *m* and swing look-back grids are fitted on learning years.
+18. **WAIT and the open-call rule.** WAIT is taken never to hold a stock's slot, while a new call (WAIT included) is blocked when a call is already open. Confirm.
+19. **Positions after a BUY resolves.** Under one open call per stock, the system's own entry price can be a HOLD or SELL reference only when a SELL closes an open BUY. Should a simulated position stay open after its BUY call resolves, so that later HOLD and SELL calls use its entry price? The default is no: every position closes at its BUY's exit.
+20. **Sealing beyond 2024 long calls.** Only 2024 long grades that use 2025 prices are sealed, as decided. A 2023 long call or a late-2024 mid call can also use prices from a later exam year that has not run yet. Should they be sealed the same way?
+21. **Fee documents to obtain (decision 14).** None of the unconfirmed figures was found in an official SEBON or NEPSE document online. These are the documents to look for:
+    - **Commission before 2016-08:** the schedule of the Securities Businessperson (Stockbroker, Securities Dealer and Market Maker) Regulations 2064 (2008) as in force from 2014 to July 2016.
+    - **2016 cut:** the Ministry of Finance-approved amendment to that schedule from the 2016/17 cut (about Shrawan 2073), with its effective date and tier table.
+    - **SEBON fee after the 2023 cut:** the SEBON circular or regulation amendment that put the 10% SEBON fee cut (0.015% → 0.014%) into force, with its effective date, after the board decision of 2023-10-18 (Kartik 2080). Also the SEBON fee schedule in force before 2020.
+    - **DP charge:** the CDSC tariff or SEBON-approved Depository Participant fee schedule stating whether the Rs 25 per scrip is charged on purchases as well as sales, and the amounts before the current one.
+    - **CGT from 2026-07-17:** the Finance Act 2083 (Section 95A rates for listed securities), and the Nepal Gazette notice of 2026-09-22 with the reduced rates.
+    - **T+2 settlement:** the CDSC notice that put T+2 into force under the SEBON amendment of the Securities Transactions Clearing and Settlement Regulations 2069 (January 2021).
 
-    Conservative values are in use. Can the owner obtain the SEBON circulars?
-15. **Cost on SELL calls.** A SELL is graded on price only. Should the holder's sell costs be charged, which would make a SELL right only if the fall exceeds the sell-side costs?
+## 15. Changelog
+
+### v1.1 (2026-10-04): the owner's decisions on v1's open questions
+
+1. **Target and stop:** the candidates are ATR multiples and swing support/resistance levels, compared on learning years only, with the winner frozen before any check or exam run. Every BUY and HOLD must have a stop, and the grader enforces it.
+2. **Unfilled BUY:** a locked circuit or no trades counts as **wrong**.
+3. **Horizons:** short 1-3 months (19-57 sessions), mid 3-7 (57-133), long **7-15 (133-285)**, with no gap.
+4. **Trade size:** NPR 100,000 per call.
+5. **Settlement:** T+3 until the official T+2 start date is confirmed, then T+2 from that date with the citation. Not confirmed yet, so T+3 throughout. The lag is now read by entry date.
+6. **Long horizons:** judged only on pooled exam years. Short and mid are also reported per year.
+7. **Last exam and holdout:** 2025-01-01 to 2025-09-29 is the last exam, `exam_2025`. A call whose holding path would reach 2025-09-30 or later is ungraded. 2024 long-call grades that depend on 2025 prices stay hidden until `exam_2025` has run.
+8. **Pre-2018 bars:** derived from the floorsheet; verified and adopted (section 4a), with the board-lot rule.
+9. **Multiple testing:** Romano-Wolf stepdown on check and exam years, and PBO via CSCV on learning years. The global counter is printed but no longer decides a pass.
+10. **HOLD and SELL reference:** the system's own entry price when it holds a simulated position, otherwise the close on the call date.
+11. **Net exactly zero:** both BUY and NO_BUY are wrong.
+12. **Open calls:** one open call per stock at a time, and a SELL may close an open BUY.
+13. **Rounding:** scores round to the nearest integer, halves away from zero (`round_score`).
+14. **Fees:** official SEBON and NEPSE sources were searched and none was found for the unconfirmed figures. The conservative values and flags stay.
+    - **Tier change:** the 2024 commission tier 5 was raised from 0.24% to 0.243%, to the higher of the two published readings.
+    - **New sources:** added for the SEBON fee (0.014% reported, not in force by any found circular) and for settlement.
+15. **SELL costs:** SELL grading includes the holder's sell-side costs.

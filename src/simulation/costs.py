@@ -69,6 +69,10 @@ def side_cost(amount: float, day: date, protocol: Protocol | None = None) -> Sid
     return SideCost(amount=amount, commission=commission, sebon_fee=sebon, dp_charge=dp)
 
 
+def sell_costs(shares: int, price: float, day: date, protocol: Protocol | None = None) -> SideCost:
+    return side_cost(shares * price, day, protocol)
+
+
 def shares_for(price: float, protocol: Protocol | None = None) -> int:
     p = protocol or load()
     if price <= 0:

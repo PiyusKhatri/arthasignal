@@ -7,8 +7,8 @@ from typing import Any, Sequence
 
 import numpy as np
 
-from src.simulation.costs import round_trip
-from src.simulation.protocol import Protocol, load
+from src.simulation.costs import round_trip, sell_costs, shares_for
+from src.simulation.protocol import Protocol, as_date, load
 
 BUY = "BUY"
 HOLD = "HOLD"
@@ -23,6 +23,14 @@ UNGRADED = "ungraded"
 
 NO_TRADE = "no_trade"
 LOCKED_UPPER = "locked_upper_circuit"
+REACHES_HOLDOUT = "reaches_holdout"
+SELL_CALL = "sell_call"
+FLOORSHEET_DERIVED = "floorsheet_derived"
+
+OPENED = "opened"
+CLOSES_BUY = "closes_buy"
+BLOCKED = "blocked"
+NOT_OPEN = "not_open"
 
 
 @dataclass(frozen=True)
@@ -34,6 +42,7 @@ class Bar:
     close: float
     volume: float
     prev_close: float | None = None
+    source: str = "daily_prices"
 
     @property
     def traded(self) -> bool:
@@ -51,6 +60,12 @@ class Call:
     target: float | None = None
     stop: float | None = None
     score: float | None = None
+    position_entry_price: float | None = None
+    position_shares: int | None = None
+
+    @property
+    def reference(self) -> float:
+        return self.position_entry_price if self.position_entry_price is not None else self.reference_price
 
 
 @dataclass(frozen=True)
@@ -84,9 +99,15 @@ class Outcome:
 
 
 def effective_bar(bar: Bar, protocol: Protocol) -> Bar:
-    if bar.day < protocol.real_open_start:
-        return replace(bar, open=bar.close, high=bar.close, low=bar.close)
-    return bar
+    if bar.day >= protocol.real_open_start:
+        return bar
+    fields = protocol.floorsheet_fields() if bar.source == FLOORSHEET_DERIVED else ()
+    return replace(
+        bar,
+        open=bar.open if "open" in fields else bar.close,
+        high=max(bar.high, bar.close) if "high" in fields else bar.close,
+        low=min(bar.low, bar.close) if "low" in fields else bar.close,
+    )
 
 
 def locked(bar: Bar, protocol: Protocol, direction: int) -> bool:
@@ -103,6 +124,8 @@ def _validate(call: Call, protocol: Protocol) -> None:
     low, high = protocol.holding_range(call.horizon_class)
     if not low <= call.holding_sessions <= high:
         raise ValueError(f"{call.horizon_class} holding must be {low}..{high} sessions, got {call.holding_sessions}")
+    if call.call_type in protocol.stop_required and call.stop is None:
+        raise ValueError(f"{call.call_type} calls must carry a stop")
 
 
 def entry(path: Sequence[Bar | None], protocol: Protocol) -> tuple[int, float] | str:
@@ -121,15 +144,21 @@ def long_exit(
     target: float | None,
     stop: float | None,
     protocol: Protocol,
+    sell_after: date | None = None,
 ) -> Exit | None:
-    first = entry_index + protocol.settlement_sessions
+    entry_bar = path[entry_index]
+    assert entry_bar is not None
+    first = entry_index + protocol.settlement_sessions(entry_bar.day)
     last = entry_index + holding - 1
     pending: tuple[str, int] | None = None
     for i in range(first, len(path)):
         bar = path[i]
         due = i >= last
+        sell_due = sell_after is not None and bar is not None and bar.day > sell_after
         if bar is None or not bar.traded:
-            if due and pending is None:
+            if pending is None and sell_due:
+                pending = (SELL_CALL, i)
+            elif due and pending is None:
                 pending = ("horizon", last)
             continue
         e = effective_bar(bar, protocol)
@@ -137,6 +166,8 @@ def long_exit(
             if pending is None:
                 if stop is not None and e.low <= stop:
                     pending = ("stop", i)
+                elif sell_due:
+                    pending = (SELL_CALL, i)
                 elif due:
                     pending = ("horizon", last)
             continue
@@ -144,6 +175,8 @@ def long_exit(
             return Exit(i, e.open, pending[0], i - pending[1])
         if stop is not None and e.open <= stop:
             return Exit(i, e.open, "stop", 0)
+        if sell_due:
+            return Exit(i, e.open, SELL_CALL, 0)
         if target is not None and e.open >= target:
             return Exit(i, e.open, "target", 0)
         if stop is not None and e.low <= stop:
@@ -207,14 +240,14 @@ def _held(call: Call, path: Sequence[Bar | None], protocol: Protocol) -> tuple[A
     return filled, hold, trip
 
 
-def _grade_buy(call: Call, path: Sequence[Bar | None], protocol: Protocol) -> Outcome:
+def _grade_buy(call: Call, path: Sequence[Bar | None], protocol: Protocol, sell_after: date | None = None) -> Outcome:
     filled = entry(path, protocol)
     if isinstance(filled, str):
         wrong = protocol.raw["grading"]["BUY"]["unfilled"] == "wrong"
         return Outcome(call, UNFILLED, False if wrong else None, filled)
     index, price = filled
     entry_day = _day(path, index)
-    exit = long_exit(path, index, call.holding_sessions, call.target, call.stop, protocol)
+    exit = long_exit(path, index, call.holding_sessions, call.target, call.stop, protocol, sell_after)
     if exit is None:
         return Outcome(call, PENDING, None, PENDING, entry_date=entry_day, entry_price=price)
     trip = round_trip(price, exit.price, entry_day, _day(path, exit.index), protocol)
@@ -265,19 +298,27 @@ def _grade_no_buy(call: Call, path: Sequence[Bar | None], protocol: Protocol) ->
     )
 
 
+def sell_threshold(call: Call, protocol: Protocol) -> tuple[int, float]:
+    shares = call.position_shares if call.position_shares is not None else shares_for(call.reference, protocol)
+    cost = sell_costs(shares, call.reference, call.call_date, protocol).total
+    return shares, call.reference - cost / shares
+
+
 def _grade_sell(call: Call, path: Sequence[Bar | None], protocol: Protocol) -> Outcome:
     exit = observe_exit(path, call.holding_sessions, call.target, call.stop, protocol)
     if exit is None:
         status = PENDING if len(path) < call.holding_sessions else UNGRADED
         return Outcome(call, status, None, PENDING if status == PENDING else NO_TRADE)
+    shares, threshold = sell_threshold(call, protocol)
     return Outcome(
         call,
         GRADED,
-        exit.price < call.reference_price,
+        exit.price < threshold,
         exit.reason,
         exit_date=_day(path, exit.index),
         exit_price=exit.price,
         exit_delay=exit.delay,
+        total_costs=shares * (call.reference - threshold),
     )
 
 
@@ -290,11 +331,12 @@ def _grade_hold(call: Call, path: Sequence[Bar | None], protocol: Protocol) -> O
         if call.stop is not None and e.low <= call.stop:
             price = min(e.open, call.stop)
             return Outcome(call, GRADED, False, "stop", exit_date=bar.day, exit_price=price)
-        if e.close >= call.reference_price:
+        if e.close >= call.reference:
             return Outcome(call, GRADED, True, "recovered", exit_date=bar.day, exit_price=e.close)
     if len(path) < call.holding_sessions:
         return Outcome(call, PENDING, None, PENDING)
-    return Outcome(call, GRADED, False, "not_recovered")
+    seen = [bar.day for bar in path[: call.holding_sessions] if bar is not None]
+    return Outcome(call, GRADED, False, "not_recovered", exit_date=max(seen) if seen else None)
 
 
 def _grade_wait(call: Call, path: Sequence[Bar | None], protocol: Protocol) -> Outcome:
@@ -306,20 +348,90 @@ def _grade_wait(call: Call, path: Sequence[Bar | None], protocol: Protocol) -> O
         None,
         WAIT,
         missed_buy=None if trip is None else trip.net_pnl > 0,
-        missed_sell=None if seen is None else seen.price < call.reference_price,
+        missed_sell=None if seen is None else seen.price < call.reference,
     )
 
 
 GRADERS = {BUY: _grade_buy, NO_BUY: _grade_no_buy, SELL: _grade_sell, HOLD: _grade_hold, WAIT: _grade_wait}
 
 
-def grade(call: Call, path: Sequence[Bar | None], protocol: Protocol | None = None) -> Outcome:
+def grade(
+    call: Call,
+    path: Sequence[Bar | None],
+    protocol: Protocol | None = None,
+    sessions_before_holdout: int | None = None,
+    sell_after: date | None = None,
+) -> Outcome:
     p = protocol or load()
     _validate(call, p)
     for bar in path:
         if bar is not None and bar.day <= call.call_date:
             raise ValueError(f"path session {bar.day} is not after the call date {call.call_date}")
-    return GRADERS[call.call_type](call, path, p)
+        if bar is not None and bar.day >= p.holdout_start:
+            raise ValueError(f"path session {bar.day} is in the holdout")
+    if sell_after is not None and call.call_type != BUY:
+        raise ValueError("only a BUY can be closed by a SELL call")
+    if sessions_before_holdout is not None and call.holding_sessions > sessions_before_holdout:
+        return Outcome(call, UNGRADED, None, REACHES_HOLDOUT)
+    if call.call_type == BUY:
+        outcome = _grade_buy(call, path, p, sell_after)
+    else:
+        outcome = GRADERS[call.call_type](call, path, p)
+    if outcome.status == PENDING and sessions_before_holdout is not None and len(path) >= sessions_before_holdout:
+        return replace(outcome, status=UNGRADED, correct=None, reason=REACHES_HOLDOUT)
+    return outcome
+
+
+def last_price_date(outcome: Outcome) -> date | None:
+    days = [d for d in (outcome.exit_date, outcome.hold_exit_date) if d is not None]
+    return max(days) if days else None
+
+
+def hidden(outcome: Outcome, completed_runs: set[str] | frozenset[str], protocol: Protocol | None = None) -> bool:
+    p = protocol or load()
+    used = last_price_date(outcome)
+    if outcome.status != GRADED or used is None:
+        return False
+    period = p.period_of(outcome.call.call_date)
+    for rule in p.raw["periods"]["sealed_grades"]:
+        if (
+            period == rule["call_period"]
+            and outcome.call.horizon_class == rule["horizon_class"]
+            and used >= as_date(rule["prices_from"])
+            and rule["hidden_until_run"] not in completed_runs
+        ):
+            return True
+    return False
+
+
+def position_call(call: Call, buy: Outcome, protocol: Protocol | None = None) -> Call:
+    if buy.entry_price is None:
+        return call
+    p = protocol or load()
+    return replace(call, position_entry_price=buy.entry_price, position_shares=shares_for(buy.entry_price, p))
+
+
+class OpenCalls:
+    def __init__(self, protocol: Protocol | None = None) -> None:
+        self.protocol = protocol or load()
+        self.open: dict[str, Call] = {}
+
+    def admit(self, call: Call) -> tuple[str, Call | None]:
+        rules = self.protocol.raw["open_calls"]
+        current = self.open.get(call.symbol)
+        if current is not None:
+            if rules["sell_closes_buy"] and current.call_type == BUY and call.call_type == SELL:
+                self.open[call.symbol] = call
+                return CLOSES_BUY, current
+            return BLOCKED, current
+        if call.call_type not in rules["open_types"]:
+            return NOT_OPEN, None
+        self.open[call.symbol] = call
+        return OPENED, None
+
+    def resolve(self, call: Call) -> None:
+        if self.open.get(call.symbol) == call:
+            del self.open[call.symbol]
 
 
 def accuracy(outcomes: Sequence[Outcome]) -> dict[str, Any]:
