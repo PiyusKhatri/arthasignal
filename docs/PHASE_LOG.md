@@ -875,3 +875,16 @@ The backfill uses the Sharesansar daily page because it is the only source that 
   - This extends announcement-dated dividend data from 2018 back to 2011. Full table: `docs/corporate_events_coverage.json`.
 - **NRB policy events:** 36 rows (`docs/policy_events.json`): policy rate, corridor bounds, bank rate, CRR, SLR, CCD/CD ratio and margin-lending rules from 2014/15 to 2025/26, each with an evidence sentence. Pre-2020 announcement dates come from secondary sources and are marked unconfirmed; 2017/18 and 2019/20 still lack one.
 - **Trading-rule notices:** NEPSE notices cannot be read (API answers 401). The T+2 approval (January 2021, start date unconfirmed) and the Monday-Friday week (2026-04-08) are recorded with sources. The circuit band change to 15% (2026-04-20) used in the code has no recorded source, and earlier trading-hour changes were not found; both are gaps.
+
+## Data phase C - Fundamentals history from report images
+
+- **Text PDFs are not available at scale.** NEPSE answers 401, SEBON hosts no quarterly reports, company sites list reports through JavaScript, and every Sharesansar attachment sampled is an image. Report images are collected from Sharesansar announcements: newest first, 2,101 so far, with 2024-2025 complete.
+- **OCR comparison** (`docs/OCR_COMPARISON.md`): 71 sampled reports (6 per year, 2014-2025), Sharesansar net-profit headlines, and 11 gold labels read from the images; one frozen parser for all engines. Results, net profit vs headline (71) / net profit, EPS and book value vs gold (11) / seconds per report:
+  - Tesseract nep+eng: 13% / 1, 4, 4 / 7;
+  - PaddleOCR medium: 75% / 8, 5, 5 / 91;
+  - PaddleOCR mobile: 72% / 8, 6, 5 / 50;
+  - Surya: 5, 8, 6 on the gold 11 only / 198 s; it stalled on the full sample with 8 GB of RAM.
+- **Choice:** PaddleOCR mobile. **Gate:** a field is accepted only at 90% or more measured accuracy, and **no field passes**. All 253 sample values are stored in `report_field_values` with `accepted = false` and the reason. Reserves, NPL, capital adequacy and dividend are unmeasured, so they are flagged too.
+- **Known parser errors,** listed for a fix and a re-measure on a new gold set: group versus bank column, a stray lakh unit, and a pre-associates profit row.
+- **Batch OCR is running** at nice 19 over the collected images: about 50 s each, so about 30 hours for the current 2,101 and about 6 days for all 9,900 development-window reports.
+- **Coverage by year** (reports with an image so far): 2014-2022 only the sample of 5-6 each, 2023: 310 of 930, 2024: 996 of 998, 2025: 743 of 743.

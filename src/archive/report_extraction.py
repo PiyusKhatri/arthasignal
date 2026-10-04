@@ -97,7 +97,7 @@ def main() -> None:
 
     parser = argparse.ArgumentParser()
     parser.add_argument("command", choices=["manifest", "store"])
-    parser.add_argument("--engine", default="tesseract")
+    parser.add_argument("--engine", default="paddleocr_mobile")
     args = parser.parse_args()
     if args.command == "manifest":
         print(build_manifest(research_engine()), "documents")
