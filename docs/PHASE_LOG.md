@@ -624,3 +624,25 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - **Holdout:** for a development date, the league and v0.1 writers no longer query `max(date)` over all of `daily_prices`, and their quarantine, penalty and grading reads go through the research engine (quarantine filtered in SQL to `step_date <= as_of`).
 - Also fixed: `check_recent` crashed on an empty window.
 - Tests: the chain policy tests were rewritten (no session, flagged, feed-wide, checker crash, soft failures, capture failure, exclusion file), giving 13 in `tests/test_ops.py`; suite 572 passed.
+
+## Readiness 3 - Rehearsal mode
+
+- `python -m src.ops.daily --rehearse --as-of <development date>` runs every chain step's logic for a past session, in the live order with the live failure rules.
+- **How "no writes, no holdout reads" is enforced:** with `ARTHASIGNAL_REHEARSAL=1` the main engine (`src/database/connection.py`) and the research engine log in as `arthasignal_research` with `default_transaction_read_only=on` and the holdout guard on. The database refuses any write, row-level security hides every holdout row, and the query guard rejects holdout dates. Verified: user `arthasignal_research`, read-only on, latest visible price 2025-09-28, 0 live calls visible, an UPDATE refused and a holdout-dated query refused.
+- **Step variants:**
+  - `capture --rehearse` (counts only, no fetch);
+  - `price_integrity --as-of`;
+  - league and v0.1 `--date D --dry-run --write-only`;
+  - `tips cycle --as-of` (state at D, dry write);
+  - sectors;
+  - `quarterly_capture --dry-run` (2 symbols, parsed, not stored);
+  - `news --dry-run`;
+  - `scoring grade` and `metrics --as-of` (computed, not written);
+  - `report daily --as-of --print-only`.
+
+  The orchestrator records nothing in the database and lists alerts instead of sending them.
+- **Run for 2025-01-16** (99 s, exit 0): capture session (296 price rows, index 1); integrity clean (243); league avoid 33, momentum 10, ranker 10, others 0, deadline 2025-01-19 11:00; v0.1 10 calls and 34 avoid observations; tips pending 0; sectors passed; quarterly parsed 2; news 56 items fetched and not stored; grading and metrics computed with 0 rows written; `would_alert: []`; report preview rendered.
+- 2025-01-17 (no session) stopped at capture with `no_session` and skipped everything but news. A holdout date was refused.
+- **Fixed on the way:** `data_quality.py` had two `__main__` blocks after my earlier change, so `--sectors` also ran the benchmark-index check. That check reads every price date, holdout included, and could fail the sectors step for an unrelated reason. There is now one entry point.
+- `docs/PROD_DEPLOY.md` Part 10 step 7 adds the server rehearsal command with the expected output.
+- Tests: 3 added; suite 575 passed.

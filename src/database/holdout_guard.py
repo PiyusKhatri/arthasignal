@@ -176,7 +176,8 @@ def research_engine() -> Engine:
                 max_overflow=2,
                 pool_recycle=300,
                 future=True,
-                connect_args={"connect_timeout": 10, "options": f"-c {GUC}=on"},
+                connect_args={"connect_timeout": 10, "options": f"-c {GUC}=on"
+                              + (" -c default_transaction_read_only=on" if os.environ.get("ARTHASIGNAL_REHEARSAL") == "1" else "")},
             )
         )
     return _research_engine

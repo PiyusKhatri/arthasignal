@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from contextlib import contextmanager
 from typing import Iterator
 
@@ -20,16 +21,41 @@ MAX_OVERFLOW = 2
 POOL_TIMEOUT_SECONDS = 30
 POOL_RECYCLE_SECONDS = 300
 
-engine = create_engine(
-    settings.database_url,
-    poolclass=QueuePool,
-    pool_size=POOL_SIZE,
-    max_overflow=MAX_OVERFLOW,
-    pool_timeout=POOL_TIMEOUT_SECONDS,
-    pool_recycle=POOL_RECYCLE_SECONDS,
-    future=True,
-    connect_args={"connect_timeout": CONNECT_TIMEOUT_SECONDS},
-)
+REHEARSAL_ENV = "ARTHASIGNAL_REHEARSAL"
+REHEARSAL_OPTIONS = "-c arthasignal.holdout_guard=on -c default_transaction_read_only=on"
+
+
+def rehearsal() -> bool:
+    return os.environ.get(REHEARSAL_ENV) == "1"
+
+
+def _build_engine():
+    if rehearsal():
+        from src.database.holdout_guard import install, research_url
+
+        return install(create_engine(
+            research_url(),
+            poolclass=QueuePool,
+            pool_size=POOL_SIZE,
+            max_overflow=MAX_OVERFLOW,
+            pool_timeout=POOL_TIMEOUT_SECONDS,
+            pool_recycle=POOL_RECYCLE_SECONDS,
+            future=True,
+            connect_args={"connect_timeout": CONNECT_TIMEOUT_SECONDS, "options": REHEARSAL_OPTIONS},
+        ))
+    return create_engine(
+        settings.database_url,
+        poolclass=QueuePool,
+        pool_size=POOL_SIZE,
+        max_overflow=MAX_OVERFLOW,
+        pool_timeout=POOL_TIMEOUT_SECONDS,
+        pool_recycle=POOL_RECYCLE_SECONDS,
+        future=True,
+        connect_args={"connect_timeout": CONNECT_TIMEOUT_SECONDS},
+    )
+
+
+engine = _build_engine()
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 

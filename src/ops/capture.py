@@ -91,13 +91,31 @@ def run(day: date, cutoff: datetime, sleep: Any = time.sleep) -> tuple[int, dict
         sleep(RETRY_MINUTES * 60)
 
 
+def rehearse(day: date) -> tuple[int, dict[str, Any]]:
+    from src.database.holdout_guard import HOLDOUT_START
+
+    if day >= HOLDOUT_START:
+        raise SystemExit(f"rehearsal needs a development-window date before {HOLDOUT_START}")
+    rows = session_rows(day)
+    expected = load().rule_session(day)
+    state = classify(rows, expected)
+    report = {"date": day.isoformat(), "mode": "rehearsal: no network fetch, no writes", "calendar_expects_session": expected,
+              "rows": rows, "state": state}
+    return {"session": EXIT_OK, "no_session": EXIT_NO_SESSION}.get(state, EXIT_FAILED), report
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     parser = argparse.ArgumentParser(description="Capture today's prices and indices with source fallbacks and retries")
     parser.add_argument("--date", type=date.fromisoformat)
     parser.add_argument("--cutoff", default=DEFAULT_CUTOFF)
+    parser.add_argument("--rehearse", action="store_true")
     args = parser.parse_args()
     day = args.date or datetime.now(tz=NPT).date()
+    if args.rehearse:
+        code, report = rehearse(day)
+        print(json.dumps(report, indent=2, default=str))
+        sys.exit(code)
     hour, minute = (int(x) for x in args.cutoff.split(":"))
     cutoff = datetime.combine(datetime.now(tz=NPT).date(), datetime.min.time(), tzinfo=NPT).replace(hour=hour, minute=minute)
     code, report = run(day, cutoff)

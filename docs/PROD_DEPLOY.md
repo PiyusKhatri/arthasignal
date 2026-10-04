@@ -333,7 +333,35 @@ The migration:
 - logs a row in `ops_migration_runs` only when it changes something;
 - exits 1 if anything is still mislabelled afterwards.
 
-If step 6 does not print exit 0, **do not** let Monday's chain run: `sudo systemctl stop arthasignal-daily.timer`, and send me the output of steps 3-6.
+```bash
+# 7. Rehearse the whole chain on a past session: no writes, no holdout reads (about 2 minutes)
+$RUN "$ENV .venv/bin/python -m src.ops.daily --rehearse --as-of 2025-01-16"; echo "exit $?"
+```
+
+The rehearsal:
+- runs every chain step's logic for 2025-01-16, in the live order and with the live failure rules;
+- runs each subprocess as `arthasignal_research` with **read-only transactions and the holdout guard on**, so the database itself refuses any write and any row after 2025-09-29;
+- still fetches the news pages and two quarterly statements over the network, without storing them;
+- writes its result to `logs/rehearsal/2025-01-16/rehearsal.json`.
+
+It needs the research login from Part 5 step 3 (`.pgpass`). Expected result (from the laptop run):
+
+| Step | Expected summary |
+| --- | --- |
+| capture | `state: session`, 296 price rows, 1 index row |
+| integrity | `decision: clean`, 243 traded equities |
+| league | deadline 2025-01-19 11:00, bull; avoid 33, momentum 10, ranker 10, the other three 0; "dry run: nothing written" |
+| avoid_writer | 10 calls, 34 avoid observations |
+| tips | `pending: 0` |
+| sectors | `sector check passed` |
+| quarterly_capture | `dry_run: true, parsed: 2` |
+| news | 5 sources ok, "dry run: nothing written" |
+| grading, metrics | "rehearsal: computed, nothing written" |
+| overall | `would_alert: []`, exit 0 |
+
+A day without a session, for example `--as-of 2025-01-17`, must stop at capture with `no_session` and skip everything but news. A date on or after 2025-09-30 is refused.
+
+If step 6 does not print exit 0, or the rehearsal does not exit 0, **do not** let Monday's chain run: `sudo systemctl stop arthasignal-daily.timer`, and send me the output of steps 3-6.
 
 ## Security checklist
 

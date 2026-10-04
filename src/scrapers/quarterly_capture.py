@@ -85,7 +85,7 @@ def apply_schema(engine: Engine) -> None:
             connection.execute(text(statement))
 
 
-def capture_symbol(collector: Collector, engine: Engine, symbol: str) -> str:
+def capture_symbol(collector: Collector, engine: Engine, symbol: str, dry_run: bool = False) -> str:
     page = collector.get(COMPANY_URL.format(slug=symbol.lower()))
     token = TOKEN_PATTERN.search(page.text)
     company = COMPANY_ID_PATTERN.search(page.text)
@@ -97,6 +97,8 @@ def capture_symbol(collector: Collector, engine: Engine, symbol: str) -> str:
     figures = parse_quarterly_tab(tab.text)
     if not figures or not figures["fiscal_year"] or not figures["quarter"]:
         return "no_data"
+    if dry_run:
+        return "parsed"
     with engine.begin() as connection:
         inserted = connection.execute(
             text(
@@ -121,14 +123,15 @@ def active_symbols(engine: Engine) -> list[str]:
     return [r[0] for r in rows if valid_symbol(r[0])]
 
 
-def run(engine: Engine, symbols: list[str], delay: float) -> dict[str, Any]:
-    apply_schema(engine)
+def run(engine: Engine, symbols: list[str], delay: float, dry_run: bool = False) -> dict[str, Any]:
+    if not dry_run:
+        apply_schema(engine)
     collector = Collector(engine, delay)
     started = datetime.now().astimezone()
-    outcome: dict[str, list[str]] = {"captured": [], "unchanged": [], "no_data": [], "no_page": [], "error": []}
+    outcome: dict[str, list[str]] = {"captured": [], "unchanged": [], "no_data": [], "no_page": [], "error": [], "parsed": []}
     for k, symbol in enumerate(symbols, 1):
         try:
-            result = capture_symbol(collector, engine, symbol)
+            result = capture_symbol(collector, engine, symbol, dry_run)
         except Exception as error:
             logger.warning("%s: %s", symbol, error)
             result = "error"
@@ -136,6 +139,8 @@ def run(engine: Engine, symbols: list[str], delay: float) -> dict[str, Any]:
         logger.info("[%d/%d] %s %s", k, len(symbols), symbol, result)
     finished = datetime.now().astimezone()
     summary = {k: len(v) for k, v in outcome.items()}
+    if dry_run:
+        return {"dry_run": True, "symbols": len(symbols), **summary, "parsed_symbols": outcome["parsed"]}
     with engine.begin() as connection:
         connection.execute(
             text(
@@ -154,6 +159,7 @@ def main() -> None:
     parser.add_argument("--symbols", nargs="*")
     parser.add_argument("--delay", type=float, default=DEFAULT_DELAY)
     parser.add_argument("--log", type=Path, default=DEFAULT_LOG)
+    parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
     if args.delay < 2.0:
         raise SystemExit("--delay below 2 seconds is not allowed")
@@ -162,7 +168,7 @@ def main() -> None:
                         handlers=[logging.FileHandler(args.log), logging.StreamHandler()])
     from src.database.connection import engine
 
-    print(json.dumps(run(engine, args.symbols or active_symbols(engine), args.delay), indent=2))
+    print(json.dumps(run(engine, args.symbols or active_symbols(engine), args.delay, args.dry_run), indent=2))
 
 
 if __name__ == "__main__":

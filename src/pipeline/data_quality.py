@@ -571,11 +571,6 @@ def check_daily_pipeline_health() -> dict[str, Any]:
     return summary
 
 
-if __name__ == "__main__":
-    assert_benchmark_index_coverage()
-    print(f"Every price session has a {BENCHMARK_INDEX_NAME} row")
-
-
 def main() -> None:
     import argparse
     import sys
@@ -590,6 +585,9 @@ def main() -> None:
             print(f"DATA QUALITY FAILURE: {error}")
             sys.exit(1)
         print("sector check passed: no non-equity symbol carries an equity sector")
+        return
+    assert_benchmark_index_coverage()
+    print(f"Every price session has a {BENCHMARK_INDEX_NAME} row")
 
 
 if __name__ == "__main__":

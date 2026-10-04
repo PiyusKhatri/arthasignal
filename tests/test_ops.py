@@ -143,3 +143,38 @@ def test_deploy_kit_files_exist() -> None:
     timer = (root / "deploy" / "systemd" / "arthasignal-daily.timer").read_text()
     assert "Mon..Fri" in timer and "Asia/Kathmandu" in timer
     assert "listen_addresses = 'localhost'" in (root / "deploy" / "config" / "postgresql-arthasignal.conf").read_text()
+
+
+def test_every_chain_step_has_a_write_free_rehearsal_variant() -> None:
+    assert set(daily.REHEARSAL) == {s.name for s in daily.STEPS}
+    for name, command in daily.REHEARSAL.items():
+        joined = " ".join(command)
+        assert "--dry-run" in joined or "--as-of" in joined or "--rehearse" in joined or name == "sectors", name
+        assert "{as_of}" in joined or name in ("sectors", "quarterly_capture", "news"), name
+
+
+def test_rehearsal_refuses_holdout_dates() -> None:
+    with pytest.raises(SystemExit, match="development-window"):
+        daily.rehearse("2025-09-30")
+
+
+def test_rehearsal_engine_is_read_only_research_role_with_guard() -> None:
+    import subprocess
+    import sys
+
+    code = (
+        "from sqlalchemy import text\n"
+        "from src.database.connection import engine\n"
+        "with engine.connect() as c:\n"
+        "    print(c.execute(text('select current_user')).scalar(), c.execute(text('show default_transaction_read_only')).scalar())\n"
+        "try:\n"
+        "    with engine.begin() as c: c.execute(text('update companies set sector = sector where false'))\n"
+        "    print('write-allowed')\n"
+        "except Exception as e: print('write-refused')\n"
+    )
+    import os
+
+    result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, env={**os.environ, "ARTHASIGNAL_REHEARSAL": "1"}, timeout=120)
+    if "could not connect" in result.stderr or "Connection refused" in result.stderr:
+        pytest.skip("database not reachable")
+    assert "arthasignal_research on" in result.stdout and "write-refused" in result.stdout, result.stderr[-500:]

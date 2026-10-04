@@ -4,7 +4,7 @@ import argparse
 import json
 import os
 import shutil
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -36,9 +36,9 @@ def latest_backup() -> dict[str, Any]:
     return {"file": newest.name, "age_hours": round(age / 3600, 1), "size_mb": round(newest.stat().st_size / 1e6, 1), "count": len(files)}
 
 
-def collect_daily(connection: Any, today: Any) -> dict[str, Any]:
+def collect_daily(connection: Any, today: Any, as_of: Any = None) -> dict[str, Any]:
     out: dict[str, Any] = {"date": today.isoformat()}
-    out["latest_session"] = connection.execute(text("SELECT max(date) FROM daily_prices")).scalar()
+    out["latest_session"] = as_of if as_of is not None else connection.execute(text("SELECT max(date) FROM daily_prices")).scalar()
     out["price_rows_latest"] = connection.execute(text("SELECT count(*) FROM daily_prices WHERE date = :d"), {"d": out["latest_session"]}).scalar()
     if _table_exists(connection, "ops_runs"):
         out["steps"] = [(r.step, r.status) for r in _rows(connection,
@@ -135,13 +135,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Send the daily or weekly report to Discord")
     parser.add_argument("kind", choices=("daily", "weekly"))
     parser.add_argument("--print-only", action="store_true")
+    parser.add_argument("--as-of", type=date.fromisoformat)
     args = parser.parse_args()
     from src.database.connection import engine
     from src.notifications.discord_alert import send_discord_alert
 
     today = datetime.now(tz=NPT).date()
     with engine.connect() as connection:
-        data = collect_daily(connection, today) if args.kind == "daily" else collect_weekly(connection, today)
+        data = collect_daily(connection, args.as_of or today, args.as_of) if args.kind == "daily" else collect_weekly(connection, today)
     message, severity = render_daily(data) if args.kind == "daily" else render_weekly(data)
     sent = False if args.print_only else send_discord_alert(message, severity)
     print(json.dumps({"sent": sent, "severity": severity, "message": message}, indent=2, default=str, ensure_ascii=False))

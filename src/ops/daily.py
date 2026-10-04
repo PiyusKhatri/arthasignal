@@ -53,6 +53,18 @@ STEPS: tuple[Step, ...] = (
     Step("metrics", (PY, "-m", "src.ops.scoring", "metrics", "--markdown-dir", "logs/league"), 60, "soft", "Leaderboards; never blocks"),
 )
 SESSION_INDEPENDENT = {"news"}
+REHEARSAL: dict[str, tuple[str, ...]] = {
+    "capture": (PY, "-m", "src.ops.capture", "--rehearse", "--date", "{as_of}"),
+    "integrity": (PY, "-m", "src.backtest.price_integrity", "--live", "--as-of", "{as_of}", "--exclusions-out", "{log_dir}/" + EXCLUSIONS_FILE),
+    "league": (PY, "-m", "src.league.run", "--date", "{as_of}", "--dry-run", "--write-only", "--markdown-dir", "{log_dir}"),
+    "avoid_writer": (PY, "-m", "src.scorecard.daily", "--date", "{as_of}", "--dry-run", "--write-only"),
+    "tips": (PY, "-m", "src.tips.run", "cycle", "--as-of", "{as_of}"),
+    "sectors": (PY, "-m", "src.pipeline.data_quality", "--sectors"),
+    "quarterly_capture": (PY, "-m", "src.scrapers.quarterly_capture", "--dry-run", "--symbols", "NABIL", "EBL", "--log", "{log_dir}/quarterly.log"),
+    "news": (PY, "-m", "src.collectors.run", "news", "--dry-run"),
+    "grading": (PY, "-m", "src.ops.scoring", "grade", "--as-of", "{as_of}"),
+    "metrics": (PY, "-m", "src.ops.scoring", "metrics", "--as-of", "{as_of}", "--markdown-dir", "{log_dir}"),
+}
 
 
 def plan(start_from: str | None, only: Sequence[str] | None) -> list[Step]:
@@ -63,10 +75,10 @@ def plan(start_from: str | None, only: Sequence[str] | None) -> list[Step]:
     return [s for s in steps if not only or s.name in only]
 
 
-def run_step(step: Step, log_dir: Path, env: dict[str, str]) -> tuple[str, int | None, dict]:
+def run_step(step: Step, log_dir: Path, env: dict[str, str], command: tuple[str, ...] | None = None) -> tuple[str, int | None, dict]:
     log_dir.mkdir(parents=True, exist_ok=True)
     out_path, err_path = log_dir / f"{step.name}.json", log_dir / f"{step.name}.log"
-    command = tuple(part.replace("{log_dir}", str(log_dir)) for part in step.command)
+    command = tuple(part.replace("{log_dir}", str(log_dir)) for part in (command or step.command))
     with out_path.open("w") as out, err_path.open("a") as err:
         try:
             result = subprocess.run(command, stdout=out, stderr=err, timeout=step.timeout_minutes * 60, env=env)
@@ -135,6 +147,84 @@ def run(start_from: str | None = None, only: Sequence[str] | None = None, report
     return 1 if failures else 0
 
 
+def summarize(step: str, path: Path) -> object:
+    try:
+        data = json.loads(path.read_text())
+    except Exception:
+        lines = [line for line in path.read_text().splitlines() if line.strip()] if path.exists() else []
+        return lines[-1][:200] if lines else None
+    if step == "capture":
+        return {k: data.get(k) for k in ("state", "rows", "calendar_expects_session")}
+    if step == "integrity":
+        return {k: data.get(k) for k in ("decision", "symbols", "traded_equities")}
+    if step == "league":
+        return {"deadline": data.get("deadline"), "market_state": data.get("market_state"), "write": data.get("write"),
+                "calls": {b: e.get("calls") for b, e in (data.get("bots") or {}).items()}}
+    if step == "avoid_writer":
+        return {"calls": len(data.get("calls") or []), "avoid_observations": len(data.get("avoid_observations") or []), "write": data.get("write")}
+    if step == "tips":
+        return {"write": data.get("write")}
+    if step in ("grading", "metrics"):
+        return {k: v for k, v in data.items() if k in ("mode", "league", "model_v0", "tips", "league_rows_written", "tip_rows_written")}
+    if step == "news" and isinstance(data, list):
+        return {r.get("source"): {"status": r.get("status"), "items": r.get("items"), "inserted": r.get("inserted")} for r in data}
+    if step == "quarterly_capture":
+        return {k: data.get(k) for k in ("dry_run", "parsed", "no_data", "no_page", "error", "parsed_symbols")}
+    return data
+
+
+def rehearse(as_of: str) -> int:
+    from datetime import date as _date
+
+    from src.database.holdout_guard import HOLDOUT_START
+
+    day = _date.fromisoformat(as_of)
+    if day >= HOLDOUT_START:
+        raise SystemExit(f"--as-of must be a development-window date before {HOLDOUT_START}")
+    log_dir = Path("logs/rehearsal") / as_of
+    if log_dir.exists():
+        for old in log_dir.iterdir():
+            if old.is_file():
+                old.unlink()
+    env = {**os.environ, "ARTHASIGNAL_REHEARSAL": "1", "ARTHASIGNAL_EXCLUSIONS": str(log_dir / EXCLUSIONS_FILE)}
+    blocked: str | None = None
+    results, would_alert = [], []
+    for step in STEPS:
+        started = datetime.now(tz=NPT)
+        reason = decide(step, blocked)
+        if reason:
+            status, code = "skipped", None
+            summary: object = f"blocked by {reason}"
+        else:
+            command = tuple(part.replace("{as_of}", as_of) for part in REHEARSAL[step.name])
+            status, code, _ = run_step(step, log_dir, env, command)
+            summary = summarize(step.name, log_dir / f"{step.name}.json")
+        seconds = round((datetime.now(tz=NPT) - started).total_seconds(), 1)
+        results.append({"step": step.name, "gate": step.gate, "status": status, "exit_code": code, "seconds": seconds, "summary": summary})
+        if status == "no_session":
+            blocked = "no_session"
+        elif status == "flagged":
+            would_alert.append("warning: flagged symbols excluded from calls")
+        elif status in ("failed", "timeout"):
+            would_alert.append(f"failure: {step.name} ({status}, exit {code})")
+            if step.gate == "session":
+                blocked = "capture_failure"
+            elif step.gate == "integrity" and code == INTEGRITY_FEED_WIDE:
+                blocked = "feed_wide_price_steps"
+    report_command = (PY, "-m", "src.ops.report", "daily", "--as-of", as_of, "--print-only")
+    report = subprocess.run(report_command, capture_output=True, text=True, env=env, timeout=600)
+    try:
+        report_text = json.loads(report.stdout)["message"]
+    except Exception:
+        report_text = (report.stderr or report.stdout)[-500:]
+    out = {"rehearsal_for": as_of, "database_role": "arthasignal_research, read-only transactions, holdout guard on",
+           "writes": "none (database refuses writes in this mode)", "steps": results, "would_alert": would_alert,
+           "daily_report_preview": report_text, "logs": str(log_dir)}
+    (log_dir / "rehearsal.json").write_text(json.dumps(out, indent=2, default=str))
+    print(json.dumps(out, indent=2, default=str))
+    return 1 if any(r["status"] in ("failed", "timeout") for r in results) else 0
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     parser = argparse.ArgumentParser(description="Post-close daily chain: capture, check, write calls, then collect, grade, score, report")
@@ -142,7 +232,13 @@ def main() -> None:
     parser.add_argument("--only", nargs="*")
     parser.add_argument("--no-report", action="store_true")
     parser.add_argument("--list", action="store_true")
+    parser.add_argument("--rehearse", action="store_true")
+    parser.add_argument("--as-of")
     args = parser.parse_args()
+    if args.rehearse:
+        if not args.as_of:
+            raise SystemExit("--rehearse needs --as-of YYYY-MM-DD (a development-window session)")
+        sys.exit(rehearse(args.as_of))
     if args.list:
         print("\n".join(f"{i + 1}. {s.name} [{s.gate}, {s.timeout_minutes} min]: {s.why}" for i, s in enumerate(STEPS)))
         return

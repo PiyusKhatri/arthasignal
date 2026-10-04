@@ -242,6 +242,19 @@ def collect(engine: Engine, book: Any, dry_run: bool, schema: str = "public") ->
     return reports
 
 
+def rehearse(engine: Engine, as_of: date) -> dict[str, Any]:
+    from src.database.holdout_guard import HOLDOUT_START
+    from src.ops.exclusions import excluded_symbols
+
+    if as_of >= HOLDOUT_START:
+        raise SystemExit(f"rehearsal needs a development-window date before {HOLDOUT_START}")
+    state = build_state(as_of)
+    now = entry_deadline(as_of, state["panel"].sessions) - timedelta(hours=12)
+    excluded = excluded_symbols()
+    return {"as_of": as_of.isoformat(), "mode": "rehearsal: no collection, no writes", "simulated_now": now.isoformat(),
+            "excluded_today": excluded, "write": write_tips(engine, state, {**quarantined_symbols(engine, until=as_of), **excluded}, now, True)}
+
+
 def live_state() -> tuple[dict[str, Any], date]:
     from src.database.connection import engine
     from src.database.holdout_guard import allow
@@ -287,6 +300,7 @@ def main() -> None:
     cycle.add_argument("--dry-run", action="store_true")
     cycle.add_argument("--no-collect", action="store_true")
     cycle.add_argument("--grade", action="store_true")
+    cycle.add_argument("--as-of", type=date.fromisoformat)
     add = sub.add_parser("add")
     add.add_argument("--platform", required=True, choices=sources.PLATFORMS)
     add.add_argument("--channel", required=True)
@@ -317,6 +331,9 @@ def main() -> None:
             sys.exit(6)
         inserted = text_store.insert_items(engine, [item], sources.VERSION)
         print(json.dumps({"inserted": inserted, "symbols": list(item.symbols), "extract": extract_all(engine, book, now)}, indent=2))
+        return
+    if args.as_of is not None:
+        print(json.dumps(rehearse(engine, args.as_of), indent=2, default=str))
         return
     if not args.dry_run:
         store.apply_schema(engine)
