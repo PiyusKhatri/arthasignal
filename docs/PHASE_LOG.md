@@ -367,3 +367,16 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - 259 rows are 4th quarter 2082/83 and 4 are 3rd quarter 2082/83. EPS was present in 215.
 - A second run on NABIL and EBL stored nothing new (2 unchanged), so a capture is written only when the statement changes.
 - The dated EPS and balance-sheet history starts here. No schedule was installed.
+
+## Phase A - Research plan
+
+- `docs/RESEARCH_PLAN.md`: literature on combining weak signals, meta-labeling, cross-sectional tree rankers, regime conditioning, LLM news sentiment and its decay, social-media sentiment, Telegram pump detection and liquidity cycles, with sources.
+- It ranks 14 ideas by expected value, data availability, time to first v2 evidence, cost and terms risk.
+- It gives a final architecture: independent frozen systems write to the immutable ledger, and a meta-system trained walk-forward only reads ledger rows written before each decision.
+- Findings that change the plan:
+  - Telegram's API terms forbid using platform data for ML development or deployment.
+  - YouTube's developer policies cap storage of API data at 30 days.
+  - LLM backtests on historical news are look-ahead-contaminated, so news evidence must be live.
+  - Documented LLM headline edges last about 2 days, shorter than our 5-session minimum horizon.
+- History we do not have: promotion and attention signals (Telegram, YouTube, Reddit) and point-in-time Google Trends. Margin-lending history must be collected from NRB publications. The IPO calendar (981 dated issues since 2011) and monthly rates (from FY 2073/74) exist locally.
+- The next replay round is capped at 12 pre-registered hypotheses because each one raises *K*.
