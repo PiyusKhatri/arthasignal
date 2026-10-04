@@ -50,11 +50,10 @@ def telegram_item(channel: str, channel_id: int, message: Any, book: SymbolBook)
     body = getattr(message, "message", None) or None
     if body is None and not getattr(message, "media", None):
         return None
-    sender = getattr(message, "post_author", None) or getattr(message, "sender_id", None)
     replies = getattr(message, "replies", None)
     return Item(
         source="telegram", channel=channel, source_item_id=f"{channel_id}:{message.id}", url=f"https://t.me/{channel}/{message.id}",
-        title=None, body=body, published_at=message.date, published_precision="second", author=str(sender) if sender else None,
+        title=None, body=body, published_at=message.date, published_precision="second", author=None,
         language=language(body), symbols=book.find(body), retention=PERMANENT,
         raw={"views": getattr(message, "views", None), "forwards": getattr(message, "forwards", None),
              "replies": getattr(replies, "replies", None) if replies else None,

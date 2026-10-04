@@ -167,8 +167,10 @@ def _league_filter() -> tuple[list[str], list[str]]:
     return [b.name for b in BOTS], [b.version for b in BOTS]
 
 
-def grade_matured(engine: Engine, state: dict[str, Any], dry_run: bool, schema: str = "public") -> dict[str, Any]:
-    names, _ = _league_filter()
+def grade_matured(engine: Engine, state: dict[str, Any], dry_run: bool, schema: str = "public",
+                  pairs: set[tuple[str, str]] | None = None) -> dict[str, Any]:
+    pairs = pairs if pairs is not None else {(b.name, b.version) for b in BOTS}
+    names = sorted({name for name, _ in pairs})
     panel, market = state["panel"], state["market"]
     with engine.connect() as connection:
         calls = pd.read_sql(
@@ -184,7 +186,7 @@ def grade_matured(engine: Engine, state: dict[str, Any], dry_run: bool, schema: 
                 {"s": names, "g": v2.GRADE_VERSION},
             )
         }
-    calls = calls[[(s, v) in {(b.name, b.version) for b in BOTS} for s, v in zip(calls["strategy"], calls["model_version"])]]
+    calls = calls[[(s, v) in pairs for s, v in zip(calls["strategy"], calls["model_version"])]]
     if calls.empty:
         return {"live_calls": 0, "matured_new_grades": 0}
     last_index = len(panel.sessions) - 1
@@ -199,8 +201,8 @@ def grade_matured(engine: Engine, state: dict[str, Any], dry_run: bool, schema: 
     return {"live_calls": int(len(calls)), "matured_new_grades": int(len(grades))}
 
 
-def load_live_graded(engine: Engine, schema: str = "public") -> pd.DataFrame:
-    names, _ = _league_filter()
+def load_live_graded(engine: Engine, schema: str = "public", names: list[str] | None = None) -> pd.DataFrame:
+    names = names if names is not None else _league_filter()[0]
     with engine.connect() as connection:
         frame = pd.read_sql(
             text(
@@ -223,14 +225,15 @@ def penalty_tests(engine: Engine) -> int:
     return max(1, int(versions)) * len(spec.SITUATIONS) * len(spec.HORIZONS)
 
 
-def write_leaderboard(engine: Engine, board: dict[int, list[dict[str, Any]]], as_of: date, schema: str = "public") -> int:
+def write_leaderboard(engine: Engine, board: dict[int, list[dict[str, Any]]], as_of: date, schema: str = "public",
+                      table: str = "league_leaderboard") -> int:
     commit = code_commit()
     inserted = 0
     with engine.begin() as connection:
         for horizon, rows in board.items():
             for row in rows:
                 result = connection.execute(
-                    text(f"INSERT INTO {schema}.league_leaderboard (as_of, bot, bot_version, horizon, rank, metrics, code_commit) "
+                    text(f"INSERT INTO {schema}.{table} (as_of, bot, bot_version, horizon, rank, metrics, code_commit) "
                          "VALUES (:d, :b, :v, :h, :r, CAST(:m AS jsonb), :c) ON CONFLICT (as_of, bot, bot_version, horizon) DO NOTHING RETURNING id"),
                     {"d": as_of, "b": row["bot"], "v": row["version"], "h": horizon, "r": row["rank"],
                      "m": json.dumps(row, default=str), "c": commit},
