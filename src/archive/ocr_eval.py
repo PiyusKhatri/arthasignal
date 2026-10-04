@@ -144,7 +144,9 @@ def score(texts: dict[str, dict[str, str]], docs: list[dict[str, Any]], gold: di
         rows = []
         for doc in docs:
             name = Path(doc["path"]).name
-            raw = by_name.get(name, "")
+            if name not in by_name:
+                continue
+            raw = by_name[name]
             stats["documents_with_text"] += bool(raw.strip())
             got = extract(raw)
             profit = got["net_profit"] * got["unit"] if got["net_profit"] is not None else None
@@ -188,9 +190,10 @@ def main() -> None:
     gold = {g["sha256"]: g for g in json.loads(GOLD.read_text())["labels"]} if GOLD.exists() else {}
     texts = {}
     for engine in ENGINES:
-        path = OCR_DIR / f"text_{engine}.json"
-        if path.exists():
-            texts[engine] = json.loads(path.read_text())["texts"]
+        for path in (OCR_DIR / f"text_{engine}.json", OCR_DIR / f"text_{engine}_gold.json"):
+            if path.exists():
+                texts[engine] = json.loads(path.read_text())["texts"]
+                break
     report = score(texts, docs, gold)
     REPORT.write_text(json.dumps(report, indent=1, default=str))
     print(json.dumps({e: {k: v for k, v in s.items() if k != "rows"} for e, s in report["engines"].items()}, indent=1))

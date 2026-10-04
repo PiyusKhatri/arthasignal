@@ -68,6 +68,14 @@ def _date(raw: Any) -> date | None:
     return date.fromisoformat(match.group(0)) if match else None
 
 
+def _number(raw: Any) -> float | None:
+    cleaned = str(raw or "").replace(",", "").strip()
+    try:
+        return float(cleaned) if cleaned else None
+    except ValueError:
+        return None
+
+
 def _clean(raw: Any) -> str:
     return re.sub(r"\s+", " ", TAG.sub(" ", str(raw or ""))).strip()
 
@@ -118,8 +126,7 @@ def dividend_rows(symbol: str, items: list[dict[str, Any]]) -> list[dict[str, An
             continue
         rows.append({"src": SOURCE, "sym": symbol, "type": "dividend", "key": f"{item.get('year')}|{bookclose}|{announced}",
                      "fy": item.get("year"), "ev": distribution, "bc": bookclose, "ad": announced,
-                     "cash": float(item["cash_dividend"]) if item.get("cash_dividend") not in (None, "") else None,
-                     "bonus": float(item["bonus_share"]) if item.get("bonus_share") not in (None, "") else None,
+                     "cash": _number(item.get("cash_dividend")), "bonus": _number(item.get("bonus_share")),
                      "details": json.dumps({k: item.get(k) for k in ("total_dividend", "bonus_listing_date", "status", "bookclose_date")}),
                      "ref": reference})
     return rows

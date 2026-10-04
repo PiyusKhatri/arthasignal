@@ -861,3 +861,17 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - **`dividend_proposals_pit` view** (`security_invoker`, so base-table holdout policies apply to the caller; tested):
   - **Knowledge date:** the earlier of the first AGM announcement in the 90 days before the meeting and the book-close date. Both are dates by which the proposal was certainly public, so the earlier one is still safe.
   - **Coverage:** this extends announcement-dated dividend data back to 2011 (2014: 26 proposals so far). The old `dividend_declarations` table starts in 2018.
+
+## Data phase D - Corporate events and policy (collected)
+
+- **Sharesansar company collection finished:** 515 companies done, 9 without a Sharesansar page, 0 errors after a rerun of the 6 that failed during a DNS outage, and 2,534 requests at one per 3 s.
+  - **Stored:** 31,724 announcements on 502 symbols (2011-2026; one row carries a source date in year 1), 3,469 AGM records and 1,824 dividend-table records.
+  - **Raw JSON per company** is kept immutable under `raw/archive/sharesansar_company/`.
+- **Announcements per year:** 2014: 1,695; 2015: 1,999; 2016: 1,961; 2017: 2,373; 2018: 2,299; 2019: 2,297; 2020: 2,175; 2021: 2,616; 2022: 2,692; 2023: 3,256; 2024: 3,039; 2025 (to 2025-09-29): 2,330.
+- **Event classes 2014-2025** (`announcement_events`, events_v2): AGM 235-370 a year; right-share announcements 60-544; dividend distributions 20-158; book-close titles 1-17; IPO/FPO 31-402; quarterly reports 707-1,009. Dividend proposals almost never appear as announcement titles (13 in 12 years).
+- **Dividend proposals, point-in-time** (`dividend_proposals_pit`, from AGM agendas):
+  - 2014: 137, 2015: 120, 2016: 156, 2017: 126, 2018: 115, 2019: 136, 2020: 81, 2021: 137, 2022: 99, 2023: 124, 2024: 104, 2025: 34;
+  - 93-99% are dated by an AGM announcement, the rest by the book-close date.
+  - This extends announcement-dated dividend data from 2018 back to 2011. Full table: `docs/corporate_events_coverage.json`.
+- **NRB policy events:** 36 rows (`docs/policy_events.json`): policy rate, corridor bounds, bank rate, CRR, SLR, CCD/CD ratio and margin-lending rules from 2014/15 to 2025/26, each with an evidence sentence. Pre-2020 announcement dates come from secondary sources and are marked unconfirmed; 2017/18 and 2019/20 still lack one.
+- **Trading-rule notices:** NEPSE notices cannot be read (API answers 401). The T+2 approval (January 2021, start date unconfirmed) and the Monday-Friday week (2026-04-08) are recorded with sources. The circuit band change to 15% (2026-04-20) used in the code has no recorded source, and earlier trading-hour changes were not found; both are gaps.
