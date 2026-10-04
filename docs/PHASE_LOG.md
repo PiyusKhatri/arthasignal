@@ -888,3 +888,24 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - **Known parser errors,** listed for a fix and a re-measure on a new gold set: group versus bank column, a stray lakh unit, and a pre-associates profit row.
 - **Batch OCR is running** at nice 19 over the collected images: about 50 s each, so about 30 hours for the current 2,101 and about 6 days for all 9,900 development-window reports.
 - **Coverage by year** (reports with an image so far): 2014-2022 only the sample of 5-6 each, 2023: 310 of 930, 2024: 996 of 998, 2025: 743 of 743.
+
+## Data phase E - News archive (collecting)
+
+- **Collector** (`src/archive/sharesansar_news.py`): walks Sharesansar's "latest" news cursor backward from 2025-09-30, one request per 3 s shared with the other Sharesansar collectors.
+  - **Stored per article:** title, minute-precision timestamp (Nepal time), body text and the raw HTML, which is immutable and SHA-256 addressed. Raw pages are under `~/Desktop/arthasignal-ai/raw/archive/sharesansar_news/`.
+  - **Resume:** from the last cursor in `archive_progress`.
+  - **Failures:** a failed detail page is recorded for retry, not lost.
+- **Coverage on 2026-10-05:** 2,508 articles, 2025-03 to 2025-09-29, plus 10 from a 2016 test page. At about 10 articles a minute, 2014-2025 (about 35-40k articles) needs several more days of background running. **Coverage per year is therefore not yet available for 2014-2024.**
+- **Symbol mentions** (`src/archive/news_mentions.py`): distinctive company names, plus all-caps tickers outside a stop-list of common words.
+  - 1,402 of 2,508 articles (56%) map to at least one symbol.
+  - The derived table is rebuilt on each run (`news_symbol_mentions`, holdout-protected).
+- **Other portals:** Merolagani is excluded by its terms. Bizmandu, Arthasarokar and the Kathmandu Post are collected live by the existing collectors; their terms for bulk back-collection were not reviewed in this phase, so no archive collection was started for them.
+- **Timestamp reliability:** all stamps agree with the list day, and the slug date equals the stamp's date on 2,497 of 2,498 (`docs/POINT_IN_TIME.md`).
+
+## Data phase F - Historical sentiment proxies
+
+- **Market turnover and breadth:** 2,594 sessions, 2014-06-01 to 2025-09-28 (daily_prices equities, research role), dated by session close (`sentiment_observations`, `market_*`).
+- **NRB monthly macro reports:** 132 English "Current Macroeconomic and Financial Situation" reports, 2013/14 to 2024/25, each with its NRB release (upload) date. 329 observations: 91-day T-bill rate 98, base rate 87, weighted average deposit and lending rates 42 each, margin-loan growth 33, market cap to GDP 27. Wording changes across years limit some series.
+- **IPO and right oversubscription:** 23 headlines from the news archive so far, dated by publication time. The series grows with the archive.
+- **New demat/BOID accounts:** not available as history. CDSC's site shows only current totals, and NRB's monthly reports do not carry the count. The SEBON annual reports and monthly bulletins (PDF) are the likely source and were not collected in this phase.
+- **Margin lending levels:** only growth rates appear in the NRB monthly text. Amounts need NRB's Banking and Financial Statistics tables, which were not collected.
