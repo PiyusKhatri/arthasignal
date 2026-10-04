@@ -344,3 +344,19 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - Exploratory: 22% of I1 calls and 29% of I3 calls were unfilled at the next open.
 - The ledger writer now stages `COPY` through a temporary table when the target has row-level security (`COPY FROM` is refused there).
 - Tests: 5 added.
+
+## Phase Q8 - EPS differences and unmatched Merolagani names
+
+- `docs/EPS_RECONCILIATION.md` (`src/scrapers/eps_reconciliation.py`, output `docs/eps_reconciliation.json`). Of 181 pairs: 168 match.
+  - 5 are Merolagani rescaling EPS retroactively after a bonus book close. EBL went 36.95 → 35.19, exactly ÷1.05, two days after its 5% bonus book close; GBIME, SADBL, SMHL and SNORL behave the same way.
+  - 3 are Sharesansar showing the company-reported basic EPS, with a weighted or restated denominator (MBL, SANIMA, SBL), while Merolagani shows profit ÷ outstanding shares.
+  - 3 are unexplained (NABIL, NMB, KSBBL). Consolidated versus standalone is plausible but not shown.
+  - 2 cannot be classified.
+  - All pairs are Q4, so annualized and cumulative effects are ruled out.
+- No parser bug. Rule: use the company-reported EPS as first captured (`quarterly_figure_captures`), and never use Merolagani's `fundamentals.eps` point-in-time.
+- `docs/MEROLAGANI_UNMATCHED.md` and `docs/merolagani_unmatched.csv` list all 63 name strings (375 rows) with the symbol Merolagani shows and a proposal. None maps to a symbol in `companies`:
+  - 8 are not listed equities;
+  - 4 are merger predecessors, not mapped to their successors;
+  - 1 is a possible same-issuer case (SMLBSL / MLBS) to verify;
+  - the rest are issuers missing from `companies`.
+- Nothing was merged. A first version wrongly called the two `symbol_history` merger cases "certain"; that was corrected before any write.

@@ -1,0 +1,302 @@
+{
+ "pairs": 181,
+ "by_category": {
+  "match": 168,
+  "merolagani_rescaled_for_bonus": 3,
+  "unexplained": 3,
+  "sharesansar_reported_basic_eps": 3,
+  "no_share_count": 2,
+  "bonus_ratio_only_no_share_count": 2
+ },
+ "mismatches": [
+  {
+   "symbol": "EBL",
+   "fiscal_year": "2082/2083",
+   "quarter": 4,
+   "eps_merolagani": 35.19,
+   "eps_sharesansar": 36.95,
+   "profit_over_outstanding_shares": 36.95,
+   "bonus_pct": 5.0,
+   "bonus_book_close": "2026-09-17",
+   "merolagani_eps_history": [
+    [
+     "2026-07-23",
+     32.35
+    ],
+    [
+     "2026-08-22",
+     36.95
+    ],
+    [
+     "2026-09-19",
+     35.19
+    ]
+   ],
+   "category": "merolagani_rescaled_for_bonus"
+  },
+  {
+   "symbol": "GBIME",
+   "fiscal_year": "2082/2083",
+   "quarter": 4,
+   "eps_merolagani": 15.71,
+   "eps_sharesansar": 16.34,
+   "profit_over_outstanding_shares": 16.34,
+   "bonus_pct": 4.0,
+   "bonus_book_close": "2026-09-21",
+   "merolagani_eps_history": [
+    [
+     "2026-07-23",
+     15.4
+    ],
+    [
+     "2026-08-22",
+     16.34
+    ],
+    [
+     "2026-09-26",
+     15.71
+    ]
+   ],
+   "category": "merolagani_rescaled_for_bonus"
+  },
+  {
+   "symbol": "KSBBL",
+   "fiscal_year": "2082/2083",
+   "quarter": 4,
+   "eps_merolagani": 22.75,
+   "eps_sharesansar": 22.34,
+   "profit_over_outstanding_shares": 23.15,
+   "bonus_pct": NaN,
+   "bonus_book_close": "2026-09-03",
+   "merolagani_eps_history": [
+    [
+     "2026-07-23",
+     22.75
+    ]
+   ],
+   "category": "unexplained"
+  },
+  {
+   "symbol": "MANDU",
+   "fiscal_year": "2082/2083",
+   "quarter": 4,
+   "eps_merolagani": 21.24,
+   "eps_sharesansar": 23.36,
+   "profit_over_outstanding_shares": NaN,
+   "bonus_pct": NaN,
+   "bonus_book_close": "2026-08-21",
+   "merolagani_eps_history": [
+    [
+     "2026-07-23",
+     24.27
+    ],
+    [
+     "2026-08-22",
+     21.24
+    ]
+   ],
+   "category": "no_share_count"
+  },
+  {
+   "symbol": "MBL",
+   "fiscal_year": "2082/2083",
+   "quarter": 4,
+   "eps_merolagani": 17.49,
+   "eps_sharesansar": 15.44,
+   "profit_over_outstanding_shares": 17.49,
+   "bonus_pct": 3.0,
+   "bonus_book_close": "2026-09-28",
+   "merolagani_eps_history": [
+    [
+     "2026-07-23",
+     18.3
+    ],
+    [
+     "2026-08-22",
+     17.49
+    ]
+   ],
+   "category": "sharesansar_reported_basic_eps"
+  },
+  {
+   "symbol": "MKHC",
+   "fiscal_year": "2082/2083",
+   "quarter": 4,
+   "eps_merolagani": 1.58,
+   "eps_sharesansar": 1.59,
+   "profit_over_outstanding_shares": NaN,
+   "bonus_pct": NaN,
+   "bonus_book_close": null,
+   "merolagani_eps_history": [
+    [
+     "2026-07-23",
+     3.9
+    ],
+    [
+     "2026-08-22",
+     1.58
+    ]
+   ],
+   "category": "no_share_count"
+  },
+  {
+   "symbol": "NABIL",
+   "fiscal_year": "2082/2083",
+   "quarter": 4,
+   "eps_merolagani": 28.36,
+   "eps_sharesansar": 27.74,
+   "profit_over_outstanding_shares": 29.22,
+   "bonus_pct": 5.0,
+   "bonus_book_close": "2026-09-30",
+   "merolagani_eps_history": [
+    [
+     "2026-07-23",
+     33.34
+    ],
+    [
+     "2026-08-22",
+     28.36
+    ]
+   ],
+   "category": "unexplained"
+  },
+  {
+   "symbol": "NMB",
+   "fiscal_year": "2082/2083",
+   "quarter": 4,
+   "eps_merolagani": 20.18,
+   "eps_sharesansar": 19.53,
+   "profit_over_outstanding_shares": 20.81,
+   "bonus_pct": NaN,
+   "bonus_book_close": null,
+   "merolagani_eps_history": [
+    [
+     "2026-07-23",
+     17.95
+    ],
+    [
+     "2026-08-22",
+     20.18
+    ]
+   ],
+   "category": "unexplained"
+  },
+  {
+   "symbol": "SADBL",
+   "fiscal_year": "2082/2083",
+   "quarter": 4,
+   "eps_merolagani": 22.92,
+   "eps_sharesansar": 23.83,
+   "profit_over_outstanding_shares": 23.83,
+   "bonus_pct": 4.0,
+   "bonus_book_close": "2026-09-24",
+   "merolagani_eps_history": [
+    [
+     "2026-07-23",
+     23.83
+    ],
+    [
+     "2026-09-26",
+     22.92
+    ]
+   ],
+   "category": "merolagani_rescaled_for_bonus"
+  },
+  {
+   "symbol": "SANIMA",
+   "fiscal_year": "2082/2083",
+   "quarter": 4,
+   "eps_merolagani": 26.14,
+   "eps_sharesansar": 24.92,
+   "profit_over_outstanding_shares": 26.14,
+   "bonus_pct": NaN,
+   "bonus_book_close": "2026-09-17",
+   "merolagani_eps_history": [
+    [
+     "2026-07-23",
+     22.93
+    ],
+    [
+     "2026-07-30",
+     26.14
+    ]
+   ],
+   "category": "sharesansar_reported_basic_eps"
+  },
+  {
+   "symbol": "SBL",
+   "fiscal_year": "2082/2083",
+   "quarter": 4,
+   "eps_merolagani": 23.79,
+   "eps_sharesansar": 21.84,
+   "profit_over_outstanding_shares": 23.79,
+   "bonus_pct": 10.0,
+   "bonus_book_close": "2026-10-02",
+   "merolagani_eps_history": [
+    [
+     "2026-07-23",
+     17.62
+    ],
+    [
+     "2026-08-22",
+     23.79
+    ]
+   ],
+   "category": "sharesansar_reported_basic_eps"
+  },
+  {
+   "symbol": "SMHL",
+   "fiscal_year": "2082/2083",
+   "quarter": 4,
+   "eps_merolagani": 16.0,
+   "eps_sharesansar": 18.4,
+   "profit_over_outstanding_shares": NaN,
+   "bonus_pct": 15.0,
+   "bonus_book_close": "2026-09-08",
+   "merolagani_eps_history": [
+    [
+     "2026-07-23",
+     14.06
+    ],
+    [
+     "2026-07-30",
+     18.4
+    ],
+    [
+     "2026-09-12",
+     16.0
+    ]
+   ],
+   "category": "bonus_ratio_only_no_share_count"
+  },
+  {
+   "symbol": "SNORL",
+   "fiscal_year": "2082/2083",
+   "quarter": 4,
+   "eps_merolagani": 10.84,
+   "eps_sharesansar": 11.93,
+   "profit_over_outstanding_shares": NaN,
+   "bonus_pct": 10.0,
+   "bonus_book_close": "2026-09-24",
+   "merolagani_eps_history": [
+    [
+     "2026-07-23",
+     0.0
+    ],
+    [
+     "2026-07-30",
+     NaN
+    ],
+    [
+     "2026-08-22",
+     11.93
+    ],
+    [
+     "2026-09-26",
+     10.84
+    ]
+   ],
+   "category": "bonus_ratio_only_no_share_count"
+  }
+ ]
+}
