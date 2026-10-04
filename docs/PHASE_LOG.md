@@ -331,3 +331,16 @@ The backfill uses the Sharesansar daily page because it is the only source that 
   - I4: dae73235b4d4fa87…
   - I5: ffe7d5ebbc9f3496…
   - I6: 18c63f65e96499ec…
+
+## Phase Q7 - Earnings-information results
+
+- `python -m src.scorecard.info_eval` ran the six pre-registered hypotheses through the scorecard on 2014-06-01 to 2025-01-19. Report: `docs/INFO_RESULTS.md`; raw output: `docs/info_results.json`.
+- Inputs: 10,380 dated reports with net profit (6,629 with YoY growth) and 847 dividend declarations from 2018.
+- **Nothing passed.**
+  - I1-I5 are NO EVIDENCE with edges of −5.8 to −10.3 points.
+  - I6 (banks, +2.5) is INSUFFICIENT SAMPLE (130 calls, 38 windows).
+  - The controls (all reports at 20 sessions −5.6, all declarations at 10 sessions −7.5) show that the filters add nothing.
+- The look-ahead audit caught I5: its book-close rule depends on the future trading calendar. The rule was not repaired after the fact, and its verdict is NO EVIDENCE either way.
+- Exploratory: 22% of I1 calls and 29% of I3 calls were unfilled at the next open.
+- The ledger writer now stages `COPY` through a temporary table when the target has row-level security (`COPY FROM` is refused there).
+- Tests: 5 added.

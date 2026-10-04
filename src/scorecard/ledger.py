@@ -40,13 +40,19 @@ def _copy(engine: Engine, table: str, columns: Sequence[str], rows: Iterable[Seq
         writer.writerow(["" if value is None else value for value in row])
         count += 1
     buffer.seek(0)
+    column_list = ", ".join(columns)
     raw = engine.raw_connection()
     try:
         with raw.cursor() as cursor:
             cursor.execute("SET statement_timeout = 0")
-            cursor.copy_expert(
-                f"COPY {schema}.{table} ({', '.join(columns)}) FROM STDIN WITH (FORMAT csv, NULL '')", buffer
-            )
+            cursor.execute("SELECT relrowsecurity FROM pg_class WHERE oid = %s::regclass", (f"{schema}.{table}",))
+            secured = bool(cursor.fetchone()[0])
+            if secured:
+                cursor.execute(f"CREATE TEMP TABLE _ledger_stage (LIKE {schema}.{table} INCLUDING DEFAULTS) ON COMMIT DROP")
+                cursor.copy_expert(f"COPY _ledger_stage ({column_list}) FROM STDIN WITH (FORMAT csv, NULL '')", buffer)
+                cursor.execute(f"INSERT INTO {schema}.{table} ({column_list}) SELECT {column_list} FROM _ledger_stage")
+            else:
+                cursor.copy_expert(f"COPY {schema}.{table} ({column_list}) FROM STDIN WITH (FORMAT csv, NULL '')", buffer)
         raw.commit()
     finally:
         raw.close()
