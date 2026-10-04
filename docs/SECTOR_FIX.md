@@ -154,6 +154,32 @@ The penalized bound moved mostly because *K* grew from 520 to 4,264: there are n
 - The v0 matrix is still 0 PASS. `new_listing` at 40 sessions remains the only cell above +8 points and still fails its penalized bound.
 - The fund and debenture contamination affected only the app's market-pulse broker statistics and the per-symbol context of non-equity symbols. Neither feeds any study. Those were real errors, and they are fixed.
 
+## Follow-up (2026-10-04): equities without a sector
+
+The 51 are actually **54** Equity rows without a sector, all delisted (three have no development-window prices). `python -m src.scrapers.sector_sources` fetched each symbol's Sharesansar and Merolagani company pages (3 s apart) and stored every raw label append-only in `company_sector_sources` (106 rows: source, URL, HTTP status, page title, label). A sector was assigned only when the sources were unambiguous:
+- exactly one equity sector between them;
+- "Merged", blank and missing count as no information;
+- a debenture label stops the assignment.
+
+Each assignment is in `company_sector_assignments` with its evidence. The full output is in `docs/sector_sources.json`.
+
+- Sharesansar shows **"Merged"** for merged companies, which is a status, not a sector. Merolagani still shows the business sector, so all 36 assignments come from Merolagani.
+- Two Merolagani labels were mapped only after checking Merolagani's own taxonomy on listed companies:
+  - "Development Bank Limited" → Development Banks (CORBL, EDBL, GBBL and GRDBL, 4 of 4);
+  - "Non-Life Insurance" → Non Life Insurance (HEI, IGI, NICL and NIL, 4 of 4).
+- ILFCM is named a microfinance, but Merolagani lists it as "Development Bank Limited". It was assigned Development Banks, as the source says.
+
+| Outcome | Count | Symbols |
+| --- | ---: | --- |
+| Assigned | **36** | Development Banks 9, Microfinance 9, Non Life Insurance 7, Life Insurance 5, Finance 3, Commercial Banks 2, Hydro Power 1 (each symbol is listed in the JSON) |
+| No source names a sector | **14** | ARUN, BOK, CLBSL, DIYALO, KMBL, KMBSL, NGBBL, NICAD 85/8, NIFRAUR85/, NLBSL, NMBMB, RMFL, UMB, WMBF |
+| Sources say it is a debenture | **3** | ADBLB, ADBLB86, ADBLB87 (stored as Equity; no development-window prices; instrument type left unchanged pending review) |
+| Empty symbol in `companies` | **1** | `''` (16 price rows in 2014-2015) |
+
+**18 remain without a sector.** The scorecard's pooled "unknown" sector shrinks from 51 symbols (31,097 development-window rows) to 15 (3,787 rows). Three of those (`''`, NICAD 85/8, NIFRAUR85/) fail the research panel's symbol format anyway, so research keeps 12 sectorless symbols (3,694 rows). The earlier reruns were **not** repeated with the new sectors. They affect only the mid-horizon sector median of these delisted names.
+
+The server gets the same 36 assignments from the committed evidence, without network access, through `deploy/migrations/m002_equity_sector_assignments.py`. It only fills sectors that are still empty and leaves any contradiction untouched.
+
 ## Still open (not fixed here)
 
-**51 Equity symbols have no sector** (31,097 development-window price rows). The scorecard pools them into one "unknown" group (`grading.py:105`), and that pooled group's median is their sector benchmark at mid horizons. Assigning sectors needs a source for each symbol, and changing the grading rule would be a protocol change, so neither was done.
+**Previously: 51 Equity symbols had no sector** (31,097 development-window price rows). The scorecard pools them into one "unknown" group (`grading.py:105`), and that pooled group's median is their sector benchmark at mid horizons. Assigning sectors needs a source for each symbol, and changing the grading rule would be a protocol change, so neither was done.

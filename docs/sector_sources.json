@@ -1,0 +1,1199 @@
+{
+ "applied": true,
+ "targets": 54,
+ "summary": {
+  "empty_symbol": 1,
+  "source_says_non_equity": 3,
+  "assigned": 36,
+  "unknown": 14
+ },
+ "alias_evidence": "On 2026-10-04 Merolagani showed 'Development Bank Limited' for CORBL, EDBL, GBBL and GRDBL and 'Non-Life Insurance' for HEI, IGI, NICL and NIL, which companies.sector stores as 'Development Banks' and 'Non Life Insurance' (4 of 4 each)",
+ "results": [
+  {
+   "symbol": "",
+   "result": "empty_symbol",
+   "sector": null,
+   "detail": "the companies row has an empty symbol"
+  },
+  {
+   "symbol": "ADBLB",
+   "result": "source_says_non_equity",
+   "sector": null,
+   "detail": [
+    "Non-Convertible Debentures"
+   ],
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Corporate Debentures",
+     "http": 200,
+     "title": "4% Agricultural Bond - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/adblb"
+    },
+    "merolagani": {
+     "sector_raw": "Others",
+     "http": 200,
+     "title": "merolagani - 4% Agricultural Bond (ADBLB) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=ADBLB"
+    }
+   }
+  },
+  {
+   "symbol": "ADBLB86",
+   "result": "source_says_non_equity",
+   "sector": null,
+   "detail": [
+    "Non-Convertible Debentures"
+   ],
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Corporate Debentures",
+     "http": 200,
+     "title": "4% Agricultural Bond 2086 - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/adblb86"
+    },
+    "merolagani": {
+     "sector_raw": "Corporate Debenture",
+     "http": 200,
+     "title": "merolagani - Agricultural Bond (8 Year) (ADBLB86) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=ADBLB86"
+    }
+   }
+  },
+  {
+   "symbol": "ADBLB87",
+   "result": "source_says_non_equity",
+   "sector": null,
+   "detail": [
+    "Non-Convertible Debentures"
+   ],
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Corporate Debentures",
+     "http": 200,
+     "title": "4% Agricultural Bond 2087 - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/adblb87"
+    },
+    "merolagani": {
+     "sector_raw": "Others",
+     "http": 200,
+     "title": "merolagani - Agricultural Bond (9 Year) (ADBLB87) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=ADBLB87"
+    }
+   }
+  },
+  {
+   "symbol": "AIC",
+   "result": "assigned",
+   "sector": "Non Life Insurance",
+   "detail": {
+    "merolagani": "Non Life Insurance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Alliance Insurance Company Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/aic"
+    },
+    "merolagani": {
+     "sector_raw": "Non-Life Insurance",
+     "http": 200,
+     "title": "merolagani - Alliance Insurance Co. Ltd. (AIC) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=AIC"
+    }
+   }
+  },
+  {
+   "symbol": "ARUN",
+   "result": "unknown",
+   "sector": null,
+   "detail": {
+    "sharesansar": null,
+    "merolagani": ""
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": null,
+     "http": 404,
+     "title": null,
+     "url": "https://www.sharesansar.com/company/arun"
+    },
+    "merolagani": {
+     "sector_raw": "",
+     "http": 200,
+     "title": "merolagani - Company Detail",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=ARUN"
+    }
+   }
+  },
+  {
+   "symbol": "BOK",
+   "result": "unknown",
+   "sector": null,
+   "detail": {
+    "sharesansar": "Merged",
+    "merolagani": ""
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "(Former) Bank of Kathmandu Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/bok"
+    },
+    "merolagani": {
+     "sector_raw": "",
+     "http": 200,
+     "title": "merolagani - Company Detail",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=BOK"
+    }
+   }
+  },
+  {
+   "symbol": "BSBL",
+   "result": "assigned",
+   "sector": "Development Banks",
+   "detail": {
+    "merolagani": "Development Banks"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Bishwa Bikas Bank Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/bsbl"
+    },
+    "merolagani": {
+     "sector_raw": "Development Bank Limited",
+     "http": 200,
+     "title": "merolagani - Bishwa Bikas Bank Limited (BSBL) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=BSBL"
+    }
+   }
+  },
+  {
+   "symbol": "CDBL",
+   "result": "assigned",
+   "sector": "Development Banks",
+   "detail": {
+    "merolagani": "Development Banks"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "City Development Bank Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/cdbl"
+    },
+    "merolagani": {
+     "sector_raw": "Development Bank Limited",
+     "http": 200,
+     "title": "merolagani - City Development Bank Limited (CDBL) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=CDBL"
+    }
+   }
+  },
+  {
+   "symbol": "CHLBS",
+   "result": "assigned",
+   "sector": "Microfinance",
+   "detail": {
+    "merolagani": "Microfinance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Chautari Laghubitta Bittiya Sanstha Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/chlbs"
+    },
+    "merolagani": {
+     "sector_raw": "Microfinance",
+     "http": 200,
+     "title": "merolagani - Chautari Laghubitta Bittya Sanstha Ltd (CHLBS) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=CHLBS"
+    }
+   }
+  },
+  {
+   "symbol": "CLBSL",
+   "result": "unknown",
+   "sector": null,
+   "detail": {
+    "sharesansar": null,
+    "merolagani": ""
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": null,
+     "http": 404,
+     "title": null,
+     "url": "https://www.sharesansar.com/company/clbsl"
+    },
+    "merolagani": {
+     "sector_raw": "",
+     "http": 200,
+     "title": "merolagani - Company Detail",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=CLBSL"
+    }
+   }
+  },
+  {
+   "symbol": "DIYALO",
+   "result": "unknown",
+   "sector": null,
+   "detail": {
+    "sharesansar": "Merged",
+    "merolagani": ""
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Diyalo Bikas Bank Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/diyalo"
+    },
+    "merolagani": {
+     "sector_raw": "",
+     "http": 200,
+     "title": "merolagani - Company Detail",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=DIYALO"
+    }
+   }
+  },
+  {
+   "symbol": "FBBL",
+   "result": "assigned",
+   "sector": "Development Banks",
+   "detail": {
+    "merolagani": "Development Banks"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Fewa Bikas Bank Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/fbbl"
+    },
+    "merolagani": {
+     "sector_raw": "Development Bank Limited",
+     "http": 200,
+     "title": "merolagani - Fewa Bikas Bank Limited (FBBL) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=FBBL"
+    }
+   }
+  },
+  {
+   "symbol": "GFL",
+   "result": "assigned",
+   "sector": "Finance",
+   "detail": {
+    "merolagani": "Finance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": null,
+     "http": 404,
+     "title": null,
+     "url": "https://www.sharesansar.com/company/gfl"
+    },
+    "merolagani": {
+     "sector_raw": "Finance",
+     "http": 200,
+     "title": "merolagani - General Finance Ltd. (GFL) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=GFL"
+    }
+   }
+  },
+  {
+   "symbol": "HGI",
+   "result": "assigned",
+   "sector": "Non Life Insurance",
+   "detail": {
+    "merolagani": "Non Life Insurance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Himalayan General Insurance Company Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/hgi"
+    },
+    "merolagani": {
+     "sector_raw": "Non-Life Insurance",
+     "http": 200,
+     "title": "merolagani - Himalayan General Insurance Co. Ltd (HGI) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=HGI"
+    }
+   }
+  },
+  {
+   "symbol": "ILFCM",
+   "result": "assigned",
+   "sector": "Development Banks",
+   "detail": {
+    "merolagani": "Development Banks"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": null,
+     "http": 404,
+     "title": null,
+     "url": "https://www.sharesansar.com/company/ilfcm"
+    },
+    "merolagani": {
+     "sector_raw": "Development Bank Limited",
+     "http": 200,
+     "title": "merolagani - ILFCO Microfinance Bittiya Sanstha Ltd. (ILFCM) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=ILFCM"
+    }
+   }
+  },
+  {
+   "symbol": "KFL",
+   "result": "assigned",
+   "sector": "Finance",
+   "detail": {
+    "merolagani": "Finance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Kathmandu Finance Limited. - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/kfl"
+    },
+    "merolagani": {
+     "sector_raw": "Finance",
+     "http": 200,
+     "title": "merolagani - Kathmandu Finance Ltd. (KFL) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=KFL"
+    }
+   }
+  },
+  {
+   "symbol": "KLBSL",
+   "result": "assigned",
+   "sector": "Microfinance",
+   "detail": {
+    "merolagani": "Microfinance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Kisan Laghubitta Bittiya Sanstha Limited(Former NRN Laghubitta Bittiya Sanstha Limited) - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/klbsl"
+    },
+    "merolagani": {
+     "sector_raw": "Microfinance",
+     "http": 200,
+     "title": "merolagani - Kisan Lagubitta Bittiya Sanstha Limited (KLBSL) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=KLBSL"
+    }
+   }
+  },
+  {
+   "symbol": "KMBL",
+   "result": "unknown",
+   "sector": null,
+   "detail": {
+    "sharesansar": "Merged",
+    "merolagani": ""
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Kamana Bikas Bank Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/kmbl"
+    },
+    "merolagani": {
+     "sector_raw": "",
+     "http": 200,
+     "title": "merolagani - Company Detail",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=KMBL"
+    }
+   }
+  },
+  {
+   "symbol": "KMBSL",
+   "result": "unknown",
+   "sector": null,
+   "detail": {
+    "sharesansar": null,
+    "merolagani": ""
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": null,
+     "http": 404,
+     "title": null,
+     "url": "https://www.sharesansar.com/company/kmbsl"
+    },
+    "merolagani": {
+     "sector_raw": "",
+     "http": 200,
+     "title": "merolagani - Company Detail",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=KMBSL"
+    }
+   }
+  },
+  {
+   "symbol": "KMFL",
+   "result": "assigned",
+   "sector": "Microfinance",
+   "detail": {
+    "merolagani": "Microfinance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Kisan Microfinance Bittiya Sanstha Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/kmfl"
+    },
+    "merolagani": {
+     "sector_raw": "Microfinance",
+     "http": 200,
+     "title": "merolagani - Kisan Microfinance Bittiya Sanstha Ltd. (KMFL) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=KMFL"
+    }
+   }
+  },
+  {
+   "symbol": "LBL",
+   "result": "assigned",
+   "sector": "Commercial Banks",
+   "detail": {
+    "merolagani": "Commercial Banks"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Laxmi Bank Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/lbl"
+    },
+    "merolagani": {
+     "sector_raw": "Commercial Banks",
+     "http": 200,
+     "title": "merolagani - Laxmi Bank Limited (LBL) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=LBL"
+    }
+   }
+  },
+  {
+   "symbol": "MDBL",
+   "result": "assigned",
+   "sector": "Development Banks",
+   "detail": {
+    "merolagani": "Development Banks"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Malika Bikash Bank Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/mdbl"
+    },
+    "merolagani": {
+     "sector_raw": "Development Bank Limited",
+     "http": 200,
+     "title": "merolagani - Malika Bikas Bank Limited (MDBL) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=MDBL"
+    }
+   }
+  },
+  {
+   "symbol": "NBIL",
+   "result": "assigned",
+   "sector": "Non Life Insurance",
+   "detail": {
+    "merolagani": "Non Life Insurance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": null,
+     "http": 404,
+     "title": null,
+     "url": "https://www.sharesansar.com/company/nbil"
+    },
+    "merolagani": {
+     "sector_raw": "Non-Life Insurance",
+     "http": 200,
+     "title": "merolagani - NB Insurance Co. Ltd. (NBIL) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=NBIL"
+    }
+   }
+  },
+  {
+   "symbol": "NDEP",
+   "result": "assigned",
+   "sector": "Development Banks",
+   "detail": {
+    "merolagani": "Development Banks"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "NDEP Development Bank Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/ndep"
+    },
+    "merolagani": {
+     "sector_raw": "Development Bank Limited",
+     "http": 200,
+     "title": "merolagani - NDEP Development Bank Limited (NDEP) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=NDEP"
+    }
+   }
+  },
+  {
+   "symbol": "NGBBL",
+   "result": "unknown",
+   "sector": null,
+   "detail": {
+    "sharesansar": null,
+    "merolagani": ""
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": null,
+     "http": 404,
+     "title": null,
+     "url": "https://www.sharesansar.com/company/ngbbl"
+    },
+    "merolagani": {
+     "sector_raw": "",
+     "http": 200,
+     "title": "merolagani - Company Detail",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=NGBBL"
+    }
+   }
+  },
+  {
+   "symbol": "NIB",
+   "result": "assigned",
+   "sector": "Commercial Banks",
+   "detail": {
+    "merolagani": "Commercial Banks"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Nepal Investment Bank Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/nib"
+    },
+    "merolagani": {
+     "sector_raw": "Commercial Banks",
+     "http": 200,
+     "title": "merolagani - Nepal Investment Bank Limited (NIB) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=NIB"
+    }
+   }
+  },
+  {
+   "symbol": "NICAD 85/8",
+   "result": "unknown",
+   "sector": null,
+   "detail": {
+    "sharesansar": null,
+    "merolagani": ""
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": null,
+     "http": 404,
+     "title": null,
+     "url": "https://www.sharesansar.com/company/nicad%2085%2F8"
+    },
+    "merolagani": {
+     "sector_raw": "",
+     "http": 200,
+     "title": "merolagani - Company Detail",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=NICAD%2085%2F8"
+    }
+   }
+  },
+  {
+   "symbol": "NIFRAUR85/",
+   "result": "unknown",
+   "sector": null,
+   "detail": {
+    "sharesansar": null,
+    "merolagani": ""
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": null,
+     "http": 404,
+     "title": null,
+     "url": "https://www.sharesansar.com/company/nifraur85%2F"
+    },
+    "merolagani": {
+     "sector_raw": "",
+     "http": 200,
+     "title": "merolagani - Company Detail",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=NIFRAUR85%2F"
+    }
+   }
+  },
+  {
+   "symbol": "NLBBL",
+   "result": "assigned",
+   "sector": "Microfinance",
+   "detail": {
+    "merolagani": "Microfinance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Nerude Laghubitta Bittiya Sanstha Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/nlbbl"
+    },
+    "merolagani": {
+     "sector_raw": "Microfinance",
+     "http": 200,
+     "title": "merolagani - Nerude Laghubita Bittiya Sanstha Limited (NLBBL) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=NLBBL"
+    }
+   }
+  },
+  {
+   "symbol": "NLBSL",
+   "result": "unknown",
+   "sector": null,
+   "detail": {
+    "sharesansar": null,
+    "merolagani": ""
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": null,
+     "http": 404,
+     "title": null,
+     "url": "https://www.sharesansar.com/company/nlbsl"
+    },
+    "merolagani": {
+     "sector_raw": "",
+     "http": 200,
+     "title": "merolagani - Company Detail",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=NLBSL"
+    }
+   }
+  },
+  {
+   "symbol": "NMBMB",
+   "result": "unknown",
+   "sector": null,
+   "detail": {
+    "sharesansar": null,
+    "merolagani": ""
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": null,
+     "http": 404,
+     "title": null,
+     "url": "https://www.sharesansar.com/company/nmbmb"
+    },
+    "merolagani": {
+     "sector_raw": "",
+     "http": 200,
+     "title": "merolagani - Company Detail",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=NMBMB"
+    }
+   }
+  },
+  {
+   "symbol": "NNLB",
+   "result": "assigned",
+   "sector": "Microfinance",
+   "detail": {
+    "merolagani": "Microfinance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Naya Nepal Laghubitta Bikas Bank Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/nnlb"
+    },
+    "merolagani": {
+     "sector_raw": "Microfinance",
+     "http": 200,
+     "title": "merolagani - Naya Nepal Laghubitta Bikas Bank Ltd. (NNLB) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=NNLB"
+    }
+   }
+  },
+  {
+   "symbol": "NSEWA",
+   "result": "assigned",
+   "sector": "Microfinance",
+   "detail": {
+    "merolagani": "Microfinance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Nepal Seva Laghubitta Bittiya Sanstha Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/nsewa"
+    },
+    "merolagani": {
+     "sector_raw": "Microfinance",
+     "http": 200,
+     "title": "merolagani - Nepal Seva Laghubitta Bittiya Sanstha Ltd. (NSEWA) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=NSEWA"
+    }
+   }
+  },
+  {
+   "symbol": "PIC",
+   "result": "assigned",
+   "sector": "Non Life Insurance",
+   "detail": {
+    "merolagani": "Non Life Insurance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Premier Insurance Company (Nepal) Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/pic"
+    },
+    "merolagani": {
+     "sector_raw": "Non-Life Insurance",
+     "http": 200,
+     "title": "merolagani - Premier Insurance Co. Ltd. (PIC) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=PIC"
+    }
+   }
+  },
+  {
+   "symbol": "PLI",
+   "result": "assigned",
+   "sector": "Life Insurance",
+   "detail": {
+    "merolagani": "Life Insurance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Prabhu Life Insurance Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/pli"
+    },
+    "merolagani": {
+     "sector_raw": "Life Insurance",
+     "http": 200,
+     "title": "merolagani - Prabhu Life Insurance Limited (PLI) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=PLI"
+    }
+   }
+  },
+  {
+   "symbol": "PLIC",
+   "result": "assigned",
+   "sector": "Life Insurance",
+   "detail": {
+    "merolagani": "Life Insurance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Prime Life Insurance Company Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/plic"
+    },
+    "merolagani": {
+     "sector_raw": "Life Insurance",
+     "http": 200,
+     "title": "merolagani - Prime Life Insurance Company Limited (PLIC) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=PLIC"
+    }
+   }
+  },
+  {
+   "symbol": "RBS",
+   "result": "assigned",
+   "sector": "Life Insurance",
+   "detail": {
+    "merolagani": "Life Insurance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": null,
+     "http": 404,
+     "title": null,
+     "url": "https://www.sharesansar.com/company/rbs"
+    },
+    "merolagani": {
+     "sector_raw": "Life Insurance",
+     "http": 200,
+     "title": "merolagani - Rastriya Beema Sansthan (RBS) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=RBS"
+    }
+   }
+  },
+  {
+   "symbol": "RHPC",
+   "result": "assigned",
+   "sector": "Hydro Power",
+   "detail": {
+    "merolagani": "Hydro Power"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Ridi Hydropower Development Company Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/rhpc"
+    },
+    "merolagani": {
+     "sector_raw": "Hydro Power",
+     "http": 200,
+     "title": "merolagani - Ridi Hydropower Development Company Ltd. (RHPC) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=RHPC"
+    }
+   }
+  },
+  {
+   "symbol": "RMFL",
+   "result": "unknown",
+   "sector": null,
+   "detail": {
+    "sharesansar": null,
+    "merolagani": ""
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": null,
+     "http": 404,
+     "title": null,
+     "url": "https://www.sharesansar.com/company/rmfl"
+    },
+    "merolagani": {
+     "sector_raw": "",
+     "http": 200,
+     "title": "merolagani - Company Detail",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=RMFL"
+    }
+   }
+  },
+  {
+   "symbol": "SDLBSL",
+   "result": "assigned",
+   "sector": "Microfinance",
+   "detail": {
+    "merolagani": "Microfinance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Sadhana Laghubitta Bittiya Sanstha Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/sdlbsl"
+    },
+    "merolagani": {
+     "sector_raw": "Microfinance",
+     "http": 200,
+     "title": "merolagani - Sadhana Laghubitta Bittiya Sanstha Limited (SDLBSL) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=SDLBSL"
+    }
+   }
+  },
+  {
+   "symbol": "SGI",
+   "result": "assigned",
+   "sector": "Non Life Insurance",
+   "detail": {
+    "merolagani": "Non Life Insurance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Sanima General Insurance Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/sgi"
+    },
+    "merolagani": {
+     "sector_raw": "Non-Life Insurance",
+     "http": 200,
+     "title": "merolagani - Sanima General Insurance Company Limited (SGI) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=SGI"
+    }
+   }
+  },
+  {
+   "symbol": "SIC",
+   "result": "assigned",
+   "sector": "Non Life Insurance",
+   "detail": {
+    "merolagani": "Non Life Insurance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Sagarmatha Insurance Company Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/sic"
+    },
+    "merolagani": {
+     "sector_raw": "Non-Life Insurance",
+     "http": 200,
+     "title": "merolagani - Sagarmatha Insurance Co. Ltd. (SIC) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=SIC"
+    }
+   }
+  },
+  {
+   "symbol": "SLI",
+   "result": "assigned",
+   "sector": "Life Insurance",
+   "detail": {
+    "merolagani": "Life Insurance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Sanima Life Insurance Company Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/sli"
+    },
+    "merolagani": {
+     "sector_raw": "Life Insurance",
+     "http": 200,
+     "title": "merolagani - Sanima Life Insurance Limited (SLI) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=SLI"
+    }
+   }
+  },
+  {
+   "symbol": "SLICL",
+   "result": "assigned",
+   "sector": "Life Insurance",
+   "detail": {
+    "merolagani": "Life Insurance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Surya Life Insurance Company Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/slicl"
+    },
+    "merolagani": {
+     "sector_raw": "Life Insurance",
+     "http": 200,
+     "title": "merolagani - Surya Life Insurance Company Limited (SLICL) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=SLICL"
+    }
+   }
+  },
+  {
+   "symbol": "SMBF",
+   "result": "assigned",
+   "sector": "Finance",
+   "detail": {
+    "merolagani": "Finance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Sagarmatha Merchant Banking & Finance Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/smbf"
+    },
+    "merolagani": {
+     "sector_raw": "Finance",
+     "http": 200,
+     "title": "merolagani - Sagarmatha Merchant Banking & Finance Limited (SMBF) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=SMBF"
+    }
+   }
+  },
+  {
+   "symbol": "SNLB",
+   "result": "assigned",
+   "sector": "Microfinance",
+   "detail": {
+    "merolagani": "Microfinance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": null,
+     "http": 404,
+     "title": null,
+     "url": "https://www.sharesansar.com/company/snlb"
+    },
+    "merolagani": {
+     "sector_raw": "Microfinance",
+     "http": 200,
+     "title": "merolagani - Sarathi Laghubitta Bittiya Sanstha Limited (SNLB) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=SNLB"
+    }
+   }
+  },
+  {
+   "symbol": "UIC",
+   "result": "assigned",
+   "sector": "Non Life Insurance",
+   "detail": {
+    "merolagani": "Non Life Insurance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "United Insurance Company (Nepal) Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/uic"
+    },
+    "merolagani": {
+     "sector_raw": "Non-Life Insurance",
+     "http": 200,
+     "title": "merolagani - United Insurance Co. (Nepal) Ltd. (UIC) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=UIC"
+    }
+   }
+  },
+  {
+   "symbol": "UMB",
+   "result": "unknown",
+   "sector": null,
+   "detail": {
+    "sharesansar": "Merged",
+    "merolagani": ""
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Unnati Laghubitta Bittiya Sanstha Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/umb"
+    },
+    "merolagani": {
+     "sector_raw": "",
+     "http": 200,
+     "title": "merolagani - Company Detail",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=UMB"
+    }
+   }
+  },
+  {
+   "symbol": "VBBL",
+   "result": "assigned",
+   "sector": "Development Banks",
+   "detail": {
+    "merolagani": "Development Banks"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Vibor Bikas Bank Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/vbbl"
+    },
+    "merolagani": {
+     "sector_raw": "Development Bank Limited",
+     "http": 200,
+     "title": "merolagani - Vibor Bikas Bank Limited (VBBL) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=VBBL"
+    }
+   }
+  },
+  {
+   "symbol": "VSDBL",
+   "result": "assigned",
+   "sector": "Development Banks",
+   "detail": {
+    "merolagani": "Development Banks"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Vibor Society Development Bank Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/vsdbl"
+    },
+    "merolagani": {
+     "sector_raw": "Development Bank Limited",
+     "http": 200,
+     "title": "merolagani - Vibor Society Development Bank Limited (VSDBL) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=VSDBL"
+    }
+   }
+  },
+  {
+   "symbol": "WMBF",
+   "result": "unknown",
+   "sector": null,
+   "detail": {
+    "sharesansar": null,
+    "merolagani": ""
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": null,
+     "http": 404,
+     "title": null,
+     "url": "https://www.sharesansar.com/company/wmbf"
+    },
+    "merolagani": {
+     "sector_raw": "",
+     "http": 200,
+     "title": "merolagani - Company Detail",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=WMBF"
+    }
+   }
+  },
+  {
+   "symbol": "WOMI",
+   "result": "assigned",
+   "sector": "Microfinance",
+   "detail": {
+    "merolagani": "Microfinance"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Womi Laghubitta Bittiya Sanstha Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/womi"
+    },
+    "merolagani": {
+     "sector_raw": "Microfinance",
+     "http": 200,
+     "title": "merolagani - Womi Microfinance Bittiya Sanstha Ltd. (WOMI) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=WOMI"
+    }
+   }
+  },
+  {
+   "symbol": "YETI",
+   "result": "assigned",
+   "sector": "Development Banks",
+   "detail": {
+    "merolagani": "Development Banks"
+   },
+   "evidence": {
+    "sharesansar": {
+     "sector_raw": "Merged",
+     "http": 200,
+     "title": "Yeti Development Bank Limited - || ShareSansar ||",
+     "url": "https://www.sharesansar.com/company/yeti"
+    },
+    "merolagani": {
+     "sector_raw": "Development Bank Limited",
+     "http": 200,
+     "title": "merolagani - Yeti Development Bank Limited (YETI) Detail, Announcements, News, Price History, Floorsheet",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=YETI"
+    }
+   }
+  }
+ ]
+}

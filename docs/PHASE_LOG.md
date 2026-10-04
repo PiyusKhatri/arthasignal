@@ -646,3 +646,21 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - **Fixed on the way:** `data_quality.py` had two `__main__` blocks after my earlier change, so `--sectors` also ran the benchmark-index check. That check reads every price date, holdout included, and could fail the sectors step for an unrelated reason. There is now one entry point.
 - `docs/PROD_DEPLOY.md` Part 10 step 7 adds the server rehearsal command with the expected output.
 - Tests: 3 added; suite 575 passed.
+
+## Readiness 4 - Sectors for equities without one
+
+- There were **54** Equity rows without a sector (not 51; three have no development-window prices), all delisted.
+- `src/scrapers/sector_sources.py` fetched each symbol's Sharesansar and Merolagani company pages (3 s apart) and stored every raw label append-only in `company_sector_sources` (106 rows). A sector was assigned only when the sources were unambiguous; each assignment is in `company_sector_assignments` with its evidence (`docs/sector_sources.json`).
+- Sharesansar labels merged companies "Merged" (a status). Merolagani keeps the business sector.
+- Two Merolagani labels were mapped only after checking them on listed companies: "Development Bank Limited" → Development Banks and "Non-Life Insurance" → Non Life Insurance, 4 of 4 each.
+- **Result:**
+  - 36 assigned (Development Banks 9, Microfinance 9, Non Life Insurance 7, Life Insurance 5, Finance 3, Commercial Banks 2, Hydro Power 1);
+  - 14 unknown (no source names a sector);
+  - 3 that the sources say are debentures (ADBLB, ADBLB86, ADBLB87; instrument type not changed);
+  - 1 empty symbol.
+
+  **18 remain without a sector.** The scorecard's pooled "unknown" group shrinks from 31,097 to 3,787 development-window rows (12 symbols in the research panel). The earlier reruns were not repeated.
+- `deploy/migrations/m002_equity_sector_assignments.py` applies the same 36 on the server from the committed evidence (no network). It is idempotent, fills only empty sectors and leaves contradictions untouched.
+- Tested together with m001 on a fresh restore of the pre-fix dump: m001 changed 111 then 0, m002 changed 36 then 0, the sectors check exited 0, and the restored `companies.sector` matched the laptop exactly. `docs/PROD_DEPLOY.md` Part 10 step 5b was added.
+- Fixed on the way: a miscount in my first report table, corrected from the data.
+- Tests: 4 added (`tests/test_sector_sources.py`); suite 579 passed.

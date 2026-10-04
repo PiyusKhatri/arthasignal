@@ -313,11 +313,16 @@ $RUN "$ENV .venv/bin/python deploy/migrations/m001_nonequity_sector_relabel.py";
 # 5. Run it again: it must say "already fixed: nothing to do" and change 0 rows
 $RUN "$ENV .venv/bin/python deploy/migrations/m001_nonequity_sector_relabel.py"; echo "exit $?"
 
+# 5b. Sectors for formerly sectorless equities, from the committed source evidence (no network): first run 36, then 0
+$RUN "$ENV .venv/bin/python deploy/migrations/m002_equity_sector_assignments.py --dry-run"
+$RUN "$ENV .venv/bin/python deploy/migrations/m002_equity_sector_assignments.py"; echo "exit $?"
+$RUN "$ENV .venv/bin/python deploy/migrations/m002_equity_sector_assignments.py"; echo "exit $?"
+
 # 6. The sectors check must now pass with exit 0
 $RUN "$ENV .venv/bin/python -m src.pipeline.data_quality --sectors"; echo "exit $?"
 ```
 
-What to expect (this was tested on a scratch restore of the pre-fix dump of 11:41 on 2026-10-04):
+What to expect (this was tested on a scratch restore of the pre-fix dump of 11:41 on 2026-10-04; after m001 and m002 the restored `companies.sector` matched the laptop exactly):
 
 | Step | Expected output |
 | --- | --- |
@@ -325,6 +330,7 @@ What to expect (this was tested on a scratch restore of the pre-fix dump of 11:4
 | 4 (dry run) | `"status": "dry run: nothing written"`, before 111 |
 | 4 (real) | `"status": "applied"`, `"rows_changed": 111` (Mutual Funds 34, Non-Convertible Debentures 77), after 0, exit 0 |
 | 5 | `"status": "already fixed: nothing to do"`, `"rows_changed": 0`, exit 0 |
+| 5b | first run: `"status": "applied"`, `"rows_changed": 36`, equities without a sector 54 → 18; second run: `"already applied: nothing to do"`; exit 0 both times (exit 1 only if a sector in the database contradicts the evidence, which is then left untouched) |
 | 6 | `sector check passed: no non-equity symbol carries an equity sector`, exit 0 |
 
 The migration:
