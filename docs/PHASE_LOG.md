@@ -777,3 +777,33 @@ The backfill uses the Sharesansar daily page because it is the only source that 
   - a delayed exit past 2019-12-31 is `ungraded` (`learning_embargo`).
 - **Trial table:** `python -m src.simulation.register` on the research role inserted 1 row (fingerprint `1847392b…fe89`; family 4, trials 140). A rerun inserted 0. `docs/PROD_DEPLOY.md` Part 11 now registers v1.3 on the server.
 - **Tests:** 5 added. They cover crossing calls refused for every call type, calls ending by 2019 graded including the exact boundary, 2020 bars refused, delayed exits ungraded, and check/exam runs not embargoed. Suite: 684 passed.
+
+## Data phase A - Instruments
+
+- **Debentures:** ADBLB, ADBLB86 and ADBLB87 were relabelled from Equity to Non-Convertible Debentures, sector Debenture. Evidence (already stored): Sharesansar "Corporate Debentures" for all three, and Merolagani "Corporate Debenture" or "Others".
+- **Empty-symbol row:** the `companies` row with symbol `''` carried 16 price rows (2014-07-08 to 2015-06-18), each a different stock.
+  - **Mapped from our floorsheet:** 15 rows, each matching exactly one symbol on the same day with the same quantity, turnover and last trade: CCBL 2, JEFL 6, MLBBL 5, LFLCPO 1, MMDBL 1.
+  - **2015-05-25 (no floorsheet file):** Sharesansar's own price page for that day has two blank-symbol rows. Each previous close matches exactly one symbol's previous stored close, and neither symbol has a row that day: NBBL (stored row moved) and JEFL (the second row had been dropped as a duplicate; now inserted).
+  - **Result:** 0 blank-symbol rows left, and the empty `companies` row is removed.
+  - **Root cause:** the Sharesansar price page sometimes leaves the symbol blank. `is_valid_price_row` now rejects a blank symbol (tested).
+- **Truncated debenture symbols:**
+  - **`NIFRAUR85/`** is the 10-character truncation of `NIFRAUR85/86` ("Nifra Urja 7% -2085/86" in the floorsheet). It agrees with the floorsheet on 69 of 70 checkable days (the other has the same quantity and a different close). 157 rows were moved where the full symbol had no row. 2 holdout-period rows clash with existing full-symbol rows and were left, and the short company row is relabelled as a debenture.
+  - **`NICAD 85/8`** (2 rows, 2024-05-07/08) has **no** matching NICAD85/86 trades in the floorsheet, so it is left unchanged and reported.
+- **Sectors from an additional public source:** Nepal Rastra Bank's class-wise merger list and its list of BFIs (Chait 2074). Both are official PDFs, and NRB's robots.txt allows them; they are stored in `~/Desktop/arthasignal-ai/raw/nrb/`. A sector was assigned only where a Sharesansar page names the company and NRB gives that company's licence class:
+  - BOK → Commercial Banks (A);
+  - DIYALO → Development Banks (B);
+  - KMBL → Development Banks (B);
+  - UMB → Microfinance (class D section).
+- **Remaining equities without a sector: 9** (from 18).
+  - **Eight with no name source:** ARUN, CLBSL, KMBSL, NGBBL, NLBSL, NMBMB, RMFL, WMBF. Sharesansar returns 404, and only Merolagani has pages for them. Merolagani's terms forbid automated collection, so it was not retried.
+  - **Names known but not in NRB's lists:** the floorsheet promoter-share lines name ARUN as Arun Finance and WMBF as World Merchant Banking & Finance, and neither appears in the NRB lists. They stay unknown rather than guessed.
+  - **NICAD 85/8** is the ninth.
+- **Code and evidence:**
+  - `src/database/instrument_fixes.py evidence` writes `docs/instrument_fixes.json`, reading on the research role plus the floorsheet and NRB PDFs, with one Sharesansar request.
+  - `deploy/migrations/m003_instrument_fixes.py` applies it from the committed JSON: one transaction, advisory lock, idempotent, with a dry run and an `ops_migration_runs` log.
+  - Laptop run: first run applied, second run "already applied". `data_quality --sectors` exits 0. `docs/PROD_DEPLOY.md` Part 10 step 5c has the server command.
+- **Terms check (new):**
+  - **Merolagani:** its Disclaimer/Terms page "strictly prohibit[s] … any automated data collection methods … regardless of their intended purposes". No new Merolagani collection was done.
+  - **Existing code that still fetches Merolagani:** `src/collectors/news.py` (live news timer), `src/scrapers/quarterly_reports_collector.py`, `fundamentals_scraper.py`, `market_data.py`, `merolagani_scraper.py`, `sector_sources.py`, `symbols.py` and `eps_reconciliation.py`. This is flagged for the owner's decision.
+  - **Sharesansar:** its Terms & Conditions page has no anti-automation clause, and its robots.txt allows everything.
+- `pypdf` added to `requirements.txt`. Tests: 5 added (`tests/test_instrument_fixes.py`) and 3 assertions in `tests/test_price_session_backfill.py`.

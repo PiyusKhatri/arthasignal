@@ -33,6 +33,8 @@ def _known_symbols() -> set[str]:
 
 
 def is_valid_price_row(row: dict[str, Any]) -> bool:
+    if not str(row.get("symbol") or "").strip():
+        return False
     values = [row.get(k) for k in ("open", "high", "low", "close")]
     if any(v is None or v <= 0 for v in values):
         return False

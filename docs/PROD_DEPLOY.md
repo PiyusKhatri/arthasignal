@@ -318,6 +318,11 @@ $RUN "$ENV .venv/bin/python deploy/migrations/m002_equity_sector_assignments.py 
 $RUN "$ENV .venv/bin/python deploy/migrations/m002_equity_sector_assignments.py"; echo "exit $?"
 $RUN "$ENV .venv/bin/python deploy/migrations/m002_equity_sector_assignments.py"; echo "exit $?"
 
+# 5c. Instrument fixes from the committed evidence (no network): debentures, a truncated debenture symbol, blank-symbol prices, 4 NRB-evidenced sectors
+$RUN "$ENV .venv/bin/python deploy/migrations/m003_instrument_fixes.py --dry-run"
+$RUN "$ENV .venv/bin/python deploy/migrations/m003_instrument_fixes.py"; echo "exit $?"
+$RUN "$ENV .venv/bin/python deploy/migrations/m003_instrument_fixes.py"; echo "exit $?"
+
 # 6. The sectors check must now pass with exit 0
 $RUN "$ENV .venv/bin/python -m src.pipeline.data_quality --sectors"; echo "exit $?"
 ```
@@ -331,6 +336,7 @@ What to expect (this was tested on a scratch restore of the pre-fix dump of 11:4
 | 4 (real) | `"status": "applied"`, `"rows_changed": 111` (Mutual Funds 34, Non-Convertible Debentures 77), after 0, exit 0 |
 | 5 | `"status": "already fixed: nothing to do"`, `"rows_changed": 0`, exit 0 |
 | 5b | first run: `"status": "applied"`, `"rows_changed": 36`, equities without a sector 54 → 18; second run: `"already applied: nothing to do"`; exit 0 both times (exit 1 only if a sector in the database contradicts the evidence, which is then left untouched) |
+| 5c | first run: `"status": "applied"`. Changes: `debentures` ADBLB, ADBLB86 and ADBLB87; `blank_rows_moved` 16; `blank_rows_inserted` 1 (JEFL 2015-05-25); `blank_company_removed` 1; `sectors` BOK, DIYALO, KMBL and UMB; NIFRAUR85/ rows moved to NIFRAUR85/86 (157 on the laptop; the count can differ on the server). `skipped` lists NICAD 85/8. Equities without a sector 18 → 9. Second run: `"already applied: nothing to do"`. Exit 0 both times |
 | 6 | `sector check passed: no non-equity symbol carries an equity sector`, exit 0 |
 
 The migration:

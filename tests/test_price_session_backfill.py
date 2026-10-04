@@ -46,11 +46,14 @@ def test_session_table_reports_the_source_date_not_the_requested_one() -> None:
 
 
 def test_invalid_price_rows_are_rejected() -> None:
-    good = {"open": 10.0, "high": 11.0, "low": 9.0, "close": 10.5, "volume": 100}
+    good = {"symbol": "NABIL", "open": 10.0, "high": 11.0, "low": 9.0, "close": 10.5, "volume": 100}
 
     assert is_valid_price_row(good)
     assert is_valid_price_row({**good, "close": 11.5})
     assert not is_valid_price_row({**good, "low": 0.0})
     assert not is_valid_price_row({**good, "high": 8.0})
+    assert not is_valid_price_row({**good, "symbol": ""})
+    assert not is_valid_price_row({**good, "symbol": "  "})
+    assert not is_valid_price_row({k: v for k, v in good.items() if k != "symbol"})
     assert not is_valid_price_row({**good, "volume": 0})
     assert not is_valid_price_row({**good, "close": None})

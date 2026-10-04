@@ -1,0 +1,307 @@
+{
+ "built_on": "2026-10-04",
+ "debenture_relabels": [
+  {
+   "symbol": "ADBLB",
+   "instrument_type": "Non-Convertible Debentures",
+   "sector": "Debenture",
+   "evidence": [
+    {
+     "source": "merolagani",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=ADBLB",
+     "http": 200,
+     "label": "Others"
+    },
+    {
+     "source": "sharesansar",
+     "url": "https://www.sharesansar.com/company/adblb",
+     "http": 200,
+     "label": "Corporate Debentures"
+    }
+   ]
+  },
+  {
+   "symbol": "ADBLB86",
+   "instrument_type": "Non-Convertible Debentures",
+   "sector": "Debenture",
+   "evidence": [
+    {
+     "source": "merolagani",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=ADBLB86",
+     "http": 200,
+     "label": "Corporate Debenture"
+    },
+    {
+     "source": "sharesansar",
+     "url": "https://www.sharesansar.com/company/adblb86",
+     "http": 200,
+     "label": "Corporate Debentures"
+    }
+   ]
+  },
+  {
+   "symbol": "ADBLB87",
+   "instrument_type": "Non-Convertible Debentures",
+   "sector": "Debenture",
+   "evidence": [
+    {
+     "source": "merolagani",
+     "url": "https://merolagani.com/CompanyDetail.aspx?symbol=ADBLB87",
+     "http": 200,
+     "label": "Others"
+    },
+    {
+     "source": "sharesansar",
+     "url": "https://www.sharesansar.com/company/adblb87",
+     "http": 200,
+     "label": "Corporate Debentures"
+    }
+   ]
+  }
+ ],
+ "truncated_symbols": [
+  {
+   "short": "NICAD 85/8",
+   "full": "NICAD85/86",
+   "price_rows": 2,
+   "rows_already_under_full": 0,
+   "floorsheet_days_checked": 2,
+   "floorsheet_days_agree": 0,
+   "floorsheet_name": null
+  },
+  {
+   "short": "NIFRAUR85/",
+   "full": "NIFRAUR85/86",
+   "price_rows": 115,
+   "rows_already_under_full": 0,
+   "floorsheet_days_checked": 70,
+   "floorsheet_days_agree": 69,
+   "floorsheet_name": "Nifra Urja 7% -2085/86"
+  }
+ ],
+ "blank_symbol_prices": [
+  {
+   "date": "2014-07-08",
+   "close": 332.0,
+   "volume": 29840,
+   "turnover": 9919199.0,
+   "symbol": "CCBL",
+   "method": "floorsheet: same volume, turnover and last trade",
+   "floorsheet_name": "Century Commercial Bank Ltd."
+  },
+  {
+   "date": "2014-07-09",
+   "close": 326.0,
+   "volume": 22179,
+   "turnover": 7303807.0,
+   "symbol": "CCBL",
+   "method": "floorsheet: same volume, turnover and last trade",
+   "floorsheet_name": "Century Commercial Bank Ltd."
+  },
+  {
+   "date": "2014-07-15",
+   "close": 178.0,
+   "volume": 160,
+   "turnover": 28330.0,
+   "symbol": "JEFL",
+   "method": "floorsheet: same volume, turnover and last trade",
+   "floorsheet_name": "Jebils Finance Ltd."
+  },
+  {
+   "date": "2014-09-22",
+   "close": 873.0,
+   "volume": 2189,
+   "turnover": 2018420.0,
+   "symbol": "MLBBL",
+   "method": "floorsheet: same volume, turnover and last trade",
+   "floorsheet_name": "Mithila Laghubitta Bittiya Sanstha Ltd."
+  },
+  {
+   "date": "2014-10-08",
+   "close": 840.0,
+   "volume": 20,
+   "turnover": 16800.0,
+   "symbol": "MLBBL",
+   "method": "floorsheet: same volume, turnover and last trade",
+   "floorsheet_name": "Mithila Laghubitta Bittiya Sanstha Ltd."
+  },
+  {
+   "date": "2014-10-09",
+   "close": 181.0,
+   "volume": 1690,
+   "turnover": 306790.0,
+   "symbol": "JEFL",
+   "method": "floorsheet: same volume, turnover and last trade",
+   "floorsheet_name": "Jebils Finance Ltd."
+  },
+  {
+   "date": "2014-12-16",
+   "close": 714.0,
+   "volume": 20,
+   "turnover": 14330.0,
+   "symbol": "MLBBL",
+   "method": "floorsheet: same volume, turnover and last trade",
+   "floorsheet_name": "Mithila Laghubitta Bittiya Sanstha Ltd."
+  },
+  {
+   "date": "2015-02-23",
+   "close": 123.0,
+   "volume": 5900,
+   "turnover": 725700.0,
+   "symbol": "LFLCPO",
+   "method": "floorsheet: same volume, turnover and last trade",
+   "floorsheet_name": "Lumbini Finance Ltd Promoter Share"
+  },
+  {
+   "date": "2015-03-22",
+   "close": 152.0,
+   "volume": 640,
+   "turnover": 97730.0,
+   "symbol": "JEFL",
+   "method": "floorsheet: same volume, turnover and last trade",
+   "floorsheet_name": "Jebils Finance Ltd."
+  },
+  {
+   "date": "2015-03-29",
+   "close": 140.0,
+   "volume": 1800,
+   "turnover": 257300.0,
+   "symbol": "JEFL",
+   "method": "floorsheet: same volume, turnover and last trade",
+   "floorsheet_name": "Jebils Finance Ltd."
+  },
+  {
+   "date": "2015-03-30",
+   "close": 136.0,
+   "volume": 3000,
+   "turnover": 412400.0,
+   "symbol": "JEFL",
+   "method": "floorsheet: same volume, turnover and last trade",
+   "floorsheet_name": "Jebils Finance Ltd."
+  },
+  {
+   "date": "2015-04-05",
+   "close": 925.0,
+   "volume": 160,
+   "turnover": 148340.0,
+   "symbol": "MLBBL",
+   "method": "floorsheet: same volume, turnover and last trade",
+   "floorsheet_name": "Mithila Laghubitta Bittiya Sanstha Ltd."
+  },
+  {
+   "date": "2015-04-06",
+   "close": 910.0,
+   "volume": 160,
+   "turnover": 145600.0,
+   "symbol": "MMDBL",
+   "method": "floorsheet: same volume, turnover and last trade",
+   "floorsheet_name": "Mount Makalu Development Bank Ltd."
+  },
+  {
+   "date": "2015-04-07",
+   "close": 145.0,
+   "volume": 6000,
+   "turnover": 870000.0,
+   "symbol": "JEFL",
+   "method": "floorsheet: same volume, turnover and last trade",
+   "floorsheet_name": "Jebils Finance Ltd."
+  },
+  {
+   "date": "2015-05-25",
+   "close": 1575.0,
+   "volume": 130,
+   "turnover": 208120.0,
+   "symbol": "NBBL",
+   "method": "sharesansar blank row; previous close equals exactly one symbol's previous close with no row that day (1 candidates)"
+  },
+  {
+   "date": "2015-06-18",
+   "close": 885.0,
+   "volume": 167,
+   "turnover": 147578.0,
+   "symbol": "MLBBL",
+   "method": "floorsheet: same volume, turnover and last trade",
+   "floorsheet_name": "Mithila Laghubitta Bittiya Sanstha Ltd."
+  }
+ ],
+ "blank_symbol_lost_rows": [
+  {
+   "date": "2015-05-25",
+   "open": 120.0,
+   "high": 118.0,
+   "low": 114.0,
+   "close": 114.0,
+   "volume": 1700,
+   "turnover": 198050.0,
+   "prev_close": 120.0,
+   "symbol": "JEFL",
+   "method": "sharesansar blank row; previous close equals exactly one symbol's previous close with no row that day (1 candidates)"
+  }
+ ],
+ "sector_assignments": [
+  {
+   "symbol": "BOK",
+   "sector": "Commercial Banks",
+   "name_source": {
+    "source": "sharesansar company page title",
+    "url": "https://www.sharesansar.com/company/bok",
+    "title": "(Former) Bank of Kathmandu Limited - || ShareSansar ||"
+   },
+   "class_source": {
+    "source": "Nepal Rastra Bank",
+    "url": "https://www.nrb.org.np/contents/uploads/2026/09/NRB_Class-wise_Merger-and-Acquisition-List.pdf",
+    "class": "A",
+    "context": "ited  / Lumbini Bank Ltd. (A) / Navadurgha Finance Co. Ltd. (C) / Bank of Kathmandu Ltd.(A) Bank of Kathmandu Ltd.(A) / Prudential Fi"
+   }
+  },
+  {
+   "symbol": "DIYALO",
+   "sector": "Development Banks",
+   "name_source": {
+    "source": "sharesansar company page title",
+    "url": "https://www.sharesansar.com/company/diyalo",
+    "title": "Diyalo Bikas Bank Limited - || ShareSansar ||"
+   },
+   "class_source": {
+    "source": "Nepal Rastra Bank",
+    "url": "https://www.nrb.org.np/contents/uploads/2026/09/NRB_Class-wise_Merger-and-Acquisition-List.pdf",
+    "class": "B",
+    "context": "nance Ltd. (C) / Sunrise Bank Ltd.(A) / NIDC Capital market Ltd / Diyalo Bikas Bank Ltd. (B) / Professional Development Bank Ltd. (B) / "
+   }
+  },
+  {
+   "symbol": "KMBL",
+   "sector": "Development Banks",
+   "name_source": {
+    "source": "sharesansar company page title",
+    "url": "https://www.sharesansar.com/company/kmbl",
+    "title": "Kamana Bikas Bank Limited - || ShareSansar ||"
+   },
+   "class_source": {
+    "source": "Nepal Rastra Bank",
+    "url": "https://www.nrb.org.np/contents/uploads/2026/09/NRB_Class-wise_Merger-and-Acquisition-List.pdf",
+    "class": "B",
+    "context": "easing Co Ltd. (C)  Lumbini Finance & Leasing Co Ltd. (C)   / Kamana Bikash Bank Ltd. (B) / Kaski Finance Ltd. (C) / Sewa Bikash Bank"
+   }
+  },
+  {
+   "symbol": "UMB",
+   "sector": "Microfinance",
+   "name_source": {
+    "source": "sharesansar company page title",
+    "url": "https://www.sharesansar.com/company/umb",
+    "title": "Unnati Laghubitta Bittiya Sanstha Limited - || ShareSansar ||"
+   },
+   "class_source": {
+    "source": "Nepal Rastra Bank",
+    "url": "https://www.nrb.org.np/contents/uploads/2019/12/List-of-BFIs-Chait-2074_Eng.pdf",
+    "class": "D",
+    "context": "20 / 1-3 District Level  / (Sindhupalchok, Rasuwa,  / Nuwakot) / 35 Unnati Microfinance Bittiya Sanstha Ltd. 2014/11/07 Padsari, Rupandehi 5.50 / 4-10"
+   }
+  }
+ ],
+ "nrb_sources": {
+  "NRB_Class-wise_Merger-and-Acquisition-List.pdf": "https://www.nrb.org.np/contents/uploads/2026/09/NRB_Class-wise_Merger-and-Acquisition-List.pdf",
+  "List-of-BFIs-Chait-2074_Eng.pdf": "https://www.nrb.org.np/contents/uploads/2019/12/List-of-BFIs-Chait-2074_Eng.pdf"
+ }
+}
