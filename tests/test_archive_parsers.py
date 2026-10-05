@@ -134,3 +134,38 @@ def test_company_report_period_parsing():
     assert period("Interim report Ashwin 2080") == ("2080/2081", 1)
     assert period("Q3 2079-80") == ("2079/2080", 3)
     assert period("Quarterly report for Chaitra end 2081") == ("2080/2081", 3)
+
+
+def test_label_tool_numbers_and_save(tmp_path, monkeypatch):
+    import json as json_lib
+
+    import pytest
+
+    from src.archive import label_tool
+
+    assert label_tool.number("१२३/४५") == 123.45
+    assert label_tool.number("(1,234.50)") == -1234.5
+    assert label_tool.number("") is None
+    with pytest.raises(ValueError):
+        label_tool.number("12a")
+    monkeypatch.setattr(label_tool, "LABELS", tmp_path)
+    item = {"label_id": "L001", "sha256": "x" * 64, "symbol": "NABIL", "fiscal_year": "2079/2080"}
+    record = label_tool.save(item, {"fiscal_year": "2079/80", "unit": "thousands", "net_profit": "1,329,381", "eps": "18.85x", "reserves_absent": "on"})
+    stored = json_lib.loads((tmp_path / "L001.json").read_text())
+    assert stored["net_profit"] == 1329381 and stored["reserves_absent"] is True
+    assert stored["eps"] is None and record["errors"] == ["eps: '18.85x' is not a number"]
+
+
+def test_fundamentals_checks_and_consensus():
+    from src.archive import fundamentals_quality as fq
+
+    values = {"tesseract": {"eps": 18.85}, "paddleocr_mobile": {"eps": 18.85}, "surya": {"eps": 18.0}}
+    assert fq.consensus(values, "eps") == 18.85
+    assert fq.consensus({"a": {"eps": 1.0}, "b": {"eps": 2.0}}, "eps") is None
+    good = {"net_profit": 1_000_000_000.0, "paid_up_capital": 10_000_000_000.0, "eps": 40.0, "net_worth": 15_000_000_000.0,
+            "book_value_per_share": 150.0, "reserves": None, "npl_ratio": 1.2, "capital_adequacy": 13.0}
+    assert all(not v for v in fq.checks(good, {"quarter": 1, "headline_net_profit": 1_000_000_000.0}).values())
+    bad = dict(good, eps=55.0, book_value_per_share=140.0, npl_ratio=120.0)
+    failed = fq.checks(bad, {"quarter": 1, "headline_net_profit": 1_200_000_000.0})
+    assert failed["eps"] and failed["book_value_per_share"] and failed["npl_ratio"] and failed["net_profit"] == ["headline_mismatch"]
+    assert fq.wilson(120, 120)[0] > 0.96 and fq.wilson(0, 0) == (None, None)

@@ -42,7 +42,11 @@ def websites(engine: Engine, client: PoliteClient) -> dict[str, str]:
     for symbol in symbols:
         if symbol in known:
             continue
-        page = client.get(f"https://www.sharesansar.com/company/{symbol.lower()}")
+        try:
+            page = client.get(f"https://www.sharesansar.com/company/{symbol.lower()}")
+        except RuntimeError as exc:
+            logger.warning("%s website lookup failed: %s", symbol, exc)
+            continue
         match = WEBSITE.search(page.text)
         url = match.group(1).strip() if match else ""
         if url.startswith("//"):
