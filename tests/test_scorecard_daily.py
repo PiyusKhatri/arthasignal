@@ -16,6 +16,9 @@ SECTORS = {s: "A" for s in SYMBOLS}
 NO_ACTIONS = pd.DataFrame(columns=["symbol", "action_date", "action_type", "ratio_or_amount"])
 
 
+FROZEN_NOW = datetime(2026, 9, 30, 13, 0, tzinfo=daily.NPT)
+
+
 def _sessions(start: date, count: int) -> list[date]:
     days, day = [], start
     while len(days) < count:
@@ -105,8 +108,8 @@ def test_live_write_is_idempotent_and_refused_after_the_deadline(temp_schema) ->
     from sqlalchemy import text
 
     engine, schema = temp_schema
-    today = datetime.now(tz=daily.NPT).date()
-    now = datetime.now(tz=daily.NPT)
+    now = FROZEN_NOW
+    today = now.date()
     first = daily.write_live_calls(engine, _calls(today), now, schema)
     second = daily.write_live_calls(engine, _calls(today), now, schema)
     assert first == {"attempted": 2, "inserted": 2}
@@ -172,8 +175,8 @@ def test_avoid_observations_are_written_with_their_rule(temp_schema) -> None:
     from sqlalchemy import text
 
     engine, schema = temp_schema
-    today = datetime.now(tz=daily.NPT).date()
-    now = datetime.now(tz=daily.NPT)
+    now = FROZEN_NOW
+    today = now.date()
     buys = _calls(today).assign(strategy=model_v0.NAME)
     avoid = pd.DataFrame({"symbol": ["ABC"], "signal_date": [today], "score": [None], "situations": [["all"]],
                           "feature_hash": ["c" * 64], "strategy": [model_v0.AVOID_E2]})

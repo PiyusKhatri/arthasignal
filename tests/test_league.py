@@ -19,6 +19,9 @@ SECTORS = {s: f"SEC{i % 4}" for i, s in enumerate(SYMBOLS)}
 NO_ACTIONS = pd.DataFrame(columns=["symbol", "action_date", "action_type", "ratio_or_amount"])
 
 
+FROZEN_NOW = datetime(2026, 9, 30, 13, 0, tzinfo=daily.NPT)
+
+
 def _sessions(start: date, count: int) -> list[date]:
     days, day = [], start
     while len(days) < count:
@@ -159,8 +162,8 @@ def test_league_write_is_idempotent_append_only_and_deadline_bound(temp_schema) 
     from sqlalchemy import text
 
     engine, schema = temp_schema
-    today = datetime.now(tz=daily.NPT).date()
-    now = datetime.now(tz=daily.NPT)
+    now = FROZEN_NOW
+    today = now.date()
     calls = pd.DataFrame({"strategy": ["bot_momentum", "bot_avoid_e2e4"], "model_version": ["b2", "b2"], "symbol": ["NABIL", "NICA"],
                           "signal_date": [today, today], "score": [0.1, None], "situations": [["all"], ["all"]],
                           "feature_hash": ["a" * 64, "b" * 64]})
