@@ -117,13 +117,16 @@ def select(pool: pd.DataFrame) -> pd.DataFrame:
         buckets = {(lang, g): list(rows.index) for (lang, g), rows in quarterly.groupby(["language", "group"])}
         for rows in buckets.values():
             rng.shuffle(rows)
-        order = sorted(buckets, key=lambda k: (k[1] != "bank", k))
+        groups = sorted({k[1] for k in buckets}, key=lambda g: (g != "bank", g))
+        turn = 0
         while len(chosen) < PER_YEAR and any(buckets.values()):
-            for language in ("nepali", "english"):
-                for key in order:
-                    if key[0] == language and buckets[key] and len(chosen) < PER_YEAR:
-                        chosen.append(buckets[key].pop())
+            for language in ("english", "nepali"):
+                for step in range(len(groups)):
+                    group = groups[(turn + step) % len(groups)]
+                    if buckets.get((language, group)) and len(chosen) < PER_YEAR:
+                        chosen.append(buckets[(language, group)].pop())
                         break
+                turn += 1
         picks.extend(chosen)
     return pool.loc[picks].reset_index(drop=True)
 
