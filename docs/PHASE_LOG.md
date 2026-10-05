@@ -964,3 +964,11 @@ The backfill uses the Sharesansar daily page because it is the only source that 
   - **Sector:** banks and financial companies 30, hydro 31, insurance 18, microfinance 23, other 18.
   - **Drawn from** a pool of 360 (24 quarterly and 6 annual per year), rotating sectors and languages.
 - **OCR on the label set:** Tesseract is done. PaddleOCR mobile and then Surya (nice 10) run in the background. Surya may not finish on this 8 GB laptop; the GPU plan covers it.
+
+## Phase 2 step 6 - Data dictionary and completion table
+
+- `docs/DATA_DICTIONARY.md` was regenerated with the final coverage: MeroLagani news, margin-lending amounts, demat vintages and the current-policy view added. It ends with the Phase 2 completion table.
+- **Met:** 1 (frozen clock, suite 723 passed), 2a (text PDFs, coverage low before 2020), 2f (GPU plan, not launched), 6.
+- **Implemented, waiting on inputs:** 2b (tool and label set ready; 120 labels to be done by the owner), 2c (consensus code ready; Tesseract done, PaddleOCR mobile and Surya running), 2d (checks ready; the cross-quarter check is not yet fed with data).
+- **Not met:** 2e (the 99% precision bar cannot be measured without the owner's labels, so no fundamental field is used), 3 (news archives still collecting: Sharesansar has reached 2024-04, MeroLagani 2025), 4 (VM unreachable; steps written).
+- **Partly met:** 5 (gaps closed where a source exists; the rest recorded as not found).
