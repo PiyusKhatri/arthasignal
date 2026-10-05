@@ -26,12 +26,13 @@ Everything below is typed by you. Nothing in this repository connects to the ser
 | 3 | league: the six paper bots (b2) | Recorded; the other writers still run; alert | Writers are independent of each other |
 | 4 | avoid_writer: model v0.1 calls and avoid observations | Same | Same |
 | 5 | tips: public tips to the ledger | Same | Same |
-| 6 | sectors: no non-equity symbol has an equity sector | **Never blocks**; alert | Calls use only the Equity price panel, so non-equity labels cannot make a call invalid |
-| 7 | quarterly_capture | Never blocks | No call uses it today; it only accrues data for later |
-| 8 | news collectors | Never blocks; also runs every 30 min on its own | No call uses it |
-| 9 | grading of matured calls | Never blocks; retried the next day | Grading never changes a written call |
-| 10 | metrics: leaderboards | Never blocks | Reporting only |
-| 11 | daily report to Discord | Always runs | |
+| 6 | corporate_actions: bonus, dividend and right book closes dated from 2025-09-30 (Sharesansar, insert-only) | Never blocks | The avoid rule E2 and the next sessions' price adjustment read them. Book closes are announced ahead, so collecting after today's writers loses no call |
+| 7 | sectors: no non-equity symbol has an equity sector | **Never blocks**; alert | Calls use only the Equity price panel, so non-equity labels cannot make a call invalid |
+| 8 | quarterly_capture | Never blocks | No call uses it today; it only accrues data for later |
+| 9 | news collectors | Never blocks; also runs every 30 min on its own | No call uses it |
+| 10 | grading of matured calls | Never blocks; retried the next day | Grading never changes a written call |
+| 11 | metrics: leaderboards | Never blocks | Reporting only |
+| 12 | daily report to Discord | Always runs | |
 
 The three integrity outcomes:
 - **exit 3, specific symbols flagged:** they are written to `logs/daily/<date>/exclude_symbols.json`, the writers **drop** those symbols from today's calls and write the rest, and Discord gets a warning. Dropped symbols are not replaced by the next-ranked stock, because the frozen bot rules do not include a replacement; a bot may make fewer calls that day.

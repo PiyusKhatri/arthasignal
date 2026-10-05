@@ -18,6 +18,7 @@ WRITERS: dict[str, tuple[str, ...]] = {
     "league": ("scorecard_models", "scorecard_calls", "league_runs", "league_leaderboard", "backtest_variant_trials"),
     "avoid_writer": ("scorecard_models", "scorecard_calls", "backtest_variant_trials"),
     "tips": ("public_tips", "public_tip_events", "tip_leaderboard", "scorecard_calls", "text_items", "backtest_variant_trials"),
+    "corporate_actions": ("corporate_actions",),
     "quarterly_capture": ("quarterly_figure_captures", "quarterly_capture_runs", "quarterly_collector_progress",
                           "quarterly_report_announcements", "quarterly_report_figures", "dividend_declarations"),
     "news": ("text_items", "text_collector_runs", "text_items_ephemeral"),

@@ -44,6 +44,9 @@ STEPS: tuple[Step, ...] = (
     Step("avoid_writer", (PY, "-m", "src.scorecard.daily", "--write-only"), 45, "writer",
          "Model v0.1 calls and avoid observations; must be written before the next session opens"),
     Step("tips", (PY, "-m", "src.tips.run", "cycle"), 30, "writer", "Public tips to the ledger; same deadline"),
+    Step("corporate_actions", (PY, "-m", "src.ops.corporate_actions"), 60, "soft",
+         "Records bonus, dividend and right book closes dated from the holdout start. The avoid rule E2 and the price adjustment of the "
+         "next sessions read them; book closes are announced ahead, so collecting after today's writers loses no call. Never blocks"),
     Step("sectors", (PY, "-m", "src.pipeline.data_quality", "--sectors"), 10, "soft",
          "Checks non-equity sector labels. Calls use only the Equity panel, so a failure cannot make a call invalid: alert, never block"),
     Step("quarterly_capture", (PY, "-m", "src.scrapers.quarterly_capture"), 120, "soft",
@@ -59,6 +62,7 @@ REHEARSAL: dict[str, tuple[str, ...]] = {
     "league": (PY, "-m", "src.league.run", "--date", "{as_of}", "--dry-run", "--write-only", "--markdown-dir", "{log_dir}"),
     "avoid_writer": (PY, "-m", "src.scorecard.daily", "--date", "{as_of}", "--dry-run", "--write-only"),
     "tips": (PY, "-m", "src.tips.run", "cycle", "--as-of", "{as_of}"),
+    "corporate_actions": (PY, "-m", "src.ops.corporate_actions", "--dry-run", "--symbols", "NABIL", "EBL"),
     "sectors": (PY, "-m", "src.pipeline.data_quality", "--sectors"),
     "quarterly_capture": (PY, "-m", "src.scrapers.quarterly_capture", "--dry-run", "--symbols", "NABIL", "EBL", "--log", "{log_dir}/quarterly.log"),
     "news": (PY, "-m", "src.collectors.run", "news", "--dry-run"),
@@ -168,6 +172,8 @@ def summarize(step: str, path: Path) -> object:
         return {k: v for k, v in data.items() if k in ("mode", "league", "model_v0", "tips", "league_rows_written", "tip_rows_written")}
     if step == "news" and isinstance(data, list):
         return {r.get("source"): {"status": r.get("status"), "items": r.get("items"), "inserted": r.get("inserted")} for r in data}
+    if step == "corporate_actions":
+        return {k: data.get(k) for k in ("dry_run", "symbols", "live_rows", "inserted", "errors")}
     if step == "quarterly_capture":
         return {k: data.get(k) for k in ("dry_run", "parsed", "no_data", "no_page", "error", "parsed_symbols")}
     return data

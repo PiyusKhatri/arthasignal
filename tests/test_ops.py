@@ -27,10 +27,10 @@ def test_capture_retries_until_the_cutoff_then_fails(monkeypatch) -> None:
 
 
 def test_daily_chain_writes_calls_before_collectors_and_soft_checks() -> None:
-    assert [s.name for s in daily.STEPS] == ["capture", "integrity", "league", "avoid_writer", "tips", "sectors", "quarterly_capture",
-                                            "news", "grading", "metrics"]
+    assert [s.name for s in daily.STEPS] == ["capture", "integrity", "league", "avoid_writer", "tips", "corporate_actions", "sectors",
+                                            "quarterly_capture", "news", "grading", "metrics"]
     gates = {s.name: s.gate for s in daily.STEPS}
-    assert gates["sectors"] == gates["quarterly_capture"] == gates["news"] == "soft"
+    assert gates["corporate_actions"] == gates["sectors"] == gates["quarterly_capture"] == gates["news"] == "soft"
     assert [s.name for s in daily.plan("league", None)][:2] == ["league", "avoid_writer"]
     with pytest.raises(SystemExit):
         daily.plan("nope", None)
@@ -150,7 +150,7 @@ def test_every_chain_step_has_a_write_free_rehearsal_variant() -> None:
     for name, command in daily.REHEARSAL.items():
         joined = " ".join(command)
         assert "--dry-run" in joined or "--as-of" in joined or "--rehearse" in joined or name == "sectors", name
-        assert "{as_of}" in joined or name in ("sectors", "quarterly_capture", "news"), name
+        assert "{as_of}" in joined or name in ("sectors", "corporate_actions", "quarterly_capture", "news"), name
 
 
 def test_rehearsal_refuses_holdout_dates() -> None:
@@ -178,3 +178,31 @@ def test_rehearsal_engine_is_read_only_research_role_with_guard() -> None:
     if "could not connect" in result.stderr or "Connection refused" in result.stderr:
         pytest.skip("database not reachable")
     assert "arthasignal_research on" in result.stdout and "write-refused" in result.stdout, result.stderr[-500:]
+
+
+def test_corporate_action_refresh_inserts_only_live_era_rows_and_survives_errors() -> None:
+    from src.ops import corporate_actions
+
+    def fetch(symbol):
+        if symbol == "BAD":
+            raise ConnectionError("down")
+        return [
+            {"symbol": symbol, "action_date": date(2026, 9, 24), "action_type": "bonus", "ratio_or_amount": 10.0, "fiscal_year": "2025/2026"},
+            {"symbol": symbol, "action_date": date(2025, 9, 29), "action_type": "dividend", "ratio_or_amount": 5.0, "fiscal_year": "2024/2025"},
+        ]
+
+    inserted, sleeps = [], []
+    report = corporate_actions.refresh(["AAA", "BAD", "BBB"], fetch, lambda rows: inserted.extend(rows) or (len(rows), 0), sleep=sleeps.append)
+    assert [r["symbol"] for r in inserted] == ["AAA", "BBB"] and all(r["action_date"] >= date(2025, 9, 30) for r in inserted)
+    assert report["inserted"] == 2 and report["older_rows_not_inserted"] == 2 and report["errors"] == {"BAD": "ConnectionError"}
+    assert len(sleeps) == 2
+    dry = corporate_actions.refresh(["AAA"], fetch, None, sleep=sleeps.append)
+    assert dry["dry_run"] and dry["inserted"] == 0 and dry["live_rows"] == 1
+
+
+def test_corporate_actions_are_collected_by_the_chain_and_never_block_it() -> None:
+    step = next(s for s in daily.STEPS if s.name == "corporate_actions")
+    assert step.gate == "soft" and step.command[-1] == "src.ops.corporate_actions"
+    from src.ops.write_check import WRITERS
+
+    assert WRITERS["corporate_actions"] == ("corporate_actions",)
