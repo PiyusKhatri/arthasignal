@@ -4,6 +4,16 @@ Last updated: 2026-08-20
 
 This file tracks **current** blockers and follow-ups. Historical planning detail has been consolidated into the implemented code and versioned design documents so stale instructions do not contradict the running system.
 
+## BEFORE COMMERCIAL LAUNCH — data permissions checklist
+
+**Status:** OPEN. This does not block the personal research build (`docs/DATA_LICENSES.md`).
+
+- [ ] NEPSE: obtain an official market-data licence (prices, floorsheet, notices) instead of the website token handshake used by `nepse_scraper`.
+- [ ] Sharesansar: written permission for the announcements, AGM and dividend tables, news archive and report images collected under `src/archive/`.
+- [ ] Bizmandu, Arthasarokar, Kathmandu Post and any other news portal: written permission for collection and for any redistribution.
+- [ ] MeroLagani: confirm that the owner's written agreement covers the planned product and redistribution (scope recorded in `docs/DATA_LICENSES.md`).
+- [ ] Remove or relicense any stored data whose permission is refused.
+
 ## BLOCKING FOR PUBLIC / PAID SIGNAL LAUNCH — confirm SEBON licensing status
 
 **Status:** OPEN — external legal review required.
