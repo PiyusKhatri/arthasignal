@@ -1,0 +1,101 @@
+{
+ "note": "Total demat accounts at quarter end from SEBON Quarterly Securities Market Indicators. Each figure is dated by the SEBON upload date of the report it appears in; revised figures are separate vintages. Quarter ends are BS quarter ends mapped to AD (mid-Oct, mid-Jan, mid-Apr, mid-Jul). Figures in '100 thousands' are converted to accounts.",
+ "observations": [
+  {
+   "period_end": "2017-07-15",
+   "value": 875049,
+   "published_date": "2018-11-14",
+   "source_url": "https://www.sebon.gov.np/uploads/uploads/xJyc1r7uimjK2XBhBt8LWQ1K85asUqkhCJWp5Qg0.pdf",
+   "source_title": "Quarterly Securities Market Indicators (4th. Quarter, FY 2017/18)",
+   "evidence": "Table 21 Demat Account ... FY 2016/17 Q1 Q2 Q3 Q4 FY 2017/18: 875,049 969,433 1,037,869 1,233,248 1,296,572 1,296,572"
+  },
+  {
+   "period_end": "2017-10-17",
+   "value": 969433,
+   "published_date": "2018-11-14",
+   "source_url": "https://www.sebon.gov.np/uploads/uploads/xJyc1r7uimjK2XBhBt8LWQ1K85asUqkhCJWp5Qg0.pdf",
+   "source_title": "Quarterly Securities Market Indicators (4th. Quarter, FY 2017/18)",
+   "evidence": "Table 21 Demat Account ... FY 2016/17 Q1 Q2 Q3 Q4 FY 2017/18: 875,049 969,433 1,037,869 1,233,248 1,296,572 1,296,572"
+  },
+  {
+   "period_end": "2018-01-14",
+   "value": 1037869,
+   "published_date": "2018-11-14",
+   "source_url": "https://www.sebon.gov.np/uploads/uploads/xJyc1r7uimjK2XBhBt8LWQ1K85asUqkhCJWp5Qg0.pdf",
+   "source_title": "Quarterly Securities Market Indicators (4th. Quarter, FY 2017/18)",
+   "evidence": "Table 21 Demat Account ... FY 2016/17 Q1 Q2 Q3 Q4 FY 2017/18: 875,049 969,433 1,037,869 1,233,248 1,296,572 1,296,572"
+  },
+  {
+   "period_end": "2018-04-13",
+   "value": 1233248,
+   "published_date": "2018-11-14",
+   "source_url": "https://www.sebon.gov.np/uploads/uploads/xJyc1r7uimjK2XBhBt8LWQ1K85asUqkhCJWp5Qg0.pdf",
+   "source_title": "Quarterly Securities Market Indicators (4th. Quarter, FY 2017/18)",
+   "evidence": "Table 21 Demat Account ... FY 2016/17 Q1 Q2 Q3 Q4 FY 2017/18: 875,049 969,433 1,037,869 1,233,248 1,296,572 1,296,572"
+  },
+  {
+   "period_end": "2018-07-16",
+   "value": 1296572,
+   "published_date": "2018-11-14",
+   "source_url": "https://www.sebon.gov.np/uploads/uploads/xJyc1r7uimjK2XBhBt8LWQ1K85asUqkhCJWp5Qg0.pdf",
+   "source_title": "Quarterly Securities Market Indicators (4th. Quarter, FY 2017/18)",
+   "evidence": "Table 21 Demat Account ... FY 2016/17 Q1 Q2 Q3 Q4 FY 2017/18: 875,049 969,433 1,037,869 1,233,248 1,296,572 1,296,572"
+  },
+  {
+   "period_end": "2018-10-17",
+   "value": 1345572,
+   "published_date": "2019-03-29",
+   "source_url": "https://www.sebon.gov.np/uploads/uploads/YrUdGlq0yE2JXvjAb57OBwOmPigt1H3sDhXZtqIo.pdf",
+   "source_title": "Quarterly Securities Market Indicators (First Quarter, FY 2018/19)",
+   "evidence": "Table 23 ... FY 2016/17 (1) FY 2017/18 (2) Q1 FY 2017/18 (3) Q1 FY 2018/19 (4): 875,049 1,296,572 969,433 1,345,572"
+  },
+  {
+   "period_end": "2019-01-14",
+   "value": 1591000,
+   "published_date": "2019-06-12",
+   "source_url": "https://www.sebon.gov.np/uploads/uploads/GKVDquoKjJ4QUw7ZvT39C1tBGhxRRQVsFVsAEdqo.pdf",
+   "source_title": "Quarterly Securities Market Indicators (Second Quarter, FY 2018/19)",
+   "evidence": "Table 25 ... Demat Account (100 thousands) FY 2017/18 Q1 Q2: 12.97 13.46 15.91"
+  },
+  {
+   "period_end": "2019-04-13",
+   "value": 1650000,
+   "published_date": "2019-06-12",
+   "source_url": "https://www.sebon.gov.np/uploads/uploads/rLjWbNTZ5P57A8d4GLf7RHLxTm09JPxNF9LcqBxu.pdf",
+   "source_title": "Quarterly Securities Market Indicators ((Third Quarter, FY 2018/19)",
+   "evidence": "Demat Account 100 thousands FY 2017/18 Q1 Q2 Q3 of FY 2018/19: 12.97 13.46 15.91 16.5"
+  },
+  {
+   "period_end": "2019-01-14",
+   "value": 1444000,
+   "published_date": "2020-08-05",
+   "source_url": "https://www.sebon.gov.np/uploads/uploads/J48M3DD7W3fC6lQQCJcaJA8VEKjTk3F4lVWDTDM2.pdf",
+   "source_title": "Quarterly Securities Market Indicators (Fourth Quarter, FY 2018/19 and First Quarter, FY 2019/20)",
+   "evidence": "Demat Account 100 thousands FY 2017/18, 2018/19 Q1-Q4, 2019/20 Q1: 12.97 13.46 14.44 15.03 15.71 16.03 (Q2 14.44; revised figure)"
+  },
+  {
+   "period_end": "2019-04-13",
+   "value": 1503000,
+   "published_date": "2020-08-05",
+   "source_url": "https://www.sebon.gov.np/uploads/uploads/J48M3DD7W3fC6lQQCJcaJA8VEKjTk3F4lVWDTDM2.pdf",
+   "source_title": "Quarterly Securities Market Indicators (Fourth Quarter, FY 2018/19 and First Quarter, FY 2019/20)",
+   "evidence": "Demat Account 100 thousands FY 2017/18, 2018/19 Q1-Q4, 2019/20 Q1: 12.97 13.46 14.44 15.03 15.71 16.03 (Q3 15.03; revised figure)"
+  },
+  {
+   "period_end": "2019-07-16",
+   "value": 1571000,
+   "published_date": "2020-08-05",
+   "source_url": "https://www.sebon.gov.np/uploads/uploads/J48M3DD7W3fC6lQQCJcaJA8VEKjTk3F4lVWDTDM2.pdf",
+   "source_title": "Quarterly Securities Market Indicators (Fourth Quarter, FY 2018/19 and First Quarter, FY 2019/20)",
+   "evidence": "Demat Account 100 thousands FY 2017/18, 2018/19 Q1-Q4, 2019/20 Q1: 12.97 13.46 14.44 15.03 15.71 16.03 (Q4 15.71; revised figure)"
+  },
+  {
+   "period_end": "2019-10-17",
+   "value": 1603000,
+   "published_date": "2020-08-05",
+   "source_url": "https://www.sebon.gov.np/uploads/uploads/J48M3DD7W3fC6lQQCJcaJA8VEKjTk3F4lVWDTDM2.pdf",
+   "source_title": "Quarterly Securities Market Indicators (Fourth Quarter, FY 2018/19 and First Quarter, FY 2019/20)",
+   "evidence": "Demat Account 100 thousands FY 2017/18, 2018/19 Q1-Q4, 2019/20 Q1: 12.97 13.46 14.44 15.03 15.71 16.03 (FY 2019/20 Q1 16.03; revised figure)"
+  }
+ ]
+}

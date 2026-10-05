@@ -13,13 +13,16 @@ MONTH_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "
 PERIOD = re.compile(r"based[\s-]+on[\s-]+(?:the[\s-]+)?(\w+)[\s-]+months?(?:'s|’s|’|')?[\s-]+data(?:[\s-]+of)?[\s-]+(\d{4})[./](\d{2})", re.I)
 VALUE = r"(-?\d+(?:\.\d+)?)"
 PATTERNS = {
-    "nrb_tbill_91d_rate": (re.compile(r"91-?daytreasurybills?rate[^.]{0,80}?(?:to|at)" + VALUE + r"percent", re.I), "percent"),
+    "nrb_tbill_91d_rate": (re.compile(r"91-?days?treasurybills?rate[^.]{0,80}?(?:to|at)" + VALUE + r"percent", re.I), "percent"),
     "nrb_interbank_rate_commercial": (re.compile(r"(?:weightedaverage)?interbankrate(?:among|of)commercialbanks[^.]{0,80}?(?:to|at)" + VALUE + r"percent", re.I), "percent"),
-    "nrb_wavg_deposit_rate": (re.compile(r"weightedaveragedepositrateandlendingrateofcommercialbanks(?:stood|remained)at" + VALUE + r"percentand", re.I), "percent"),
-    "nrb_wavg_lending_rate": (re.compile(r"weightedaveragedepositrateandlendingrateofcommercialbanks(?:stood|remained)at-?\d+(?:\.\d+)?percentand" + VALUE + r"percent", re.I), "percent"),
-    "nrb_base_rate_commercial": (re.compile(r"averagebaserateofcommercialbanks(?:increased|decreased|remained|stood)(?:to|at)?" + VALUE + r"percent", re.I), "percent"),
-    "nrb_margin_loan_growth": (re.compile(r"marginnatureloan(increased|decreased|grew|declined)" + VALUE + r"percent", re.I), "percent, fiscal year to date"),
+    "nrb_wavg_deposit_rate": (re.compile(r"weightedaveragedepositrates?(?:andlendingrate)?ofcommercialbanks(?:,developmentbanksandfinancecompanies)?(?:stood|remained)(?:at)?" + VALUE + r"percent", re.I), "percent"),
+    "nrb_wavg_lending_rate": (re.compile(r"(?:weightedaveragedepositrateandlendingrateofcommercialbanks(?:stood|remained)at-?\d+(?:\.\d+)?percentand|weightedaveragelendingrates?ofcommercialbanks(?:,developmentbanksandfinancecompanies)?(?:stood|remained)(?:at)?)" + VALUE + r"percent", re.I), "percent"),
+    "nrb_base_rate_commercial": (re.compile(r"averagebaserates?ofcommercialbanks(?:,developmentbanksandfinancecompanies)?(?:increased|decreased|remained|stood|were)(?:to|at)?" + VALUE + r"percent", re.I), "percent"),
+    "nrb_margin_loan_growth": (re.compile(r"marginnatureloan(increased|decreased|grew|declined)?" + VALUE + r"(?:percent)?", re.I), "percent, fiscal year to date"),
     "nrb_market_cap_to_gdp": (re.compile(r"ratioofmarketcapitali[sz]ationtoGDP(?:stood|remained)at" + VALUE + r"percent", re.I), "percent"),
+}
+TABLE_PATTERNS = {
+    "nrb_interbank_rate_bfis": (re.compile(r"Inter-?\s?bank rate of BFIs\s+(-?\d+\.\d+)\s+(-?\d+\.\d+)", re.I), "percent"),
 }
 
 
@@ -43,10 +46,15 @@ def extract(raw: str) -> dict[str, tuple[float, str]]:
         if not match:
             continue
         if series == "nrb_margin_loan_growth":
-            value = float(match.group(2)) * (-1 if match.group(1).lower() in ("decreased", "declined") else 1)
+            value = float(match.group(2)) * (-1 if (match.group(1) or "").lower() in ("decreased", "declined") else 1)
         else:
             value = float(match.group(1))
         out[series] = (value, compact[max(0, match.start() - 20): match.end() + 10])
+    spaced = re.sub(r"\s+", " ", raw)
+    for series, (pattern, _) in TABLE_PATTERNS.items():
+        match = pattern.search(spaced)
+        if match:
+            out[series] = (float(match.group(2)), spaced[max(0, match.start() - 40): match.end() + 10])
     return out
 
 
@@ -58,7 +66,7 @@ def run(engine: Engine, research: Any) -> dict[str, Any]:
     apply(engine)
     with research.connect() as connection:
         docs = pd.read_sql(text("SELECT announcement_source_id, url, path, published_date FROM archive_documents WHERE source = 'nrb:macro_situation'"), connection)
-    rows, failures, found = [], [], {k: 0 for k in PATTERNS}
+    rows, failures, found = [], [], {k: 0 for k in [*PATTERNS, *TABLE_PATTERNS]}
     for doc in docs.itertuples():
         title = doc.announcement_source_id.split("|", 1)[-1]
         end = period_end(title)
@@ -72,8 +80,9 @@ def run(engine: Engine, research: Any) -> dict[str, Any]:
             continue
         for series, (value, evidence) in extract(raw).items():
             found[series] += 1
-            rows.append({"s": series, "ps": None, "pe": end, "v": value, "u": PATTERNS[series][1], "pd": doc.published_date,
+            rows.append({"s": series, "ps": None, "pe": end, "v": value, "u": "", "pd": doc.published_date,
                          "b": "NRB listing upload date of the report", "url": doc.url, "e": evidence})
+            rows[-1]["u"] = {**PATTERNS, **TABLE_PATTERNS}[series][1]
     added = 0
     with engine.begin() as connection:
         for row in rows:

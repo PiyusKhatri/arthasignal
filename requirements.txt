@@ -24,3 +24,5 @@ telethon==1.45.0
 lightgbm==4.7.0
 scikit-learn==1.9.1
 pypdf==6.19.0
+openpyxl==3.1.5
+xlrd==2.0.2

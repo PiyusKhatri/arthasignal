@@ -920,3 +920,29 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 
 - **Licences:** `docs/DATA_LICENSES.md` records the owner-confirmed written MeroLagani agreement (confirmed 2026-10-05; covers automated collection, bulk floorsheet and commercial use). `TODOS.md` gained a before-commercial-launch checklist: NEPSE data licence, Sharesansar and portal permissions. MeroLagani collection had never been switched off in code, so the live news timer (`src.collectors.run news`) still includes `merolagani_news`. New MeroLagani work resumes in the steps below.
 - **Clock-dependent tests:** `tests/test_league.py` and `tests/test_scorecard_daily.py` used the real clock, so their "refused after the deadline" checks failed between a weekend and Monday 11:00. `now` is now frozen at Wednesday 2026-09-30 13:00 NPT. Full suite: **717 passed**.
+
+## Phase 2 step 5 - Remaining gaps
+
+- **9 sectorless equities:** still unresolved.
+  - **ARUN, CLBSL, KMBSL, NGBBL, NLBSL, NMBMB, RMFL, WMBF:** MeroLagani's company pages are now allowed but empty for these delisted symbols. Its company list (1,676 entries) holds only their promoter-share lines: ARUNPO "Arun Finance", WMBFPO "World Merchant Banking & Finance", RMFLPO "Reliable Microfinance" and KMBSLP "unknown". None of the 63 unresolved MeroLagani report-index names matches them.
+  - **No guess:** linking a promoter line to its symbol relies on the naming convention alone, so no sector is assigned.
+  - **NICAD 85/8:** stays unmatched.
+- **NRB monetary-policy announcement dates:** the English full texts state "Delivered by Governor ... on" for 2014/15 (18 Jul 2014), 2015/16 (23 Jul 2015), 2016/17 (14 Jul 2016), 2017/18 (9 Jul 2017), 2018/19 (11 Jul 2018) and 2019/20 (24 Jul 2019).
+  - **Correction:** the earlier secondary date for 2015/16 (2015-08-06) was wrong.
+  - **New events:** 2017/18 and 2019/20 now have events.
+  - **How corrections are stored:** `policy_events` is append-only, so `policy_events_current` (security_invoker) returns the latest row per measure, value and document. 2020/21 onward still rely on the NRB upload date of the Nepali full text, because those documents state no delivery date.
+- **NRB macro 2024-2025:** new wording ("91-days", plural rates for three bank classes, a margin figure without a verb) and the interbank table are now parsed. 488 observations in total, of which 2024: 66 and 2025: 39.
+- **Margin lending amounts:** NRB monthly Banking & Financial Statistics, 2011-07 to 2025-08 (171 months).
+  - **Workbooks** (2021 onward): the aggregate statement of loans and advances.
+  - **PDFs** (2011-2021): the margin-nature-loan row. The PDF rule matched the workbooks exactly (to the rounding) in 11 of 11 months checked.
+  - **Cross-check:** the mid-July 2018, 2019 and 2020 values equal the prior-year columns of the 2021 workbook.
+  - **Exclusions:** three months that fail a neighbour check are recorded in `sentiment_exclusions`; `sentiment_observations_current` hides excluded rows (tested).
+  - **Knowledge dates:** pre-2020 months carry NRB's batch upload dates (2019-12-30 and 2020-01-24), which are late but safe.
+- **Demat/BOID accounts:** SEBON Quarterly Securities Market Indicators give 12 quarter-end totals, 2017-07 to 2019-10, with revised figures kept as separate vintages (for example, Q2 2018/19 was first published as 1.591 million and later as 1.444 million).
+  - **Not found:** totals for 2014-2016 and after 2019. CDSC shows only current figures, and SEBON's later quarterly reports are not on its site.
+  - Values are in `docs/demat_accounts.json`.
+- **NEPSE trading-rule notices:** NEPSE's own notices are not reachable (401). MeroLagani's announcement list holds company announcements only, with no separate NEPSE notice archive. Recorded from portal news, with sources:
+  - the 10% to 15% price band and the two-tier index halt (effective 2026-04-20);
+  - the six-day week (2022-06-15; `daily_prices` shows Friday sessions from 2022-05-20 to 2022-09-16, a period missing from `config/nepse_calendar.json`'s weekday rules, though actual sessions override them);
+  - the planned 10:30-15:30 hours (March 2020), not confirmed as implemented.
+- **Still not found:** the start of the pre-open session, any 2014-2021 change to circuit bands, and the exact T+2 start date.

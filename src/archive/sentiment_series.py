@@ -88,12 +88,21 @@ def store_oversubscription(engine: Engine, frame: pd.DataFrame) -> int:
     return _insert(engine, rows)
 
 
+def store_demat(engine: Engine) -> int:
+    from pathlib import Path
+
+    data = json.loads((Path(__file__).resolve().parents[2] / "docs" / "demat_accounts.json").read_text())
+    rows = [{"s": "demat_accounts_total", "ps": None, "pe": r["period_end"], "v": float(r["value"]), "u": "accounts", "pd": r["published_date"],
+             "b": "SEBON upload date of the report", "url": r["source_url"], "e": r["evidence"]} for r in data["observations"]]
+    return _insert(engine, rows)
+
+
 def main() -> None:
     from src.database.connection import engine
     from src.database.holdout_guard import LAST_DEVELOPMENT_DAY, research_engine
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=["market", "oversubscription"])
+    parser.add_argument("command", choices=["market", "oversubscription", "demat"])
     args = parser.parse_args()
     schema.apply(engine)
     research = research_engine()
@@ -101,6 +110,8 @@ def main() -> None:
         daily = market_series(research, LAST_DEVELOPMENT_DAY)
         added = store_market(engine, daily)
         print(json.dumps({"sessions": len(daily), "first": str(daily["date"].min()), "last": str(daily["date"].max()), "rows_added": added}, indent=1))
+    elif args.command == "demat":
+        print(json.dumps({"rows_added": store_demat(engine)}, indent=1))
     else:
         frame = oversubscription(research)
         added = store_oversubscription(engine, frame)

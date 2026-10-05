@@ -141,3 +141,18 @@ def test_dividend_proposal_view_applies_base_table_policies(engine):
             assert [r[0] for r in seen] == [OLD]
         finally:
             transaction.rollback()
+
+
+def test_sentiment_exclusions_hide_rows_from_the_current_view(engine):
+    with engine.connect() as connection:
+        transaction = connection.begin()
+        try:
+            for day in (OLD, NEW):
+                connection.execute(text(INSERTS["sentiment_observations"]), {"k": "pit-test-x", "d": day})
+            connection.execute(text("INSERT INTO sentiment_exclusions (series, period_end, source_url, reason) VALUES ('pit-test-x', :d, 'u', 'test')"), {"d": OLD})
+            connection.execute(text(f"SET LOCAL ROLE {hg.RESEARCH_ROLE}"))
+            connection.execute(text(f"SET LOCAL {hg.GUC} = 'on'"))
+            assert connection.execute(text("SELECT count(*) FROM sentiment_observations WHERE series = 'pit-test-x'")).scalar_one() == 1
+            assert connection.execute(text("SELECT count(*) FROM sentiment_observations_current WHERE series = 'pit-test-x'")).scalar_one() == 0
+        finally:
+            transaction.rollback()

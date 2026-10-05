@@ -21,6 +21,7 @@ MONTHS = ("one-month", "two-months", "three-months", "four-months", "five-months
           "nine-months", "ten-months", "eleven-months", "twelve-months")
 CATEGORIES = {
     "monetary_policy": ["https://www.nrb.org.np/category/monetary-policy/"],
+    "monthly_statistics": ["https://www.nrb.org.np/category/monthly-statistics/?department=bfr"],
     "macro_situation": [f"https://www.nrb.org.np/category/current-macroeconomic-situation/?department=red&fy={y}-{str(y + 1)[-2:]}&subcategory={m}"
                         for y in range(2070, 2082) for m in MONTHS],
 }

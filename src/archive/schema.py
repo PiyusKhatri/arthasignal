@@ -18,6 +18,7 @@ DATE_COLUMNS = {
     "sentiment_observations": "published_date",
     "company_event_records": "reference_date",
     "announcement_events": "published_date",
+    "sentiment_exclusions": "period_end",
 }
 
 DDL = r"""
@@ -177,6 +178,20 @@ LEFT JOIN LATERAL (
 ) a ON true
 WHERE r.record_type = 'agm' AND (r.cash_pct IS NOT NULL OR r.bonus_pct IS NOT NULL);
 
+CREATE OR REPLACE VIEW policy_events_current WITH (security_invoker = true) AS
+SELECT DISTINCT ON (authority, measure, value_text, source_url) *
+FROM policy_events ORDER BY authority, measure, value_text, source_url, recorded_at DESC, id DESC;
+
+CREATE TABLE IF NOT EXISTS sentiment_exclusions (
+    id              BIGSERIAL PRIMARY KEY,
+    series          VARCHAR(60) NOT NULL,
+    period_end      DATE NOT NULL,
+    source_url      TEXT NOT NULL,
+    reason          TEXT NOT NULL,
+    recorded_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (series, period_end, source_url)
+);
+
 CREATE TABLE IF NOT EXISTS sentiment_observations (
     id              BIGSERIAL PRIMARY KEY,
     series          VARCHAR(60) NOT NULL,
@@ -191,10 +206,14 @@ CREATE TABLE IF NOT EXISTS sentiment_observations (
     recorded_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     UNIQUE (series, period_end, source_url)
 );
+
+CREATE OR REPLACE VIEW sentiment_observations_current WITH (security_invoker = true) AS
+SELECT o.* FROM sentiment_observations o
+WHERE NOT EXISTS (SELECT 1 FROM sentiment_exclusions x WHERE x.series = o.series AND x.period_end = o.period_end AND x.source_url = o.source_url);
 """
 
 APPEND_ONLY = ("corporate_announcements", "archive_documents", "news_articles", "report_field_values",
-               "policy_events", "sentiment_observations", "company_event_records")
+               "policy_events", "sentiment_observations", "company_event_records", "sentiment_exclusions")
 
 
 def apply(engine: Engine) -> list[str]:
