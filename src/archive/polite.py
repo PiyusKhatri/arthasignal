@@ -74,10 +74,13 @@ class PoliteClient:
             self._limiter(parts.netloc).wait()
             try:
                 response = self.http.get(f"{base}/robots.txt", timeout=30)
-                if response.status_code == 200 and "html" not in response.headers.get("content-type", ""):
+                parser.modified()
+                if response.status_code in (401, 403):
+                    parser.disallow_all = True
+                elif response.status_code == 200 and "html" not in response.headers.get("content-type", "").lower():
                     parser.parse(response.text.splitlines())
                 else:
-                    parser.parse([])
+                    parser.allow_all = True
                 self.robots[base] = parser
             except requests.RequestException:
                 self.robots[base] = None

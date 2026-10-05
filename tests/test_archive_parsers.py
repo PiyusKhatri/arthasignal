@@ -102,3 +102,35 @@ def test_event_classifier_v2():
     assert ce.classify("XYZ Bank has proposed 10% bonus shares and 0.53% cash dividend") == "dividend_proposal"
     assert ce.classify("Nabil Bank Limited has published a notice regarding new interest rate") == "interest_rate_notice"
     assert ce.numbers("proposed 10% bonus shares and 0.53% cash dividend for FY 2081/82") == {"cash_pct": 0.53, "bonus_pct": 10.0, "right_ratio": None, "fiscal_year": "2081/82"}
+
+
+class _Response:
+    def __init__(self, status, body="", content_type="text/plain"):
+        self.status_code, self.text, self.headers = status, body, {"content-type": content_type}
+
+
+def _client(monkeypatch, response):
+    from src.archive import polite
+
+    client = polite.PoliteClient()
+    monkeypatch.setattr(client.http, "get", lambda *a, **k: response)
+    monkeypatch.setattr(polite.HostLimiter, "wait", lambda self: None)
+    return client
+
+
+def test_robots_missing_file_allows_and_forbidden_disallows(monkeypatch):
+    assert _client(monkeypatch, _Response(404)).allowed("https://a.example/x.pdf") is True
+    assert _client(monkeypatch, _Response(200, "<html>error</html>", "text/html")).allowed("https://b.example/x.pdf") is True
+    assert _client(monkeypatch, _Response(403)).allowed("https://c.example/x.pdf") is False
+    rules = _client(monkeypatch, _Response(200, "User-agent: *\nDisallow: /private/"))
+    assert rules.allowed("https://d.example/public/a.pdf") is True
+    assert rules.allowed("https://d.example/private/a.pdf") is False
+
+
+def test_company_report_period_parsing():
+    from src.archive.company_reports import period
+
+    assert period("Unaudited Financial Results 1st Quarter of FY 2080/81") == ("2080/2081", 1)
+    assert period("Interim report Ashwin 2080") == ("2080/2081", 1)
+    assert period("Q3 2079-80") == ("2079/2080", 3)
+    assert period("Quarterly report for Chaitra end 2081") == ("2080/2081", 3)
