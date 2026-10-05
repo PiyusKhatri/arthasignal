@@ -224,7 +224,7 @@ def decide(report: dict[str, Any], acceptance: dict[str, Any]) -> dict[str, Any]
     return decision
 
 
-def build(protocol: Protocol | None = None, out_dir: Path = DERIVED_DIR) -> dict[str, Any]:
+def build(protocol: Protocol | None = None, out_dir: Path = DERIVED_DIR, end: date | None = None) -> dict[str, Any]:
     p = protocol or load()
     rule = p.raw["floorsheet_ohlc"]
     raw = FLOORSHEET_ROOT.resolve()
@@ -232,7 +232,7 @@ def build(protocol: Protocol | None = None, out_dir: Path = DERIVED_DIR) -> dict
     if target == raw or raw in target.parents:
         raise ValueError(f"refusing to write inside the floorsheet directory {raw}")
     start = as_date(p.raw["periods"]["learning"]["start"])
-    end = as_date(rule["verification"]["end"])
+    end = end or as_date(rule["verification"]["end"])
     bars = derive(floorsheet_files(start, end), con=connect(target / "work"), min_quantity=int(rule["min_quantity"]))
     bars["source"] = SOURCE
     bars["before_real_open"] = pd.to_datetime(bars["date"]).dt.date < p.real_open_start
@@ -246,13 +246,14 @@ def build(protocol: Protocol | None = None, out_dir: Path = DERIVED_DIR) -> dict
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("command", choices=["verify", "build"])
+    parser.add_argument("--end", type=date.fromisoformat)
     args = parser.parse_args()
     if args.command == "verify":
         report = verify()
         REPORT_PATH.write_text(json.dumps(report, indent=1) + "\n")
         print(json.dumps({k: report[k] for k in ("before_real_open", "odd_lot_trade_share", "decision_all_trades", "decision")}, indent=1))
     else:
-        print(json.dumps(build(), indent=1))
+        print(json.dumps(build(end=args.end), indent=1))
 
 
 if __name__ == "__main__":
