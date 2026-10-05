@@ -144,13 +144,25 @@ def measure(rows: Iterable[dict[str, Any]], methods: tuple[str, ...]) -> dict[st
     return out
 
 
+def text_pdf_index() -> dict[tuple[str, str, int], str]:
+    path = DERIVED.parent / "company_pdfs" / "index.json"
+    if not path.exists():
+        return {}
+    out: dict[tuple[str, str, int], str] = {}
+    for record in json.loads(path.read_text()).values():
+        for pdf in record.get("pdfs", []):
+            if pdf.get("text_layer") and pdf.get("fiscal_year") and pdf.get("quarter"):
+                out.setdefault((record["symbol"], pdf["fiscal_year"], int(pdf["quarter"])), pdf["sha256"])
+    return out
+
+
 def method_values(sha: str, context: dict[str, Any]) -> dict[str, dict[str, float | None]]:
     per_engine = {}
     for engine in ENGINES:
         path = DERIVED / engine / f"{sha}.txt"
         if path.exists():
             per_engine[engine] = read_values(path.read_text())
-    pdf = DERIVED / "text_pdf" / f"{sha}.txt"
+    pdf = DERIVED / "text_pdf" / f"{context.get('text_pdf_sha') or sha}.txt"
     methods: dict[str, dict[str, float | None]] = dict(per_engine)
     if pdf.exists():
         methods["text_pdf"] = read_values(pdf.read_text())
@@ -167,6 +179,7 @@ def method_values(sha: str, context: dict[str, Any]) -> dict[str, dict[str, floa
 
 def run() -> dict[str, Any]:
     label_set = {item["label_id"]: item for item in json.loads((LABEL_DIR / "label_set.json").read_text())}
+    pdfs = text_pdf_index()
     rows = []
     for path in sorted((LABEL_DIR / "labels").glob("L*.json")):
         label = json.loads(path.read_text())
@@ -174,7 +187,9 @@ def run() -> dict[str, Any]:
         if item is None or label.get("legibility") == "unreadable" or label.get("errors"):
             continue
         quarter = int(label["quarter"]) if str(label.get("quarter") or "").isdigit() else None
-        context = {"quarter": quarter if label.get("period") != "annual" else 4, "headline_net_profit": item.get("headline_net_profit")}
+        fiscal = str(item.get("fiscal_year") or "")
+        context = {"quarter": quarter if label.get("period") != "annual" else 4, "headline_net_profit": item.get("headline_net_profit"),
+                   "text_pdf_sha": pdfs.get((item["symbol"], fiscal, quarter or 4))}
         rows.append({"label": label, "methods": method_values(item["sha256"], context)})
     methods = ("tesseract", "paddleocr_mobile", "surya", "text_pdf", "text_pdf_checked", "consensus", "consensus_checked", "headline")
     report = {"labelled_reports_used": len(rows), "rule": "a field is used only if precision >= 0.99; Wilson 95% intervals reported",

@@ -50,8 +50,10 @@ class HostLimiter:
 
 
 class PoliteClient:
-    def __init__(self, interval: float = DEFAULT_INTERVAL, respect_robots: bool = True) -> None:
+    def __init__(self, interval: float = DEFAULT_INTERVAL, respect_robots: bool = True, retries: int = RETRIES, timeout: float = 60.0) -> None:
         self.interval = interval
+        self.retries = retries
+        self.timeout = timeout
         self.respect_robots = respect_robots
         self.http = requests.Session()
         self.http.headers.update({"User-Agent": USER_AGENT})
@@ -73,7 +75,7 @@ class PoliteClient:
             parser = robotparser.RobotFileParser()
             self._limiter(parts.netloc).wait()
             try:
-                response = self.http.get(f"{base}/robots.txt", timeout=30)
+                response = self.http.get(f"{base}/robots.txt", timeout=min(30.0, self.timeout))
                 parser.modified()
                 if response.status_code in (401, 403):
                     parser.disallow_all = True
@@ -91,9 +93,9 @@ class PoliteClient:
         if not self.allowed(url):
             raise RobotsDisallowed(url)
         host = urlparse(url).netloc
-        kwargs.setdefault("timeout", 60)
+        kwargs.setdefault("timeout", self.timeout)
         error: Exception | None = None
-        for attempt in range(RETRIES):
+        for attempt in range(self.retries):
             self._limiter(host).wait()
             self.requests += 1
             try:
@@ -105,7 +107,7 @@ class PoliteClient:
                 error = exc
                 logger.warning("%s %s failed (%s), attempt %d", method, url, exc, attempt + 1)
                 time.sleep(min(MAX_BACKOFF, self.interval * 2 ** (attempt + 1)))
-        raise RuntimeError(f"{method} {url} failed after {RETRIES} attempts: {error}")
+        raise RuntimeError(f"{method} {url} failed after {self.retries} attempts: {error}")
 
     def get(self, url: str, **kwargs: Any) -> requests.Response:
         return self.request("GET", url, **kwargs)

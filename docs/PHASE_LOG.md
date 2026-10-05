@@ -946,3 +946,21 @@ The backfill uses the Sharesansar daily page because it is the only source that 
   - the six-day week (2022-06-15; `daily_prices` shows Friday sessions from 2022-05-20 to 2022-09-16, a period missing from `config/nepse_calendar.json`'s weekday rules, though actual sessions override them);
   - the planned 10:30-15:30 hours (March 2020), not confirmed as implemented.
 - **Still not found:** the start of the pre-open session, any 2014-2021 change to circuit bands, and the exact T+2 start date.
+
+## Phase 2 step 2a-2b - Text-layer sources, labeling tool and label set
+
+- **Text-layer PDFs** (`src/archive/company_reports.py`, `docs/company_report_pdfs.json`):
+  - **Portals first:** NEPSE notices answer 401 and SEBON hosts no quarterly reports. MeroLagani report attachments are images too: 35 of 36 sampled are JPG or GIF, and the one PDF is broken. Their Repository file names carry .NET-ticks upload times.
+  - **Company websites:** website links from Sharesansar company pages, then up to 12 report-like pages per site (2 retries, 20 s timeout, robots.txt respected). PDFs whose names or anchors look like quarterly or interim results were downloaded and kept raw, and the text layer was extracted without OCR.
+  - **Results:** 280 active companies looked up, 175 list a website, 76 sites publish report PDFs. 2,534 PDFs, of which 2,043 have a text layer, from 73 companies. 29 sites were unreachable.
+  - **Matching:** 1,276 text PDFs match a dated Sharesansar announcement (same symbol, fiscal year and quarter), which supplies the knowledge date. By publication year: 2014: 10, 2015: 23, 2016: 17, 2017: 24, 2018: 22, 2019: 34, 2020: 82, 2021: 123, 2022: 128, 2023: 150, 2024: 217, 2025: 250 (2026 rows are holdout-era).
+  - **Distinct reports:** 635 (symbol, fiscal year, quarter) with a matched text PDF.
+  - **Fields found and passing the automatic checks:** net profit 350 / 245; EPS 285 / 183; book value per share 64 / 60; net worth 293 / 292; reserves 423 / 421; paid-up capital 429 / 363; NPL 185 / 185; capital adequacy 241 / 179. Passing a check is not correctness. Only 70% of net-profit values agree with the headline, so the field reader still picks the wrong figure on clean text. Precision is measured only against the owner's labels.
+  - **Bug fixed on the way:** the polite client treated sites without robots.txt as fully disallowed, because Python's parser needs `modified()`. It now follows the standard library's rules (401/403 disallow, other errors and missing files allow; tested). Sharesansar, NRB and CDSC were unaffected because they serve a robots file.
+- **Labeling tool** (`src/archive/label_tool.py`, steps in `docs/labels/README.md`): a local web page on 127.0.0.1:8765 with the report image beside a form. Fields: fiscal year, period, quarter, basis, unit, net profit (year to date), EPS (plus whether annualized), book value per share, net worth, reserves, paid-up capital, NPL and capital adequacy, each with "not in report", plus language, legibility and notes. One JSON file is saved per report; tested.
+- **Label set** (`docs/labels/label_set.json`): 120 reports, 10 per year 2014-2025.
+  - **Kind:** 22 annual and 98 quarterly.
+  - **Language:** 22 English and 98 Nepali or mixed, tagged by the Devanagari share of Tesseract text.
+  - **Sector:** banks and financial companies 30, hydro 31, insurance 18, microfinance 23, other 18.
+  - **Drawn from** a pool of 360 (24 quarterly and 6 annual per year), rotating sectors and languages.
+- **OCR on the label set:** Tesseract is done. PaddleOCR mobile and then Surya (nice 10) run in the background. Surya may not finish on this 8 GB laptop; the GPU plan covers it.

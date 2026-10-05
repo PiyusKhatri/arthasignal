@@ -84,8 +84,18 @@ def period(raw: str) -> tuple[str | None, int | None]:
     return fy, quarter
 
 
+def normalize_site(raw: str) -> str:
+    site = raw.strip().lstrip("/")
+    site = re.sub(r"^(https?:)?/*(https?://)", r"\2", site)
+    site = re.sub(r"^(https?:)/{2,}", r"\1//", site)
+    if not re.match(r"https?://", site):
+        site = "https://" + site.lstrip("/")
+    return site if urlparse(site).netloc else ""
+
+
 def crawl(symbol: str, site: str) -> dict[str, Any]:
-    client = PoliteClient()
+    client = PoliteClient(retries=2, timeout=20.0)
+    site = normalize_site(site) if site else site
     result: dict[str, Any] = {"symbol": symbol, "site": site, "pages": 0, "pdf_links": 0, "pdfs": [], "error": None}
     if not site:
         result["error"] = "no website listed"
@@ -138,7 +148,7 @@ def run(engine: Engine, workers: int = 6) -> dict[str, Any]:
     client = PoliteClient()
     sites = websites(engine, client)
     index = json.loads(INDEX.read_text()) if INDEX.exists() else {}
-    todo = [(s, u) for s, u in sorted(sites.items()) if s not in index]
+    todo = [(s, u) for s, u in sorted(sites.items()) if s not in index or (index[s]["error"] and index[s]["error"] != "no website listed")]
     INDEX.parent.mkdir(parents=True, exist_ok=True)
     with ThreadPoolExecutor(max_workers=workers) as pool:
         for result in pool.map(lambda item: crawl(*item), todo):

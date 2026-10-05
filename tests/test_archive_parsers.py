@@ -169,3 +169,12 @@ def test_fundamentals_checks_and_consensus():
     failed = fq.checks(bad, {"quarter": 1, "headline_net_profit": 1_200_000_000.0})
     assert failed["eps"] and failed["book_value_per_share"] and failed["npl_ratio"] and failed["net_profit"] == ["headline_mismatch"]
     assert fq.wilson(120, 120)[0] > 0.96 and fq.wilson(0, 0) == (None, None)
+
+
+def test_company_site_normalization():
+    from src.archive.company_reports import normalize_site
+
+    assert normalize_site("//https://arunhydro.com.np/") == "https://arunhydro.com.np/"
+    assert normalize_site("https:////bhujunghydro.com/") == "https://bhujunghydro.com/"
+    assert normalize_site("https://http://www.asianlife.com.np") == "http://www.asianlife.com.np"
+    assert normalize_site("//www.nabilbank.com") == "https://www.nabilbank.com"
