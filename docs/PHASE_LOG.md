@@ -986,7 +986,7 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 **Reproduction:**
 - A scratch restore of today's dump, built as on the server: a new `arthasignal` login without superuser or bypass, `pg_restore --no-owner`, then `reassign_owner.sql`, `role_grants.sql`, the connect grants, `src.database.holdout_guard` and `src.scorecard.schema` as `arthasignal`.
 - `register` failed with the same error. The research role saw 0 of the 140 registry rows; `arthasignal` saw 140.
-- Real inserts dated today as `arthasignal`, one per writer table (32 tables, plus the `ops_alerts` update and the ephemeral-text delete), all succeeded.
+- Real inserts dated today as `arthasignal`, one per writer table (27 tables, plus the `ops_alerts` update and the ephemeral-text delete), all succeeded.
 
 **Fix:**
 - `src.database.holdout_guard` now also adds two policies on `backtest_variant_trials` for `arthasignal_research`: insert, and read. It is the table that `restore_server.sh` and Part 11 of `docs/PROD_DEPLOY.md` already run.
