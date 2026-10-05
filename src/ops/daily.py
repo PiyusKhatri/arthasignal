@@ -234,7 +234,14 @@ def main() -> None:
     parser.add_argument("--list", action="store_true")
     parser.add_argument("--rehearse", action="store_true")
     parser.add_argument("--as-of")
+    parser.add_argument("--write-check", action="store_true")
     args = parser.parse_args()
+    if args.write_check:
+        from src.ops import write_check
+
+        result = write_check.run()
+        print(json.dumps(result, indent=1, default=str))
+        sys.exit(0 if result["ok"] else 1)
     if args.rehearse:
         if not args.as_of:
             raise SystemExit("--rehearse needs --as-of YYYY-MM-DD (a development-window session)")

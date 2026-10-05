@@ -379,25 +379,50 @@ If step 6 does not print exit 0, or the rehearsal does not exit 0, **do not** le
 
 After `git pull` (Part 10 step 2), run this once on the server. It registers the protocol version in the committed config, which is now v1.3. It writes one row to `backtest_variant_trials` as `arthasignal_research` (the research login from Part 5 step 3), reads no prices and is safe to repeat.
 
+**Why it failed before 2026-10-05 15:00:** `backtest_variant_trials` has row-level security enabled and had no policy. On the server the tables belong to `arthasignal`, and `arthasignal_research` is neither the owner nor a member of it, so PostgreSQL denies it every row: the insert failed with `new row violates row-level security policy for table "backtest_variant_trials"`, and its reads of the table returned 0 rows. On the laptop the research role is a member of the owner role, which is why the laptop never showed it. Step 1 adds two policies for `arthasignal_research` on this table only: insert, and read. Nothing else changes.
+
 ```bash
 cd /srv/arthasignal/app
 RUN='sudo -u arthasignal bash -lc'
 ENV='cd /srv/arthasignal/app && set -a && . ./.env && set +a &&'
+
+# 0. New code
+sudo -u arthasignal git pull
+
+# 1. Holdout policies plus the two research registry policies (run as the table owner, arthasignal)
+$RUN "$ENV .venv/bin/python -m src.database.holdout_guard"; echo "exit $?"
+
+# 2. Look at the policies on the registry
+sudo -u postgres psql -d arthasignal -c "select policyname, cmd, roles, qual, with_check from pg_policies where tablename = 'backtest_variant_trials'"
+
+# 3. Write check: one real insert dated today per writer table, as the app role and as the research role; everything is rolled back
+$RUN "$ENV .venv/bin/python -m src.ops.daily --write-check"; echo "exit $?"
+
+# 4. Register v1.3
 $RUN "$ENV .venv/bin/python -m src.simulation.register"; echo "exit $?"
 ```
 
-**Expected output (first run):**
-- `"role": "arthasignal_research"`;
-- `"family": "simulation_protocol"`;
-- `"protocol": "sim-protocol-v1.3"`;
-- `"config_sha256": "22f2065e095ac89c324e1ae6e4fb28f4ac51cb54755f8fa2cc59ff5f489b0c89"`;
-- `"fingerprint": "1847392bf212852c478f9e8e9ab28a5af328d97fb7f9765f4dfc3f3bf54efe89"`;
-- `"inserted": 1`, then exit 0.
+Step 1 runs this SQL:
+
+```sql
+ALTER TABLE backtest_variant_trials ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS research_registry_insert ON backtest_variant_trials;
+CREATE POLICY research_registry_insert ON backtest_variant_trials FOR INSERT TO arthasignal_research WITH CHECK (true);
+DROP POLICY IF EXISTS research_registry_read ON backtest_variant_trials;
+CREATE POLICY research_registry_read ON backtest_variant_trials FOR SELECT TO arthasignal_research USING (true);
+```
+
+**Expected output:**
+- **Step 1:** `policies applied: [...]` (the 33 holdout tables), then `research registry policies applied: ['backtest_variant_trials']`, exit 0.
+- **Step 2:** two rows, `research_registry_insert | INSERT | {arthasignal_research} | | true` and `research_registry_read | SELECT | {arthasignal_research} | true |`.
+- **Step 3:** ends with `"ok": true` and exit 0. Under `app`: `"role": "arthasignal"`, `"refused": []`, and every writer table `ok`. A table listed under `missing_created_by_writer_on_first_run` is created by its writer on the first run; that is not a failure. Under `research`: `"role": "arthasignal_research"`, `backtest_variant_trials` `ok`, `"registry_row_visible_after_insert": true`, every table under `must_stay_refused` `REFUSED`, `"holdout_evaluations_visible_rows": 0`, `latest_visible_price_date` before 2025-09-30, `"holdout_hidden": true`, `"nothing_else_opened": true`.
+- **Step 4 (first run):** `"role": "arthasignal_research"`, `"family": "simulation_protocol"`, `"protocol": "sim-protocol-v1.3"`, `"config_sha256": "22f2065e095ac89c324e1ae6e4fb28f4ac51cb54755f8fa2cc59ff5f489b0c89"`, `"fingerprint": "1847392bf212852c478f9e8e9ab28a5af328d97fb7f9765f4dfc3f3bf54efe89"`, `"inserted": 1`, exit 0.
 
 **After that:**
 - **A second run** prints `"inserted": 0`.
-- **The family count:** v1, v1.1 and v1.2 were registered on the laptop only, so on a server that never ran this command, `family_total` is 1 after the first run. It is higher by one for each earlier version registered there with a previous version of this part.
+- **The family count:** v1, v1.1 and v1.2 were registered on the laptop only, so on a server that never ran this command, `family_total` is 1 after the first run. It is higher by one for each earlier version registered there with a previous version of this part. `trials_total` is the number of rows in the registry; before step 1 the research role saw 0 here.
 - **A different `config_sha256`** means the server's `config/simulation_protocol.yaml` is not the committed v1.3. Stop and run `git status` there.
+- **If step 3 exits 1:** do not let the chain run (`sudo systemctl stop arthasignal-daily.timer`) and send the output. `REFUSED` names the table and the role that cannot write it.
 
 ## Security checklist
 

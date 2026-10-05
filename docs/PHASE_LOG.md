@@ -972,3 +972,45 @@ The backfill uses the Sharesansar daily page because it is the only source that 
 - **Implemented, waiting on inputs:** 2b (tool and label set ready; 120 labels to be done by the owner), 2c (consensus code ready; Tesseract done, PaddleOCR mobile and Surya running), 2d (checks ready; the cross-quarter check is not yet fed with data).
 - **Not met:** 2e (the 99% precision bar cannot be measured without the owner's labels, so no fundamental field is used), 3 (news archives still collecting: Sharesansar has reached 2024-04, MeroLagani 2025), 4 (VM unreachable; steps written).
 - **Partly met:** 5 (gaps closed where a source exists; the rest recorded as not found).
+
+## 2026-10-05: register failed on the server with a row-level-security error
+
+**Symptom:** on the server, `python -m src.simulation.register` stopped with `new row violates row-level security policy for table "backtest_variant_trials"`.
+
+**Cause:**
+- `backtest_variant_trials` has row-level security enabled and had no policy. 30 tables are in that state; it denies every row to any role that is not the owner.
+- On the server the owner is `arthasignal` (no superuser, no bypass), and `arthasignal_research` is not a member of it. So the research role was denied the insert, and its reads of the table returned 0 rows without an error.
+- On the laptop `arthasignal_research` is a member of the owner role and inherits its bypass. That is why the laptop and the read-only rehearsal never showed it.
+- `register` is the only live-day command that writes as the research role. Every chain writer (capture, integrity, league, avoid_writer, tips, quarterly_capture, news, grading, metrics, report, the run log) connects as the app role `arthasignal`, the owner, which row-level security does not restrict on these tables. The 33 holdout tables have FORCE row-level security, and their policy admits the app role because it is not the research role and the guard setting is off. Backup runs `pg_dump` as `postgres` and writes no row.
+
+**Reproduction:**
+- A scratch restore of today's dump, built as on the server: a new `arthasignal` login without superuser or bypass, `pg_restore --no-owner`, then `reassign_owner.sql`, `role_grants.sql`, the connect grants, `src.database.holdout_guard` and `src.scorecard.schema` as `arthasignal`.
+- `register` failed with the same error. The research role saw 0 of the 140 registry rows; `arthasignal` saw 140.
+- Real inserts dated today as `arthasignal`, one per writer table (32 tables, plus the `ops_alerts` update and the ephemeral-text delete), all succeeded.
+
+**Fix:**
+- `src.database.holdout_guard` now also adds two policies on `backtest_variant_trials` for `arthasignal_research`: insert, and read. It is the table that `restore_server.sh` and Part 11 of `docs/PROD_DEPLOY.md` already run.
+- The research role gets no update or delete there; it has no such grant. Nothing else changes:
+  - the 33 holdout policies are untouched;
+  - the research role still cannot insert into `scorecard_calls`, `scorecard_grades`, `scorecard_models`, `daily_prices` or `backtest_holdout_evaluations`;
+  - it still sees 0 rows of `backtest_holdout_evaluations` and no price on or after 2025-09-30.
+- **The registry's dates:** every registry row has a `created_at` after 2025-09-30, because that is when the variants were registered, not a market date. The rows hold names, fingerprints and descriptions, and no prices or holdout outcomes. A read policy that hid rows dated on or after 2025-09-30 would hide all 140, and set every trial count that research uses for its multiple-testing correction to 0. The read policy therefore shows the whole registry, as the laptop always has.
+
+**Write check:**
+- `python -m src.ops.daily --write-check` (or `python -m src.ops.write_check`) makes one real insert dated today into every writer table: as the app role, in foreign-key order, with an insert retried with fresh keys on a unique conflict.
+- As the research role it inserts into the registry and reads the row back, and checks that five tables stay refused and the holdout stays hidden.
+- Everything runs in transactions that are rolled back.
+- A permission or policy error is reported as `REFUSED` with the table and role. A constraint error is reported separately: PostgreSQL checks the policy before constraints, so such an error still shows the policy admitted the row.
+- **On the scratch restore:** without the fix it exits 1 with the registry `REFUSED`. With the fix it exits 0: every writer table `ok`, nothing left behind, and `register` prints `"inserted": 1` as `arthasignal_research`.
+
+**Tests:** `tests/test_server_roles.py` (6 tests) builds a throwaway database owned by a non-superuser, non-bypass role and applies `role_grants.sql` exactly. It inserts real rows dated today:
+- as the research role: refused before the policies, accepted after; `register` itself runs end to end;
+- as the app role: accepted.
+
+It also checks that the research role still cannot read holdout prices or holdout evaluations, or write any other table. Suite: 729 passed.
+
+**Found, not changed:**
+- On the server the research role also reads 0 rows from the other 29 tables that have row-level security and no policy. Examples: `price_quarantine`, `nepse_calendar_rules`, `company_sector_assignments`, `scorecard_grades`, `scorecard_models`, `quant_*`, `ops_runs`.
+- The live chain is not affected, because it reads them as the app role.
+- Research code, and the rehearsal (`--rehearse`), run on the server as the research role. There they read no quarantine and no calendar rules, so their results can differ from the laptop's.
+- Opening these tables to the research role is a separate decision and was not made here.

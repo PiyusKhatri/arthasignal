@@ -58,6 +58,8 @@ PROTECTED_COLUMNS: dict[str, str] = {
     "sentiment_exclusions": "period_end",
 }
 
+RESEARCH_REGISTRY_TABLES = ("backtest_variant_trials",)
+
 _allowed: ContextVar[str | None] = ContextVar("holdout_allowed", default=None)
 _research_engine: Engine | None = None
 
@@ -228,6 +230,24 @@ def apply_policies(engine: Engine) -> list[str]:
     return applied
 
 
+def apply_research_registry_policies(engine: Engine) -> list[str]:
+    applied = []
+    with engine.begin() as connection:
+        for table in RESEARCH_REGISTRY_TABLES:
+            if connection.execute(text("SELECT to_regclass(:t)"), {"t": f"public.{table}"}).scalar() is None:
+                continue
+            for statement in (
+                f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY",
+                f"DROP POLICY IF EXISTS research_registry_insert ON {table}",
+                f"CREATE POLICY research_registry_insert ON {table} FOR INSERT TO {RESEARCH_ROLE} WITH CHECK (true)",
+                f"DROP POLICY IF EXISTS research_registry_read ON {table}",
+                f"CREATE POLICY research_registry_read ON {table} FOR SELECT TO {RESEARCH_ROLE} USING (true)",
+            ):
+                connection.execute(text(statement))
+            applied.append(table)
+    return applied
+
+
 INCIDENT_DDL = (
     """
     CREATE TABLE IF NOT EXISTS holdout_incidents (
@@ -272,6 +292,7 @@ def main() -> None:
     from src.database.connection import engine
 
     print("policies applied:", apply_policies(engine))
+    print("research registry policies applied:", apply_research_registry_policies(engine))
 
 
 if __name__ == "__main__":
