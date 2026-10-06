@@ -1014,3 +1014,76 @@ It also checks that the research role still cannot read holdout prices or holdou
 - The live chain is not affected, because it reads them as the app role.
 - Research code, and the rehearsal (`--rehearse`), run on the server as the research role. There they read no quarantine and no calendar rules, so their results can differ from the laptop's.
 - Opening these tables to the research role is a separate decision and was not made here.
+
+## Phase 2 step 2c-2e - Why extracted fundamentals miss the labels, v2 readers, and the GPU pilot
+
+- **Inputs:** the owner's 120 labels (`docs/labels/labels`), with the research role only and no holdout data. Every labelled report was published before 2025-09-30.
+- **Cause of every mismatch** (`src/archive/fundamentals_causes.py`, output `docs/fundamentals_causes.json`):
+  - For each method value that misses a label, it searches the report's own texts (Tesseract, PaddleOCR mobile, text-layer PDF) for the label's printed number and for the method's number.
+  - It then names one cause:
+    - unit scale;
+    - period (another column of the same row: quarter-only, year-to-date or previous period);
+    - consolidation (group or bank column, or the attributable row);
+    - sign;
+    - wrong row;
+    - digit misread;
+    - Nepali numeral (Devanagari digits that the English PaddleOCR model cannot read, or look-alike digits);
+    - headline rounding;
+    - likely label error;
+    - unexplained.
+  - A label error needs evidence:
+    - the report prints the figure in brackets while the label is positive;
+    - the label unit gives an impossible amount for a NEPSE company;
+    - the headline and the report text agree on another figure;
+    - the label says "not in report" while the field's own row prints it;
+    - the same figure is labelled for another company.
+- **Before (headline and the original readers), 530 mismatches:** wrong row 216, digit misread 94, period 62, likely label error 63, unit scale 53, unexplained 18, consolidation 12, headline rounding 6, Nepali numeral 5, sign 1. Per field: net profit 128, reserves 87, EPS 77, net worth 56, NPL 52, paid-up capital 51, book value 41, capital adequacy 38.
+- **The headline's 38 misses are mostly definitions, not reading errors:**
+  - 14 likely label errors, for example L050 PRIN, where the image prints १३०,८१९ thousand and the headline says Rs 130.81 million, while the label carries HGI's 158,561;
+  - 6 rounding: Sharesansar prints 0.01 million or 0.01 billion, and truncates;
+  - 11 Nepali reports where neither figure is readable in any OCR text;
+  - 3 wrong row. In BNL the headline took "Owners of the Company" (268,965 against the group total of 294,299); the OCR garbled that row's label, so the classifier counts it as wrong row;
+  - 2 period. L073 LBL is really the bank column (552,870) against a group label (608,342);
+  - 1 sign and 1 digit.
+- **Labels to recheck: 42 reports** (`docs/labels/RECHECK.md`):
+  - 25 unit reasons: for example HBL, NMB, CZBIL and NRIC labelled "thousands" on rupee figures; BPCL "rupees" on thousands;
+  - 32 sign reasons: brackets dropped, for example BNT (118,941), SHPC, GGBSL, NMBMF;
+  - 37 net worth or EPS marked absent although printed ("Total equity attributable to equity holders");
+  - 18 duplicate-value reasons: L050 PRIN repeats L040 HGI's net profit, reserves and paid-up capital; L051 LICN and L062 BPCL share 310,411,314; L061 NIFRA and L070 PRIN share 112,300,314;
+  - 5 quarter mismatches with the announcement.
+  The labels are not changed in code; the image decides.
+- **Fixes in code** (`src/archive/statement_text.py`, the v2 readers):
+  - the unit comes from the nearest unit line above the figure, because SANIMA prints its balance sheet in NPR and its profit and loss in '000. It understands हजारमा, दश लाखमा (millions), करोड, `Amount in NPR` and `'000`, and amounts outside NEPSE-plausible ranges fall back to rupees;
+  - period: year-to-date is taken from "This quarter / Up to this quarter" headers and from 4-value rows;
+  - consolidation: group and bank blocks, from headers or 8-value rows, following the label's basis;
+  - rows are mapped by label text with exclusions: "Total Equity and Liabilities", "before tax", non-controlling, prose sentences, formula references such as (F-3.12-3.13), years and "29th";
+  - OCR dot groups (311.862.091) are read as thousands separators.
+- **Measurement:**
+  - headline precision is also reported within its printed step;
+  - the rule is now explicit: a field is used only if a method with the accounting checks applied produces at least 30 values on the labelled set, makes at most 1 error and has precision of at least 0.99.
+  - The minimum of 30 is new. Without it, a 1-of-1 text-PDF value passed.
+- **After the fixes**, mismatches went from 530 to 377 for the same engines (headline excluded). Precision, right/produced:
+
+| Method | Net profit | EPS | Book value | Net worth | Reserves | Paid-up capital | NPL | Capital adequacy |
+|---|---|---|---|---|---|---|---|---|
+| Headline | 56/94 (0.60) | | | | | | | |
+| Headline within printed step | 58/94 (0.62) | | | | | | | |
+| PaddleOCR mobile, before | 39/83 (0.47) | 22/54 (0.41) | 17/30 (0.57) | 17/51 (0.33) | 30/76 (0.39) | 60/88 (0.68) | 3/36 (0.08) | 17/40 (0.42) |
+| PaddleOCR mobile, v2 | 48/86 (0.56) | 22/52 (0.42) | 16/30 (0.53) | 19/42 (0.45) | 31/72 (0.43) | 70/86 (0.81) | 23/37 (0.62) | 22/39 (0.56) |
+| Consensus with checks, before | 11/15 (0.73) | 10/14 (0.71) | 11/13 (0.85) | 5/16 (0.31) | 11/21 (0.52) | 27/31 (0.87) | 1/11 (0.09) | 7/11 (0.64) |
+| Consensus with checks, v2 | 17/20 (0.85) | 6/8 (0.75) | 11/13 (0.85) | 7/12 (0.58) | 13/24 (0.54) | 38/42 (0.90) | 7/11 (0.64) | 8/11 (0.73) |
+
+- **No field reaches the bar.**
+  - With the 42 reports flagged for recheck left out (sensitivity only), consensus with checks gives paid-up capital 28/29, net profit 13/14 and book value 7/7. All are below 30 values, and paid-up capital and net profit are below 99%.
+- **Surya:** 0 values, because the runner saved only after each 20-image block. At about 200 s per image on the laptop, the process ended before the first block was written (`derived/ocr/surya` is empty, and the log has no error line). Every engine now saves each image as it is read.
+- **GPU pilot** (`docs/GPU_RUN_PLAN.md`):
+  - AWS Mumbai `g6.xlarge`, with the 8-vCPU quota approved;
+  - 200 images, all 120 labelled plus 80 across 2014-2025 (`src/archive/gpu_pilot.py`, 288 MB archive);
+  - Surya plus Qwen2.5-VL-7B through vLLM with images capped at 3 megapixels, and per-image timing;
+  - the VLM output is measured as `qwen25vl7b` and `qwen25vl7b_checked`;
+  - estimated $2-3 for the pilot and about $9-10 for the 2,101-image development manifest;
+  - exact CLI steps, a 4-hour self-terminate switch and a terminate-and-verify step. Nothing was launched.
+- **What the fundamentals pillar can contribute now:**
+  - only the publication dates of reports and the Sharesansar headline net profit, as a dated, rounded headline figure with its own measured agreement (0.62 within its printed step, 0.77 on the reports not flagged for recheck);
+  - no extracted statement field until one passes the rule after the recheck and the GPU pilot.
+- Tests: 15 added (`tests/test_fundamentals_causes.py`).

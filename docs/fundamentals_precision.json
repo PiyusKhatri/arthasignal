@@ -1,0 +1,2293 @@
+{
+ "labelled_reports_used": 120,
+ "rule": "a field is used only if a method with the accounting checks applied produces at least 30 values on the labelled set, makes at most 1 error and has precision of at least 0.99; Wilson 95% intervals reported",
+ "definition": "v2 readers and the measurement use the label's basis (group or standalone) and EPS annualization; net profit is year to date",
+ "results": {
+  "tesseract": {
+   "net_profit": {
+    "present_in_gold": 119,
+    "produced": 59,
+    "right": 14,
+    "errors": 45,
+    "precision": 0.23728813559322035,
+    "precision_ci95": [
+     0.1469448625694613,
+     0.3597513386730279
+    ],
+    "coverage": 0.11764705882352941,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "eps": {
+    "present_in_gold": 106,
+    "produced": 63,
+    "right": 18,
+    "errors": 45,
+    "precision": 0.2857142857142857,
+    "precision_ci95": [
+     0.18903043457341695,
+     0.4070295041473797
+    ],
+    "coverage": 0.16981132075471697,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "book_value_per_share": {
+    "present_in_gold": 99,
+    "produced": 40,
+    "right": 12,
+    "errors": 28,
+    "precision": 0.3,
+    "precision_ci95": [
+     0.18074670915695296,
+     0.454303106543204
+    ],
+    "coverage": 0.12121212121212122,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "net_worth": {
+    "present_in_gold": 41,
+    "produced": 27,
+    "right": 6,
+    "errors": 21,
+    "precision": 0.2222222222222222,
+    "precision_ci95": [
+     0.10607095489408958,
+     0.4075729546307081
+    ],
+    "coverage": 0.14634146341463414,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "reserves": {
+    "present_in_gold": 112,
+    "produced": 53,
+    "right": 13,
+    "errors": 40,
+    "precision": 0.24528301886792453,
+    "precision_ci95": [
+     0.14932762711854577,
+     0.3756681506217008
+    ],
+    "coverage": 0.11607142857142858,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "paid_up_capital": {
+    "present_in_gold": 118,
+    "produced": 53,
+    "right": 31,
+    "errors": 22,
+    "precision": 0.5849056603773585,
+    "precision_ci95": [
+     0.45094182384453757,
+     0.7073929169087134
+    ],
+    "coverage": 0.2627118644067797,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "npl_ratio": {
+    "present_in_gold": 51,
+    "produced": 19,
+    "right": 1,
+    "errors": 18,
+    "precision": 0.05263157894736842,
+    "precision_ci95": [
+     0.009351752490529969,
+     0.2463921533654521
+    ],
+    "coverage": 0.0196078431372549,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "capital_adequacy": {
+    "present_in_gold": 53,
+    "produced": 23,
+    "right": 9,
+    "errors": 14,
+    "precision": 0.391304347826087,
+    "precision_ci95": [
+     0.22157377982382145,
+     0.5921482039625402
+    ],
+    "coverage": 0.16981132075471697,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   }
+  },
+  "paddleocr_mobile": {
+   "net_profit": {
+    "present_in_gold": 119,
+    "produced": 83,
+    "right": 39,
+    "errors": 44,
+    "precision": 0.46987951807228917,
+    "precision_ci95": [
+     0.36623168109196985,
+     0.5761922263440977
+    ],
+    "coverage": 0.3277310924369748,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "eps": {
+    "present_in_gold": 106,
+    "produced": 54,
+    "right": 22,
+    "errors": 32,
+    "precision": 0.4074074074074074,
+    "precision_ci95": [
+     0.2867801518924045,
+     0.5403338975114846
+    ],
+    "coverage": 0.20754716981132076,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "book_value_per_share": {
+    "present_in_gold": 99,
+    "produced": 30,
+    "right": 17,
+    "errors": 13,
+    "precision": 0.5666666666666667,
+    "precision_ci95": [
+     0.3919700954540873,
+     0.7262276256938489
+    ],
+    "coverage": 0.1717171717171717,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "net_worth": {
+    "present_in_gold": 41,
+    "produced": 51,
+    "right": 17,
+    "errors": 34,
+    "precision": 0.3333333333333333,
+    "precision_ci95": [
+     0.21969755762722826,
+     0.4703187803351943
+    ],
+    "coverage": 0.4146341463414634,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "reserves": {
+    "present_in_gold": 112,
+    "produced": 76,
+    "right": 30,
+    "errors": 46,
+    "precision": 0.39473684210526316,
+    "precision_ci95": [
+     0.2924641219449393,
+     0.5071390924195023
+    ],
+    "coverage": 0.26785714285714285,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "paid_up_capital": {
+    "present_in_gold": 118,
+    "produced": 88,
+    "right": 60,
+    "errors": 28,
+    "precision": 0.6818181818181818,
+    "precision_ci95": [
+     0.5786503842476456,
+     0.7697756013623611
+    ],
+    "coverage": 0.5084745762711864,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "npl_ratio": {
+    "present_in_gold": 51,
+    "produced": 36,
+    "right": 3,
+    "errors": 33,
+    "precision": 0.08333333333333333,
+    "precision_ci95": [
+     0.0287480892712918,
+     0.21827010276918848
+    ],
+    "coverage": 0.058823529411764705,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "capital_adequacy": {
+    "present_in_gold": 53,
+    "produced": 40,
+    "right": 17,
+    "errors": 23,
+    "precision": 0.425,
+    "precision_ci95": [
+     0.28509168524815875,
+     0.5780519956394001
+    ],
+    "coverage": 0.32075471698113206,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   }
+  },
+  "surya": {
+   "net_profit": {
+    "present_in_gold": 119,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "eps": {
+    "present_in_gold": 106,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "book_value_per_share": {
+    "present_in_gold": 99,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "net_worth": {
+    "present_in_gold": 41,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "reserves": {
+    "present_in_gold": 112,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "paid_up_capital": {
+    "present_in_gold": 118,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "npl_ratio": {
+    "present_in_gold": 51,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "capital_adequacy": {
+    "present_in_gold": 53,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   }
+  },
+  "text_pdf": {
+   "net_profit": {
+    "present_in_gold": 119,
+    "produced": 1,
+    "right": 0,
+    "errors": 1,
+    "precision": 0.0,
+    "precision_ci95": [
+     0.0,
+     0.7934567085261071
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "eps": {
+    "present_in_gold": 106,
+    "produced": 1,
+    "right": 1,
+    "errors": 0,
+    "precision": 1.0,
+    "precision_ci95": [
+     0.20654329147389294,
+     1.0
+    ],
+    "coverage": 0.009433962264150943,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "book_value_per_share": {
+    "present_in_gold": 99,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "net_worth": {
+    "present_in_gold": 41,
+    "produced": 1,
+    "right": 0,
+    "errors": 1,
+    "precision": 0.0,
+    "precision_ci95": [
+     0.0,
+     0.7934567085261071
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "reserves": {
+    "present_in_gold": 112,
+    "produced": 1,
+    "right": 0,
+    "errors": 1,
+    "precision": 0.0,
+    "precision_ci95": [
+     0.0,
+     0.7934567085261071
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "paid_up_capital": {
+    "present_in_gold": 118,
+    "produced": 1,
+    "right": 0,
+    "errors": 1,
+    "precision": 0.0,
+    "precision_ci95": [
+     0.0,
+     0.7934567085261071
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "npl_ratio": {
+    "present_in_gold": 51,
+    "produced": 1,
+    "right": 0,
+    "errors": 1,
+    "precision": 0.0,
+    "precision_ci95": [
+     0.0,
+     0.7934567085261071
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "capital_adequacy": {
+    "present_in_gold": 53,
+    "produced": 1,
+    "right": 0,
+    "errors": 1,
+    "precision": 0.0,
+    "precision_ci95": [
+     0.0,
+     0.7934567085261071
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   }
+  },
+  "text_pdf_checked": {
+   "net_profit": {
+    "present_in_gold": 119,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "eps": {
+    "present_in_gold": 106,
+    "produced": 1,
+    "right": 1,
+    "errors": 0,
+    "precision": 1.0,
+    "precision_ci95": [
+     0.20654329147389294,
+     1.0
+    ],
+    "coverage": 0.009433962264150943,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "book_value_per_share": {
+    "present_in_gold": 99,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "net_worth": {
+    "present_in_gold": 41,
+    "produced": 1,
+    "right": 0,
+    "errors": 1,
+    "precision": 0.0,
+    "precision_ci95": [
+     0.0,
+     0.7934567085261071
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "reserves": {
+    "present_in_gold": 112,
+    "produced": 1,
+    "right": 0,
+    "errors": 1,
+    "precision": 0.0,
+    "precision_ci95": [
+     0.0,
+     0.7934567085261071
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "paid_up_capital": {
+    "present_in_gold": 118,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "npl_ratio": {
+    "present_in_gold": 51,
+    "produced": 1,
+    "right": 0,
+    "errors": 1,
+    "precision": 0.0,
+    "precision_ci95": [
+     0.0,
+     0.7934567085261071
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "capital_adequacy": {
+    "present_in_gold": 53,
+    "produced": 1,
+    "right": 0,
+    "errors": 1,
+    "precision": 0.0,
+    "precision_ci95": [
+     0.0,
+     0.7934567085261071
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   }
+  },
+  "consensus": {
+   "net_profit": {
+    "present_in_gold": 119,
+    "produced": 21,
+    "right": 12,
+    "errors": 9,
+    "precision": 0.5714285714285714,
+    "precision_ci95": [
+     0.3654621629703244,
+     0.7553030051347894
+    ],
+    "coverage": 0.10084033613445378,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "eps": {
+    "present_in_gold": 106,
+    "produced": 16,
+    "right": 10,
+    "errors": 6,
+    "precision": 0.625,
+    "precision_ci95": [
+     0.3864064709793481,
+     0.815190174452472
+    ],
+    "coverage": 0.09433962264150944,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "book_value_per_share": {
+    "present_in_gold": 99,
+    "produced": 14,
+    "right": 11,
+    "errors": 3,
+    "precision": 0.7857142857142857,
+    "precision_ci95": [
+     0.5241027622679172,
+     0.9242875166308363
+    ],
+    "coverage": 0.1111111111111111,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "net_worth": {
+    "present_in_gold": 41,
+    "produced": 16,
+    "right": 5,
+    "errors": 11,
+    "precision": 0.3125,
+    "precision_ci95": [
+     0.14164435051961052,
+     0.5559606813326594
+    ],
+    "coverage": 0.12195121951219512,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "reserves": {
+    "present_in_gold": 112,
+    "produced": 21,
+    "right": 11,
+    "errors": 10,
+    "precision": 0.5238095238095238,
+    "precision_ci95": [
+     0.32369217900266756,
+     0.7165628770323705
+    ],
+    "coverage": 0.09821428571428571,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "paid_up_capital": {
+    "present_in_gold": 118,
+    "produced": 32,
+    "right": 27,
+    "errors": 5,
+    "precision": 0.84375,
+    "precision_ci95": [
+     0.6824550744643347,
+     0.9313568089337279
+    ],
+    "coverage": 0.2288135593220339,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "npl_ratio": {
+    "present_in_gold": 51,
+    "produced": 11,
+    "right": 1,
+    "errors": 10,
+    "precision": 0.09090909090909091,
+    "precision_ci95": [
+     0.01623175226282597,
+     0.3773646254862038
+    ],
+    "coverage": 0.0196078431372549,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "capital_adequacy": {
+    "present_in_gold": 53,
+    "produced": 12,
+    "right": 7,
+    "errors": 5,
+    "precision": 0.5833333333333334,
+    "precision_ci95": [
+     0.3195073356553728,
+     0.8067425380947535
+    ],
+    "coverage": 0.1320754716981132,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   }
+  },
+  "consensus_checked": {
+   "net_profit": {
+    "present_in_gold": 119,
+    "produced": 15,
+    "right": 11,
+    "errors": 4,
+    "precision": 0.7333333333333333,
+    "precision_ci95": [
+     0.4804911034231324,
+     0.8910272389681718
+    ],
+    "coverage": 0.09243697478991597,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "eps": {
+    "present_in_gold": 106,
+    "produced": 14,
+    "right": 10,
+    "errors": 4,
+    "precision": 0.7142857142857143,
+    "precision_ci95": [
+     0.4535045882751561,
+     0.882788120898909
+    ],
+    "coverage": 0.09433962264150944,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "book_value_per_share": {
+    "present_in_gold": 99,
+    "produced": 13,
+    "right": 11,
+    "errors": 2,
+    "precision": 0.8461538461538461,
+    "precision_ci95": [
+     0.5776482949136899,
+     0.9567427368172621
+    ],
+    "coverage": 0.1111111111111111,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "net_worth": {
+    "present_in_gold": 41,
+    "produced": 16,
+    "right": 5,
+    "errors": 11,
+    "precision": 0.3125,
+    "precision_ci95": [
+     0.14164435051961052,
+     0.5559606813326594
+    ],
+    "coverage": 0.12195121951219512,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "reserves": {
+    "present_in_gold": 112,
+    "produced": 21,
+    "right": 11,
+    "errors": 10,
+    "precision": 0.5238095238095238,
+    "precision_ci95": [
+     0.32369217900266756,
+     0.7165628770323705
+    ],
+    "coverage": 0.09821428571428571,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "paid_up_capital": {
+    "present_in_gold": 118,
+    "produced": 31,
+    "right": 27,
+    "errors": 4,
+    "precision": 0.8709677419354839,
+    "precision_ci95": [
+     0.7114724304561464,
+     0.9486579883535524
+    ],
+    "coverage": 0.2288135593220339,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "npl_ratio": {
+    "present_in_gold": 51,
+    "produced": 11,
+    "right": 1,
+    "errors": 10,
+    "precision": 0.09090909090909091,
+    "precision_ci95": [
+     0.01623175226282597,
+     0.3773646254862038
+    ],
+    "coverage": 0.0196078431372549,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "capital_adequacy": {
+    "present_in_gold": 53,
+    "produced": 11,
+    "right": 7,
+    "errors": 4,
+    "precision": 0.6363636363636364,
+    "precision_ci95": [
+     0.35379677689163724,
+     0.8483377638586862
+    ],
+    "coverage": 0.1320754716981132,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   }
+  },
+  "headline": {
+   "net_profit": {
+    "present_in_gold": 119,
+    "produced": 94,
+    "right": 56,
+    "errors": 38,
+    "precision": 0.5957446808510638,
+    "precision_ci95": [
+     0.49467113952773195,
+     0.689299686787455
+    ],
+    "coverage": 0.47058823529411764,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "eps": {
+    "present_in_gold": 106,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "book_value_per_share": {
+    "present_in_gold": 99,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "net_worth": {
+    "present_in_gold": 41,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "reserves": {
+    "present_in_gold": 112,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "paid_up_capital": {
+    "present_in_gold": 118,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "npl_ratio": {
+    "present_in_gold": 51,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "capital_adequacy": {
+    "present_in_gold": 53,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   }
+  },
+  "headline_printed_precision": {
+   "net_profit": {
+    "present_in_gold": 119,
+    "produced": 94,
+    "right": 58,
+    "errors": 36,
+    "precision": 0.6170212765957447,
+    "precision_ci95": [
+     0.5159937196695321,
+     0.7088595124934742
+    ],
+    "coverage": 0.48739495798319327,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "eps": {
+    "present_in_gold": 106,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "book_value_per_share": {
+    "present_in_gold": 99,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "net_worth": {
+    "present_in_gold": 41,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "reserves": {
+    "present_in_gold": 112,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "paid_up_capital": {
+    "present_in_gold": 118,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "npl_ratio": {
+    "present_in_gold": 51,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "capital_adequacy": {
+    "present_in_gold": 53,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   }
+  },
+  "tesseract_v2": {
+   "net_profit": {
+    "present_in_gold": 119,
+    "produced": 57,
+    "right": 19,
+    "errors": 38,
+    "precision": 0.3333333333333333,
+    "precision_ci95": [
+     0.2249363598222627,
+     0.4627773097722252
+    ],
+    "coverage": 0.15966386554621848,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "eps": {
+    "present_in_gold": 106,
+    "produced": 53,
+    "right": 14,
+    "errors": 39,
+    "precision": 0.2641509433962264,
+    "precision_ci95": [
+     0.16437206511316813,
+     0.3958092105722453
+    ],
+    "coverage": 0.1320754716981132,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "book_value_per_share": {
+    "present_in_gold": 99,
+    "produced": 37,
+    "right": 12,
+    "errors": 25,
+    "precision": 0.32432432432432434,
+    "precision_ci95": [
+     0.19633077820815478,
+     0.48536631495176064
+    ],
+    "coverage": 0.12121212121212122,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "net_worth": {
+    "present_in_gold": 41,
+    "produced": 20,
+    "right": 8,
+    "errors": 12,
+    "precision": 0.4,
+    "precision_ci95": [
+     0.21880396741419272,
+     0.613422057684794
+    ],
+    "coverage": 0.1951219512195122,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "reserves": {
+    "present_in_gold": 112,
+    "produced": 47,
+    "right": 14,
+    "errors": 33,
+    "precision": 0.2978723404255319,
+    "precision_ci95": [
+     0.18651084151016262,
+     0.439779440463654
+    ],
+    "coverage": 0.125,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "paid_up_capital": {
+    "present_in_gold": 118,
+    "produced": 49,
+    "right": 40,
+    "errors": 9,
+    "precision": 0.8163265306122449,
+    "precision_ci95": [
+     0.6864212843271743,
+     0.9002377116154164
+    ],
+    "coverage": 0.3389830508474576,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "npl_ratio": {
+    "present_in_gold": 51,
+    "produced": 17,
+    "right": 7,
+    "errors": 10,
+    "precision": 0.4117647058823529,
+    "precision_ci95": [
+     0.21610786039131383,
+     0.6399492561448447
+    ],
+    "coverage": 0.13725490196078433,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "capital_adequacy": {
+    "present_in_gold": 53,
+    "produced": 24,
+    "right": 9,
+    "errors": 15,
+    "precision": 0.375,
+    "precision_ci95": [
+     0.21159133433631458,
+     0.5729038096209293
+    ],
+    "coverage": 0.16981132075471697,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   }
+  },
+  "paddleocr_mobile_v2": {
+   "net_profit": {
+    "present_in_gold": 119,
+    "produced": 86,
+    "right": 48,
+    "errors": 38,
+    "precision": 0.5581395348837209,
+    "precision_ci95": [
+     0.4529326746260169,
+     0.6583743368252482
+    ],
+    "coverage": 0.40336134453781514,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "eps": {
+    "present_in_gold": 106,
+    "produced": 52,
+    "right": 22,
+    "errors": 30,
+    "precision": 0.4230769230769231,
+    "precision_ci95": [
+     0.29867847908860445,
+     0.558059150205685
+    ],
+    "coverage": 0.20754716981132076,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "book_value_per_share": {
+    "present_in_gold": 99,
+    "produced": 30,
+    "right": 16,
+    "errors": 14,
+    "precision": 0.5333333333333333,
+    "precision_ci95": [
+     0.3614201328152505,
+     0.6976787277587178
+    ],
+    "coverage": 0.16161616161616163,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "net_worth": {
+    "present_in_gold": 41,
+    "produced": 42,
+    "right": 19,
+    "errors": 23,
+    "precision": 0.4523809523809524,
+    "precision_ci95": [
+     0.3122316381863852,
+     0.6005113725287732
+    ],
+    "coverage": 0.4634146341463415,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "reserves": {
+    "present_in_gold": 112,
+    "produced": 72,
+    "right": 31,
+    "errors": 41,
+    "precision": 0.4305555555555556,
+    "precision_ci95": [
+     0.3225772336645315,
+     0.5455690079759403
+    ],
+    "coverage": 0.2767857142857143,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "paid_up_capital": {
+    "present_in_gold": 118,
+    "produced": 86,
+    "right": 70,
+    "errors": 16,
+    "precision": 0.813953488372093,
+    "precision_ci95": [
+     0.7189479436715508,
+     0.8821099181652817
+    ],
+    "coverage": 0.5932203389830508,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "npl_ratio": {
+    "present_in_gold": 51,
+    "produced": 37,
+    "right": 23,
+    "errors": 14,
+    "precision": 0.6216216216216216,
+    "precision_ci95": [
+     0.4610014255281996,
+     0.7593621253610898
+    ],
+    "coverage": 0.45098039215686275,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "capital_adequacy": {
+    "present_in_gold": 53,
+    "produced": 39,
+    "right": 22,
+    "errors": 17,
+    "precision": 0.5641025641025641,
+    "precision_ci95": [
+     0.40975423474522105,
+     0.7069547583829534
+    ],
+    "coverage": 0.41509433962264153,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   }
+  },
+  "surya_v2": {
+   "net_profit": {
+    "present_in_gold": 119,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "eps": {
+    "present_in_gold": 106,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "book_value_per_share": {
+    "present_in_gold": 99,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "net_worth": {
+    "present_in_gold": 41,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "reserves": {
+    "present_in_gold": 112,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "paid_up_capital": {
+    "present_in_gold": 118,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "npl_ratio": {
+    "present_in_gold": 51,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "capital_adequacy": {
+    "present_in_gold": 53,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   }
+  },
+  "text_pdf_v2": {
+   "net_profit": {
+    "present_in_gold": 119,
+    "produced": 1,
+    "right": 0,
+    "errors": 1,
+    "precision": 0.0,
+    "precision_ci95": [
+     0.0,
+     0.7934567085261071
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "eps": {
+    "present_in_gold": 106,
+    "produced": 1,
+    "right": 1,
+    "errors": 0,
+    "precision": 1.0,
+    "precision_ci95": [
+     0.20654329147389294,
+     1.0
+    ],
+    "coverage": 0.009433962264150943,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "book_value_per_share": {
+    "present_in_gold": 99,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "net_worth": {
+    "present_in_gold": 41,
+    "produced": 1,
+    "right": 1,
+    "errors": 0,
+    "precision": 1.0,
+    "precision_ci95": [
+     0.20654329147389294,
+     1.0
+    ],
+    "coverage": 0.024390243902439025,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "reserves": {
+    "present_in_gold": 112,
+    "produced": 1,
+    "right": 0,
+    "errors": 1,
+    "precision": 0.0,
+    "precision_ci95": [
+     0.0,
+     0.7934567085261071
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "paid_up_capital": {
+    "present_in_gold": 118,
+    "produced": 1,
+    "right": 1,
+    "errors": 0,
+    "precision": 1.0,
+    "precision_ci95": [
+     0.20654329147389294,
+     1.0
+    ],
+    "coverage": 0.00847457627118644,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "npl_ratio": {
+    "present_in_gold": 51,
+    "produced": 1,
+    "right": 1,
+    "errors": 0,
+    "precision": 1.0,
+    "precision_ci95": [
+     0.20654329147389294,
+     1.0
+    ],
+    "coverage": 0.0196078431372549,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "capital_adequacy": {
+    "present_in_gold": 53,
+    "produced": 1,
+    "right": 0,
+    "errors": 1,
+    "precision": 0.0,
+    "precision_ci95": [
+     0.0,
+     0.7934567085261071
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   }
+  },
+  "text_pdf_v2_checked": {
+   "net_profit": {
+    "present_in_gold": 119,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "eps": {
+    "present_in_gold": 106,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "book_value_per_share": {
+    "present_in_gold": 99,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "net_worth": {
+    "present_in_gold": 41,
+    "produced": 1,
+    "right": 1,
+    "errors": 0,
+    "precision": 1.0,
+    "precision_ci95": [
+     0.20654329147389294,
+     1.0
+    ],
+    "coverage": 0.024390243902439025,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "reserves": {
+    "present_in_gold": 112,
+    "produced": 1,
+    "right": 0,
+    "errors": 1,
+    "precision": 0.0,
+    "precision_ci95": [
+     0.0,
+     0.7934567085261071
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "paid_up_capital": {
+    "present_in_gold": 118,
+    "produced": 1,
+    "right": 1,
+    "errors": 0,
+    "precision": 1.0,
+    "precision_ci95": [
+     0.20654329147389294,
+     1.0
+    ],
+    "coverage": 0.00847457627118644,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "npl_ratio": {
+    "present_in_gold": 51,
+    "produced": 1,
+    "right": 1,
+    "errors": 0,
+    "precision": 1.0,
+    "precision_ci95": [
+     0.20654329147389294,
+     1.0
+    ],
+    "coverage": 0.0196078431372549,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "capital_adequacy": {
+    "present_in_gold": 53,
+    "produced": 1,
+    "right": 0,
+    "errors": 1,
+    "precision": 0.0,
+    "precision_ci95": [
+     0.0,
+     0.7934567085261071
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   }
+  },
+  "consensus_v2": {
+   "net_profit": {
+    "present_in_gold": 119,
+    "produced": 26,
+    "right": 17,
+    "errors": 9,
+    "precision": 0.6538461538461539,
+    "precision_ci95": [
+     0.46220229009632996,
+     0.8058798502714787
+    ],
+    "coverage": 0.14285714285714285,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "eps": {
+    "present_in_gold": 106,
+    "produced": 12,
+    "right": 7,
+    "errors": 5,
+    "precision": 0.5833333333333334,
+    "precision_ci95": [
+     0.3195073356553728,
+     0.8067425380947535
+    ],
+    "coverage": 0.0660377358490566,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "book_value_per_share": {
+    "present_in_gold": 99,
+    "produced": 13,
+    "right": 11,
+    "errors": 2,
+    "precision": 0.8461538461538461,
+    "precision_ci95": [
+     0.5776482949136899,
+     0.9567427368172621
+    ],
+    "coverage": 0.1111111111111111,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "net_worth": {
+    "present_in_gold": 41,
+    "produced": 12,
+    "right": 7,
+    "errors": 5,
+    "precision": 0.5833333333333334,
+    "precision_ci95": [
+     0.3195073356553728,
+     0.8067425380947535
+    ],
+    "coverage": 0.17073170731707318,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "reserves": {
+    "present_in_gold": 112,
+    "produced": 24,
+    "right": 13,
+    "errors": 11,
+    "precision": 0.5416666666666666,
+    "precision_ci95": [
+     0.35074553553106635,
+     0.7210894164831857
+    ],
+    "coverage": 0.11607142857142858,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "paid_up_capital": {
+    "present_in_gold": 118,
+    "produced": 42,
+    "right": 38,
+    "errors": 4,
+    "precision": 0.9047619047619048,
+    "precision_ci95": [
+     0.7793460477494668,
+     0.9623383611716879
+    ],
+    "coverage": 0.3220338983050847,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "npl_ratio": {
+    "present_in_gold": 51,
+    "produced": 11,
+    "right": 7,
+    "errors": 4,
+    "precision": 0.6363636363636364,
+    "precision_ci95": [
+     0.35379677689163724,
+     0.8483377638586862
+    ],
+    "coverage": 0.13725490196078433,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "capital_adequacy": {
+    "present_in_gold": 53,
+    "produced": 12,
+    "right": 8,
+    "errors": 4,
+    "precision": 0.6666666666666666,
+    "precision_ci95": [
+     0.3906175873976139,
+     0.8618821601026385
+    ],
+    "coverage": 0.1509433962264151,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   }
+  },
+  "consensus_v2_checked": {
+   "net_profit": {
+    "present_in_gold": 119,
+    "produced": 20,
+    "right": 17,
+    "errors": 3,
+    "precision": 0.85,
+    "precision_ci95": [
+     0.6395767041130426,
+     0.9476322080405041
+    ],
+    "coverage": 0.14285714285714285,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "eps": {
+    "present_in_gold": 106,
+    "produced": 8,
+    "right": 6,
+    "errors": 2,
+    "precision": 0.75,
+    "precision_ci95": [
+     0.40926987910258916,
+     0.9285223111419724
+    ],
+    "coverage": 0.05660377358490566,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "book_value_per_share": {
+    "present_in_gold": 99,
+    "produced": 13,
+    "right": 11,
+    "errors": 2,
+    "precision": 0.8461538461538461,
+    "precision_ci95": [
+     0.5776482949136899,
+     0.9567427368172621
+    ],
+    "coverage": 0.1111111111111111,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "net_worth": {
+    "present_in_gold": 41,
+    "produced": 12,
+    "right": 7,
+    "errors": 5,
+    "precision": 0.5833333333333334,
+    "precision_ci95": [
+     0.3195073356553728,
+     0.8067425380947535
+    ],
+    "coverage": 0.17073170731707318,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "reserves": {
+    "present_in_gold": 112,
+    "produced": 24,
+    "right": 13,
+    "errors": 11,
+    "precision": 0.5416666666666666,
+    "precision_ci95": [
+     0.35074553553106635,
+     0.7210894164831857
+    ],
+    "coverage": 0.11607142857142858,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "paid_up_capital": {
+    "present_in_gold": 118,
+    "produced": 42,
+    "right": 38,
+    "errors": 4,
+    "precision": 0.9047619047619048,
+    "precision_ci95": [
+     0.7793460477494668,
+     0.9623383611716879
+    ],
+    "coverage": 0.3220338983050847,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "npl_ratio": {
+    "present_in_gold": 51,
+    "produced": 11,
+    "right": 7,
+    "errors": 4,
+    "precision": 0.6363636363636364,
+    "precision_ci95": [
+     0.35379677689163724,
+     0.8483377638586862
+    ],
+    "coverage": 0.13725490196078433,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "capital_adequacy": {
+    "present_in_gold": 53,
+    "produced": 11,
+    "right": 8,
+    "errors": 3,
+    "precision": 0.7272727272727273,
+    "precision_ci95": [
+     0.4343497069897537,
+     0.9025411942607853
+    ],
+    "coverage": 0.1509433962264151,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   }
+  },
+  "qwen25vl7b": {
+   "net_profit": {
+    "present_in_gold": 119,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "eps": {
+    "present_in_gold": 106,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "book_value_per_share": {
+    "present_in_gold": 99,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "net_worth": {
+    "present_in_gold": 41,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "reserves": {
+    "present_in_gold": 112,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "paid_up_capital": {
+    "present_in_gold": 118,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "npl_ratio": {
+    "present_in_gold": 51,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   },
+   "capital_adequacy": {
+    "present_in_gold": 53,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": false,
+    "usable": false
+   }
+  },
+  "qwen25vl7b_checked": {
+   "net_profit": {
+    "present_in_gold": 119,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "eps": {
+    "present_in_gold": 106,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "book_value_per_share": {
+    "present_in_gold": 99,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "net_worth": {
+    "present_in_gold": 41,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "reserves": {
+    "present_in_gold": 112,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "paid_up_capital": {
+    "present_in_gold": 118,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "npl_ratio": {
+    "present_in_gold": 51,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   },
+   "capital_adequacy": {
+    "present_in_gold": 53,
+    "produced": 0,
+    "right": 0,
+    "errors": 0,
+    "precision": null,
+    "precision_ci95": [
+     null,
+     null
+    ],
+    "coverage": 0.0,
+    "meets_precision": false,
+    "checks_applied": true,
+    "usable": false
+   }
+  }
+ },
+ "decisions": {
+  "net_profit": {
+   "usable": false,
+   "methods": [],
+   "best_method": "consensus_v2_checked",
+   "best": {
+    "right": 17,
+    "produced": 20,
+    "errors": 3,
+    "precision": 0.85
+   }
+  },
+  "eps": {
+   "usable": false,
+   "methods": [],
+   "best_method": "text_pdf",
+   "best": {
+    "right": 1,
+    "produced": 1,
+    "errors": 0,
+    "precision": 1.0
+   }
+  },
+  "book_value_per_share": {
+   "usable": false,
+   "methods": [],
+   "best_method": "consensus_checked",
+   "best": {
+    "right": 11,
+    "produced": 13,
+    "errors": 2,
+    "precision": 0.8461538461538461
+   }
+  },
+  "net_worth": {
+   "usable": false,
+   "methods": [],
+   "best_method": "text_pdf_v2",
+   "best": {
+    "right": 1,
+    "produced": 1,
+    "errors": 0,
+    "precision": 1.0
+   }
+  },
+  "reserves": {
+   "usable": false,
+   "methods": [],
+   "best_method": "consensus_v2",
+   "best": {
+    "right": 13,
+    "produced": 24,
+    "errors": 11,
+    "precision": 0.5416666666666666
+   }
+  },
+  "paid_up_capital": {
+   "usable": false,
+   "methods": [],
+   "best_method": "text_pdf_v2",
+   "best": {
+    "right": 1,
+    "produced": 1,
+    "errors": 0,
+    "precision": 1.0
+   }
+  },
+  "npl_ratio": {
+   "usable": false,
+   "methods": [],
+   "best_method": "text_pdf_v2",
+   "best": {
+    "right": 1,
+    "produced": 1,
+    "errors": 0,
+    "precision": 1.0
+   }
+  },
+  "capital_adequacy": {
+   "usable": false,
+   "methods": [],
+   "best_method": "consensus_v2_checked",
+   "best": {
+    "right": 8,
+    "produced": 11,
+    "errors": 3,
+    "precision": 0.7272727272727273
+   }
+  }
+ }
+}

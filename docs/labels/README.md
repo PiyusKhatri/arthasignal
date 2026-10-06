@@ -46,3 +46,7 @@ venv/bin/python -m src.archive.fundamentals_quality
 This measures, for every field and method, precision and coverage with 95% Wilson intervals, and writes `docs/fundamentals_precision.json`. The methods are Tesseract, PaddleOCR mobile, Surya, text-layer PDFs, two-engine consensus, consensus after the accounting checks, and the Sharesansar headline. A field is used only if its precision is at least 99%.
 
 **Caution:** with 120 reports, even 120 right out of 120 gives a lower 95% bound of about 97%. The 99% rule is applied to the point estimate, and the interval is reported next to it.
+
+## Rechecking
+
+`venv/bin/python -m src.archive.fundamentals_causes` classifies every mismatch and writes `docs/labels/RECHECK.md`: the reports whose label looks wrong, with the evidence. Recheck those in the tool against the image, commit the labels, then rerun `fundamentals_quality` and `fundamentals_causes`.

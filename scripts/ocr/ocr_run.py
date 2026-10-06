@@ -7,11 +7,17 @@ import time
 from pathlib import Path
 
 
-def tesseract(paths: list[Path]) -> dict[str, str]:
+def _emit(out: dict[str, str], name: str, body: str, on_page) -> None:
+    out[name] = body
+    if on_page is not None:
+        on_page(name, body)
+
+
+def tesseract(paths: list[Path], on_page=None) -> dict[str, str]:
     out = {}
     for path in paths:
         result = subprocess.run(["tesseract", str(path), "stdout", "-l", "nep+eng", "--psm", "6"], capture_output=True, text=True)
-        out[path.name] = result.stdout
+        _emit(out, path.name, result.stdout, on_page)
     return out
 
 
@@ -26,7 +32,7 @@ def _lines_by_row(items: list[tuple[float, float, str]]) -> str:
     return "\n".join("  ".join(t for _, _, t in sorted(row, key=lambda r: r[1])) for row in rows)
 
 
-def paddle(paths: list[Path], mobile: bool = False) -> dict[str, str]:
+def paddle(paths: list[Path], mobile: bool = False, on_page=None) -> dict[str, str]:
     from paddleocr import PaddleOCR
 
     options = {"text_detection_model_name": "PP-OCRv5_mobile_det", "text_recognition_model_name": "en_PP-OCRv5_mobile_rec"} if mobile else {"lang": "en"}
@@ -38,7 +44,7 @@ def paddle(paths: list[Path], mobile: bool = False) -> dict[str, str]:
         for page in result:
             for text, box in zip(page["rec_texts"], page["rec_boxes"]):
                 items.append((float(box[1]), float(box[0]), text))
-        out[path.name] = _lines_by_row(items)
+        _emit(out, path.name, _lines_by_row(items), on_page)
     return out
 
 
@@ -51,7 +57,7 @@ def _html_text(html: str) -> str:
     return html_lib.unescape(re.sub(r"<[^>]+>", "", html))
 
 
-def surya(paths: list[Path]) -> dict[str, str]:
+def surya(paths: list[Path], on_page=None) -> dict[str, str]:
     from PIL import Image
     from surya.recognition import RecognitionPredictor
 
@@ -61,11 +67,12 @@ def surya(paths: list[Path]) -> dict[str, str]:
         image = Image.open(path).convert("RGB")
         page = recognition([image], full_page=True)[0]
         blocks = sorted(page.blocks, key=lambda b: b.reading_order)
-        out[path.name] = "\n".join(_html_text(b.html) for b in blocks if b.html)
+        _emit(out, path.name, "\n".join(_html_text(b.html) for b in blocks if b.html), on_page)
     return out
 
 
-ENGINES = {"tesseract": tesseract, "paddleocr": paddle, "paddleocr_mobile": lambda paths: paddle(paths, mobile=True), "surya": surya}
+ENGINES = {"tesseract": tesseract, "paddleocr": paddle, "paddleocr_mobile": lambda paths, on_page=None: paddle(paths, mobile=True, on_page=on_page),
+           "surya": surya}
 
 
 def main() -> None:
@@ -95,15 +102,19 @@ def batch_main() -> None:
     manifest = json.loads(Path(args.manifest).read_text())
     todo = [Path(item["path"]) for item in manifest if not (out_dir / f"{item['sha256']}.txt").exists()]
     by_name = {Path(item["path"]).name: item["sha256"] for item in manifest}
+    done = [0]
+    started = time.time()
+
+    def save(name: str, body: str) -> None:
+        target = out_dir / f"{by_name[name]}.txt"
+        temporary = target.with_suffix(".tmp")
+        temporary.write_text(body)
+        temporary.replace(target)
+        done[0] += 1
+        print(args.engine, done[0], "of", len(todo), f"{(time.time() - started) / done[0]:.1f} s per image", flush=True)
+
     for start in range(0, len(todo), 20):
-        chunk = todo[start: start + 20]
-        texts = ENGINES[args.engine](chunk)
-        for name, body in texts.items():
-            target = out_dir / f"{by_name[name]}.txt"
-            temporary = target.with_suffix(".tmp")
-            temporary.write_text(body)
-            temporary.replace(target)
-        print(args.engine, start + len(chunk), "of", len(todo), flush=True)
+        ENGINES[args.engine](todo[start: start + 20], on_page=save)
 
 
 if __name__ == "__main__":
